@@ -91,10 +91,11 @@ All fields come from `C_QuestLog.GetInfo`, `GetQuestObjectives`, `IsComplete`, `
 
 ### Refresh
 
-1. Payload events record *what* changed: `QUEST_ACCEPTED`, `QUEST_REMOVED`, `QUEST_TURNED_IN`,
-   `QUEST_WATCH_UPDATE`. They mark the model dirty; they don't read the log.
-2. The next `QUEST_LOG_UPDATE` (the client sends at most one per frame) rebuilds a fresh snapshot
-   and diffs it against the model. Per quest, a short signature string (state flags + each
+1. Every `QUEST_LOG_UPDATE` (the client sends at most one per frame) rebuilds a fresh snapshot
+   and diffs it against the model. (As built: no dirty flag. The diff already says what changed,
+   and a full read of at most 40 quests is cheap. Of the payload events, only `QUEST_TURNED_IN`
+   is used, for turn-in vs abandon; the others are registered so `/qm events` shows them.)
+2. The diff: Per quest, a short signature string (state flags + each
    objective's fulfilled/finished) makes "did anything change" one string compare.
 3. The diff fires bus events: `QuestAdded(quest)`, `QuestChanged(quest, old)`,
    `QuestRemoved(questID, how)`, then `QuestLogRefreshed()`.

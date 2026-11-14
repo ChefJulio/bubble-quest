@@ -25,6 +25,7 @@
   "workspace.checkThirdParty": false,
   "diagnostics.globals": [
     "QuestmarkDB",
+    "QuestmarkCharDB",
     "SLASH_QUESTMARK1",
     "SLASH_QUESTMARK2"
   ],

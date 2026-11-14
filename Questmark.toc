@@ -1,8 +1,19 @@
 ## Interface: 16001
 ## Title: Questmark
-## Notes: Quest helper
+## Notes: Quest cards with what to do, where to go, and a hint for confusing steps
 ## Author: ChefJulio
 ## Version: 0.1.0
+## Category: Quests
 ## SavedVariables: QuestmarkDB
+## SavedVariablesPerCharacter: QuestmarkCharDB
 
-Questmark.lua
+Core\Debug.lua
+Core\Bus.lua
+Core\Combat.lua
+Core\DB.lua
+Quests\QuestLog.lua
+Blizzard\Tracker.lua
+Compat\Questie.lua
+UI\Settings.lua
+Slash.lua
+Init.lua
