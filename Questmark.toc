@@ -12,8 +12,13 @@ Core\Bus.lua
 Core\Combat.lua
 Core\DB.lua
 Quests\QuestLog.lua
+Quests\Zone.lua
+Quests\DoLine.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua
+UI\Pool.lua
+UI\Cards\Card.lua
+UI\Cards\Stack.lua
 UI\Settings.lua
 UI\CopyWindow.lua
 Slash.lua

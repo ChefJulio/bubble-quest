@@ -25,7 +25,20 @@ Evidence tags: [Read] verified in the Forever UI source or in game; [Assumes] to
 
 ## Which quests are "in this zone"
 
-Undecided until `/qm map` output comes back from game. Two candidate sources, likely combined:
+**Decided from `/qm map` in game (Elwynn Forest, Northshire):** `GetQuestsOnMap` is filled on
+Forever. On the zone map (1429) it returned both Northshire quests with positions; on the continent
+map (1415) it returned them too, each with `mapID = 1429`, its zone. The quest-log header
+("Northshire Valley") matched no map name, since Northshire is not a separate map. So:
+
+- **In this zone:** returned by `GetQuestsOnMap(zone map)`, where the zone map is the first map of
+  type `Zone` (`Enum.UIMapType.Zone = 3`) up the player's map chain.
+- **Elsewhere, grouped by zone:** `GetQuestsOnMap(continent map)` gives each quest's zone map;
+  its name is the group heading.
+- **No map marker** (e.g. Camping quests): in this zone if its header equals the zone or subzone
+  text (`GetSubZoneText()`), otherwise under its header in Elsewhere.
+- [Assumes] turn-in-ready quests keep a marker; check in game after build.
+
+The candidates considered:
 
 1. **The client's own map data.** `C_QuestLog.GetQuestsOnMap(uiMapID)` returns the quests with a
    marker on that map, with an x/y position [Read: QuestInfoSharedDocumentation.lua:27-41].

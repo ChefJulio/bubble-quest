@@ -36,6 +36,15 @@ function SettingsPanel:Register()
       ns.BlizzardTracker:Apply()
     end)
 
+  addCheckbox(category, "QUESTMARK_LOCK_CARDS", "Lock card position",
+    "Untick to drag Questmark's cards somewhere else on screen; tick again to lock them there.",
+    true,
+    function(profile) return profile.cards.locked end,
+    function(profile, value)
+      profile.cards.locked = value
+      ns.Stack:ApplyLock()
+    end)
+
   Settings.RegisterAddOnCategory(category)
   self.category = category
 end

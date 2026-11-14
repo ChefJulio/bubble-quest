@@ -20,13 +20,20 @@ local PROFILE_DEFAULTS = {
   blizzardTracker = {
     hide = true,
   },
+  cards = {
+    locked = true,
+    -- position = { point, relativePoint, x, y } once the player has moved the stack
+  },
 }
 
 local CHAR_DEFAULTS = {
   profile = "Default",
   pins = {},       -- [questID] = true  (phase 3)
   ignored = {},    -- [questID] = true  (phase 3)
-  collapsed = {},  -- [questID] = true  (phase 2)
+  collapsed = {},  -- [questID] = true: card shows only its title line
+  elsewhere = {
+    expanded = false,
+  },
   notices = {},    -- [noticeKey] = true, one-time messages already shown
 }
 

@@ -57,11 +57,13 @@ end
 
 ---@param info QuestInfo from C_QuestLog.GetInfo
 ---@param group string? the quest-log header it sits under
-local function readQuest(info, group)
+---@param order number position in the quest log, for a stable display order
+local function readQuest(info, group, order)
   local questID = info.questID
   local tag = C_QuestLog.GetQuestTagInfo(questID)
   return {
     questID = questID,
+    order = order,
     title = info.title,
     level = info.level,
     difficultyLevel = info.difficultyLevel,
@@ -127,7 +129,7 @@ local function readVisibleEntries()
       elseif info.questID and info.questID > 0 then
         counted = counted + 1
         if not info.isHidden and not info.isInternalOnly then
-          snapshot[info.questID] = readQuest(info, group)
+          snapshot[info.questID] = readQuest(info, group, index)
         end
       end
     end
