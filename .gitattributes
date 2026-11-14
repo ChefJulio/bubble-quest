@@ -1,0 +1,2 @@
+# Vendored third-party files: keep byte-identical to the verified release.
+Libs/** -text
