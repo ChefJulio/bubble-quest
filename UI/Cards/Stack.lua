@@ -10,11 +10,29 @@ local ADDON_NAME, ns = ...
 --     combat: they wait for the end of combat (ns.Combat). A calm-UI rule; the frames are plain.
 --   - The player's own clicks (collapse, pin, hide, groups, header buttons) apply at once, even in
 --     combat; a re-sort still waiting stays queued until combat ends.
+--
+-- Look: a translucent panel (opacity is a setting), a darker header band, faint dividers between
+-- cards and stronger ones before each group line.
 
 local DEFAULT_POSITION = { "TOPRIGHT", "TOPRIGHT", -60, -230 }
-local HEADER_HEIGHT = 20
+local PAD = 6                -- inner padding of the panel
+local HEADER_HEIGHT = 22
 local LINE_HEIGHT = 16
+local HALF_GAP = 5           -- space above and below a divider
 local BUTTON_SIZE_X, BUTTON_SIZE_Y = 18, 19  -- Blizzard's tracker header buttons
+local DIVIDER_ALPHA = { card = 0.08, section = 0.2 }
+
+-- The first atlas the client has, from candidates seen in Forever's UI source. An atlas used only by
+-- a retail file may not exist on Forever (groupfinder-icon-lock didn't render), so ask the client.
+local function firstAtlas(...)
+  for i = 1, select("#", ...) do
+    local atlas = select(i, ...)
+    if C_Texture.GetAtlasInfo(atlas) then
+      return atlas
+    end
+  end
+  return nil
+end
 
 local Stack = {
   container = nil,  ---@type Frame?
@@ -23,33 +41,57 @@ local Stack = {
 }
 ns.Stack = Stack
 
-local cardPool, headingPool, linePool
+local cardPool, headingPool, linePool, dividerPool
 
 -- Drawing ----------------------------------------------------------------------------------------
 
-local function placeCard(quest, y, options)
+-- Layout state for one pass: y offset inside the body, and whether anything was placed yet.
+local cursor = { y = 0, any = false }
+
+local function separate(kind)
+  if not cursor.any then
+    return
+  end
+  cursor.y = cursor.y + HALF_GAP
+  local divider = dividerPool:Acquire()
+  divider:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
+  divider:SetPoint("TOPRIGHT", Stack.body, "TOPRIGHT", 0, -cursor.y)
+  divider:SetColorTexture(1, 1, 1, DIVIDER_ALPHA[kind])
+  cursor.y = cursor.y + HALF_GAP
+end
+
+local function placeCard(quest, options)
+  separate("card")
   local card = cardPool:Acquire()
-  card.frame:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -y)
+  card.frame:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
   Stack.visible[quest.questID] = card
   card.ready = quest.readyForTurnIn
-  return card:SetQuest(quest, ns.DB.char.collapsed[quest.questID] == true, options)
+  cursor.y = cursor.y + card:SetQuest(quest, ns.DB.char.collapsed[quest.questID] == true, options)
+  cursor.any = true
 end
 
-local function placeHeading(text, y)
+local function placeHeading(text)
+  separate("card")
   local heading = headingPool:Acquire()
-  heading:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -y)
+  heading:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
   heading:SetText(text)
-  return LINE_HEIGHT
+  cursor.y = cursor.y + LINE_HEIGHT
+  cursor.any = false  -- no divider between a heading and its first card
 end
 
----A clickable text line: group toggles and hidden quests.
+---A clickable text line: group toggles, and quests in the Hidden group.
 ---@param onClick fun(line: table, button: string)
-local function placeLine(text, y, onClick, indent)
+---@param kind string? "section" puts a divider above; nil for a line inside a group
+local function placeLine(text, onClick, kind, indent)
+  if kind then
+    separate(kind)
+  end
   local line = linePool:Acquire()
-  line:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", indent or 0, -y)
+  line:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", indent or 0, -cursor.y)
   line.label:SetText(text)
   line.onClick = onClick
-  return LINE_HEIGHT + 2
+  cursor.y = cursor.y + LINE_HEIGHT
+  cursor.any = true
 end
 
 local function toggleGroup(state)
@@ -76,7 +118,18 @@ local function updateHeader()
   header.minimize:SetNormalAtlas(minimized and "ui-questtrackerbutton-expand-all" or "ui-questtrackerbutton-collapse-all")
   header.minimize:SetPushedAtlas(minimized and "ui-questtrackerbutton-expand-all-pressed"
     or "ui-questtrackerbutton-collapse-all-pressed")
-  header.lock:SetAlpha(ns.DB.profile.cards.locked and 1 or 0.4)
+
+  local locked = ns.DB.profile.cards.locked
+  header.lock:SetAlpha(locked and 1 or 0.4)
+  if header.lock.fallback then
+    header.lock.fallback:SetText(locked and "L" or "U")
+  end
+end
+
+function Stack:ApplyBackground()
+  if self.background then
+    self.background:SetColorTexture(0, 0, 0, ns.DB.profile.cards.opacity / 100)
+  end
 end
 
 function Stack:Layout()
@@ -86,43 +139,45 @@ function Stack:Layout()
   cardPool:ReleaseAll()
   headingPool:ReleaseAll()
   linePool:ReleaseAll()
+  dividerPool:ReleaseAll()
   wipe(self.visible)
   updateHeader()
 
   local char = ns.DB.char
   if char.minimized then
     self.body:Hide()
+    self.headerDivider:Hide()
     self.container:SetHeight(HEADER_HEIGHT)
     return
   end
   self.body:Show()
 
   local view = ns.Tracking:View()
-  local y = 0
+  cursor.y, cursor.any = 0, false
 
   for _, quest in ipairs(view.pinned) do
     local elsewhere = not ns.Zone:IsInZone(quest) and ns.Zone:NameFor(quest) or nil
-    y = y + placeCard(quest, y, { pinned = true, zone = elsewhere })
+    placeCard(quest, { pinned = true, zone = elsewhere })
   end
   for _, quest in ipairs(view.zone) do
-    y = y + placeCard(quest, y)
+    placeCard(quest)
   end
 
   if #view.overflow > 0 then
     if char.overflow.expanded then
       for _, quest in ipairs(view.overflow) do
-        y = y + placeCard(quest, y)
+        placeCard(quest)
       end
-      y = y + placeLine("- Show fewer", y, toggleGroup(char.overflow))
+      placeLine("- Show fewer", toggleGroup(char.overflow), "section")
     else
-      y = y + placeLine(("+ %d more here"):format(#view.overflow), y, toggleGroup(char.overflow))
+      placeLine(("+ %d more here"):format(#view.overflow), toggleGroup(char.overflow), "section")
     end
   end
 
   if #view.elsewhere > 0 then
     local expanded = char.elsewhere.expanded
-    y = y + placeLine(("%s Elsewhere (%d)"):format(expanded and "-" or "+", #view.elsewhere), y,
-      toggleGroup(char.elsewhere))
+    placeLine(("%s Elsewhere (%d)"):format(expanded and "-" or "+", #view.elsewhere), toggleGroup(char.elsewhere),
+      "section")
     if expanded then
       local byZone, zones = {}, {}
       for _, quest in ipairs(view.elsewhere) do
@@ -135,10 +190,10 @@ function Stack:Layout()
       end
       table.sort(zones)
       for _, zone in ipairs(zones) do
-        y = y + placeHeading(zone, y)
+        placeHeading(zone)
         table.sort(byZone[zone], function(a, b) return (a.order or 0) < (b.order or 0) end)
         for _, quest in ipairs(byZone[zone]) do
-          y = y + placeCard(quest, y)
+          placeCard(quest)
         end
       end
     end
@@ -146,18 +201,20 @@ function Stack:Layout()
 
   if #view.hidden > 0 then
     local expanded = char.hidden.expanded
-    y = y + placeLine(("%s Hidden (%d)"):format(expanded and "-" or "+", #view.hidden), y, toggleGroup(char.hidden))
+    placeLine(("%s Hidden (%d)"):format(expanded and "-" or "+", #view.hidden), toggleGroup(char.hidden), "section")
     if expanded then
       for _, quest in ipairs(view.hidden) do
-        y = y + placeLine(quest.title or "?", y, function(line)
+        placeLine(quest.title or "?", function(line)
           ns.Menu:OpenForHidden(line, quest)
-        end, 14)
+        end, nil, 14)
       end
     end
   end
 
+  local y = cursor.y
+  self.headerDivider:SetShown(y > 0)
   self.body:SetHeight(math.max(y, 1))
-  self.container:SetHeight(HEADER_HEIGHT + 4 + y)
+  self.container:SetHeight(HEADER_HEIGHT + (y > 0 and (PAD + y + PAD) or 0))
 end
 
 -- Re-sort (rule 4) and layout, applying the combat rule. Player actions lay out at once; anything
@@ -246,7 +303,8 @@ end
 local function createHeader(container)
   local header = CreateFrame("Frame", nil, container)
   header:SetPoint("TOPLEFT")
-  header:SetSize(ns.Card.WIDTH, HEADER_HEIGHT)
+  header:SetPoint("TOPRIGHT")
+  header:SetHeight(HEADER_HEIGHT)
   header:EnableMouse(true)
   header:RegisterForDrag("LeftButton")
   header:SetScript("OnDragStart", function()
@@ -256,8 +314,13 @@ local function createHeader(container)
   end)
   header:SetScript("OnDragStop", savePosition)
 
+  -- Darker band behind the header, on top of the panel background.
+  local band = header:CreateTexture(nil, "BACKGROUND", nil, 1)
+  band:SetAllPoints()
+  band:SetColorTexture(0, 0, 0, 0.35)
+
   header.title = header:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerHeaderFont")
-  header.title:SetPoint("LEFT", 0, 0)
+  header.title:SetPoint("LEFT", PAD, 0)
   header.title:SetText("Questmark")
 
   header.minimize = headerButton(header, function()
@@ -266,7 +329,7 @@ local function createHeader(container)
     ns.DB.char.minimized = not ns.DB.char.minimized
     Stack:Request(false, true)
   end)
-  header.minimize:SetPoint("RIGHT", 0, 0)
+  header.minimize:SetPoint("RIGHT", -PAD + 2, 0)
 
   header.settings = headerButton(header, function() return "Questmark settings" end, function()
     ns.Settings:Open()
@@ -283,8 +346,14 @@ local function createHeader(container)
     cards.locked = not cards.locked
     updateHeader()
   end)
-  header.lock:SetNormalAtlas("groupfinder-icon-lock")
   header.lock:SetPoint("RIGHT", header.settings, "LEFT", -2, 0)
+  local lockAtlas = firstAtlas("worldquest-tracker-lock", "honorsystem-bar-lock", "groupfinder-icon-lock")
+  if lockAtlas then
+    header.lock:SetNormalAtlas(lockAtlas)
+  else
+    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    header.lock.fallback:SetPoint("CENTER")
+  end
 
   header.count = header:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
   header.count:SetPoint("RIGHT", header.lock, "LEFT", -6, 0)
@@ -294,15 +363,25 @@ end
 
 function Stack:Create()
   local container = CreateFrame("Frame", "QuestmarkStack", UIParent)
-  container:SetSize(ns.Card.WIDTH, HEADER_HEIGHT)
+  container:SetSize(ns.Card.WIDTH + 2 * PAD, HEADER_HEIGHT)
   container:SetMovable(true)
   container:SetClampedToScreen(true)
   self.container = container
 
+  self.background = container:CreateTexture(nil, "BACKGROUND", nil, 0)
+  self.background:SetAllPoints()
+  self:ApplyBackground()
+
   self.header = createHeader(container)
 
+  self.headerDivider = container:CreateTexture(nil, "ARTWORK")
+  self.headerDivider:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT")
+  self.headerDivider:SetPoint("TOPRIGHT", self.header, "BOTTOMRIGHT")
+  self.headerDivider:SetColorTexture(1, 1, 1, DIVIDER_ALPHA.section)
+  PixelUtil.SetHeight(self.headerDivider, 1, 1)
+
   local body = CreateFrame("Frame", nil, container)
-  body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", 0, -4)
+  body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", PAD, -PAD)
   body:SetSize(ns.Card.WIDTH, 1)
   self.body = body
 
@@ -339,6 +418,12 @@ function Stack:Create()
     return line
   end, function(line)
     line.onClick = nil
+  end)
+
+  dividerPool = ns.CreatePool(function()
+    local divider = body:CreateTexture(nil, "ARTWORK")
+    PixelUtil.SetHeight(divider, 1, 1)
+    return divider
   end)
 
   self:ApplyPosition()
@@ -381,6 +466,7 @@ end)
 ns.Bus:On("ProfileChanged", function()
   if Stack.container then
     Stack:ApplyPosition()
+    Stack:ApplyBackground()
     Stack:Request(false, true)
   end
 end)

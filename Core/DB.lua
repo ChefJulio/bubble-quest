@@ -23,6 +23,7 @@ local PROFILE_DEFAULTS = {
   cards = {
     locked = true,
     cap = 5,  -- most zone cards shown before "+ N more here" (pinned cards don't count)
+    opacity = 50,  -- background panel opacity, percent
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
 }

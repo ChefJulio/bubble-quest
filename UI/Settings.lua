@@ -58,6 +58,20 @@ function SettingsPanel:Register()
     "How many of this zone's quests get a card before the rest go behind \"+ N more here\". "
     .. "Pinned quests always show and don't count.")
 
+  local opacitySetting = Settings.RegisterProxySetting(category, "QUESTMARK_BACKGROUND_OPACITY",
+    Settings.VarType.Number, "Background opacity", 50,
+    function() return ns.DB.profile.cards.opacity end,
+    function(value)
+      ns.DB.profile.cards.opacity = value
+      ns.Stack:ApplyBackground()
+    end)
+  local opacityOptions = Settings.CreateSliderOptions(0, 100, 5)
+  opacityOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, function(value)
+    return ("%d%%"):format(value)
+  end)
+  Settings.CreateSlider(category, opacitySetting, opacityOptions,
+    "How dark the panel behind the cards is. 0% shows no panel.")
+
   Settings.RegisterAddOnCategory(category)
   self.category = category
 end

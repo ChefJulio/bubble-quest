@@ -9,14 +9,12 @@ local TITLE_HEIGHT = 16
 local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
-local CARD_GAP = 8
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready"
 
 local Card = {}
 Card.__index = Card
 ns.Card = Card
 Card.WIDTH = WIDTH
-Card.GAP = CARD_GAP
 
 local function createRow(card)
   local row = CreateFrame("Frame", nil, card.frame)
@@ -111,7 +109,7 @@ local function setRow(row, text, counter, finished)
   row.counter:SetTextColor(r, g, b)
 end
 
----Fill the card. Returns its height (including the gap below it).
+---Fill the card. Returns its height (spacing between cards is the stack's job).
 ---@param quest table from ns.QuestLog
 ---@param collapsed boolean
 ---@param options table? see titleText
@@ -147,7 +145,7 @@ function Card:SetQuest(quest, collapsed, options)
   end
 
   self.frame:SetHeight(y)
-  return y + CARD_GAP
+  return y
 end
 
 ---Update texts in place (same rows, same layout). Used for progress, including in combat.
