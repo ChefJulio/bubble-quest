@@ -10,7 +10,7 @@ local ADDON_NAME, ns = ...
 --   QuestAdded(quest)
 --   QuestChanged(quest, oldQuest)
 --   QuestRemoved(questID, how)   how = "turnin" | "abandon", resolved one frame later
---   QuestLogRefreshed()
+--   QuestLogChanged()            once per batch, only when something changed
 -- Re-reading is cheap: the log holds at most 40 quests.
 
 local QuestLog = {
@@ -210,31 +210,47 @@ function QuestLog:Commit(snapshot)
   end
 
   self.quests = snapshot
+  local changed = false
   for questID, quest in pairs(snapshot) do
     quest.signature = quest.signature or signature(quest)
     local previous = old[questID]
     if not previous then
       ns.Bus:Fire("QuestAdded", quest)
+      changed = true
     elseif previous.signature ~= quest.signature then
       ns.Bus:Fire("QuestChanged", quest, previous)
+      changed = true
     end
   end
+
+  local removed = {}
   for questID in pairs(old) do
     if not snapshot[questID] then
-      self:ResolveRemoval(questID)
+      removed[#removed + 1] = questID
     end
   end
-  ns.Bus:Fire("QuestLogRefreshed")
+
+  -- QuestLogChanged closes each batch, and only fires when something changed: most
+  -- QUEST_LOG_UPDATEs (loot, combat) change nothing, and listeners re-sort on it (spec tracking
+  -- rule 4: re-sort only on events).
+  if #removed > 0 then
+    self:ResolveRemovals(removed)  -- fires QuestLogChanged after the removals
+  elseif changed then
+    ns.Bus:Fire("QuestLogChanged")
+  end
 end
 
 -- There is no abandon event: QUEST_REMOVED fires for turn-ins and abandons alike, and
 -- QUEST_TURNED_IN only for turn-ins, in an order we don't rely on. One frame later, either
 -- signal has arrived.
-function QuestLog:ResolveRemoval(questID)
+function QuestLog:ResolveRemovals(questIDs)
   C_Timer.After(0, function()
-    local turnedIn = self.turnedIn[questID] or C_QuestLog.IsQuestFlaggedCompleted(questID)
-    self.turnedIn[questID] = nil
-    ns.Bus:Fire("QuestRemoved", questID, turnedIn and "turnin" or "abandon")
+    for _, questID in ipairs(questIDs) do
+      local turnedIn = self.turnedIn[questID] or C_QuestLog.IsQuestFlaggedCompleted(questID)
+      self.turnedIn[questID] = nil
+      ns.Bus:Fire("QuestRemoved", questID, turnedIn and "turnin" or "abandon")
+    end
+    ns.Bus:Fire("QuestLogChanged")
   end)
 end
 

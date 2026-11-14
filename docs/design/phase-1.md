@@ -98,7 +98,8 @@ All fields come from `C_QuestLog.GetInfo`, `GetQuestObjectives`, `IsComplete`, `
 2. The diff: Per quest, a short signature string (state flags + each
    objective's fulfilled/finished) makes "did anything change" one string compare.
 3. The diff fires bus events: `QuestAdded(quest)`, `QuestChanged(quest, old)`,
-   `QuestRemoved(questID, how)`, then `QuestLogRefreshed()`.
+   `QuestRemoved(questID, how)`, then `QuestLogChanged()` once per batch, only when something
+   changed (most `QUEST_LOG_UPDATE`s, e.g. loot, change nothing; listeners re-sort on it).
 
 Cost: at most 40 quests [Read: log cap] times a few objectives per refresh. Negligible; no
 throttling needed.
