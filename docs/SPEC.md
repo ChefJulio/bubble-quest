@@ -2,7 +2,7 @@
 
 Nov 14, 2026 · @Hunter Graves
 
-Revised Nov 14, 2026 with the pre-build research in [docs/research/](research/README.md). Decisions taken: license GPL-3.0-or-later; forever-db (LibForeverData) as quest database and first-pass hint source; Blizzard tracker hidden with an `OnShow` re-hide hook.
+Revised Nov 14, 2026 with the pre-build research in [docs/research/](research/README.md). Decisions taken: license GPL-3.0-or-later; forever-db (LibForeverData) as quest database and first-pass hint source, bundled inside Questmark's folder; Blizzard tracker hidden with an `OnShow` re-hide hook; Questmark works alongside Questie, replacing only its quest tracker and leaving map pins, available quests and tooltips to Questie.
 
 ## Overview
 
@@ -159,9 +159,9 @@ Small features that remove common questing friction.
 
 ## Replacing Questie, the tracker, and the quest log
 
-The goal is for this addon to replace Questie, Blizzard's objective tracker, and Blizzard's quest log. That adds these requirements.
+**Decided:** Questmark works alongside Questie. It replaces Blizzard's objective tracker and Questie's tracker; Questie keeps map and minimap pins, available quests and unit tooltips. When Questie's tracker is enabled, Questmark tells the player once how to turn it off; it never changes Questie's settings itself. The "From Questie" list below is kept for reference only and is out of scope. Quest log replacement (phase 11) stays a later phase.
 
-**From Questie**
+**From Questie** (out of scope while Questie runs alongside)
 
 - **World map and minimap pins:** available quest givers, objective areas (clustered), and turn-ins. Use the standard map-pin approach other addons use rather than a custom map.
 - **Available-quest filtering:** by level, faction, race, class, prerequisites, exclusive and breadcrumb quests. This is the hardest data problem; it needs a complete quest database.
@@ -225,7 +225,7 @@ Build in this order; each phase is usable on its own.
 7. **Hint data:** data format and loader first, then the build-time pipeline (separate repo folder, not shipped): forever-db tips triaged first, then quests the confusion detector flags.
 8. **In-game learning:** where collector, confusion detector, note button, export string.
 
-**Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). 10. Questie replacement (database, map and minimap pins, available quests, tooltips). 11. Quest log replacement window.
+**Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). ~~10. Questie replacement~~ (dropped: Questmark runs alongside Questie). 11. Quest log replacement window.
 
 ## Open questions
 
@@ -239,6 +239,6 @@ Resolved by the research:
 Still open:
 
 - Name for the addon (working name: Questmark).
-- Phases 10–11 (Questie and quest log replacement): the map-pin space is crowded. Build them, or coexist with a pin addon?
-- Event order on Forever: does `QUEST_TURNED_IN` fire before `QUEST_REMOVED`? Needed to tell turn-ins from abandons. Verify in-game.
-- Ship LibForeverData as a required dependency, or embed it in Questmark's folder?
+- ~~Phases 10–11: build, or coexist with a pin addon?~~ Coexist with Questie; phase 10 dropped.
+- ~~Event order of `QUEST_TURNED_IN` vs `QUEST_REMOVED`?~~ Designed out: a removal is resolved one frame later as a turn-in if `QUEST_TURNED_IN` arrived for it or `C_QuestLog.IsQuestFlaggedCompleted` is true, otherwise an abandon. Works in either order.
+- ~~LibForeverData: dependency or embedded?~~ Bundled in Questmark's folder.
