@@ -2,13 +2,29 @@ local ADDON_NAME, ns = ...
 
 -- Forever disables /dump and /run, so these prints are our window into the addon in game.
 
-local Debug = {}
+local Debug = {
+  history = {},  -- recent printed lines, color codes stripped, for /qm copy
+}
 ns.Debug = Debug
 
 local PREFIX = "|cff66ccffQuestmark|r:"
+local HISTORY_SIZE = 300
+
+local function stripColors(text)
+  return (text:gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""))
+end
 
 function Debug:Print(...)
   print(PREFIX, ...)
+  local parts = {}
+  for i = 1, select("#", ...) do
+    parts[i] = tostring((select(i, ...)))
+  end
+  local history = self.history
+  history[#history + 1] = date("%H:%M:%S ") .. stripColors(table.concat(parts, " "))
+  if #history > HISTORY_SIZE then
+    table.remove(history, 1)
+  end
 end
 
 ---Short readable form of an event argument: quests print as "#id title".

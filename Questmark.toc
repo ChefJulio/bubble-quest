@@ -15,5 +15,6 @@ Quests\QuestLog.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua
 UI\Settings.lua
+UI\CopyWindow.lua
 Slash.lua
 Init.lua
