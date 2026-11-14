@@ -4,13 +4,17 @@ A quest helper addon for World of Warcraft.
 
 ## Install (dev)
 
-Link or copy this folder into your AddOns directory as `Questmark`:
+Junction this folder into the Forever AddOns directory as `Questmark`, so the game reads the repo
+directly and changes only need a `/reload` (PowerShell):
 
 ```
-World of Warcraft\_retail_\Interface\AddOns\Questmark
+New-Item -ItemType Junction -Path "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\Questmark" -Target <repo path>
 ```
 
 Then `/reload` in game and type `/qm`.
+
+Forever disables user scripts, so `/dump`, `/run` and `/script` do nothing (silently). Debug through
+the addon's own slash commands instead.
 
 ## Lint
 

@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 16001
 ## Title: Questmark
 ## Notes: Quest helper
 ## Author: ChefJulio
