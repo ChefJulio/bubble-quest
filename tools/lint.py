@@ -193,8 +193,10 @@ def main() -> int:
   luals_rc = run_luals(exe)
   print(f"== Forever API guard (build {ui['build']})")
   core = ANNOTATIONS_DIR / "Annotations" / "Core"
-  guard_rc = apiguard.run(API_DOCS, [ROOT], method_sources=[
-    UI_SOURCE_DIR / "Interface", core / "Widget", core / "Lua", core / "Libraries"])
+  guard_rc = apiguard.run(
+    API_DOCS, [ROOT],
+    method_sources=[UI_SOURCE_DIR / "Interface", core / "Widget", core / "Lua", core / "Libraries"],
+    wrapper_source=(UI_SOURCE_DIR / "Interface", TOOLS / "generated" / "wrappers.json", ui["commit"]))
   ok = luals_rc == 0 and guard_rc == 0
   print("lint: OK" if ok else "lint: FAILED")
   return 0 if ok else 1

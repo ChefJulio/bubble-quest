@@ -36,7 +36,8 @@ Two layers:
    restriction metadata LuaLS annotations drop:
    - **errors:** protected or SecureOnly functions, `C_` functions missing on Forever (retail-only),
      undocumented event names, method names nothing defines (`frame:SetPointt`)
-   - **warnings:** restricted or secret-returning calls and events, secure templates
+   - **warnings:** restricted or secret-returning calls and events, Blizzard Lua functions that
+     directly call a restricted API (e.g. `Settings.OpenToCategory`), secure templates
      (combat-locked frames)
 
 Every warning fails the lint until reviewed. Once a restricted call is confirmed correct, acknowledge

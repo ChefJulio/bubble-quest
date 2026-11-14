@@ -47,5 +47,6 @@ function SettingsPanel:Open()
     ns.Debug:Print("Settings can't be opened in combat.")
     return
   end
+  -- apiguard: allow called only out of combat (checked above), from a typed /qm command
   Settings.OpenToCategory(self.category:GetID())
 end

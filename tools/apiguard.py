@@ -16,6 +16,9 @@ Errors (always fail):
 
 Warnings (fail unless acknowledged):
   - restricted calls (HasRestrictions, Secret*, Requires*Access, ...) and events
+  - calls to Blizzard Lua functions that *directly* call one of the above (e.g.
+    Settings.OpenToCategory -> C_SettingsUtil.OpenSettingsPanel). One level deep only: deeper
+    chains would flag most of Blizzard's UI code.
   - secure templates (Secure*Template) in Lua or XML: the frame's protected methods (Show, Hide,
     SetPoint, SetAttribute, ...) are blocked in combat, so every change must be combat-guarded.
     Protected methods are not flagged per call: the receiver is unknown statically and on
@@ -31,6 +34,7 @@ Usage: python tools/apiguard.py <docs_dir> <file_or_dir> [...]
 
 from __future__ import annotations
 
+import json
 import re
 import sys
 from dataclasses import dataclass, field
@@ -238,6 +242,9 @@ class ApiDb:
   events: dict[str, ApiEntry] = field(default_factory=dict)
   widget_methods: set[str] = field(default_factory=set)  # from ScriptObject docs
   known_methods: set[str] | None = None  # None: method check disabled
+  # Blizzard Lua functions that directly call a restricted API: "Settings.OpenToCategory" ->
+  # ["C_SettingsUtil.OpenSettingsPanel [HasRestrictions]"]. Empty: wrapper check disabled.
+  wrappers: dict[str, list[str]] = field(default_factory=dict)
 
 
 def load_docs(docs_dir: Path) -> ApiDb:
@@ -295,6 +302,100 @@ def collect_defined_names(paths: list[Path]) -> set[str]:
       for m in _METHOD_DEF.finditer(f.read_text(encoding="utf-8", errors="replace")):
         names.add(m.group(1) or m.group(2))
   return names
+
+
+# --------------------------------------------------------------------------------------------
+# Blizzard Lua wrappers around restricted APIs
+# --------------------------------------------------------------------------------------------
+
+def _restricted_label(entry: ApiEntry, label: str) -> str | None:
+  if entry.protected:
+    return f"{label} [protected]"
+  if entry.secure_only:
+    return f"{label} [SecureOnly]"
+  if entry.flags:
+    return f"{label} [{', '.join(entry.flags)}]"
+  return None
+
+
+def _restricted_call_at(toks: list[Tok], k: int, db: ApiDb) -> tuple[Tok, str] | None:
+  """If toks[k] starts a reference to a documented restricted API, return (token, label)."""
+  t = toks[k]
+  prev = toks[k - 1] if k > 0 else None
+  if prev is not None and prev.kind == "op" and prev.value in (".", ":"):
+    return None
+  if t.value in db.namespaces and k + 2 < len(toks) and toks[k + 1].value == "." and toks[k + 2].kind == "name":
+    member = toks[k + 2]
+    entry = db.namespaces[t.value].get(member.value)
+    label = entry and _restricted_label(entry, f"{t.value}.{member.value}")
+    return (member, label) if label else None
+  if t.value in db.globals and not (prev and prev.value in ("function", "local")):
+    label = _restricted_label(db.globals[t.value], t.value)
+    return (t, label) if label else None
+  return None
+
+
+def _function_name_before(toks: list[Tok], i: int) -> str | None:
+  """Name of `function A.B(` / `function A(` at toks[i] == "function", or of `A.B = function`.
+  Methods (A:B) and locals return None: their callers can't be matched by name."""
+  if i + 1 < len(toks) and toks[i + 1].kind == "name" and not (i > 0 and toks[i - 1].value == "local"):
+    parts, j = [toks[i + 1].value], i + 2
+    while j + 1 < len(toks) and toks[j].value in (".", ":") and toks[j + 1].kind == "name":
+      if toks[j].value == ":":
+        return None
+      parts.append(toks[j + 1].value)
+      j += 2
+    return ".".join(parts)
+  if i >= 2 and toks[i - 1].value == "=":
+    parts, j = [], i - 2
+    while j >= 0 and toks[j].kind == "name":
+      parts.insert(0, toks[j].value)
+      if j >= 1 and toks[j - 1].value == ".":
+        j -= 2
+      else:
+        break
+    if len(parts) >= 2:  # only A.B = function; a bare `x = function` may be a table field
+      return ".".join(parts)
+  return None
+
+
+def build_wrapper_index(ui_dir: Path, db: ApiDb) -> dict[str, list[str]]:
+  """Map each named Blizzard Lua function to the restricted APIs it calls directly. Calls inside
+  nested anonymous functions count for the enclosing named function (conservative)."""
+  index: dict[str, set[str]] = {}
+  for path in ui_dir.rglob("*.lua"):
+    if "Blizzard_APIDocumentationGenerated" in path.parts:
+      continue
+    toks = [t for t in lex(path.read_text(encoding="utf-8", errors="replace")) if t.kind != "comment"]
+    stack: list[str | None] = []  # one entry per open block; a name for named functions
+    for i, t in enumerate(toks):
+      if t.kind != "name":
+        continue
+      if t.value == "function":
+        stack.append(_function_name_before(toks, i))
+      elif t.value in ("if", "do", "repeat"):  # for/while blocks open with their `do`
+        stack.append(None)
+      elif t.value in ("end", "until"):
+        if stack:
+          stack.pop()
+      else:
+        hit = _restricted_call_at(toks, i, db)
+        owner = next((name for name in reversed(stack) if name), None)
+        if hit and owner:
+          index.setdefault(owner, set()).add(hit[1])
+  return {name: sorted(labels) for name, labels in index.items()}
+
+
+def load_wrapper_index(ui_dir: Path, db: ApiDb, cache: Path, key: str) -> dict[str, list[str]]:
+  """build_wrapper_index, cached on disk per UI-source version (building lexes ~3k files)."""
+  if cache.exists():
+    data = json.loads(cache.read_text(encoding="utf-8"))
+    if data.get("key") == key:
+      return data["wrappers"]
+  wrappers = build_wrapper_index(ui_dir, db)
+  cache.parent.mkdir(parents=True, exist_ok=True)
+  cache.write_text(json.dumps({"key": key, "wrappers": wrappers}, indent=0), encoding="utf-8")
+  return wrappers
 
 
 # --------------------------------------------------------------------------------------------
@@ -385,6 +486,16 @@ def scan_file(path: Path, db: ApiDb) -> list[Finding]:
     if t.value in db.globals and not after_access and not (prev and prev.value in ("function", "local")):
       report(t, _describe(db.globals[t.value], t.value))
 
+    # Blizzard Lua wrapper around a restricted API: Settings.OpenToCategory(...) or Func(...)
+    elif db.wrappers and not after_access and not (prev and prev.value in ("function", "local")):
+      name_tok, name = t, t.value
+      if nxt and nxt.value == "." and k + 2 < len(toks) and toks[k + 2].kind == "name":
+        name_tok, name = toks[k + 2], f"{t.value}.{toks[k + 2].value}"
+      callees = db.wrappers.get(name)
+      if callees:
+        shown = ", ".join(callees[:3]) + (f" (+{len(callees) - 3} more)" if len(callees) > 3 else "")
+        report(name_tok, ("warning", f"{name} is Blizzard Lua that calls restricted {shown}"))
+
     # RegisterEvent("EVENT_NAME") and friends
     if t.value in _EVENT_REGISTRARS and nxt and nxt.value == "(" and k + 2 < len(toks):
       arg = toks[k + 2]
@@ -426,10 +537,14 @@ def iter_source_files(targets: list[Path], exclude: tuple[str, ...]) -> list[Pat
 
 
 def run(docs_dir: Path, targets: list[Path], method_sources: list[Path] | None = None,
+        wrapper_source: tuple[Path, Path, str] | None = None,
         exclude: tuple[str, ...] = (".tools", ".git", "Libs")) -> int:
   """method_sources: dirs of Lua that define legal method names (UI source, annotations).
-  When given, the addon's own files are added and the unknown-method check is enabled."""
+  When given, the addon's own files are added and the unknown-method check is enabled.
+  wrapper_source: (UI source dir, cache file, cache key) enables the Blizzard-wrapper check."""
   db = load_docs(docs_dir)
+  if wrapper_source is not None:
+    db.wrappers = load_wrapper_index(wrapper_source[0], db, wrapper_source[1], wrapper_source[2])
   files = iter_source_files(targets, exclude)
   if method_sources is not None:
     # Embedded libraries (Libs/) aren't linted but do define methods the addon calls.
