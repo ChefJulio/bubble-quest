@@ -37,10 +37,17 @@ local function createRow(card)
 end
 
 ---@param onToggleCollapse fun(questID: number)
-function Card.Create(parent, onToggleCollapse)
+---@param onMenu fun(card: table, questID: number) right-click
+function Card.Create(parent, onToggleCollapse, onMenu)
   local self = setmetatable({ rows = {} }, Card)
   local frame = CreateFrame("Frame", nil, parent)
   frame:SetWidth(WIDTH)
+  frame:EnableMouse(true)
+  frame:SetScript("OnMouseUp", function(_, button)
+    if button == "RightButton" and self.questID then
+      onMenu(self, self.questID)
+    end
+  end)
   self.frame = frame
 
   self.title = frame:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerHeaderFont")
@@ -68,11 +75,16 @@ function Card:Show() self.frame:Show() end
 function Card:Hide() self.frame:Hide() end
 function Card:ClearAllPoints() self.frame:ClearAllPoints() end
 
-local function titleText(quest)
+local PIN_MARKUP = "|A:Waypoint-MapPin-Tracked:14:14|a "
+
+---@param options table? { pinned = bool, zone = string? (shown for pinned quests elsewhere) }
+local function titleText(quest, options)
   local color = GetQuestDifficultyColor(quest.level or 0)
   local level = ("|cff%02x%02x%02x[%d]|r"):format(color.r * 255, color.g * 255, color.b * 255, quest.level or 0)
   local tag = quest.tagName and (" |cff999999(" .. quest.tagName .. ")|r") or ""
-  return ("%s %s%s"):format(level, quest.title or "?", tag)
+  local pin = options and options.pinned and PIN_MARKUP or ""
+  local zone = options and options.zone and (" |cff999999- " .. options.zone .. "|r") or ""
+  return ("%s%s %s%s%s"):format(pin, level, quest.title or "?", tag, zone)
 end
 
 -- How many rows the card shows for this quest; the stack compares it to decide whether a change
@@ -102,11 +114,13 @@ end
 ---Fill the card. Returns its height (including the gap below it).
 ---@param quest table from ns.QuestLog
 ---@param collapsed boolean
+---@param options table? see titleText
 ---@return number
-function Card:SetQuest(quest, collapsed)
+function Card:SetQuest(quest, collapsed, options)
   self.questID = quest.questID
+  self.options = options
   self.rowCount = Card.RowCount(quest, collapsed)
-  self.title:SetText(titleText(quest))
+  self.title:SetText(titleText(quest, options))
   self.toggle.label:SetText(collapsed and "+" or "-")
 
   for _, row in ipairs(self.rows) do
@@ -139,7 +153,7 @@ end
 ---Update texts in place (same rows, same layout). Used for progress, including in combat.
 ---@param quest table
 function Card:UpdateInPlace(quest)
-  self.title:SetText(titleText(quest))
+  self.title:SetText(titleText(quest, self.options))
   if quest.readyForTurnIn then
     return
   end

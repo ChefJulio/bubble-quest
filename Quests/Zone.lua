@@ -13,7 +13,7 @@ local ADDON_NAME, ns = ...
 local Zone = {
   mapID = nil,       -- the player's zone map (first Zone-type map up the chain), nil in instances
   name = nil,        -- its name
-  inZone = {},       -- [questID] = true: has a marker on the player's zone map
+  inZone = {},       -- [questID] = { x, y }: its marker on the player's zone map (map fractions)
   questZone = {},    -- [questID] = zone name, from the continent query
 }
 ns.Zone = Zone
@@ -56,7 +56,7 @@ function Zone:Update()
   end
   if self.mapID then
     for _, poi in ipairs(C_QuestLog.GetQuestsOnMap(self.mapID) or {}) do
-      self.inZone[poi.questID] = true
+      self.inZone[poi.questID] = { x = poi.x, y = poi.y }
       self.questZone[poi.questID] = self.questZone[poi.questID] or self.name
     end
   end
@@ -73,6 +73,39 @@ function Zone:IsInZone(quest)
   end
   local group = quest.group
   return group ~= nil and (group == self.name or group == GetSubZoneText())
+end
+
+---The player's position on the zone map, as map fractions. Nil outside a zone map (instances).
+---@return number? x
+---@return number? y
+function Zone:PlayerPosition()
+  if not self.mapID then
+    return nil
+  end
+  local position = C_Map.GetPlayerMapPosition(self.mapID, "player")
+  if not position then
+    return nil
+  end
+  return position.x, position.y
+end
+
+---Yards between two points on the zone map (map fractions).
+function Zone:Yards(x1, y1, x2, y2)
+  local width, height = C_Map.GetMapWorldSize(self.mapID)
+  local dx, dy = (x2 - x1) * width, (y2 - y1) * height
+  return math.sqrt(dx * dx + dy * dy)
+end
+
+---Yards from the player to a quest's marker on this zone map, or nil.
+---@param questID number
+---@return number?
+function Zone:DistanceTo(questID)
+  local marker = self.inZone[questID]
+  local px, py = self:PlayerPosition()
+  if not marker or not px then
+    return nil
+  end
+  return self:Yards(px, py, marker.x, marker.y)
 end
 
 ---Heading for a quest in the Elsewhere group.

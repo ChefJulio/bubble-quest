@@ -14,10 +14,12 @@ Core\DB.lua
 Quests\QuestLog.lua
 Quests\Zone.lua
 Quests\DoLine.lua
+Quests\Tracking.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua
 UI\Pool.lua
 UI\Cards\Card.lua
+UI\Cards\Menu.lua
 UI\Cards\Stack.lua
 UI\Settings.lua
 UI\CopyWindow.lua

@@ -22,16 +22,25 @@ local PROFILE_DEFAULTS = {
   },
   cards = {
     locked = true,
+    cap = 5,  -- most zone cards shown before "+ N more here" (pinned cards don't count)
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
 }
 
 local CHAR_DEFAULTS = {
   profile = "Default",
-  pins = {},       -- [questID] = true  (phase 3)
-  ignored = {},    -- [questID] = true  (phase 3)
-  collapsed = {},  -- [questID] = true: card shows only its title line
+  pins = {},        -- [questID] = pin order number (lower = pinned earlier)
+  pinCounter = 0,   -- last pin order number handed out
+  ignored = {},     -- [questID] = true: hidden until unhidden
+  collapsed = {},   -- [questID] = true: card shows only its title line
+  minimized = false,  -- whole tracker collapsed to its header row
   elsewhere = {
+    expanded = false,
+  },
+  overflow = {
+    expanded = false,  -- "+ N more here" opened
+  },
+  hidden = {
     expanded = false,
   },
   notices = {},    -- [noticeKey] = true, one-time messages already shown

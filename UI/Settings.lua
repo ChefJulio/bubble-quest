@@ -45,6 +45,19 @@ function SettingsPanel:Register()
       ns.Stack:ApplyLock()
     end)
 
+  local capSetting = Settings.RegisterProxySetting(category, "QUESTMARK_CARD_CAP", Settings.VarType.Number,
+    "Cards shown for this zone", 5,
+    function() return ns.DB.profile.cards.cap end,
+    function(value)
+      ns.DB.profile.cards.cap = value
+      ns.Stack:Request(false, true)
+    end)
+  local capOptions = Settings.CreateSliderOptions(1, 15, 1)
+  capOptions:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right)
+  Settings.CreateSlider(category, capSetting, capOptions,
+    "How many of this zone's quests get a card before the rest go behind \"+ N more here\". "
+    .. "Pinned quests always show and don't count.")
+
   Settings.RegisterAddOnCategory(category)
   self.category = category
 end
