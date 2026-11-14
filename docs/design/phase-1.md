@@ -131,9 +131,12 @@ reports it; phase 8 (confusion detector) counts abandons.
 
 The spec requires rows keyed by objective, not position, because Forever quests can gain
 objectives mid-quest and accept them in any order. Key = `type .. ":" .. text with the progress
-counter stripped` ("Kobold Vermin slain: 3/8" becomes "monster:Kobold Vermin slain"), with "#2",
-"#3" suffixes for exact duplicates. [Assumes] the counter format; `/qm quest <id>` prints raw
-objective text so we can confirm it and refine the rule before phase 2 depends on it.
+counter stripped`, with "#2", "#3" suffixes for exact duplicates. Confirmed in game: Forever puts
+the counter first ("1/10 Kobold Vermin slain" becomes "monster:Kobold Vermin slain", "3/8 Tough
+Wolf Meat" becomes "item:Tough Wolf Meat"). Objectives seen so far: `monster`, `item`, `object`
+("Raise your blacksmithing skill to 20", no counter) and `log`, a step with no counter ("Return
+the book to Brother Paxton.", 1/1). A quest can be ready for turn-in through a `log` step, and a
+quest can have no objectives at all (A Visitor to Dun Morogh); cards must handle both.
 
 Optional objectives: the API has no "optional" field [Read: QuestObjectiveInfo]. Phase 1 records
 raw text and type only; the marker is decided in phase 2 once we've seen real optional objectives

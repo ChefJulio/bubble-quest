@@ -23,8 +23,10 @@ ns.QuestLog = QuestLog
 
 -- Objective keys --------------------------------------------------------------------------------
 
--- "Kobold Vermin slain: 3/8" -> "Kobold Vermin slain". Also strips a "(45%)" progress suffix.
--- [Assumes] Forever's objective text format; /qm quest <id> prints raw text to confirm.
+-- "1/10 Kobold Vermin slain" -> "Kobold Vermin slain". Forever puts the counter first (confirmed in
+-- game: monster "1/10 Kobold Vermin slain", item "3/8 Tough Wolf Meat"); a trailing ": 3/8" and a
+-- "(45%)" suffix are stripped too. Step objectives (type "log", e.g. "Return the book to Brother
+-- Paxton.") and skill objectives ("Raise your blacksmithing skill to 20") have no counter.
 local function stripProgress(text)
   local stripped = text:gsub("%s*:?%s*%d+%s*/%s*%d+", ""):gsub("%s*%(%d+%%%)", "")
   return (stripped:match("^%s*(.-)%s*$"))
