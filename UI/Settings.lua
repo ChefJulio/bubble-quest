@@ -59,7 +59,7 @@ function SettingsPanel:Register()
     .. "Pinned quests always show and don't count.")
 
   local opacitySetting = Settings.RegisterProxySetting(category, "QUESTMARK_BACKGROUND_OPACITY",
-    Settings.VarType.Number, "Background opacity", 50,
+    Settings.VarType.Number, "Background opacity", 25,
     function() return ns.DB.profile.cards.opacity end,
     function(value)
       ns.DB.profile.cards.opacity = value

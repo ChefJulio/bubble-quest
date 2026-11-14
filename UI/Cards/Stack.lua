@@ -11,7 +11,7 @@ local ADDON_NAME, ns = ...
 --   - The player's own clicks (collapse, pin, hide, groups, header buttons) apply at once, even in
 --     combat; a re-sort still waiting stays queued until combat ends.
 --
--- Look: a translucent panel (opacity is a setting), a darker header band, faint dividers between
+-- Look (approved in game): a translucent panel (opacity setting, default 25%), a darker header band, faint dividers between
 -- cards and stronger ones before each group line.
 
 local DEFAULT_POSITION = { "TOPRIGHT", "TOPRIGHT", -60, -230 }
@@ -22,8 +22,8 @@ local HALF_GAP = 5           -- space above and below a divider
 local BUTTON_SIZE_X, BUTTON_SIZE_Y = 18, 19  -- Blizzard's tracker header buttons
 local DIVIDER_ALPHA = { card = 0.08, section = 0.2 }
 
--- The first atlas the client has, from candidates seen in Forever's UI source. An atlas used only by
--- a retail file may not exist on Forever (groupfinder-icon-lock didn't render), so ask the client.
+-- The first atlas the client has, from candidates seen in Forever's UI source. Atlases referenced
+-- only by retail-only files might not exist on Forever, so ask the client rather than assume.
 local function firstAtlas(...)
   for i = 1, select("#", ...) do
     local atlas = select(i, ...)
