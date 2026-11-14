@@ -93,6 +93,47 @@ commands.quest = {
   end,
 }
 
+-- Phase 2 research: which quests does the client place on the player's map (and its parents),
+-- and do quest-log headers match the zone names? Decides how "quests in this zone" is computed.
+commands.map = {
+  help = "where you are, and which quests the game places on this map (copy window)",
+  run = function()
+    local lines = {}
+    lines[#lines + 1] = ("Zone texts: zone=%q real=%q subzone=%q minimap=%q"):format(GetZoneText(), GetRealZoneText(),
+      GetSubZoneText(), GetMinimapZoneText())
+
+    local chain, names = {}, {}
+    local mapID = C_Map.GetBestMapForUnit("player")
+    while mapID and mapID > 0 do
+      local info = C_Map.GetMapInfo(mapID)
+      if not info then break end
+      chain[#chain + 1] = info
+      names[info.name] = true
+      mapID = info.parentMapID
+    end
+    if #chain == 0 then
+      lines[#lines + 1] = "No player map (instance?)"
+    end
+
+    for _, info in ipairs(chain) do
+      lines[#lines + 1] = ("Map %d %q type=%s parent=%s"):format(info.mapID, info.name, tostring(info.mapType),
+        tostring(info.parentMapID))
+      for _, poi in ipairs(C_QuestLog.GetQuestsOnMap(info.mapID) or {}) do
+        local quest = ns.QuestLog:Get(poi.questID)
+        lines[#lines + 1] = ("  quest %d %s at %.3f,%.3f (map %d) objectives=%d start=%s"):format(poi.questID,
+          quest and tostring(quest.title) or "?", poi.x, poi.y, poi.mapID, poi.numObjectives, tostring(poi.isQuestStart))
+      end
+    end
+
+    lines[#lines + 1] = "Quest-log headers vs this map chain:"
+    for _, quest in ipairs(sortedQuests()) do
+      lines[#lines + 1] = ("  %d %s [%s] header matches map: %s"):format(quest.questID, tostring(quest.title),
+        tostring(quest.group), tostring(names[quest.group or ""] == true))
+    end
+    ns.CopyWindow:Show("Questmark: map", lines)
+  end,
+}
+
 commands.copy = {
   help = "recent Questmark chat output, including /qm events lines (copy window)",
   run = function()
