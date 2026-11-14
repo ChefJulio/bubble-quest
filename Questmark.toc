@@ -7,11 +7,24 @@
 ## SavedVariables: QuestmarkDB
 ## SavedVariablesPerCharacter: QuestmarkCharDB
 
+# LibForeverData (bundled, see THIRD-PARTY-NOTICES); the newest copy loaded by any addon wins.
+Libs\LibForeverData\LuaChunks.lua
+Libs\LibForeverData\Core.lua
+Libs\LibForeverData\Data\Quests.lua
+Libs\LibForeverData\Data\Npcs.lua
+Libs\LibForeverData\Data\Objects.lua
+Libs\LibForeverData\Data\Items.lua
+Libs\LibForeverData\Data\Spawns.lua
+Libs\LibForeverData\Data\Steps.lua
+
 Core\Debug.lua
 Core\Bus.lua
 Core\Combat.lua
 Core\DB.lua
+Data\ForeverData.lua
+Data\CategoryOverrides.lua
 Quests\QuestLog.lua
+Quests\Categories.lua
 Quests\Zone.lua
 Quests\DoLine.lua
 Quests\Tracking.lua

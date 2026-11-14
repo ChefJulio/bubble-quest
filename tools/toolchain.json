@@ -6,6 +6,10 @@
     "repo": "https://github.com/Ketho/vscode-wow-api.git",
     "commit": "d0b5b51fac4c52c493371b9b18e66ce604ea4326"
   },
+  "libforeverdata": {
+    "repo": "fitzforge/polestar",
+    "tag": "lib-v1.2026.11.1"
+  },
   "wow_ui_source": {
     "repo": "https://github.com/Gethe/wow-ui-source.git",
     "branch": "forever",

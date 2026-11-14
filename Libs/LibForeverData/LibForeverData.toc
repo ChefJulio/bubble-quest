@@ -1,0 +1,19 @@
+## Interface: 16001
+## Title: LibForeverData
+## Notes: World of Warcraft: Forever quest data (forever-db 2026.11.1, client 1.60.1.70532): quests, NPCs, objects, items, spawns and quest steps for other addons.
+## Author: Polestar contributors
+## Version: 1.2026.11.1
+## X-License: GPL-3.0 (the database); CC BY 4.0 (our own layer: quest steps and notes)
+## X-Credits: EG Link (Efficient Games, CC BY 4.0), CMaNGOS classic-db, VMaNGOS through pfQuest, pfQuest (Shagu, MIT), Factoruide, ForeverTDB, QuestieDB, the game client's tables; see NOTICE.md
+## X-Website: https://github.com/fitzforge/polestar/tree/main/forever-db
+## X-ForeverDB-Version: 2026.11.1
+## X-ForeverDB-ClientBuild: 1.60.1.70532
+
+LuaChunks.lua
+Core.lua
+Data\Quests.lua
+Data\Npcs.lua
+Data\Objects.lua
+Data\Items.lua
+Data\Spawns.lua
+Data\Steps.lua

@@ -20,12 +20,14 @@
   "workspace.ignoreDir": [
     ".tools",
     ".release",
-    "tools"
+    "tools",
+    "Libs"
   ],
   "workspace.checkThirdParty": false,
   "diagnostics.globals": [
     "QuestmarkDB",
     "QuestmarkCharDB",
+    "LibForeverData",
     "SLASH_QUESTMARK1",
     "SLASH_QUESTMARK2"
   ],

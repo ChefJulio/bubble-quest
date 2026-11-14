@@ -66,15 +66,16 @@ replaces the quest-log header as the fallback for quests without a marker, heade
 3. **Quest-log header** (the game files quests by category under headers like "Camping",
    "Blacksmithing", "Lunar Festival", "Warrior"):
    - Class: header equals a class name from `LocalizedClassList()` (language-independent).
-   - Profession, Seasonal, Pet battle: header in a hand-kept English name list. **Stopgap**: other
+   - Camping, Profession, Seasonal, Pet battle: header in a hand-kept English name list. **Stopgap**: other
      client languages fall through to the next rules until the list is localized.
 4. **Class**: forever-db `classes` mask is not 0 (restricted to some classes).
 5. **Repeatable**: game frequency daily/weekly, classification Recurring, or forever-db
    `repeatable`.
 6. **Normal**.
 
-**Camping** (Forever's new category, "Camping 101: Blacksmithing" etc. [Read: phase 1 test]) maps
-to Profession: its quests are profession tutorials. Open to change.
+**Camping** (Forever's new category, "Camping 101: Blacksmithing" etc. [Read: phase 1 test]) is its
+own category (decided in review): Forever may grow it into its own system, and a category of its
+own keeps that open. Detected by its quest-log header, like Profession.
 
 ## Per-category behaviour
 
@@ -86,6 +87,7 @@ Setting per category, in the profile: **Show** with zone cards / **Separate** gr
 | Dungeon | Show (dungeon mode, phase 6, builds on these) |
 | Class | Show |
 | Profession | Separate |
+| Camping | Separate |
 | Seasonal/Event | Separate |
 | Repeatable | Separate |
 | Pet battle | Separate |
@@ -122,8 +124,8 @@ no record (new or unpublished quests).
 ## In-game test (after build)
 
 1. `/qm memory` before and after: Questmark's memory with the library loaded.
-2. Camping 101 quests appear under "+ Professions (N)", not as zone cards.
+2. Camping 101 quests appear under "+ Camping (N)", not as zone cards.
 3. A turn-in card says "Turn in to <name>".
-4. Settings: set Profession to Show: Camping quests become zone/Elsewhere cards; Hide: gone.
+4. Settings: set Camping to Show: Camping quests become zone/Elsewhere cards; Hide: gone.
 5. `/qm quest <id>` on a few quests: category and rule look right.
 6. Pin a Camping quest: it shows at the top even though Profession is Separate.

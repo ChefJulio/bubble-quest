@@ -26,6 +26,7 @@ local PROFILE_DEFAULTS = {
     opacity = 25,  -- background panel opacity, percent
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
+  categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
 }
 
 local CHAR_DEFAULTS = {
@@ -44,6 +45,7 @@ local CHAR_DEFAULTS = {
   hidden = {
     expanded = false,
   },
+  groups = {},  -- [category] = true: that category's separate group is expanded
   notices = {},    -- [noticeKey] = true, one-time messages already shown
 }
 

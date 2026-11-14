@@ -51,6 +51,16 @@ local function describeQuest(quest, lines)
   for _, key in ipairs(keys) do
     lines[#lines + 1] = ("  %s = %s"):format(key, tostring(quest[key]))
   end
+  local category, rule = ns.Categories:For(quest)
+  lines[#lines + 1] = ("  category = %s (by %s; mode %s)"):format(category, rule, ns.Categories:Mode(category))
+  local record = ns.ForeverData:Quest(quest.questID)
+  if record then
+    lines[#lines + 1] = ("  forever-db: type=%s zone=%s (%s) classes=%s repeatable=%s turn-in=%s"):format(
+      tostring(record.type), tostring(record.zone), tostring(ns.ForeverData:AreaName(quest.questID)),
+      tostring(record.classes), tostring(record.repeatable), tostring(ns.ForeverData:TurnInName(quest.questID)))
+  else
+    lines[#lines + 1] = "  forever-db: no record"
+  end
   for i, objective in ipairs(quest.objectives) do
     lines[#lines + 1] = ("  objective %d: type=%s text=%q fulfilled=%s required=%s finished=%s"):format(i,
       tostring(objective.type), objective.text, tostring(objective.fulfilled), tostring(objective.required),
@@ -131,6 +141,16 @@ commands.map = {
         tostring(quest.group), tostring(names[quest.group or ""] == true))
     end
     ns.CopyWindow:Show("Questmark: map", lines)
+  end,
+}
+
+commands.memory = {
+  help = "Questmark's memory use, including the bundled quest data",
+  run = function()
+    UpdateAddOnMemoryUsage()
+    local kb = GetAddOnMemoryUsage(ADDON_NAME)
+    print(("Questmark uses %.1f MB (forever-db %s)"):format(kb / 1024,
+      ns.ForeverData:Available() and tostring(ns.ForeverData:Version()) or "not loaded"))
   end,
 }
 

@@ -5,10 +5,10 @@ local ADDON_NAME, ns = ...
 -- Uses the client's own quest map markers (verified on Forever with /qm map):
 --   C_QuestLog.GetQuestsOnMap(zone map)       quests in the player's zone
 --   C_QuestLog.GetQuestsOnMap(continent map)  every quest on the continent, each with its zone map
--- Quests without a marker (e.g. Camping) fall back to their quest-log header.
+-- Quests without a marker (e.g. Camping) fall back to forever-db's area, then their quest-log header.
 --
--- STOPGAP until phase 4: forever-db gives every quest its zone (quest.zone_area). This module is
--- the only place that decides zone membership, so that swap touches only this file.
+-- Markers are the rule for good (decided in phase 4): forever-db's zone is often a subzone and missing
+-- for a quarter of quests, while the client's markers are exact.
 
 local Zone = {
   mapID = nil,       -- the player's zone map (first Zone-type map up the chain), nil in instances
@@ -71,8 +71,9 @@ function Zone:IsInZone(quest)
   if self.questZone[quest.questID] then
     return false  -- has a marker, in another zone
   end
-  local group = quest.group
-  return group ~= nil and (group == self.name or group == GetSubZoneText())
+  -- No marker: forever-db's area (zone or subzone), then the quest-log header.
+  local name = ns.ForeverData:AreaName(quest.questID) or quest.group
+  return name ~= nil and (name == self.name or name == GetSubZoneText())
 end
 
 ---The player's position on the zone map, as map fractions. Nil outside a zone map (instances).
@@ -112,5 +113,5 @@ end
 ---@param quest table
 ---@return string
 function Zone:NameFor(quest)
-  return self.questZone[quest.questID] or quest.group or "Other"
+  return self.questZone[quest.questID] or ns.ForeverData:AreaName(quest.questID) or quest.group or "Other"
 end

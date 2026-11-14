@@ -1,7 +1,8 @@
 local ADDON_NAME, ns = ...
 
 -- The card stack: a header row, then what ns.Tracking:View() says to show:
---   pinned cards, this zone's cards (capped), "+ N more here", "Elsewhere (N)", "Hidden (N)".
+--   pinned cards, this zone's cards (capped), "+ N more here", one group per separated category
+--   ("+ Camping (2)"), "Elsewhere (N)", "Hidden (N)".
 -- Tracking decides order and membership; this file only draws.
 --
 -- When things change (spec: nothing jumps around):
@@ -171,6 +172,20 @@ function Stack:Layout()
       placeLine("- Show fewer", toggleGroup(char.overflow), "section")
     else
       placeLine(("+ %d more here"):format(#view.overflow), toggleGroup(char.overflow), "section")
+    end
+  end
+
+  for _, group in ipairs(view.groups) do
+    local category = group.category
+    local expanded = char.groups[category] == true
+    placeLine(("%s %s (%d)"):format(expanded and "-" or "+", group.label, #group.quests), function()
+      char.groups[category] = not expanded or nil
+      Stack:Request(false, true)
+    end, "section")
+    if expanded then
+      for _, quest in ipairs(group.quests) do
+        placeCard(quest)
+      end
     end
   end
 

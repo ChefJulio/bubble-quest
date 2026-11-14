@@ -130,7 +130,8 @@ function Card:SetQuest(quest, collapsed, options)
     local row = self.rows[i] or createRow(self)
     self.rows[i] = row
     if quest.readyForTurnIn then
-      setRow(row, "Ready to turn in", nil, false)
+      local turnIn = ns.ForeverData:TurnInName(quest.questID)
+      setRow(row, turnIn and ("Turn in to " .. turnIn) or "Ready to turn in", nil, false)
       row.text:SetTextColor(0.2, 1, 0.2)
     else
       local objective = quest.objectives[i]

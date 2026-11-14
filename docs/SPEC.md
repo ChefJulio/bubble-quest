@@ -80,7 +80,7 @@ Rule 4 is the core fix for "automatic tracking sucks": the list stays still whil
 
 Side content gets its own group so it doesn't crowd normal questing.
 
-- Categories: Normal, Dungeon, Profession, Pet battle, Class, Seasonal/Event, Repeatable.
+- Categories: Normal, Dungeon, Profession, Camping (Forever's own system, its own category to stay future-proof), Pet battle, Class, Seasonal/Event, Repeatable.
 - Per category, the player chooses: **Show with zone cards**, **Separate group** (collapsed section), or **Hide**.
 - Classification comes from the quest API's tags/classification where available, then from the quest database, then from a small hand-maintained list of quest IDs for anything that slips through.
 

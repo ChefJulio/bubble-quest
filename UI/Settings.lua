@@ -72,6 +72,28 @@ function SettingsPanel:Register()
   Settings.CreateSlider(category, opacitySetting, opacityOptions,
     "How dark the panel behind the cards is. 0% shows no panel.")
 
+  -- Quest categories: Show with zone cards / Separate group / Hide, per category.
+  SettingsPanel:GetLayout(category):AddInitializer(CreateSettingsListSectionHeaderInitializer("Quest categories"))
+  local function modeOptions()
+    local container = Settings.CreateControlTextContainer()
+    container:Add("show", "Show with zone cards")
+    container:Add("separate", "Separate group")
+    container:Add("hide", "Hide")
+    return container:GetData()
+  end
+  for _, name in ipairs(ns.Categories.ORDER) do
+    local setting = Settings.RegisterProxySetting(category, "QUESTMARK_CATEGORY_" .. name:upper(),
+      Settings.VarType.String, ns.Categories.LABELS[name], ns.Categories.DEFAULT_MODES[name],
+      function() return ns.Categories:Mode(name) end,
+      function(value)
+        ns.DB.profile.categories[name] = value
+        ns.Stack:Request(true, true)
+      end)
+    Settings.CreateDropdown(category, setting, modeOptions,
+      "Show: as normal cards with this zone's quests. Separate: in their own collapsed group. "
+      .. "Hide: not shown (pinned quests always show).")
+  end
+
   Settings.RegisterAddOnCategory(category)
   self.category = category
 end

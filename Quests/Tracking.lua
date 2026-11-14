@@ -11,6 +11,8 @@ local ADDON_NAME, ns = ...
 --      defers). Hysteresis: neighbours swap only when the lower one is HYSTERESIS times closer.
 --   5. At most profile.cards.cap zone cards; the rest behind "+ N more here".
 --   6. Ignored quests are hidden until unhidden.
+-- Categories (phase 4): a category set to "separate" gets its own group (all its quests, any zone);
+-- "hide" removes its quests. Pinned quests show whatever their category.
 
 local MOVE_YARDS = 100
 local HYSTERESIS = 0.8  -- swap only when at least 20% closer
@@ -58,13 +60,27 @@ local function settle(list, distance, rank)
   end
 end
 
+-- Where a quest goes, before zone: "pinned", "ignored", "hide", "separate" or "show"; and its category.
+---@return string where
+---@return string category
+local function placement(quest)
+  local char = ns.DB.char
+  local category = ns.Categories:For(quest)
+  if char.ignored[quest.questID] then
+    return "ignored", category
+  end
+  if char.pins[quest.questID] then
+    return "pinned", category
+  end
+  return ns.Categories:Mode(category), category
+end
+
 -- Re-sort this zone's quests (rule 4: called only on events).
 function Tracking:Resort()
   ns.Zone:Update()
-  local char = ns.DB.char
   local distance, ready, rest = {}, {}, {}
   for questID, quest in pairs(ns.QuestLog.quests) do
-    if not char.ignored[questID] and not char.pins[questID] and ns.Zone:IsInZone(quest) then
+    if placement(quest) == "show" and ns.Zone:IsInZone(quest) then
       distance[questID] = ns.Zone:DistanceTo(questID)
       local list = quest.readyForTurnIn and ready or rest
       list[#list + 1] = quest
@@ -89,21 +105,36 @@ end
 
 ---What the stack should draw. Uses the order from the last Resort; quests it hasn't ranked yet
 ---(just pinned off, just unhidden) go after the ranked ones until the next re-sort.
----@return table view { pinned, zone, overflow, elsewhere, hidden }: lists of quests
+---@return table view { pinned, zone, overflow, groups, elsewhere, hidden }: lists of quests;
+---groups is a list of { category, label, quests } in Categories.ORDER
 function Tracking:View()
   ns.Zone:Update()
   local char = ns.DB.char
-  local view = { pinned = {}, zone = {}, overflow = {}, elsewhere = {}, hidden = {} }
-  local here = {}
-  for questID, quest in pairs(ns.QuestLog.quests) do
-    if char.ignored[questID] then
+  local view = { pinned = {}, zone = {}, overflow = {}, groups = {}, elsewhere = {}, hidden = {} }
+  local here, byCategory = {}, {}
+  for _, quest in pairs(ns.QuestLog.quests) do
+    local where, category = placement(quest)
+    if where == "ignored" then
       table.insert(view.hidden, quest)
-    elseif char.pins[questID] then
+    elseif where == "pinned" then
       table.insert(view.pinned, quest)
+    elseif where == "separate" then
+      byCategory[category] = byCategory[category] or {}
+      table.insert(byCategory[category], quest)
+    elseif where == "hide" then
+      -- category hidden in settings: not shown
     elseif ns.Zone:IsInZone(quest) then
       here[#here + 1] = quest
     else
       table.insert(view.elsewhere, quest)
+    end
+  end
+
+  for _, category in ipairs(ns.Categories.ORDER) do
+    local quests = byCategory[category]
+    if quests then
+      table.sort(quests, function(a, b) return (a.order or 0) < (b.order or 0) end)
+      table.insert(view.groups, { category = category, label = ns.Categories.LABELS[category], quests = quests })
     end
   end
 
