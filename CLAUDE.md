@@ -27,5 +27,8 @@ Run `python tools/lint.py` after every Lua/XML change. It must print `lint: OK`.
   New globals only when the client requires them (SavedVariables, `SLASH_*`); add those to
   `diagnostics.globals` in `.luarc.json`.
 - Never create, move or show/hide secure frames in combat; queue until `PLAYER_REGEN_ENABLED`.
-- Hide Blizzard UI, never modify or hook it (taint).
+- Hide Blizzard UI, never modify it. Never replace Blizzard functions or scripts (`SetScript` on
+  their frames, overwriting globals): that taints. Post-hooks (`HookScript`, `hooksecurefunc`)
+  are allowed where needed (e.g. re-hiding the objective tracker on `OnShow`); they run after
+  Blizzard's code without changing it. Never call Blizzard's update functions from a hook.
 - Testing is in-game: `/reload`, BugSack/BugGrabber for errors.

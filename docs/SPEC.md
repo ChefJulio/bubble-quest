@@ -2,6 +2,8 @@
 
 Nov 14, 2026 · @Hunter Graves
 
+Revised Nov 14, 2026 with the pre-build research in [docs/research/](research/README.md). Decisions taken: license GPL-3.0-or-later; forever-db (LibForeverData) as quest database and first-pass hint source; Blizzard tracker hidden with an `OnShow` re-hide hook.
+
 ## Overview
 
 A quest tracker for WoW Forever that answers two questions for every active quest: **what do I do** and **where do I go**, with a hint when the quest has a confusing step.
@@ -37,6 +39,7 @@ The tracker is a stack of cards, one per quest, replacing Blizzard's objective t
   - **Where:** distance and direction outdoors; a short description indoors or when no position exists ("cave behind the waterfall").
   - **Hint:** shown only when the quest has a known confusing step. Hidden otherwise to keep cards short.
 - Progress (3/6) and a completed state. When all objectives are done, the card turns into a turn-in card pointing at the quest giver.
+- Forever quests can gain objectives partway through, mark objectives optional, and accept them in any order (Questie issues #7929–#7931). Rows are keyed by objective, not by position; a newly appeared objective gets a row without reshuffling the others, and optional objectives carry an "optional" marker and never block the turn-in state.
 
 **Card behavior**
 
@@ -91,7 +94,7 @@ Some objectives are meant to be done while doing other things, such as boars and
 
 - **Card:** a slim row, "Crag Boar Ribs 3/8 · as you go," with no arrow and no distance.
 - **Map:** no zone-wide dots. Show only spawns within a short radius of the player, or nothing (setting).
-- **When one is nearby:** addons can't see mob positions, but they can see when a matching mob's nameplate appears on screen. When that happens, the row lights up briefly, and the mob's tooltip shows the quest line. Check what the client allows for nameplate and unit info under the current restrictions.
+- **When one is nearby:** addons can't see mob positions, but they can see when a matching mob's nameplate appears on screen. When that happens, the row lights up briefly, and the mob's tooltip shows the quest line. Out of combat only: on Forever, tooltip quest data (quest ID, objective text, counters) becomes secret in combat, so string work on it fails. The quest-log API itself stays readable in combat.
 
 **Promotion to active:** a background objective becomes a normal one, with an arrow, when it is the last unfinished objective for the player in the zone, or the player pins it. The arrow then points to the nearest dense cluster of spawns, not to every spawn point.
 
@@ -103,43 +106,35 @@ Inside a dungeon, the cards show only that dungeon's quests, with Do and Hint li
 
 ## Hint system and sourcing
 
-Hints are the feature nobody else has, and the best way to source them is a build-time pipeline over openly licensed data, plus in-game learning that flags which quests are confusing. Only 5–10% of quests should need a hint.
+Hint *data* already exists: Polestar's open forever-db has 1,059 tips over 966 quests. What nobody does is show the hint on the card of the quest you are on, without following a guide. That presentation, plus calm tracking, is the differentiator. Hints start from forever-db, get triaged, and grow through in-game learning that flags which quests are confusing.
 
-**Data model:** a Lua table keyed by quest ID → objective index → `{do, where, hint, source}`. Shipped with the addon, regenerated per release. `source` keeps attribution for licensed content.
+**Data model:** a Lua table keyed by quest ID → objective key → `{do, where, hint, source}`. Shipped with the addon, regenerated per release. `source` keeps attribution for licensed content.
 
 ### Sources
 
 | Source | What it gives | License / risk | Use |
 | --- | --- | --- | --- |
-| [QuestieDB, Forever branch](https://github.com/Questie/Questie) | Quest givers, objectives, NPC/object/item spawn coordinates. Forever base data added in Questie 12.0.4 ([details](https://epiccarry.com/blogs/?p=44611)) | Open source on GitHub; confirm exact license | **Where** data and objective structure. Optional dependency or build-time input |
-| [Warcraft Wiki](https://warcraft.wiki.gg/wiki/Warcraft_Wiki:Copyrights) | Quest pages with objectives, notes, walkthrough text | CC BY-SA 4.0: reuse allowed with attribution and share-alike | Best licensed source for **Hint** text. Coverage of new Forever quests unverified |
-| AllTheThings Forever quest data | Forever quest coverage | MIT, per [Everything Quests](https://www.curseforge.com/wow/addons/everything-quests), which uses it | Fills gaps for new Forever quests |
-| Open leveling guides ([Guidelime](https://github.com/max-ri/Guidelime) modules, [LevelForge](https://www.curseforge.com/wow/addons/levelforge)) | Step text written by guide authors, often explains odd steps | Per guide; some GPL-3, others unstated | Only guides with an explicit open license |
+| [forever-db / LibForeverData](https://github.com/fitzforge/polestar/tree/next/forever-db) (Polestar) | 5,287 Forever quests: givers, turn-ins, objectives, prerequisites, 88k spawn points, items and drop sources. Plus 3,401 mechanic rows (use-item, escort, timed, ...) and 1,059 `gotcha` tips over 966 quests | Database GPL-3.0; mechanics/steps/tips CC BY 4.0. Tips were rewritten as facts from evidence that includes web quest-database pages and comments; no quoted text ships | **Primary.** Quest database at runtime via the `LibForeverData` library addon (~3.6 MiB), and first-pass **Hint** input. Contribute fixes back through its `corrections/` |
+| [QuestieDB](https://github.com/Questie/QuestieDB) | Quest givers, objectives, spawn coordinates; 5,682 quests, versioned runtime API (`LibQuestieDB.RequireContract`) | No real license: "treat as all rights reserved when in doubt"; team permits GPLv3 copying, not all past contributors agreed | Fallback only, as an optional runtime dependency. Never baked in |
+| [Warcraft Wiki](https://warcraft.wiki.gg/wiki/Warcraft_Wiki:Copyrights) | Quest pages with objectives, notes, walkthrough text | CC BY-SA 4.0: reuse allowed with attribution and share-alike (one-way into GPLv3) | **Hint** text for original classic quests. Covers new Forever quests poorly (spot check: 0 of 13 with a real hint) |
+| AllTheThings Forever quest data | Forever quest coverage, incl. new zones | MIT (confirmed in its LICENSE) | Gap-filler if forever-db misses quests |
+| Open leveling guides ([Guidelime](https://github.com/max-ri/Guidelime) modules, [LevelForge](https://www.curseforge.com/wow/addons/levelforge)) | Step text written by guide authors | Guidelime and its Forever guides are All Rights Reserved; LevelForge has no source and unlicensed player guides | Not usable |
+| [Forever GuideMate](https://github.com/TylerAkins/forever-guide-mate) | 3,041 quest IDs of guide steps | Code GPL-3.0, but leveling text machine-imported from Zygor Guides (commercial) without credit; archived | No text or data. At most a to-do list of quest IDs whose steps hold a real trick |
 | In-game quest text (API) | Objective and description text | Blizzard's text, already in the client | Raw input for generating **Do** lines |
 | Wowhead comments | Best "how do I actually do this" notes | Terms not verified; reported to block scraping. Comments are authored by users | Manual only: read, then write the hint in your own words. No scraping |
 
-### Research first: Forever GuideMate
+### Research outcome: Forever GuideMate
 
-[Forever GuideMate](https://github.com/TylerAkins/forever-guide-mate) ([CurseForge](https://www.curseforge.com/wow/addons/forever-guidemate)) is an open-source (GPLv3) Forever questing guide and the most promising hint source found so far. Clone it and investigate before building the pipeline.
-
-Its guides are Lua `RegisterGuide` tables. Each goal has a `kind` (note / accept / objective), human-written `text`, a `route` with `mapID` + x/y + `label` + `offMapText`, faction/race/level `conditions`, `dependsOn` / `requiredQuests`, and a `useClientText` flag. `useClientText = false` appears to mark steps where the author replaced Blizzard's objective text with their own, a likely filter for hint-worthy steps.
-
-Answer these before deciding how to use it:
-
-1. **Coverage:** how many unique quest IDs across all guides (Alliance, Horde, new Forever zones, dungeons, class quests)?
-2. **Hint quality:** sample \~50 steps with `useClientText = false`. How many contain a real trick (item use, hidden location, timing, despawns) versus restating the objective?
-3. **Provenance:** what does `sourceStep` refer to? Check the README and history for where guide text originates; if derived from another guide, confirm the license chain.
-4. **Fit:** can its route data feed the Where line and its `dependsOn` data feed the pre-dungeon reminder?
-
-If used, this addon must be GPLv3 with attribution. Consider contacting the author: hints contributed back would improve both projects.
+The spec originally named GuideMate the most promising hint source. Research ([guidemate.md](research/guidemate.md)) ruled it out: archived on Nov 14, 2026; its 1-60 text was machine-imported from Zygor Guides without credit; `useClientText = false` is set on 87% of steps and is not a hint marker (2 real tricks in a random 50). Its dungeon guides' "enter the instance" step, listing every pickup for that dungeon with giver, level and prerequisites, is a good *design* for the pre-dungeon reminder; rebuild the data from forever-db.
 
 ### Pipeline (build time, outside the game)
 
-1. Pull quest list + objectives from QuestieDB / ATT.
-2. For each quest, gather licensed text (wiki notes, open guides, in-game description).
-3. LLM pass: rewrite each objective into a verb-first **Do** line; produce a **Hint** only when the sources describe a non-obvious step (item use, timing, hidden location, talk-twice, escort quirks). Otherwise no hint.
-4. Keep `source` + attribution per entry. Generate a credits file.
-5. Human review queue for quests flagged as confusing (below), prioritized over everything else.
+1. Pull quests, objectives, mechanics and `gotcha` tips from forever-db.
+2. Triage tips: generic ones ("needs a group", "raid", "holiday only") become card tags or categories, not hints; real tricks (timers, hidden spawns, item use, talk-twice, escort quirks) become **Hint** candidates.
+3. For quests without a usable tip, gather licensed text (wiki notes for classic quests, in-game description).
+4. LLM pass: rewrite each objective into a verb-first **Do** line; produce a **Hint** only when the sources describe a non-obvious step. Otherwise no hint.
+5. Keep `source` + attribution per entry. Generate a credits file.
+6. Human review queue for quests flagged as confusing (below), prioritized over everything else. Fixes to forever-db's facts go back upstream through its `corrections/`.
 
 ### In-game learning (local, opt-in export)
 
@@ -150,7 +145,7 @@ If used, this addon must be GPLv3 with attribution. Consider contacting the auth
 
 ### Licensing note
 
-If wiki text is used, the hint data must be CC BY-SA compatible. Licensing the whole addon GPL-3.0 keeps it open source and compatible with both the wiki (CC BY-SA 4.0 adapts into GPLv3) and Questie-derived data. Confirm before shipping.
+Decided: the addon is **GPL-3.0-or-later**. Compatible with forever-db (GPL-3.0 database, CC BY 4.0 tips), the wiki (CC BY-SA 4.0 adapts one-way into GPLv3), and AllTheThings (MIT). Ship `LICENSE`, a `THIRD-PARTY-NOTICES` file (forever-db and AllTheThings notices, wiki attribution) once any third-party data is included, and a generated `CREDITS` listing each wiki page used. Never include Guidelime guides, Wowhead text, Blizzard quest text quoted on the wiki, or Questie's name and logo.
 
 ## Card extras
 
@@ -181,33 +176,35 @@ The goal is for this addon to replace Questie, Blizzard's objective tracker, and
 - **Full quest view:** description, objectives, rewards with item tooltips and an upgrade indicator, follow-up quest in the chain.
 - **Actions:** abandon (with confirm), share to party, link in chat, track/untrack (pin).
 - **Organization:** grouped by zone and by category, matching the card categories; search.
-- **Log capacity indicator** if Forever caps the quest log; verify the cap.
+- **Log capacity indicator:** Forever caps the log at 40 accepted quests; read it at runtime with `C_QuestLog.GetMaxNumQuestsCanAccept()`.
 - **Opening it:** own keybind and slash command. Don't hook or override Blizzard's quest log toggle, which risks taint; leave Blizzard's log reachable as a fallback.
 
 **General**
 
-- **Quest database:** decide between QuestieDB's Forever data at runtime and data baked in at build time from QuestieDB and GuideMate. Memory footprint matters; Questie's download is \~57 MB.
+- **Quest database:** decided: forever-db through the `LibForeverData` library at runtime (~3.6 MiB memory, decodes records on first read), as a dependency or embedded. Bake in only Questmark's own data: hints, category overrides, background-objective clusters, the dungeon-quest index. QuestieDB is an optional fallback, never baked in.
 - **Profiles and settings** shared across characters.
 - **Localization:** UI and game strings can come from the client; hint data starts English-only.
 
 ## Platform constraints
 
-Forever runs on the modern client, so retail-style APIs apply, and the Midnight addon restrictions are active there too ([details](https://epiccarry.com/blogs/?p=41550)). None of this addon's features touch combat state.
+Forever runs on the modern client, so retail-style APIs apply, and the Midnight addon restrictions are active there too ([details](https://epiccarry.com/blogs/?p=41550)). Features avoid combat state, with two exceptions: tooltip quest data is secret in combat (see Background objectives), and secure frames are locked in combat (see Combat).
 
-- **Addon folder:** Forever shares the retail `Interface/AddOns` directory; the .toc must declare the Forever interface version. Check the current number in-game.
-- **API reference:** Claude Code's API knowledge is out of date. Ground it in Blizzard's current UI source (the `Gethe/wow-ui-source` mirror, Forever branch if one exists) and Ketho's WoW API VS Code extension. Verify every API call against these before using it.
-- **Position:** map position and facing work outdoors; both return nothing inside instances.
+- **Addon folder:** Forever has its own `_forever_\Interface\AddOns` directory. Interface version **16001** (client build 1.60.1).
+- **API reference:** Claude Code's API knowledge is out of date. Ground it in Blizzard's current UI source (the `Gethe/wow-ui-source` mirror, `forever` branch) and Ketho's WoW API annotations. `python tools/lint.py` checks every call against both; it must pass.
+- **Position:** map position and facing work outdoors; both return nothing inside instances. `UnitPosition` + `GetPlayerFacing` (TomTom's approach on Forever).
 - **Combat:** don't rebuild or re-sort frames during combat; queue changes until combat ends. Avoids taint errors.
-- **Blizzard tracker:** hide it rather than modify it.
-- **Testing:** must happen in-game. Use `/reload` loops and BugSack/BugGrabber to capture Lua errors and paste them back to Claude Code.
+- **Blizzard tracker:** hide it rather than modify it. A one-time `Hide()` does not stick (Blizzard re-shows it when it has content), so hide it and add an `OnShow` post-hook (`HookScript`) that hides it again, deferring to `PLAYER_REGEN_ENABLED` if the frame is protected in combat. Never call Blizzard's tracker update functions. Hiding it also hides quest auto-complete popups and the scenario UI; Questmark must cover those later.
+- **No user scripts:** Forever disables `/dump`, `/run` and `/script` (silently). Debugging goes through Questmark's own slash commands.
+- **Testing:** must happen in-game. Use `/reload` loops and BugSack + !BugGrabber to capture Lua errors and paste them back to Claude Code.
 
 ## Existing landscape
 
-Several Forever quest addons already ship arrows and trackers, so the differentiator is the hint layer and calm per-zone cards, not navigation. Check each before building.
+Several Forever quest addons already ship arrows and trackers, and Polestar's forever-db already holds hint data. The differentiator is presentation: the hint for the quest you're on, on its card, without following a guide, plus calm per-zone cards with event-only re-sorting. Nobody does either (Questie re-sorts on a 5 s timer; its users ask for this spec's rules). Polestar plans richer step data soon, so the hint gap may narrow. Full survey: [landscape.md](research/landscape.md).
 
 | Addon | Overlap |
 | --- | --- |
-| [Questie (Forever bundle)](https://epiccarry.com/blogs/?p=44611) | Map pins, tracker, quest database |
+| [Polestar Guides](https://github.com/fitzforge/polestar) | Largest Forever guide (~290K downloads): route guide, terrain-aware arrow, dungeon journal. Publishes forever-db, which Questmark builds on |
+| [Questie (Forever bundle)](https://epiccarry.com/blogs/?p=44611) | Map pins, tracker, quest database; ~80 hint sentences shown only on map icons |
 | [ForeverQuest](https://www.curseforge.com/wow/addons/foreverquest) | Questie-style tracker, map markers, minimap guidance |
 | [Dungeon Quests Forever](https://www.curseforge.com/wow/addons/dungeon-quests-forever) | Step-by-step dungeon quests with arrow and auto-tracking. Closest overlap with Dungeon mode |
 | [UpQuest Forever](https://www.curseforge.com/wow/addons/upquest-forever) | Directional arrow HUD, item navigation |
@@ -225,15 +222,23 @@ Build in this order; each phase is usable on its own.
 4. **Categories:** classification + Show/Separate/Hide per category.
 5. **Arrows:** per-card mini arrows, focus arrow, edge targeting, hysteresis, optional native waypoint.
 6. **Dungeon mode:** instance detection, dungeon-only cards, pre-dungeon reminder.
-7. **Hint data:** data format and loader first, then the build-time pipeline (separate repo folder, not shipped), starting with quests the confusion detector flags.
+7. **Hint data:** data format and loader first, then the build-time pipeline (separate repo folder, not shipped): forever-db tips triaged first, then quests the confusion detector flags.
 8. **In-game learning:** where collector, confusion detector, note button, export string.
 
 **Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). 10. Questie replacement (database, map and minimap pins, available quests, tooltips). 11. Quest log replacement window.
 
 ## Open questions
 
-- Depend on QuestieDB at runtime, or bake its data in at build time?
-- How much of Warcraft Wiki's quest coverage includes the new Forever quests?
-- Exact licenses for QuestieDB and AllTheThings data (verify before use).
-- Does Forever's quest API expose profession/pet classifications, or is a manual list needed?
-- Name for the addon.
+Resolved by the research:
+
+- ~~Depend on QuestieDB at runtime, or bake its data in?~~ Neither: forever-db via LibForeverData at runtime; QuestieDB optional fallback.
+- ~~Warcraft Wiki coverage of new Forever quests?~~ Thin; useful for classic quests only.
+- ~~Licenses for QuestieDB and AllTheThings?~~ QuestieDB: none (all rights reserved when in doubt). AllTheThings: MIT.
+- ~~Profession/pet classifications in the API?~~ Partly. Quest tags cover Dungeon, Raid, PvP, Group, Elite; frequency/classification cover Repeatable/Daily/Weekly. Profession and Pet battle tags apply only to world quests, so Profession, Class and Seasonal come from the quest database plus a small manual list.
+
+Still open:
+
+- Name for the addon (working name: Questmark).
+- Phases 10–11 (Questie and quest log replacement): the map-pin space is crowded. Build them, or coexist with a pin addon?
+- Event order on Forever: does `QUEST_TURNED_IN` fire before `QUEST_REMOVED`? Needed to tell turn-ins from abandons. Verify in-game.
+- Ship LibForeverData as a required dependency, or embed it in Questmark's folder?

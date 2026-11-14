@@ -1,6 +1,6 @@
 # Questmark
 
-A quest helper addon for World of Warcraft.
+A quest helper addon for World of Warcraft: Forever. Licensed under GPL-3.0-or-later (see `LICENSE`).
 
 ## Install (dev)
 
