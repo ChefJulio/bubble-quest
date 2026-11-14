@@ -131,6 +131,17 @@ text come from hint data (phase 7). In the Elsewhere group, the zone heading is 
 | `UI/Cards/Card.lua` | One card: title line, rows, collapse button, turn-in state |
 | `UI/Cards/Stack.lua` | Container, ordering, Elsewhere group, rebuild/defer logic |
 
+## Verified in game (Nov 14, 2026)
+
+Passed: cards and Do lines, difficulty colors, counters updating in place, turn-in card moving to
+the top, card removed on turn-in, collapse, drag and lock, settings panel. Deferred: crossing into
+another zone (test character too low for Westfall); check when leveling there.
+
+Changed after testing: the default position anchors to Blizzard's hidden `ObjectiveTrackerFrame`
+(the game's layout puts it below the minimap and its widgets) instead of a fixed screen offset,
+which overlapped a "1:24" timer under the minimap. A minimap scaled by another addon (SexyMap)
+isn't known to Blizzard's layout, so the stack can still overlap one; dragging it fixes that.
+
 ## In-game test (after build)
 
 1. Cards for this zone's quests appear where Blizzard's tracker was; other quests are under

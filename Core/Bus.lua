@@ -18,6 +18,7 @@ end
 -- Game events whose firing /qm events should not print (they fire constantly).
 local QUIET_EVENTS = {
   QUEST_LOG_UPDATE = true,
+  ADDON_LOADED = true,  -- fires for every addon, including load-on-demand ones mid-session
 }
 
 local Events = {

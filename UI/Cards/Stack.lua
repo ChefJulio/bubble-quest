@@ -114,10 +114,24 @@ end
 
 -- Position and lock ------------------------------------------------------------------------------
 
+-- Until the player drags the stack, it sits exactly where Blizzard's (hidden) tracker is: the
+-- game's layout system places that frame below the minimap and its widgets (timers, buffs), and
+-- anchoring to it follows any change to that layout. Anchoring ours to theirs changes nothing of
+-- theirs; ObjectiveTrackerFrame is not protected on Forever (/qm tracker).
 function Stack:ApplyPosition()
-  local p = ns.DB.profile.cards.position or DEFAULT_POSITION
-  self.container:ClearAllPoints()
-  self.container:SetPoint(p[1], UIParent, p[2], p[3], p[4])
+  local container, saved = self.container, ns.DB.profile.cards.position
+  if not container then
+    return
+  end
+  container:ClearAllPoints()
+  if saved then
+    container:SetPoint(saved[1], UIParent, saved[2], saved[3], saved[4])
+  elseif ObjectiveTrackerFrame then
+    container:SetPoint("TOPRIGHT", ObjectiveTrackerFrame, "TOPRIGHT")
+  else
+    local p = DEFAULT_POSITION
+    container:SetPoint(p[1], UIParent, p[2], p[3], p[4])
+  end
 end
 
 function Stack:ApplyLock()
@@ -127,6 +141,7 @@ function Stack:ApplyLock()
   self.dragLabel:SetShown(unlocked)
 end
 
+-- StartMoving re-anchors the frame to UIParent, so the point read back is screen-relative.
 local function savePosition(container)
   container:StopMovingOrSizing()
   local point, _, relativePoint, x, y = container:GetPoint(1)
