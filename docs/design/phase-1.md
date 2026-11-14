@@ -142,6 +142,19 @@ Optional objectives: the API has no "optional" field [Read: QuestObjectiveInfo].
 raw text and type only; the marker is decided in phase 2 once we've seen real optional objectives
 in the debug output.
 
+### Verified in game (Nov 14, 2026)
+
+All test steps passed on two characters. Observations for later phases:
+
+- Turn-in and abandon are told apart correctly (`QuestRemoved 91741 turnin`, `QuestRemoved 91743
+  abandon`). `QUEST_REMOVED`'s second argument (`wasReplayQuest`) was `false` both times.
+- A quest's objectives arrive a moment after it is accepted: Rascally Rodents fired `QuestAdded`
+  and then `QuestChanged` in the same second. Consumers must not treat that first `QuestChanged`
+  as progress (no "progress" flash on a card that just appeared).
+- A quest also fires `QuestChanged` at the moment of turn-in, just before `QuestRemoved`.
+- The tracker frame is not protected on Forever (`/qm tracker`: `protected=false`), so hiding it
+  never waits for combat.
+
 ## Hiding Blizzard's tracker
 
 Questie's proven Forever pattern [Read: research A5]:
