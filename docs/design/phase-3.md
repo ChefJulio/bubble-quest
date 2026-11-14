@@ -109,6 +109,15 @@ in place. The player's own actions (pin, hide, collapse, expanding a group) appl
 `Tracking` decides, `Stack` draws. Phase 4 (categories) adds its Show / Separate / Hide groups in
 `Tracking` without touching drawing.
 
+## Verified in game (Nov 14, 2026)
+
+Passed: header (count, minimize, lock + drag by header, settings), pin/unpin, hide/unhide, cap with
+"+ N more here", distance re-sort at a reasonable pace without flip-flopping. Combat deferral
+assumed (same mechanism as phase 2). Pins on top of the cap confirmed as intended.
+
+Added after review: translucent panel (opacity setting, default 25%), darker header band, faint
+dividers between cards and stronger ones before group lines, inner padding.
+
 ## In-game test (after build)
 
 1. With more than 5 quests in the zone: 5 cards, then "+ N more here"; click shows the rest.
