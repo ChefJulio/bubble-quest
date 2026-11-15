@@ -3,10 +3,10 @@ local ADDON_NAME, ns = ...
 -- Settings panel in the game's Options > AddOns. Settings are proxies onto the *active profile*,
 -- so switching profiles later needs no re-registration.
 
-local SettingsPanel = {
+local QuestmarkSettings = {
   category = nil,
 }
-ns.Settings = SettingsPanel
+ns.Settings = QuestmarkSettings
 
 ---@param category table
 ---@param variable string unique setting id
@@ -23,7 +23,7 @@ local function addCheckbox(category, variable, name, tooltip, default, get, set)
 end
 
 -- Called once SavedVariables are loaded.
-function SettingsPanel:Register()
+function QuestmarkSettings:Register()
   local category = Settings.RegisterVerticalLayoutCategory("Questmark")
 
   addCheckbox(category, "QUESTMARK_HIDE_BLIZZARD_TRACKER", "Hide Blizzard quest tracker",
@@ -102,6 +102,8 @@ function SettingsPanel:Register()
     "How dark the panel behind the cards is. 0% shows no panel.")
 
   -- Quest categories: Show with zone cards / Separate group / Hide, per category.
+  -- SettingsPanel is Blizzard's global frame. (This module's table was once a local of the same name,
+  -- which hid it: this line errored and the whole panel never registered.)
   SettingsPanel:GetLayout(category):AddInitializer(CreateSettingsListSectionHeaderInitializer("Quest categories"))
   local function modeOptions()
     local container = Settings.CreateControlTextContainer()
@@ -130,7 +132,7 @@ end
 ---Change the lock from outside the panel (the header's lock button). Settings.SetValue runs our
 ---setter and refreshes the checkbox if the panel is open.
 ---@param locked boolean
-function SettingsPanel:SetLocked(locked)
+function QuestmarkSettings:SetLocked(locked)
   if self.category then
     Settings.SetValue("QUESTMARK_LOCK_CARDS", locked)
   else
@@ -141,9 +143,13 @@ end
 
 -- Opening goes through C_SettingsUtil.OpenSettingsPanel, which is HasRestrictions on Forever with no
 -- stated rule; assume combat is the restriction and don't try then.
-function SettingsPanel:Open()
+function QuestmarkSettings:Open()
   if InCombatLockdown() then
     ns.Debug:Print("Settings can't be opened in combat.")
+    return
+  end
+  if not self.category then
+    ns.Debug:Print("Settings failed to load; BugSack has the error.")
     return
   end
   -- apiguard: allow called only out of combat (checked above), from a typed /qm command

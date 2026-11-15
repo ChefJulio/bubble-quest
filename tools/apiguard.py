@@ -19,6 +19,7 @@ Warnings (fail unless acknowledged):
   - calls to Blizzard Lua functions that *directly* call one of the above (e.g.
     Settings.OpenToCategory -> C_SettingsUtil.OpenSettingsPanel). One level deep only: deeper
     chains would flag most of Blizzard's UI code.
+  - a `local` with the name of a Blizzard global (it hides Blizzard's for the rest of the file)
   - secure templates (Secure*Template) in Lua or XML: the frame's protected methods (Show, Hide,
     SetPoint, SetAttribute, ...) are blocked in combat, so every change must be combat-guarded.
     Protected methods are not flagged per call: the receiver is unknown statically and on
@@ -245,6 +246,8 @@ class ApiDb:
   # Blizzard Lua functions that directly call a restricted API: "Settings.OpenToCategory" ->
   # ["C_SettingsUtil.OpenSettingsPanel [HasRestrictions]"]. Empty: wrapper check disabled.
   wrappers: dict[str, list[str]] = field(default_factory=dict)
+  # Names Blizzard defines globally (Lua and XML). Empty: shadowing check disabled.
+  blizzard_globals: set[str] = field(default_factory=set)
 
 
 def load_docs(docs_dir: Path) -> ApiDb:
@@ -301,6 +304,39 @@ def collect_defined_names(paths: list[Path]) -> set[str]:
     for f in files:
       for m in _METHOD_DEF.finditer(f.read_text(encoding="utf-8", errors="replace")):
         names.add(m.group(1) or m.group(2))
+  return names
+
+
+# --------------------------------------------------------------------------------------------
+# Blizzard globals (for the shadowing check)
+# --------------------------------------------------------------------------------------------
+
+# Top-level (unindented) `function Name(` or `Name =` in Blizzard's Lua; frames named in XML.
+_TOP_LEVEL_GLOBAL = re.compile(r"^(?:function\s+([A-Za-z_]\w*)\s*\(|([A-Za-z_]\w*)\s*=[^=])", re.M)
+_XML_FRAME_NAME = re.compile(r"<\w+\b[^>]*\bname=\"([A-Za-z_]\w*)\"")
+
+
+def collect_blizzard_globals(ui_dir: Path) -> set[str]:
+  """Capitalized names only: Blizzard's UI and API globals (SettingsPanel, Menu, GameTooltip) are
+  capitalized; lowercase top-level names in its source are stray leaks (frame, max) or standard Lua
+  (print) that addons shadow on purpose."""
+  names: set[str] = set()
+  for path in ui_dir.rglob("*.lua"):
+    for m in _TOP_LEVEL_GLOBAL.finditer(path.read_text(encoding="utf-8", errors="replace")):
+      names.add(m.group(1) or m.group(2))
+  for path in ui_dir.rglob("*.xml"):
+    names.update(_XML_FRAME_NAME.findall(path.read_text(encoding="utf-8", errors="replace")))
+  return {name for name in names if name[:1].isupper()}
+
+
+def load_blizzard_globals(ui_dir: Path, cache: Path, key: str) -> set[str]:
+  if cache.exists():
+    data = json.loads(cache.read_text(encoding="utf-8"))
+    if data.get("key") == key:
+      return set(data["globals"])
+  names = collect_blizzard_globals(ui_dir)
+  cache.parent.mkdir(parents=True, exist_ok=True)
+  cache.write_text(json.dumps({"key": key, "globals": sorted(names)}), encoding="utf-8")
   return names
 
 
@@ -458,6 +494,23 @@ def scan_file(path: Path, db: ApiDb) -> list[Finding]:
       report(t, _secure_template_finding(t.value))
     if t.kind != "name":
       continue
+
+    # `local Name` / `local function Name` hiding a Blizzard global: later code in the file that
+    # means Blizzard's Name silently gets the local (UI/Settings.lua's `local SettingsPanel` broke
+    # the whole settings panel this way).
+    if t.value == "local" and db.blizzard_globals:
+      j = k + 1
+      if j < len(toks) and toks[j].value == "function":
+        j += 1
+      while j < len(toks) and toks[j].kind == "name":
+        if toks[j].value in db.blizzard_globals:
+          report(toks[j], ("warning", f"local {toks[j].value} hides Blizzard's global {toks[j].value}: code in "
+                                      "this file that means Blizzard's gets this local instead; rename it"))
+        if j + 1 < len(toks) and toks[j + 1].value == ",":
+          j += 2
+        else:
+          break
+      continue
     prev = toks[k - 1] if k > 0 else None
     nxt = toks[k + 1] if k + 1 < len(toks) else None
     after_access = prev is not None and prev.kind == "op" and prev.value in (".", ":")
@@ -544,7 +597,9 @@ def run(docs_dir: Path, targets: list[Path], method_sources: list[Path] | None =
   wrapper_source: (UI source dir, cache file, cache key) enables the Blizzard-wrapper check."""
   db = load_docs(docs_dir)
   if wrapper_source is not None:
-    db.wrappers = load_wrapper_index(wrapper_source[0], db, wrapper_source[1], wrapper_source[2])
+    ui_dir, cache, key = wrapper_source
+    db.wrappers = load_wrapper_index(ui_dir, db, cache, key)
+    db.blizzard_globals = load_blizzard_globals(ui_dir, cache.with_name("blizzard-globals.json"), key)
   files = iter_source_files(targets, exclude)
   if method_sources is not None:
     # Embedded libraries (Libs/) aren't linted but do define methods the addon calls.
