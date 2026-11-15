@@ -10,7 +10,9 @@ local ADDON_NAME, ns = ...
 --   4. The order changes only on events: QuestLogChanged, a zone change, or moving more than
 --      MOVE_YARDS since the last sort. Never on a timer by itself, never in combat (the stack
 --      defers). Hysteresis: neighbours swap only when the lower one is HYSTERESIS times closer.
---   5. At most profile.cards.cap zone cards; the rest behind "+ N more here".
+--   5. At most profile.cards.cap zone cards; the rest behind "+ N more here". With "Always show
+--      nearest quests" (cards.nearestAnywhere), free slots take the nearest quests outside the zone
+--      (same continent, by distance, ranked after every zone quest); the rest stay in Elsewhere.
 --   6. Ignored quests are hidden until unhidden.
 -- Categories (phase 4): a category set to "separate" gets its own group (all its quests, any zone);
 -- "hide" removes its quests. Pinned quests show whatever their category.
@@ -87,12 +89,25 @@ function Tracking:Resort()
   --   2. rule 3, "turn-ins near you": ready and within NEAR_TURNIN_YARDS (in-zone alone put a turn-in
   --      700 yards away on top; a 213 yd turn-in above the quest being done was also wrong);
   --   3. everything else.
+  --   4. with nearestAnywhere, quests outside the zone that have a distance (same continent): only
+  --      used to fill free card slots (rule 5), after every zone quest.
   -- Each tier sorted by distance with hysteresis. Re-sorts happen only on events (100 yd moves), so
   -- crossing a tier line doesn't make cards jump.
-  local distance, tiers = {}, { {}, {}, {} }
+  local distance, tiers = {}, { {}, {}, {}, {} }
+  local nearestAnywhere = ns.DB.profile.cards.nearestAnywhere
   wipe(self.tier)
   for questID, quest in pairs(ns.QuestLog.quests) do
-    if placement(quest) == "show" and ns.Zone:IsInZone(quest) then
+    local shown = placement(quest) == "show"
+    local inZone = shown and ns.Zone:IsInZone(quest)
+    if shown and not inZone and nearestAnywhere then
+      local d = ns.Navigation:Distance(quest)
+      if d then
+        distance[questID] = d
+        self.tier[questID] = 4
+        table.insert(tiers[4], quest)
+      end
+    end
+    if inZone then
       local here = ns.Navigation:InArea(quest)
       -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
       local d = here and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
@@ -177,6 +192,21 @@ function Tracking:View()
   local cap = ns.DB.profile.cards.cap
   for i, quest in ipairs(here) do
     table.insert(i <= cap and view.zone or view.overflow, quest)
+  end
+
+  -- Rule 5, nearestAnywhere: free slots take the nearest ranked quests from Elsewhere (only tier 4
+  -- quests are ranked there, and only while the setting is on).
+  local free = cap - #view.zone
+  if free > 0 and ns.DB.profile.cards.nearestAnywhere then
+    local near, rest = {}, {}
+    for _, quest in ipairs(view.elsewhere) do
+      table.insert(rank[quest.questID] and near or rest, quest)
+    end
+    table.sort(near, function(a, b) return rank[a.questID] < rank[b.questID] end)
+    for i, quest in ipairs(near) do
+      table.insert(i <= free and view.zone or rest, quest)
+    end
+    view.elsewhere = rest
   end
   return view
 end

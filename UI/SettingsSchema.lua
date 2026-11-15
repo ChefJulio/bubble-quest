@@ -61,6 +61,14 @@ function Schema:Entries()
       get = function(p) return p.cards.cap end,
       set = function(p, v) p.cards.cap = v; ns.Stack:Request(false, true) end,
     },
+    {
+      kind = "checkbox", id = "QUESTMARKER_NEAREST_ANYWHERE", column = 1, default = false,
+      label = "Always show nearest quests",
+      tooltip = "When this zone has fewer quests than the card limit, fill the free cards with your "
+        .. "nearest quests elsewhere on this continent, so the tracker is never empty.",
+      get = function(p) return p.cards.nearestAnywhere end,
+      set = function(p, v) p.cards.nearestAnywhere = v; ns.Bus:Fire("TrackingResortWanted") end,
+    },
 
     { kind = "section", label = "Look", column = 1 },
     {
