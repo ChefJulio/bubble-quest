@@ -29,7 +29,12 @@ jobs:
       - name: Check package contents
         run: python3 tools/package.py --check
 
-      # Zip and CurseForge label "Questmarker-v0.2.0": the defaults add "-forever" and drop the name.
+      # Names as set on CurseForge by hand (review): "Questmarker-v0.2.0.zip". The release type (beta,
+      # alpha) shows as CurseForge's badge, so it's cut from the name: tag v0.2.0-beta -> v0.2.0.
+      - name: Release name
+        id: name
+        run: echo "version=${GITHUB_REF_NAME%%-*}" >> "$GITHUB_OUTPUT"
+
       - uses: BigWigsMods/packager@v2
         with:
-          args: -n "{package-name}-{project-version}:{package-name}-{project-version}"
+          args: -n "{package-name}-${{ steps.name.outputs.version }}:{package-name}-${{ steps.name.outputs.version }}.zip"
