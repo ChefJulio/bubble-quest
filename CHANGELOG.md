@@ -1,4 +1,4 @@
 ## What's new
 
-- Card tooltip: each party member's progress now sits next to yours on the same objective line,
-  instead of in a separate block
+- Card tooltip in a group: your progress and each party member's are uniform rows next to each other
+  ("You" first), with mini progress bars per objective; item sources moved below them
