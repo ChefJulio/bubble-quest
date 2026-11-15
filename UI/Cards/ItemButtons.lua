@@ -126,7 +126,21 @@ function ItemButtons:ReleaseAll()
   return true
 end
 
----Is any button on screen (the stack then defers layouts in combat)?
+---Show the buttons whose card is in view, hide the rest (the stack's scroll area can't clip them:
+---they sit outside it). Out of combat only; returns false if refused.
+---@param inView fun(questID: number): boolean
+---@return boolean
+function ItemButtons:ShowWhere(inView)
+  if InCombatLockdown() then
+    return false
+  end
+  for questID, button in pairs(self.active) do
+    button:SetShown(inView(questID))
+  end
+  return true
+end
+
+---Is any button attached (the stack then defers layouts and scrolling in combat)?
 ---@return boolean
 function ItemButtons:AnyShown()
   return next(self.active) ~= nil

@@ -22,6 +22,8 @@ local LINE_HEIGHT = 16
 local HALF_GAP = 5           -- space above and below a divider
 local BUTTON_SIZE_X, BUTTON_SIZE_Y = 18, 19  -- Blizzard's tracker header buttons
 local DIVIDER_ALPHA = { card = 0.08, section = 0.2 }
+local BOTTOM_MARGIN = 12     -- the panel stops this far above the screen's bottom edge, then scrolls
+local SCROLL_STEP = 40       -- pixels per mouse wheel notch
 
 -- The first atlas the client has, from candidates seen in Forever's UI source. Atlases referenced
 -- only by retail-only files might not exist on Forever, so ask the client rather than assume.
@@ -153,12 +155,12 @@ function Stack:Layout()
 
   local char = ns.DB.char
   if char.minimized then
-    self.body:Hide()
+    self.scroll:Hide()
     self.headerDivider:Hide()
-    self.container:SetHeight(HEADER_HEIGHT)
+    self:Fit()
     return
   end
-  self.body:Show()
+  self.scroll:Show()
 
   local view = ns.Tracking:View()
   cursor.y, cursor.any = 0, false
@@ -236,7 +238,75 @@ function Stack:Layout()
   local y = cursor.y
   self.headerDivider:SetShown(y > 0)
   self.body:SetHeight(math.max(y, 1))
-  self.container:SetHeight(HEADER_HEIGHT + (y > 0 and (PAD + y + PAD) or 0))
+  self:Fit()
+end
+
+-- Scrolling ----------------------------------------------------------------------------------------
+-- The cards scroll inside the panel instead of growing past the screen bottom (the clamp then pushed
+-- the whole stack up; seen in review). The panel is as tall as its contents, at most down to
+-- BOTTOM_MARGIN above the screen's bottom edge. Mouse wheel scrolls; a thin thumb shows where.
+--
+-- Quest item buttons sit outside the panel (left of their card), so the scroll area can't clip them:
+-- a button is hidden while its card is scrolled out of view. They're secure, so that happens out of
+-- combat only, and while any is up, scrolling in combat is paused (scrolling would move them).
+
+-- Height the scroll area may use: from the panel's top down to BOTTOM_MARGIN above the screen.
+function Stack:MaxScrollHeight()
+  local top = self.container:GetTop()
+  if not top then
+    return math.huge
+  end
+  return math.max(LINE_HEIGHT * 3, top - HEADER_HEIGHT - 2 * PAD - BOTTOM_MARGIN)
+end
+
+-- Size the panel to its contents (capped), keep the scroll offset in range, update the thumb.
+function Stack:Fit()
+  local content = self.body:GetHeight()
+  if self.headerDivider:IsShown() == false then
+    self.scroll:SetHeight(1)
+    self.container:SetHeight(HEADER_HEIGHT)
+    self:ScrollTo(0)
+    return
+  end
+  local view = math.min(content, self:MaxScrollHeight())
+  self.scroll:SetHeight(view)
+  self.container:SetHeight(HEADER_HEIGHT + PAD + view + PAD)
+  self:ScrollTo(self.scroll:GetVerticalScroll())
+end
+
+---@param offset number pixels from the top; clamped to the scrollable range
+function Stack:ScrollTo(offset)
+  local scroll = self.scroll
+  local range = math.max(0, self.body:GetHeight() - scroll:GetHeight())
+  offset = math.max(0, math.min(offset, range))
+  scroll:SetVerticalScroll(offset)
+
+  local thumb = self.thumb
+  if range <= 0 then
+    thumb:Hide()
+  else
+    local view = scroll:GetHeight()
+    local size = math.max(16, view * view / (view + range))
+    thumb:SetHeight(size)
+    thumb:SetPoint("TOPRIGHT", scroll, "TOPRIGHT", PAD - 2, -(view - size) * offset / range)
+    thumb:Show()
+  end
+  -- Out of combat only (secure); in combat nothing moved, as scrolling is paused while they're up.
+  if not InCombatLockdown() then
+    local top, bottom = scroll:GetTop(), scroll:GetBottom()
+    ns.ItemButtons:ShowWhere(function(questID)
+      local card = self.visible[questID]
+      local cardTop = card and card.frame:GetTop()
+      return cardTop ~= nil and top ~= nil and cardTop <= top + 0.5 and cardTop >= bottom + 10
+    end)
+  end
+end
+
+local function onMouseWheel(_, delta)
+  if InCombatLockdown() and ns.ItemButtons:AnyShown() then
+    return
+  end
+  Stack:ScrollTo(Stack.scroll:GetVerticalScroll() - delta * SCROLL_STEP)
 end
 
 -- Re-sort (rule 4) and layout, applying the combat rule. Player actions lay out at once; anything
@@ -320,6 +390,7 @@ local function savePosition()
   end
   container:StopMovingOrSizing()
   ns.DB.profile.cards.position = Stack:AnchorTopLeft() or ns.DB.profile.cards.position
+  Stack:Request(false, true)  -- the room below changed: refit the scroll area
 end
 
 -- Construction -------------------------------------------------------------------------------------
@@ -430,10 +501,23 @@ function Stack:Create()
   self.headerDivider:SetColorTexture(1, 1, 1, DIVIDER_ALPHA.section)
   PixelUtil.SetHeight(self.headerDivider, 1, 1)
 
-  local body = CreateFrame("Frame", nil, container)
-  body:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", PAD, -PAD)
+  -- The cards live on `body`, the scroll child of `scroll` (see Scrolling).
+  local scroll = CreateFrame("ScrollFrame", nil, container)
+  scroll:SetPoint("TOPLEFT", self.header, "BOTTOMLEFT", PAD, -PAD)
+  scroll:SetSize(ns.Card.WIDTH, 1)
+  scroll:EnableMouseWheel(true)
+  scroll:SetScript("OnMouseWheel", onMouseWheel)
+  self.scroll = scroll
+
+  local body = CreateFrame("Frame", nil, scroll)
   body:SetSize(ns.Card.WIDTH, 1)
+  scroll:SetScrollChild(body)
   self.body = body
+
+  self.thumb = container:CreateTexture(nil, "OVERLAY")
+  self.thumb:SetWidth(2)
+  self.thumb:SetColorTexture(1, 1, 1, 0.3)
+  self.thumb:Hide()
 
   cardPool = ns.CreatePool(function()
     return ns.Card.Create(body, function(questID)
@@ -501,6 +585,11 @@ ns.Bus:On("LearnedSourcesChanged", function() Stack:Request(false) end)
 
 -- These can change membership (subzone fallback, map markers) but are not re-sort events.
 for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "QUEST_POI_UPDATE" }) do
+  ns.Events:On(event, function() Stack:Request(false) end)
+end
+
+-- The screen's size or UI scale changed: the room below the panel did too (scroll area height).
+for _, event in ipairs({ "UI_SCALE_CHANGED", "DISPLAY_SIZE_CHANGED" }) do
   ns.Events:On(event, function() Stack:Request(false) end)
 end
 
