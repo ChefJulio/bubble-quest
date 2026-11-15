@@ -54,9 +54,19 @@ function Card.ApplyArrowStyle(texture, key)
   if style.atlas then
     texture:SetAtlas(style.atlas)
   else
-    texture:SetTexture(style.file)
+    -- TRILINEAR: mipmapped, so the 128px art stays smooth shrunk to card size (Blizzard loads its
+    -- scaled map tiles this way, Blizzard_MapCanvasDetailLayer.lua:68); plain sampling looked jagged
+    -- when the arrow rotated.
+    texture:SetTexture(style.file, nil, nil, "TRILINEAR")
   end
   return style.tintable == true
+end
+
+---Settings for a texture that gets rotated: pixel-grid snapping (on by default, crisp for still
+---art) makes rotated art jitter and stair-step; Blizzard turns it off the same way for rotating art.
+function Card.PrepareRotatingTexture(texture)
+  texture:SetSnapToPixelGrid(false)
+  texture:SetTexelSnappingBias(0)
 end
 
 -- Arrow colour. By distance (setting, default on): green close, through yellow and orange, to red far;
@@ -148,6 +158,7 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.navText:SetJustifyH("RIGHT")
   self.arrow = frame:CreateTexture(nil, "ARTWORK")
   self.arrow:SetSize(ARROW_SIZE, ARROW_SIZE)
+  Card.PrepareRotatingTexture(self.arrow)
   self.arrow:SetPoint("RIGHT", self.navText, "LEFT", -3, 0)
   self.arrow:Hide()
   self.inArea = frame:CreateTexture(nil, "ARTWORK")

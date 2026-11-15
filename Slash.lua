@@ -210,6 +210,7 @@ commands.arrows = {
         for j, size in ipairs({ 16, 24 }) do
           for k, rotation in ipairs({ 0, math.pi / 2 }) do
             local texture = arrowPreview:CreateTexture(nil, "ARTWORK")
+            ns.Card.PrepareRotatingTexture(texture)
             if ns.Card.ApplyArrowStyle(texture, style.key) then
               texture:SetVertexColor(1, 0.82, 0)
             end

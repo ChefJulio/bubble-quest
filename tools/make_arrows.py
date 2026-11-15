@@ -4,8 +4,9 @@
 
 Each arrow points up (the angle maths relies on that): a near-white fill with a dark outline. The game
 tints the fill (Texture:SetVertexColor) gold, or by distance; the outline stays dark, so it reads on
-bright and dark ground alike. Drawn at 8x and downsampled for smooth edges; saved as 64x64 32-bit TGA,
-which the client loads directly. The preview shows them tinted gold. Requires Pillow.
+bright and dark ground alike. Drawn at 8x and downsampled for smooth edges; saved as 128x128 32-bit
+TGA, which the client loads directly and mipmaps (the card loads it with TRILINEAR filtering, so it
+stays smooth shrunk to card size and rotated). The preview shows them tinted gold. Requires Pillow.
 """
 
 from __future__ import annotations
@@ -16,12 +17,12 @@ from PIL import Image, ImageDraw
 
 ROOT = Path(__file__).resolve().parent.parent
 OUT = ROOT / "Media" / "Arrows"
-SIZE = 64
+SIZE = 128                      # was 64; jagged when rotated at card size (seen in game)
 SCALE = 8
 FILL = (250, 250, 250, 255)     # tinted in game
 PREVIEW_TINT = (255, 209, 0)    # Blizzard's UI gold, the untinted-by-distance colour
 OUTLINE = (25, 18, 5, 235)
-OUTLINE_WIDTH = 5               # in final pixels, half of it outside the shape
+OUTLINE_WIDTH = SIZE * 5 // 64  # in final pixels, half of it outside the shape (same look as at 64)
 
 # Shapes in unit coordinates (0..1, y down), pointing up.
 SHAPES = {
