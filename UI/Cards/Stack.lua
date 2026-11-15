@@ -486,6 +486,7 @@ for _, event in ipairs({ "PLAYER_ENTERING_WORLD", "ZONE_CHANGED_NEW_AREA" }) do
 end
 ns.Bus:On("QuestLogChanged", function() Stack:Request(true) end)
 ns.Bus:On("TrackingResortWanted", function() Stack:Request(true) end)
+ns.Bus:On("NearbyQuestEntered", function() Stack:Request(true) end)
 
 -- These can change membership (subzone fallback, map markers) but are not re-sort events.
 for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "QUEST_POI_UPDATE" }) do

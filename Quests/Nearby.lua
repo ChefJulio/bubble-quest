@@ -58,7 +58,11 @@ local function scan(unit)
   return next(result) and result or false
 end
 
+-- Fires NearbyQuestEntered(questID) when a quest gains its first nearby creature: entering an
+-- objective's area is a re-sort event (tracking rule 4). Leaving isn't, so creatures walking in and
+-- out of nameplate range don't shuffle the cards.
 local function rebuild()
+  local before = Nearby.quests
   local quests = {}
   for _, found in pairs(Nearby.units) do
     if found then
@@ -71,6 +75,11 @@ local function rebuild()
     end
   end
   Nearby.quests = quests
+  for questID in pairs(quests) do
+    if not before[questID] then
+      ns.Bus:Fire("NearbyQuestEntered", questID)
+    end
+  end
 end
 
 local function learn(found)

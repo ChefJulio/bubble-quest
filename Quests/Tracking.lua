@@ -85,7 +85,8 @@ function Tracking:Resort()
   for questID, quest in pairs(ns.QuestLog.quests) do
     if placement(quest) == "show" and ns.Zone:IsInZone(quest) then
       -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
-      local d = ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
+      -- A quest creature on the player's nameplates means "here": distance 0, whatever the targets say.
+      local d = ns.Nearby:Has(questID) and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
       distance[questID] = d
       -- Rule 3, "turn-ins near you": ready and within NEAR_TURNIN_YARDS. (In-zone alone put a turn-in
       -- 700 yards away at the top, seen in game.) Re-sorts happen only after moving 100 yards, so
