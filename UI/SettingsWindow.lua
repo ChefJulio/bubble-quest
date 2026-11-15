@@ -34,16 +34,41 @@ local Window = {
 }
 ns.SettingsWindow = Window
 
+-- Tooltips (review: hovering often showed nothing). A tooltip is hooked (HookScript, so templates keep
+-- their own hover highlights) onto the control and onto every mouse-enabled part of it: a slider's
+-- frame takes no mouse input itself, its bar and stepper buttons do. Each row also gets a hover area
+-- under its controls (hoverArea), so its label shows the tooltip too.
+local function showTooltip(owner, title, text)
+  GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+  GameTooltip:SetText(title, 1, 1, 1)
+  if text then
+    GameTooltip:AddLine(text, nil, nil, nil, true)
+  end
+  GameTooltip:Show()
+end
+
 local function tooltip(owner, title, text)
-  owner:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
-    GameTooltip:SetText(title, 1, 1, 1)
-    if text then
-      GameTooltip:AddLine(text, nil, nil, nil, true)
-    end
-    GameTooltip:Show()
-  end)
-  owner:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  local targets = { owner }
+  for _, child in ipairs({ owner:GetChildren() }) do
+    targets[#targets + 1] = child
+  end
+  for _, target in ipairs(targets) do
+    target:HookScript("OnEnter", function() showTooltip(owner, title, text) end)
+    target:HookScript("OnLeave", function() GameTooltip:Hide() end)
+  end
+end
+
+-- An invisible, mouse-enabled area for a row's tooltip, beneath the row's controls (at the panel's own
+-- frame level; controls sit one above), so the label shows it and the controls still get the mouse.
+local function hoverArea(parent, x, y, width, height, title, text)
+  local area = CreateFrame("Frame", nil, parent)
+  area:SetPoint("TOPLEFT", x - 4, y)
+  area:SetSize(width + 8, height)
+  area:SetFrameLevel(parent:GetFrameLevel())
+  area:EnableMouse(true)
+  area:SetScript("OnEnter", function() showTooltip(area, title, text) end)
+  area:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  return area
 end
 
 local function change(entry, value)
@@ -91,6 +116,8 @@ local function checkbox(parent, entry, x, y, label)
   box.Text:SetText(label or entry.label)
   box.Text:SetJustifyH("LEFT")
   box:SetScript("OnClick", function(self) change(entry, self:GetChecked()) end)
+  -- The label is part of the button: hovering or clicking the text works, as in Blizzard's options.
+  box:SetHitRectInsets(0, -(box.Text:GetStringWidth() + 6), 0, 0)
   tooltip(box, entry.label, entry.tooltip)
   local refresh = function()
     box:SetChecked(entry.get(ns.DB.profile))
@@ -118,6 +145,7 @@ local function inlineLabel(parent, entry, x, y)
 end
 
 function builders.slider(parent, entry, x, y)
+  hoverArea(parent, x, y, COLUMN_WIDTH, INLINE_HEIGHT, entry.label, entry.tooltip)
   inlineLabel(parent, entry, x, y)
   local slider = CreateFrame("Frame", nil, parent, "MinimalSliderWithSteppersTemplate")
   slider:SetPoint("LEFT", parent, "TOPLEFT", x + INLINE_LABEL_WIDTH - 4, y - INLINE_HEIGHT / 2)
@@ -167,6 +195,7 @@ local function dropdownAt(parent, entry, x, y, width)
 end
 
 function builders.dropdown(parent, entry, x, y)
+  hoverArea(parent, x, y, COLUMN_WIDTH, INLINE_HEIGHT, entry.label, entry.tooltip)
   local label = inlineLabel(parent, entry, x, y)
   local _, refresh = dropdownAt(parent, entry, x + INLINE_LABEL_WIDTH, y, COLUMN_WIDTH - INLINE_LABEL_WIDTH)
   return INLINE_HEIGHT, function()
@@ -230,6 +259,8 @@ local function buildGrid(parent, entries, x, y)
       stripe:SetPoint("TOPLEFT", x - 4, y)
       stripe:SetSize(GRID_LABEL_WIDTH + #options * GRID_COLUMN_WIDTH + 8, GRID_ROW_HEIGHT)
     end
+    hoverArea(parent, x, y, GRID_LABEL_WIDTH + #options * GRID_COLUMN_WIDTH, GRID_ROW_HEIGHT, entry.label,
+      entry.tooltip)
     local label = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
     label:SetPoint("LEFT", parent, "TOPLEFT", x, y - GRID_ROW_HEIGHT / 2)
     label:SetText(entry.label)
