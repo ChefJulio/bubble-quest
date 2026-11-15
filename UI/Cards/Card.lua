@@ -13,6 +13,9 @@ local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
 local TOGGLE_WIDTH = 20  -- the collapse button at the right of the title line
+local BAR_HEIGHT = 3     -- progress bar under the card
+local BAR_GAP = 3
+local BAR_WIDTH = WIDTH - ROW_INDENT
 local ARROW_SIZE = 16
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready"
 local IN_AREA_ATLAS = "Navigation-Tracked-Icon"
@@ -143,6 +146,17 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.inArea:SetVertexColor(0.2, 1, 0.2)
   self.inArea:Hide()
 
+  -- Progress bar: a dark track and a fill whose width is the progress.
+  local bar = CreateFrame("Frame", nil, frame)
+  bar:SetSize(BAR_WIDTH, BAR_HEIGHT)
+  local track = bar:CreateTexture(nil, "BACKGROUND")
+  track:SetAllPoints()
+  track:SetColorTexture(1, 1, 1, 0.12)
+  local fill = bar:CreateTexture(nil, "ARTWORK")
+  fill:SetPoint("TOPLEFT")
+  fill:SetHeight(BAR_HEIGHT)
+  self.bar, self.barFill = bar, fill
+
   local toggle = CreateFrame("Button", nil, frame)
   toggle:SetSize(16, TITLE_HEIGHT)
   toggle:SetPoint("TOPRIGHT", 0, 0)
@@ -242,6 +256,17 @@ function Card:SetQuest(quest, collapsed, options)
     y = y + row.text:GetStringHeight() + ROW_GAP
   end
 
+  -- Progress bar under the card (setting, default on); shown on collapsed cards too, as a summary.
+  local showBar = ns.DB.profile.cards.progressBar
+  self.bar:SetShown(showBar)
+  if showBar then
+    y = y + BAR_GAP
+    self.bar:ClearAllPoints()
+    self.bar:SetPoint("TOPLEFT", self.frame, "TOPLEFT", ROW_INDENT, -y)
+    self:UpdateBar(quest)
+    y = y + BAR_HEIGHT
+  end
+
   self.frame:SetHeight(y)
   return y
 end
@@ -287,9 +312,43 @@ function Card:SetNavigation(nav)
   end
 end
 
+-- How far along a quest is, 0..1: the average over its objectives of each one's fraction (3/8 counts
+-- 0.375; an objective without a counter counts 0 or 1). Ready to turn in is 1.
+local function progressOf(quest)
+  if quest.readyForTurnIn then
+    return 1
+  end
+  local total, count = 0, 0
+  for _, objective in ipairs(quest.objectives) do
+    count = count + 1
+    if objective.finished then
+      total = total + 1
+    elseif (objective.required or 0) > 0 then
+      total = total + math.min(objective.fulfilled or 0, objective.required) / objective.required
+    end
+  end
+  return count > 0 and total / count or 0
+end
+
+---@param quest table
+function Card:UpdateBar(quest)
+  if not self.bar:IsShown() then
+    return
+  end
+  local progress = progressOf(quest)
+  self.barFill:SetWidth(math.max(1, BAR_WIDTH * progress))
+  self.barFill:SetShown(progress > 0)
+  if quest.readyForTurnIn then
+    self.barFill:SetColorTexture(0.2, 0.85, 0.2, 0.9)
+  else
+    self.barFill:SetColorTexture(0.95, 0.75, 0.15, 0.9)
+  end
+end
+
 ---Update texts in place (same rows, same layout). Used for progress, including in combat.
 ---@param quest table
 function Card:UpdateInPlace(quest)
+  self:UpdateBar(quest)
   self.title:SetText(titleText(quest, self.options))
   if quest.readyForTurnIn then
     return

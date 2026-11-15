@@ -5,7 +5,7 @@ local ADDON_NAME, ns = ...
 --
 --   1. Pinned quests always show, in pin order, wherever they are; not counted in the cap.
 --   2. Other quests are chosen by zone and sorted by distance to their map marker.
---   3. Ready turn-ins in this zone go first.
+--   3. Ready turn-ins within NEAR_TURNIN_YARDS go first; farther ones sort by distance like the rest.
 --   4. The order changes only on events: QuestLogChanged, a zone change, or moving more than
 --      MOVE_YARDS since the last sort. Never on a timer by itself, never in combat (the stack
 --      defers). Hysteresis: neighbours swap only when the lower one is HYSTERESIS times closer.
@@ -15,11 +15,13 @@ local ADDON_NAME, ns = ...
 -- "hide" removes its quests. Pinned quests show whatever their category.
 
 local MOVE_YARDS = 100
+local NEAR_TURNIN_YARDS = 250
 local HYSTERESIS = 0.8  -- swap only when at least 20% closer
 local MOVE_CHECK_SECONDS = 1
 
 local Tracking = {
   rank = {},           -- [questID] = position in the last sorted order (this zone's quests)
+  nearTurnIn = {},     -- [questID] = true: ready and within NEAR_TURNIN_YARDS at the last sort
   sortedAt = nil,      -- { mapID, x, y } where the last sort happened
 }
 ns.Tracking = Tracking
@@ -79,11 +81,18 @@ end
 function Tracking:Resort()
   ns.Zone:Update()
   local distance, ready, rest = {}, {}, {}
+  wipe(self.nearTurnIn)
   for questID, quest in pairs(ns.QuestLog.quests) do
     if placement(quest) == "show" and ns.Zone:IsInZone(quest) then
       -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
-      distance[questID] = ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
-      local list = quest.readyForTurnIn and ready or rest
+      local d = ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
+      distance[questID] = d
+      -- Rule 3, "turn-ins near you": ready and within NEAR_TURNIN_YARDS. (In-zone alone put a turn-in
+      -- 700 yards away at the top, seen in game.) Re-sorts happen only after moving 100 yards, so
+      -- crossing this line doesn't make cards jump.
+      local near = quest.readyForTurnIn and d ~= nil and d <= NEAR_TURNIN_YARDS
+      self.nearTurnIn[questID] = near or nil
+      local list = near and ready or rest
       list[#list + 1] = quest
     end
   end
@@ -141,8 +150,10 @@ function Tracking:View()
 
   table.sort(view.pinned, function(a, b) return char.pins[a.questID] < char.pins[b.questID] end)
   local rank = self.rank
+  local near = self.nearTurnIn
   table.sort(here, function(a, b)
-    if a.readyForTurnIn ~= b.readyForTurnIn then return a.readyForTurnIn end
+    local na, nb = near[a.questID] == true, near[b.questID] == true
+    if na ~= nb then return na end
     local ra, rb = rank[a.questID], rank[b.questID]
     if ra and rb then return ra < rb end
     if ra or rb then return ra ~= nil end

@@ -74,6 +74,15 @@ function QuestmarkSettings:Register()
     function(profile) return profile.cards.arrowColorByDistance end,
     function(profile, value) profile.cards.arrowColorByDistance = value end)
 
+  addCheckbox(category, "QUESTMARK_PROGRESS_BAR", "Progress bar under each quest",
+    "A thin bar under each card showing how far along the quest is; green when ready to turn in.",
+    true,
+    function(profile) return profile.cards.progressBar end,
+    function(profile, value)
+      profile.cards.progressBar = value
+      ns.Stack:Request(false, true)
+    end)
+
   local capSetting = Settings.RegisterProxySetting(category, "QUESTMARK_CARD_CAP", Settings.VarType.Number,
     "Cards shown for this zone", 5,
     function() return ns.DB.profile.cards.cap end,
