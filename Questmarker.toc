@@ -4,6 +4,7 @@
 ## Author: ChefJulio
 ## Version: @project-version@
 ## Category: Quests
+## X-Curse-Project-ID: 1806606
 ## SavedVariables: QuestmarkerDB
 ## SavedVariablesPerCharacter: QuestmarkerCharDB
 
