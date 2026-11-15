@@ -29,14 +29,15 @@ local function media(name)
   return ("Interface\\AddOns\\%s\\Media\\Arrows\\%s"):format(ADDON_NAME, name)
 end
 Card.ARROW_STYLES = {
-  { key = "classic", label = "Arrow", file = media("classic") },
-  { key = "dart", label = "Dart", file = media("dart") },
-  { key = "thin", label = "Thin arrow", file = media("thin") },
+  { key = "classic", label = "Arrow", file = media("classic"), tintable = true },
+  { key = "dart", label = "Dart", file = media("dart"), tintable = true },
+  { key = "thin", label = "Thin arrow", file = media("thin"), tintable = true },
   { key = "minimap", label = "Minimap arrow", file = "Interface\\Minimap\\MinimapArrow" },
   { key = "chevron", label = "Chevron (Blizzard)", atlas = "NPE_ArrowUp" },
 }
 
 ---Put arrow style `key` on a texture (unknown keys fall back to the first style).
+---@return boolean tintable our own (white-filled) art takes colour; Blizzard's art keeps its own
 function Card.ApplyArrowStyle(texture, key)
   local style = Card.ARROW_STYLES[1]
   for _, candidate in ipairs(Card.ARROW_STYLES) do
@@ -44,11 +45,38 @@ function Card.ApplyArrowStyle(texture, key)
       style = candidate
     end
   end
+  texture:SetVertexColor(1, 1, 1)
   if style.atlas then
     texture:SetAtlas(style.atlas)
   else
     texture:SetTexture(style.file)
   end
+  return style.tintable == true
+end
+
+-- Arrow colour. By distance (setting, default on): green close, through yellow and orange, to red far;
+-- a target in another zone counts as far. Always alongside the distance text, never the only cue.
+local GOLD = { 1, 0.82, 0 }
+local DISTANCE_COLORS = {  -- { yards, r, g, b }, blended between stops
+  { 0, 0.3, 1, 0.3 },
+  { 100, 1, 0.9, 0.2 },
+  { 400, 1, 0.55, 0.1 },
+  { 1000, 1, 0.25, 0.2 },
+}
+local function distanceColor(yards)
+  if not yards then
+    local far = DISTANCE_COLORS[#DISTANCE_COLORS]
+    return far[2], far[3], far[4]
+  end
+  for i = 2, #DISTANCE_COLORS do
+    local a, b = DISTANCE_COLORS[i - 1], DISTANCE_COLORS[i]
+    if yards <= b[1] then
+      local t = (yards - a[1]) / (b[1] - a[1])
+      return a[2] + (b[2] - a[2]) * t, a[3] + (b[3] - a[3]) * t, a[4] + (b[4] - a[4]) * t
+    end
+  end
+  local far = DISTANCE_COLORS[#DISTANCE_COLORS]
+  return far[2], far[3], far[4]
 end
 
 local function createRow(card)
@@ -189,7 +217,7 @@ function Card:SetQuest(quest, collapsed, options)
   self.highlighted = nil
   local style = ns.DB.profile.cards.arrowStyle
   if style ~= self.arrowStyle then
-    Card.ApplyArrowStyle(self.arrow, style)
+    self.arrowTintable = Card.ApplyArrowStyle(self.arrow, style)
     self.arrowStyle = style
   end
   self:SetNavigation(nil)  -- the driver fills it in on its next tick
@@ -242,6 +270,13 @@ function Card:SetNavigation(nav)
   self.arrow:SetShown(arrow)
   if arrow and nav then
     self.arrow:SetRotation(nav.angle)
+    if self.arrowTintable then
+      if ns.DB.profile.cards.arrowColorByDistance then
+        self.arrow:SetVertexColor(distanceColor(not nav.zone and nav.distance or nil))
+      else
+        self.arrow:SetVertexColor(GOLD[1], GOLD[2], GOLD[3])
+      end
+    end
   end
   self.inArea:SetShown(inArea)
   if highlight ~= self.highlighted then

@@ -67,6 +67,13 @@ function SettingsPanel:Register()
     return container:GetData()
   end, "The arrow on each card. /qm arrows shows them all side by side.")
 
+  addCheckbox(category, "QUESTMARK_ARROW_COLOR", "Color arrows by distance",
+    "Green when close, through yellow and orange, to red when far (or in another zone). Off: gold. "
+    .. "Applies to Questmark's own arrow styles.",
+    true,
+    function(profile) return profile.cards.arrowColorByDistance end,
+    function(profile, value) profile.cards.arrowColorByDistance = value end)
+
   local capSetting = Settings.RegisterProxySetting(category, "QUESTMARK_CARD_CAP", Settings.VarType.Number,
     "Cards shown for this zone", 5,
     function() return ns.DB.profile.cards.cap end,

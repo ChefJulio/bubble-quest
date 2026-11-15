@@ -203,7 +203,9 @@ commands.arrows = {
         for j, size in ipairs({ 16, 24 }) do
           for k, rotation in ipairs({ 0, math.pi / 2 }) do
             local texture = arrowPreview:CreateTexture(nil, "ARTWORK")
-            ns.Card.ApplyArrowStyle(texture, style.key)
+            if ns.Card.ApplyArrowStyle(texture, style.key) then
+              texture:SetVertexColor(1, 0.82, 0)
+            end
             texture:SetSize(size, size)
             texture:SetPoint("TOPLEFT", 230 + (j - 1) * 70 + (k - 1) * 32, y)
             texture:SetRotation(rotation)
@@ -214,6 +216,52 @@ commands.arrows = {
       arrowPreview:SetSize(390, -y + 12)
     end
     arrowPreview:Show()
+  end,
+}
+
+-- Research for nameplate-based "you're in the area" (quests with no spawn data, e.g. Rascally
+-- Rodents): what the client tells an addon about a creature. Tooltip line fields aren't documented,
+-- so this prints every field. Tooltip quest data is secret in combat on Forever: secret values
+-- print as <secret> instead of erroring.
+local function show(value)
+  if issecretvalue(value) then
+    return "<secret>"
+  end
+  return tostring(value)
+end
+
+commands.unit = {
+  help = "your target: is it part of a quest, and every tooltip line (copy window)",
+  run = function()
+    if not UnitExists("target") then
+      print("Target a creature first.")
+      return
+    end
+    local lines = {
+      -- apiguard: allow name only displayed, through show(), which prints secret values as <secret>
+      ("Target %s; related to an active quest: %s; in combat: %s"):format(show(UnitName("target")),
+        show(C_QuestLog.UnitIsRelatedToActiveQuest("target")), tostring(InCombatLockdown())),
+    }
+    local data = C_TooltipInfo.GetUnit("target")
+    if not data then
+      lines[#lines + 1] = "No tooltip data."
+    else
+      local top = {}
+      for key, value in pairs(data) do
+        if key ~= "lines" then top[#top + 1] = key .. "=" .. show(value) end
+      end
+      table.sort(top)
+      lines[#lines + 1] = "data: " .. table.concat(top, " ")
+      for i, line in ipairs(data.lines or {}) do
+        local fields = {}
+        for key, value in pairs(line) do
+          fields[#fields + 1] = key .. "=" .. show(value)
+        end
+        table.sort(fields)
+        lines[#lines + 1] = ("line %d: %s"):format(i, table.concat(fields, " "))
+      end
+    end
+    ns.CopyWindow:Show("Questmark: unit", lines)
   end,
 }
 
