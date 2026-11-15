@@ -36,8 +36,12 @@ local PROFILE_DEFAULTS = {
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
   automation = {
-    accept = false,  -- accept quests (and pick them from NPC gossip) automatically
-    turnIn = false,  -- turn in completed quests (only with 0 or 1 reward to choose)
+    accept = false,        -- accept regular quests (and pick them from NPC gossip) automatically
+    acceptDaily = false,   -- the same for daily quests
+    acceptWeekly = false,  -- the same for weekly (and scheduler-reset) quests
+    turnIn = false,        -- turn in completed quests (only with 0 or 1 reward to choose)
+    key = "SHIFT",         -- override key: "SHIFT" | "CTRL" | "ALT"
+    requireKey = false,    -- false: holding the key pauses automation; true: only automate while held
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {

@@ -9,7 +9,9 @@ local ADDON_NAME, ns = ...
 --   - turn in only with 0 or 1 reward to choose; never pay gold or currency; never hand over
 --     crafting reagents (the player may want them), or items whose info hasn't loaded;
 --   - skip NPCs whose dialogue has special options (coloured or "<...>", e.g. "skip the intro");
---   - Shift held while talking: do nothing;
+--   - the override key (Shift, Ctrl or Alt) held while talking: do nothing; or with "only while
+--     holding the key", automate only then;
+--   - regular, daily and weekly quests are accepted by separate settings;
 --   - stand aside while Leatrix Plus's own quest automation is on (both would act on every NPC).
 -- Escort-style confirmations (QUEST_ACCEPT_CONFIRM) are left to the player: dismissing that popup
 -- would mean calling into Blizzard's StaticPopup code, which taints it.
@@ -40,12 +42,53 @@ local function leatrixAutomates()
   return C_AddOns.IsAddOnLoaded("Leatrix_Plus") and type(db) == "table" and db.AutomateQuests == "On"
 end
 
----Is automation of this kind ("accept" or "turnIn") on right now?
+local KEY_DOWN = { SHIFT = IsShiftKeyDown, CTRL = IsControlKeyDown, ALT = IsAltKeyDown }
+
+-- The override key: held pauses automation, or with requireKey, holding it is required.
+local function keyAllows(settings)
+  local isDown = KEY_DOWN[settings.key] or IsShiftKeyDown
+  return settings.requireKey == (isDown() == true)
+end
+
+-- Setting for accepting a quest of this frequency (Enum.QuestFrequency; nil = regular).
+local ACCEPT_SETTING = {
+  [Enum.QuestFrequency.Default] = "accept",
+  [Enum.QuestFrequency.Daily] = "acceptDaily",
+  [Enum.QuestFrequency.Weekly] = "acceptWeekly",
+  [Enum.QuestFrequency.ResetByScheduler] = "acceptWeekly",
+}
+
+---Is automation of this kind on right now? kind: "turnIn", or "accept" with the quest's frequency.
 ---@param kind string
+---@param frequency number? Enum.QuestFrequency, for "accept"
 ---@return boolean
-function Automation:Active(kind)
+function Automation:Active(kind, frequency)
   local settings = ns.DB.profile and ns.DB.profile.automation
-  return settings ~= nil and settings[kind] == true and not IsShiftKeyDown() and not leatrixAutomates()
+  if not settings or leatrixAutomates() or not keyAllows(settings) then
+    return false
+  end
+  if kind == "accept" then
+    kind = ACCEPT_SETTING[frequency or Enum.QuestFrequency.Default] or "accept"
+  end
+  return settings[kind] == true
+end
+
+---Is any kind of accepting on (the lists are only scanned then)?
+local function acceptingAny()
+  return Automation:Active("accept") or Automation:Active("accept", Enum.QuestFrequency.Daily)
+    or Automation:Active("accept", Enum.QuestFrequency.Weekly)
+end
+
+-- The frequency of the quest in the open details window. QuestIsDaily/QuestIsWeekly aren't in
+-- Forever's UI source; Leatrix Plus calls them on this client, but guard them anyway.
+local function detailFrequency()
+  local isDaily, isWeekly = rawget(_G, "QuestIsDaily"), rawget(_G, "QuestIsWeekly")
+  if isDaily and isDaily() then
+    return Enum.QuestFrequency.Daily
+  elseif isWeekly and isWeekly() then
+    return Enum.QuestFrequency.Weekly
+  end
+  return Enum.QuestFrequency.Default
 end
 
 -- Picked recently without result: skip it, so a quest that can't be taken doesn't loop.
@@ -93,7 +136,7 @@ end
 
 -- The quest's details are shown: accept it (or close the window if the game already accepted it).
 ns.Events:On("QUEST_DETAIL", function()
-  if not Automation:Active("accept") then
+  if not Automation:Active("accept", detailFrequency()) then
     return
   end
   if QuestGetAutoAccept() then
@@ -135,9 +178,9 @@ ns.Events:On("GOSSIP_SHOW", function()
       end
     end
   end
-  if Automation:Active("accept") then
+  if acceptingAny() then
     for _, info in ipairs(C_GossipInfo.GetAvailableQuests()) do
-      if info.questID and not recentlyTried(info.questID) then
+      if info.questID and not recentlyTried(info.questID) and Automation:Active("accept", info.frequency) then
         markTried(info.questID)
         C_GossipInfo.SelectAvailableQuest(info.questID)
         return
@@ -159,10 +202,11 @@ ns.Events:On("QUEST_GREETING", function()
       end
     end
   end
-  if Automation:Active("accept") then
+  if acceptingAny() then
     for i = 1, GetNumAvailableQuests() do
       local title = GetAvailableTitle(i)
-      if title and not recentlyTried(title) then
+      local _, frequency = GetAvailableQuestInfo(i)
+      if title and not recentlyTried(title) and Automation:Active("accept", frequency) then
         markTried(title)
         selectAvailableQuest(i)
         return

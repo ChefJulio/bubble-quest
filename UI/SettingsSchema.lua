@@ -90,21 +90,47 @@ function Schema:Entries()
     { kind = "section", label = "Automation", column = 1 },
     {
       kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT", column = 1, default = false,
-      label = "Accept quests automatically",
+      label = "Accept regular quests automatically",
       tooltip = "Accepts quests when an NPC offers them, and picks them from the NPC's dialogue. "
-        .. "Hold Shift while talking to the NPC to do it yourself. Stands aside while Leatrix Plus's "
-        .. "quest automation is on.",
+        .. "Stands aside while Leatrix Plus's quest automation is on.",
       get = function(p) return p.automation.accept end,
       set = function(p, v) p.automation.accept = v end,
     },
     {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_DAILY", column = 1, default = false,
+      label = "Accept daily quests automatically",
+      get = function(p) return p.automation.acceptDaily end,
+      set = function(p, v) p.automation.acceptDaily = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_WEEKLY", column = 1, default = false,
+      label = "Accept weekly quests automatically",
+      get = function(p) return p.automation.acceptWeekly end,
+      set = function(p, v) p.automation.acceptWeekly = v end,
+    },
+    {
       kind = "checkbox", id = "QUESTMARKER_AUTO_TURN_IN", column = 1, default = false,
-      label = "Turn in quests automatically",
+      label = "Turn in completed quests automatically",
       tooltip = "Turns in completed quests when you talk to the NPC. Never picks between rewards (you "
-        .. "choose when there's more than one) and never pays gold or currency. Hold Shift to do it "
-        .. "yourself. Stands aside while Leatrix Plus's quest automation is on.",
+        .. "choose when there's more than one), never pays gold or currency, never hands over crafting "
+        .. "reagents. Stands aside while Leatrix Plus's quest automation is on.",
       get = function(p) return p.automation.turnIn end,
       set = function(p, v) p.automation.turnIn = v end,
+    },
+    {
+      kind = "dropdown", id = "QUESTMARKER_AUTO_KEY", column = 1, default = "SHIFT",
+      label = "Override key",
+      tooltip = "Hold this while talking to an NPC to do it yourself (or, with the option below, to "
+        .. "automate only then).",
+      options = function() return { { "SHIFT", "Shift" }, { "CTRL", "Ctrl" }, { "ALT", "Alt" } } end,
+      get = function(p) return p.automation.key end,
+      set = function(p, v) p.automation.key = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_REQUIRE_KEY", column = 1, default = false,
+      label = "Only automate while holding the override key",
+      get = function(p) return p.automation.requireKey end,
+      set = function(p, v) p.automation.requireKey = v end,
     },
 
     { kind = "section", label = "Look", column = 1 },
