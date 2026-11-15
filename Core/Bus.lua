@@ -15,10 +15,19 @@ local function dispatch(handlers, ...)
   end
 end
 
--- Game events whose firing /qm events should not print (they fire constantly).
-local QUIET_EVENTS = {
-  QUEST_LOG_UPDATE = true,
-  ADDON_LOADED = true,  -- fires for every addon, including load-on-demand ones mid-session
+-- Game events /qm events prints: the ones that matter for following quests. Everything else we listen
+-- to (nameplates, combat, subzones, map markers, QUEST_LOG_UPDATE, ADDON_LOADED) fires constantly.
+local SHOWN_EVENTS = {
+  QUEST_ACCEPTED = true,
+  QUEST_REMOVED = true,
+  QUEST_TURNED_IN = true,
+  QUEST_WATCH_UPDATE = true,
+  ZONE_CHANGED_NEW_AREA = true,
+}
+
+-- Questmark events /qm events doesn't print (they fire every few steps while moving).
+local QUIET_BUS_EVENTS = {
+  LearnedChanged = true,
 }
 
 local Events = {
@@ -28,7 +37,7 @@ local Events = {
 ns.Events = Events
 
 Events.frame:SetScript("OnEvent", function(_, event, ...)
-  if not QUIET_EVENTS[event] then
+  if SHOWN_EVENTS[event] then
     ns.Debug:Event("game", event, ...)
   end
   dispatch(Events.handlers[event], ...)
@@ -65,7 +74,9 @@ end
 
 ---@param name string
 function Bus:Fire(name, ...)
-  ns.Debug:Event("bus", name, ...)
+  if not QUIET_BUS_EVENTS[name] then
+    ns.Debug:Event("bus", name, ...)
+  end
   local list = self.handlers[name]
   if list then
     dispatch(list, ...)

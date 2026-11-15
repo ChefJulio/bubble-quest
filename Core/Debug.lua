@@ -53,9 +53,15 @@ function Debug:Event(source, name, ...)
   if not self:EventsEnabled() then
     return
   end
-  local parts = { ("|cff999999%s|r %s"):format(source, name) }
+  local parts, seenQuest = { ("|cff999999%s|r %s"):format(source, name) }, nil
   for i = 1, select("#", ...) do
-    parts[#parts + 1] = describe((select(i, ...)))
+    local value = select(i, ...)
+    -- QuestChanged passes the new and the old copy of the same quest: print it once.
+    local questID = type(value) == "table" and value.questID or nil
+    if not (questID and questID == seenQuest) then
+      parts[#parts + 1] = describe(value)
+      seenQuest = questID or seenQuest
+    end
   end
   self:Print(table.concat(parts, " "))
 end

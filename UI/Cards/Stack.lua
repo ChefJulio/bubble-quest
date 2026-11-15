@@ -384,8 +384,8 @@ local function createHeader(container)
     return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag this header to move the cards."
       or "Unlocked: drag this header to move the cards. Click to lock."
   end, function()
-    -- Through the setting, so an open settings panel's checkbox follows (its setter applies it).
-    ns.Settings:SetLocked(not ns.DB.profile.cards.locked)
+    -- Through the setting, so both settings UIs follow (their checkboxes refresh on SettingChanged).
+    ns.Settings:SetValue("QUESTMARK_LOCK_CARDS", not ns.DB.profile.cards.locked)
   end)
   header.lock:SetPoint("RIGHT", header.settings, "LEFT", -2, 0)
   local lockAtlas = firstAtlas("worldquest-tracker-lock", "honorsystem-bar-lock", "groupfinder-icon-lock")

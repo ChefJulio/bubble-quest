@@ -38,7 +38,9 @@ UI\Cards\Card.lua
 UI\Cards\Menu.lua
 UI\Cards\Tooltip.lua
 UI\Cards\Stack.lua
+UI\SettingsSchema.lua
 UI\Settings.lua
+UI\SettingsWindow.lua
 UI\CopyWindow.lua
 Slash.lua
 Init.lua
