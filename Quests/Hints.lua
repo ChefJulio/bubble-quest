@@ -52,6 +52,76 @@ function Hints:DoFor(questID, objectiveName)
   return nil
 end
 
+-- Item hints ---------------------------------------------------------------------------------------
+-- A quest with a usable quest item gets a hint built from the item itself: its tooltip's "Use:" line,
+-- read by line type (TooltipDataLineType.ItemSpellTriggerOnUse, so no localized "Use:" text to
+-- match). Covers quests no data knows, e.g. Forever's "Shhh! We're Hunting Kobolds" with the Kobold
+-- Tracking Kit ("Causes nearby kobold tracks to appear on your map"), asked for in review.
+
+-- 44 in Forever's docs (TooltipInfoSharedDocumentation.lua); newer than the WoW API annotations.
+local LINE_ON_USE = (Enum.TooltipDataLineType --[[@as table]]).ItemSpellTriggerOnUse
+local ENGLISH = GetLocale() == "enUS" or GetLocale() == "enGB"
+local itemEffects = {}  -- [itemID] = effect text, or false (none)
+
+local function itemEffect(itemID)
+  if itemEffects[itemID] ~= nil then
+    return itemEffects[itemID] or nil
+  end
+  local tooltip = C_TooltipInfo.GetItemByID(itemID)
+  local effect
+  for _, line in ipairs(tooltip and tooltip.lines or {}) do
+    local text = line.leftText
+    if line.type == LINE_ON_USE and type(text) == "string" and not issecretvalue(text) then
+      -- "Use: Causes nearby kobold tracks to appear on your map. (1 Sec Cooldown)"
+      -- Drop the label up to the first colon: ASCII, else the full-width one (CJK clients), matched as
+      -- a whole UTF-8 sequence so other multi-byte letters can't be mistaken for it.
+      local stripped, count = text:gsub("^.-:%s*", "", 1)
+      if count == 0 then
+        stripped = text:gsub("^.-\239\188\154%s*", "", 1)
+      end
+      effect = stripped:gsub("%s*%b()%s*$", "")  -- a trailing "(1 Sec Cooldown)"
+      break
+    end
+  end
+  -- Not cached until the item data has loaded: an empty answer is retried next time.
+  if tooltip and tooltip.lines and #tooltip.lines > 0 then
+    itemEffects[itemID] = effect or false
+  end
+  return effect
+end
+
+---The hint for a quest's usable item, or nil.
+---@param quest table
+---@return string?
+function Hints:ItemHint(quest)
+  local info = ns.ItemButtons:Info(quest)
+  if not info then
+    return nil
+  end
+  local effect = itemEffect(info.itemID)
+  local name = info.link:match("%[(.-)%]")
+  if not effect or effect == "" or not name then
+    return nil
+  end
+  effect = effect:gsub("^%u", string.lower):gsub("%.$", "")
+  return ENGLISH and ("Use the %s: %s."):format(name, effect) or ("%s: %s."):format(name, effect)
+end
+
+---All hints for a quest on its card: the item hint first, then the curated ones.
+---@param quest table
+---@return string[]?
+function Hints:ForQuest(quest)
+  local hints = {}
+  local item = self:ItemHint(quest)
+  if item then
+    hints[1] = item
+  end
+  for _, text in ipairs(self:For(quest.questID) or {}) do
+    hints[#hints + 1] = text
+  end
+  return #hints > 0 and hints or nil
+end
+
 ---Every entry for a quest with its sources, for /qm quest.
 ---@param questID number
 ---@return table?

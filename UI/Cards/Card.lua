@@ -281,7 +281,7 @@ function Card:SetQuest(quest, collapsed, options)
   -- Hint lines (phase 7): after the objectives, only for quests with a known tricky step; shown on
   -- ready cards too ("keep the item, you hand it in"), not on collapsed ones. Setting, default on.
   -- They come after the objective rows, so UpdateInPlace (objective rows only) never touches them.
-  local hints = not collapsed and ns.DB.profile.cards.hints and ns.Hints:For(quest.questID)
+  local hints = not collapsed and ns.DB.profile.cards.hints and ns.Hints:ForQuest(quest)
   for h, hint in ipairs(hints or {}) do
     local i = self.rowCount + h
     local row = self.rows[i] or createRow(self)
