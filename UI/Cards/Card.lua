@@ -13,7 +13,8 @@ local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
 local TOGGLE_WIDTH = 20  -- the collapse button at the right of the title line
-local BAR_HEIGHT = 3     -- progress bar under the card
+local BAR_HEIGHT = 4     -- progress bar under the card
+local MAX_SEGMENTS = 20  -- more steps than this and segments get too thin to read: smooth bar
 local BAR_GAP = 3
 local BAR_WIDTH = WIDTH - ROW_INDENT
 local ARROW_SIZE = 16
@@ -113,6 +114,15 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   local frame = CreateFrame("Frame", nil, parent)
   frame:SetWidth(WIDTH)
   frame:EnableMouse(true)
+  frame:SetScript("OnEnter", function()
+    local quest = self.questID and ns.QuestLog:Get(self.questID)
+    if quest then
+      ns.QuestTooltip:Show(frame, quest)
+    end
+  end)
+  frame:SetScript("OnLeave", function()
+    ns.QuestTooltip:Hide()
+  end)
   frame:SetScript("OnMouseUp", function(_, button)
     if not self.questID or not frame:IsMouseOver() then
       return
@@ -155,7 +165,7 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   local fill = bar:CreateTexture(nil, "ARTWORK")
   fill:SetPoint("TOPLEFT")
   fill:SetHeight(BAR_HEIGHT)
-  self.bar, self.barFill = bar, fill
+  self.bar, self.barFill, self.barDividers = bar, fill, {}
 
   local toggle = CreateFrame("Button", nil, frame)
   toggle:SetSize(16, TITLE_HEIGHT)
@@ -330,12 +340,57 @@ local function progressOf(quest)
   return count > 0 and total / count or 0
 end
 
+-- Whole-number progress: every objective has a count (7/10 kobolds, 3/8 + 1/12 ...), at most
+-- MAX_SEGMENTS steps in total. Returns done, total; nil when the bar should stay smooth.
+local function steps(quest)
+  if quest.readyForTurnIn or #quest.objectives == 0 then
+    return nil
+  end
+  local done, total = 0, 0
+  for _, objective in ipairs(quest.objectives) do
+    local required = objective.required or 0
+    if required <= 0 then
+      return nil
+    end
+    total = total + required
+    done = done + math.min(objective.fulfilled or 0, required)
+  end
+  if total < 2 or total > MAX_SEGMENTS then
+    return nil
+  end
+  return done, total
+end
+
+-- Thin dark gaps across the bar at each step boundary, so 7/10 reads as seven of ten segments.
+function Card:SetSegments(total)
+  local dividers = self.barDividers
+  for i = 1, math.max(#dividers, (total or 1) - 1) do
+    local divider = dividers[i]
+    if total and i < total then
+      if not divider then
+        divider = self.bar:CreateTexture(nil, "OVERLAY")
+        divider:SetColorTexture(0, 0, 0, 0.85)
+        PixelUtil.SetWidth(divider, 1, 1)
+        divider:SetHeight(BAR_HEIGHT)
+        dividers[i] = divider
+      end
+      divider:ClearAllPoints()
+      divider:SetPoint("TOPLEFT", self.bar, "TOPLEFT", BAR_WIDTH * i / total, 0)
+      divider:Show()
+    elseif divider then
+      divider:Hide()
+    end
+  end
+end
+
 ---@param quest table
 function Card:UpdateBar(quest)
   if not self.bar:IsShown() then
     return
   end
-  local progress = progressOf(quest)
+  local done, total = steps(quest)
+  local progress = done and done / total or progressOf(quest)
+  self:SetSegments(total)
   self.barFill:SetWidth(math.max(1, BAR_WIDTH * progress))
   self.barFill:SetShown(progress > 0)
   if quest.readyForTurnIn then

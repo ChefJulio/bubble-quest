@@ -70,8 +70,10 @@ local MAX_SOURCE_NAMES = 2
 ---objectives. Coverage: about half of item objectives, mostly classic quests; few Forever-new ones.
 ---@param questID number
 ---@param itemName string the objective text without its counter
+---@param maxNames number? names to list before counting the rest in `more` (default 2)
 ---@return table? sources { kind = "npc" | "object" | "item", names = { ... }, more = n }
-function ForeverData:ItemSources(questID, itemName)
+function ForeverData:ItemSources(questID, itemName, maxNames)
+  maxNames = maxNames or MAX_SOURCE_NAMES
   local lib = library()
   local record = self:Quest(questID)
   if not lib or not record then
@@ -89,7 +91,7 @@ function ForeverData:ItemSources(questID, itemName)
       local result = { kind = first.kind, names = {}, more = 0 }
       for _, source in ipairs(sources) do
         if source.kind == first.kind then
-          if #result.names < MAX_SOURCE_NAMES then
+          if #result.names < maxNames then
             result.names[#result.names + 1] = lib.Name(source.kind, source.id)
           else
             result.more = result.more + 1

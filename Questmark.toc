@@ -36,6 +36,7 @@ Compat\Questie.lua
 UI\Pool.lua
 UI\Cards\Card.lua
 UI\Cards\Menu.lua
+UI\Cards\Tooltip.lua
 UI\Cards\Stack.lua
 UI\Settings.lua
 UI\CopyWindow.lua
