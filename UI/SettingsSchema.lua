@@ -67,7 +67,7 @@ function Schema:Entries()
     },
     {
       kind = "slider", id = "QUESTMARKER_CARD_CAP", column = 1, default = 5, min = 1, max = 15, step = 1,
-      label = "Cards shown for this zone",
+      label = "Cards for this zone",
       tooltip = "How many of this zone's quests get a card before the rest go behind \"+ N more here\". "
         .. "Pinned quests always show and don't count.",
       format = tostring,
@@ -199,10 +199,9 @@ function Schema:Entries()
       set = function(p, v) p.automation.turnIn = v end,
     },
     {
-      kind = "dropdown", id = "QUESTMARKER_AUTO_KEY", column = 2, default = "SHIFT",
-      row = "key", rowLabel = "Override key", width = 80, enabledWhen = automating,
+      kind = "dropdown", id = "QUESTMARKER_AUTO_KEY", column = 2, default = "SHIFT", enabledWhen = automating,
       label = "Override key",
-      tooltip = "Hold this while talking to an NPC to do it yourself (or, with \"only while held\", to "
+      tooltip = "Hold this while talking to an NPC to do it yourself (or, with the option below, to "
         .. "automate only then).",
       options = function() return { { "SHIFT", "Shift" }, { "CTRL", "Ctrl" }, { "ALT", "Alt" } } end,
       get = function(p) return p.automation.key end,
@@ -210,8 +209,8 @@ function Schema:Entries()
     },
     {
       kind = "checkbox", id = "QUESTMARKER_AUTO_REQUIRE_KEY", column = 2, default = false,
-      row = "key", short = "only while held", enabledWhen = automating,
-      label = "Only automate while holding the override key",
+      enabledWhen = automating,
+      label = "Only automate while holding it",
       get = function(p) return p.automation.requireKey end,
       set = function(p, v) p.automation.requireKey = v end,
     },
