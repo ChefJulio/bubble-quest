@@ -85,12 +85,18 @@ ns.Events:On("PLAYER_ENTERING_WORLD", function()
   Tracker:Apply()
 end)
 
--- A watch was added (Blizzard's auto-watch on accept, the quest log's Track button): remove it again.
-ns.Events:On("QUEST_WATCH_LIST_CHANGED", function(_, added)
-  if added and Tracker:ShouldHide() then
+-- Watches can appear at any time: Blizzard's auto-watch on accept, the quest log's Track button, and
+-- on a fresh game start the server's saved watch list, which arrives after PLAYER_ENTERING_WORLD
+-- (the tracker showed quests at login, seen in review), not always as an "added" change. So whenever
+-- the watch list or the quest log changes, remove any watch there is. A count check, nothing more,
+-- when there are none.
+local function clearIfWatched()
+  if Tracker:ShouldHide() and C_QuestLog.GetNumQuestWatches() > 0 then
     removeWatches()
   end
-end)
+end
+ns.Events:On("QUEST_WATCH_LIST_CHANGED", clearIfWatched)
+ns.Events:On("QUEST_LOG_UPDATE", clearIfWatched)
 
 ns.Bus:On("QuestRemoved", function(questID)
   ns.DB.char.removedWatches[questID] = nil
