@@ -1,34 +1,16 @@
 local ADDON_NAME, ns = ...
 
--- Hover tooltip for a card: what doesn't fit on the card. Title and level, category, a short
--- description, every objective in full with all known item sources, the turn-in, distance, and
--- what the clicks do. Uses the shared GameTooltip, as addons normally do.
+-- Hover tooltip for a card: what doesn't fit on the card, kept short (the quest description and click
+-- help were dropped in review as too wordy). Title, level and category, every objective in full with
+-- all known item sources, the turn-in, distance. Uses the shared GameTooltip, as addons normally do.
 
-local DESCRIPTION_CHARS = 240
-local WHITE, GRAY, GREEN, DIM = { 1, 1, 1 }, { 0.6, 0.6, 0.6 }, { 0.2, 1, 0.2 }, { 0.5, 0.5, 0.5 }
+local WHITE, GRAY, GREEN = { 1, 1, 1 }, { 0.6, 0.6, 0.6 }, { 0.2, 1, 0.2 }
 
 local QuestTooltip = {}
 ns.QuestTooltip = QuestTooltip
 
 local function add(text, color, wrap)
   GameTooltip:AddLine(text, color[1], color[2], color[3], wrap)
-end
-
--- The quest's description from the quest log, shortened. Blizzard's own quest tooltip reads it the
--- same way (Blizzard_GameTooltip/Mainline/GameTooltip.lua:707-709).
-local function description(questID)
-  local index = C_QuestLog.GetLogIndexForQuestID(questID)
-  if not index then
-    return nil
-  end
-  local text = GetQuestLogQuestText(index)
-  if type(text) ~= "string" or issecretvalue(text) or text == "" then
-    return nil
-  end
-  if #text > DESCRIPTION_CHARS then
-    text = text:sub(1, DESCRIPTION_CHARS):gsub("%s+%S*$", "") .. "..."
-  end
-  return text
 end
 
 -- Every known source of an item objective: forever-db's, else learned in play.
@@ -61,12 +43,6 @@ function QuestTooltip:Show(owner, quest)
   end
   add(table.concat(facts, "  -  "), GRAY)
 
-  local text = description(questID)
-  if text then
-    add(text, DIM, true)
-  end
-
-  GameTooltip:AddLine(" ")
   if quest.readyForTurnIn then
     local turnIn = ns.ForeverData:TurnInName(questID)
     add(turnIn and ("Turn in to " .. turnIn) or "Ready to turn in", GREEN)
@@ -93,12 +69,6 @@ function QuestTooltip:Show(owner, quest)
       add(("%d yards away"):format(nav.distance), GRAY)
     end
   end
-
-  GameTooltip:AddLine(" ")
-  if ns.DB.profile.cards.clickOpensMap then
-    add("Left-click: show on the map", DIM)
-  end
-  add("Right-click: pin, hide, collapse", DIM)
   GameTooltip:Show()
 end
 
