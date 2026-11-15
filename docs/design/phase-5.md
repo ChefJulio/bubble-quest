@@ -64,6 +64,22 @@ target minus facing = the arrow's rotation.
 `UnitPosition`'s first value is the same axis is verified first with a debug command
 (`/qm where`: your position, the nearest spawn of a creature next to you, and the bearing).
 
+**Verified in game** (`/qm where`, Northshire): `UnitPosition`, `GetWorldPosFromMapPos` and
+forever-db agree on (north, west). Rest and Relaxation's turn-in marker converts to (-9463.0, 16.0);
+forever-db puts Innkeeper Farley at (-9462.5, 16.0). Bearing to Goldshire 153 degrees left of a
+north-facing player, correct. Kobold Camp Cleanup: 4 yd, in area. `SetRotation` turns counter-
+clockwise (the preview's up-arrow turned left), matching the maths.
+
+**Fixed after testing:** LibForeverData's `ToUiMap` picks the smallest map rectangle holding a point,
+which fails where rectangles overlap at zone borders (Northshire's Defias Thugs came out as Burning
+Steppes). Whether a target is in the player's zone is now asked of the client
+(`GetMapPosFromWorldPos` with the zone map).
+
+**Arrow art:** Blizzard's arrows (`Navigation-Tracked-Arrow`, `NPE_ArrowUp`, ...) all read as chevrons
+or triangles at card size. Questmark draws its own (`tools/make_arrows.py` -> `Media/Arrows/*.tga`):
+arrow (default), dart, thin; plus the minimap arrow and Blizzard's chevron. Setting "Arrow style";
+`/qm arrows` previews them.
+
 ## Also in this phase
 
 - Sorting (phase 3) switches from the single marker to these better distances, through the same

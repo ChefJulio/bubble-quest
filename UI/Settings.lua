@@ -52,6 +52,21 @@ function SettingsPanel:Register()
     function(profile) return profile.cards.clickOpensMap end,
     function(profile, value) profile.cards.clickOpensMap = value end)
 
+  local arrowSetting = Settings.RegisterProxySetting(category, "QUESTMARK_ARROW_STYLE", Settings.VarType.String,
+    "Arrow style", "classic",
+    function() return ns.DB.profile.cards.arrowStyle end,
+    function(value)
+      ns.DB.profile.cards.arrowStyle = value
+      ns.Stack:Request(false, true)
+    end)
+  Settings.CreateDropdown(category, arrowSetting, function()
+    local container = Settings.CreateControlTextContainer()
+    for _, style in ipairs(ns.Card.ARROW_STYLES) do
+      container:Add(style.key, style.label)
+    end
+    return container:GetData()
+  end, "The arrow on each card. /qm arrows shows them all side by side.")
+
   local capSetting = Settings.RegisterProxySetting(category, "QUESTMARK_CARD_CAP", Settings.VarType.Number,
     "Cards shown for this zone", 5,
     function() return ns.DB.profile.cards.cap end,

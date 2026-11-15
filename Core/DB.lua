@@ -24,7 +24,8 @@ local PROFILE_DEFAULTS = {
     locked = true,
     cap = 5,  -- most zone cards shown before "+ N more here" (pinned cards don't count)
     opacity = 25,  -- background panel opacity, percent
-    clickOpensMap = true,  -- left-clicking a card highlights the quest and opens the map at it
+    clickOpensMap = true,
+    arrowStyle = "classic",  -- key in Card.ARROW_STYLES  -- left-clicking a card highlights the quest and opens the map at it
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES

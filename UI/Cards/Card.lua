@@ -13,7 +13,7 @@ local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
 local TOGGLE_WIDTH = 20  -- the collapse button at the right of the title line
-local ARROW_SIZE = 14
+local ARROW_SIZE = 16
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready"
 local IN_AREA_ATLAS = "Navigation-Tracked-Icon"
 
@@ -22,18 +22,33 @@ Card.__index = Card
 ns.Card = Card
 Card.WIDTH = WIDTH
 
--- Arrow art, in order of preference; the first the client has is used. All point up unrotated
--- (the names say so), which the angle maths relies on. Navigation-Tracked-Arrow (the in-world
--- beacon's) was tried first and read as a triangle at this size. /qm arrows previews them all.
-Card.ARROW_CANDIDATES = { "NPE_ArrowUp", "housing-floor-arrow-up", "poi-traveldirections-arrow",
-  "Navigation-Tracked-Arrow" }
-local function arrowAtlas()
-  for _, atlas in ipairs(Card.ARROW_CANDIDATES) do
-    if C_Texture.GetAtlasInfo(atlas) then
-      return atlas
+-- Arrow art (setting cards.arrowStyle). Every style points up unrotated; the angle maths relies on
+-- it. Blizzard's own arrows all read as chevrons or triangles at card size (compared in game), so
+-- the default is our own drawing (tools/make_arrows.py -> Media/Arrows). /qm arrows previews them.
+local function media(name)
+  return ("Interface\\AddOns\\%s\\Media\\Arrows\\%s"):format(ADDON_NAME, name)
+end
+Card.ARROW_STYLES = {
+  { key = "classic", label = "Arrow", file = media("classic") },
+  { key = "dart", label = "Dart", file = media("dart") },
+  { key = "thin", label = "Thin arrow", file = media("thin") },
+  { key = "minimap", label = "Minimap arrow", file = "Interface\\Minimap\\MinimapArrow" },
+  { key = "chevron", label = "Chevron (Blizzard)", atlas = "NPE_ArrowUp" },
+}
+
+---Put arrow style `key` on a texture (unknown keys fall back to the first style).
+function Card.ApplyArrowStyle(texture, key)
+  local style = Card.ARROW_STYLES[1]
+  for _, candidate in ipairs(Card.ARROW_STYLES) do
+    if candidate.key == key then
+      style = candidate
     end
   end
-  return "Navigation-Tracked-Arrow"
+  if style.atlas then
+    texture:SetAtlas(style.atlas)
+  else
+    texture:SetTexture(style.file)
+  end
 end
 
 local function createRow(card)
@@ -90,7 +105,6 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.navText:SetPoint("TOPRIGHT", -TOGGLE_WIDTH, -2)
   self.navText:SetJustifyH("RIGHT")
   self.arrow = frame:CreateTexture(nil, "ARTWORK")
-  self.arrow:SetAtlas(arrowAtlas())
   self.arrow:SetSize(ARROW_SIZE, ARROW_SIZE)
   self.arrow:SetPoint("RIGHT", self.navText, "LEFT", -3, 0)
   self.arrow:Hide()
@@ -173,6 +187,11 @@ function Card:SetQuest(quest, collapsed, options)
     row.highlight:Hide()
   end
   self.highlighted = nil
+  local style = ns.DB.profile.cards.arrowStyle
+  if style ~= self.arrowStyle then
+    Card.ApplyArrowStyle(self.arrow, style)
+    self.arrowStyle = style
+  end
   self:SetNavigation(nil)  -- the driver fills it in on its next tick
 
   local y = TITLE_HEIGHT + 2

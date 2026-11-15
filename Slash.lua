@@ -187,7 +187,7 @@ commands.where = {
 -- quarter to the left, to pick the one that reads best at card size.
 local arrowPreview
 commands.arrows = {
-  help = "preview the arrow art candidates",
+  help = "preview the arrow styles (pick one in settings)",
   run = function()
     if not arrowPreview then
       arrowPreview = CreateFrame("Frame", "QuestmarkArrowPreview", UIParent, "BasicFrameTemplateWithInset")
@@ -196,20 +196,17 @@ commands.arrows = {
       arrowPreview.TitleText:SetText("Questmark arrows (Escape closes)")
       tinsert(UISpecialFrames, "QuestmarkArrowPreview")
       local y = -34
-      for i, atlas in ipairs(ns.Card.ARROW_CANDIDATES) do
-        local exists = C_Texture.GetAtlasInfo(atlas) ~= nil
+      for _, style in ipairs(ns.Card.ARROW_STYLES) do
         local label = arrowPreview:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
         label:SetPoint("TOPLEFT", 16, y - 6)
-        label:SetText(("%d. %s%s"):format(i, atlas, exists and "" or "  (missing)"))
-        if exists then
-          for j, size in ipairs({ 14, 24 }) do
-            for k, rotation in ipairs({ 0, math.pi / 2 }) do
-              local texture = arrowPreview:CreateTexture(nil, "ARTWORK")
-              texture:SetAtlas(atlas)
-              texture:SetSize(size, size)
-              texture:SetPoint("TOPLEFT", 230 + (j - 1) * 70 + (k - 1) * 32, y)
-              texture:SetRotation(rotation)
-            end
+        label:SetText(style.label)
+        for j, size in ipairs({ 16, 24 }) do
+          for k, rotation in ipairs({ 0, math.pi / 2 }) do
+            local texture = arrowPreview:CreateTexture(nil, "ARTWORK")
+            ns.Card.ApplyArrowStyle(texture, style.key)
+            texture:SetSize(size, size)
+            texture:SetPoint("TOPLEFT", 230 + (j - 1) * 70 + (k - 1) * 32, y)
+            texture:SetRotation(rotation)
           end
         end
         y = y - 36
