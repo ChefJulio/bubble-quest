@@ -177,6 +177,8 @@ end
 
 local function createPanel()
   local frame = CreateFrame("Frame", "QuestmarkSettingsWindow", UIParent)
+  -- New frames start shown; start hidden so the first Toggle opens it (and runs OnShow's refresh).
+  frame:Hide()
   frame:SetPoint("CENTER")
   frame:SetFrameStrata("DIALOG")
   frame:SetMovable(true)
