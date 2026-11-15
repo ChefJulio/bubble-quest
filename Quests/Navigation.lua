@@ -151,6 +151,22 @@ local function nearbyObjective(quest)
   return nil
 end
 
+---Is the player in one of the quest's objective areas right now: a creature for it on the nameplates,
+---or within IN_AREA_YARDS of one of its spawn/learned points (not a marker: one point can't tell).
+---Defined after nearbyObjective, a local it needs.
+---@param quest table
+---@return boolean
+function Navigation:InArea(quest)
+  if nearbyObjective(quest) then
+    return true
+  end
+  if not targetsFor(quest).spawnBased then
+    return false
+  end
+  local distance = self:Distance(quest)
+  return distance ~= nil and distance <= IN_AREA_YARDS
+end
+
 ---Everything a card's arrow needs, or nil (no position, no target).
 ---@param quest table
 ---@return table? nav { distance, angle?, inArea, objective?, zone? }

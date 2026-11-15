@@ -5,7 +5,8 @@ local ADDON_NAME, ns = ...
 --
 --   1. Pinned quests always show, in pin order, wherever they are; not counted in the cap.
 --   2. Other quests are chosen by zone and sorted by distance to their map marker.
---   3. Ready turn-ins within NEAR_TURNIN_YARDS go first; farther ones sort by distance like the rest.
+--   3. Quests whose area you're in go first, then ready turn-ins within NEAR_TURNIN_YARDS; farther
+--      turn-ins sort by distance like the rest.
 --   4. The order changes only on events: QuestLogChanged, a zone change, or moving more than
 --      MOVE_YARDS since the last sort. Never on a timer by itself, never in combat (the stack
 --      defers). Hysteresis: neighbours swap only when the lower one is HYSTERESIS times closer.
@@ -21,7 +22,7 @@ local MOVE_CHECK_SECONDS = 1
 
 local Tracking = {
   rank = {},           -- [questID] = position in the last sorted order (this zone's quests)
-  nearTurnIn = {},     -- [questID] = true: ready and within NEAR_TURNIN_YARDS at the last sort
+  tier = {},           -- [questID] = 1 in the area, 2 ready turn-in nearby, 3 the rest (last sort)
   sortedAt = nil,      -- { mapID, x, y } where the last sort happened
 }
 ns.Tracking = Tracking
@@ -80,32 +81,44 @@ end
 -- Re-sort this zone's quests (rule 4: called only on events).
 function Tracking:Resort()
   ns.Zone:Update()
-  local distance, ready, rest = {}, {}, {}
-  wipe(self.nearTurnIn)
+  -- Tiers, top first (decided in review):
+  --   1. in the area right now (nameplate, or within the in-area radius of a spawn): the quest
+  --      you're doing outranks one you'd walk to;
+  --   2. rule 3, "turn-ins near you": ready and within NEAR_TURNIN_YARDS (in-zone alone put a turn-in
+  --      700 yards away on top; a 213 yd turn-in above the quest being done was also wrong);
+  --   3. everything else.
+  -- Each tier sorted by distance with hysteresis. Re-sorts happen only on events (100 yd moves), so
+  -- crossing a tier line doesn't make cards jump.
+  local distance, tiers = {}, { {}, {}, {} }
+  wipe(self.tier)
   for questID, quest in pairs(ns.QuestLog.quests) do
     if placement(quest) == "show" and ns.Zone:IsInZone(quest) then
+      local here = ns.Navigation:InArea(quest)
       -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
-      -- A quest creature on the player's nameplates means "here": distance 0, whatever the targets say.
-      local d = ns.Nearby:Has(questID) and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
+      local d = here and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
       distance[questID] = d
-      -- Rule 3, "turn-ins near you": ready and within NEAR_TURNIN_YARDS. (In-zone alone put a turn-in
-      -- 700 yards away at the top, seen in game.) Re-sorts happen only after moving 100 yards, so
-      -- crossing this line doesn't make cards jump.
-      local near = quest.readyForTurnIn and d ~= nil and d <= NEAR_TURNIN_YARDS
-      self.nearTurnIn[questID] = near or nil
-      local list = near and ready or rest
-      list[#list + 1] = quest
+      local tier = 3
+      if here then
+        tier = 1
+      elseif quest.readyForTurnIn and d ~= nil and d <= NEAR_TURNIN_YARDS then
+        tier = 2
+      end
+      self.tier[questID] = tier
+      table.insert(tiers[tier], quest)
     end
   end
-  settle(ready, distance, self.rank)
-  settle(rest, distance, self.rank)
 
-  wipe(self.rank)
-  for i, quest in ipairs(ready) do
-    self.rank[quest.questID] = i
+  -- Settle against the previous order (hysteresis needs it), then replace it.
+  for _, list in ipairs(tiers) do
+    settle(list, distance, self.rank)
   end
-  for i, quest in ipairs(rest) do
-    self.rank[quest.questID] = #ready + i
+  wipe(self.rank)
+  local position = 0
+  for _, list in ipairs(tiers) do
+    for _, quest in ipairs(list) do
+      position = position + 1
+      self.rank[quest.questID] = position
+    end
   end
 
   local x, y = ns.Zone:PlayerPosition()
@@ -151,10 +164,9 @@ function Tracking:View()
 
   table.sort(view.pinned, function(a, b) return char.pins[a.questID] < char.pins[b.questID] end)
   local rank = self.rank
-  local near = self.nearTurnIn
+  -- The rank already orders by tier; quests not ranked yet (just unpinned or unhidden) go after the
+  -- ranked ones until the next re-sort.
   table.sort(here, function(a, b)
-    local na, nb = near[a.questID] == true, near[b.questID] == true
-    if na ~= nb then return na end
     local ra, rb = rank[a.questID], rank[b.questID]
     if ra and rb then return ra < rb end
     if ra or rb then return ra ~= nil end
