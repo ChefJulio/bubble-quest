@@ -2,7 +2,8 @@ local ADDON_NAME, ns = ...
 
 -- Hover tooltip for a card: what doesn't fit on the card, kept short (the quest description and click
 -- help were dropped in review as too wordy). Title, level and category, every objective in full with
--- all known item sources, the turn-in, distance. Uses the shared GameTooltip, as addons normally do.
+-- all known item sources, the turn-in, distance, and party members' progress when grouped. Uses the
+-- shared GameTooltip, as addons normally do.
 
 local WHITE, GRAY, GREEN = { 1, 1, 1 }, { 0.6, 0.6, 0.6 }, { 0.2, 1, 0.2 }
 
@@ -69,7 +70,39 @@ function QuestTooltip:Show(owner, quest)
       add(("%d yards away"):format(nav.distance), GRAY)
     end
   end
+  QuestTooltip:AddParty(questID)
   GameTooltip:Show()
+end
+
+---Party members' progress on the quest, as the server reports it: the same data Blizzard's tracker
+---and quest map show on hover (GameTooltip:SetQuestPartyProgress, Blizzard_QuestObjectiveTracker.lua:149,
+---QuestMapFrame.lua:2301), read as lines so they follow ours. Works for every party member, no addon
+---needed on their side. Lines are copied as given: their text and colors are Blizzard's.
+---@param questID number
+function QuestTooltip:AddParty(questID)
+  if not IsInGroup() then
+    return
+  end
+  -- omitTitle: we already show it; ignoreActivePlayer: your own progress is the card.
+  local data = C_TooltipInfo.GetQuestPartyProgress(questID, true, true)
+  local lines = data and data.lines
+  if not lines or #lines == 0 then
+    return
+  end
+  add(" ", WHITE)
+  add("Party", { NORMAL_FONT_COLOR:GetRGB() })
+  for _, line in ipairs(lines) do
+    local left, right = line.leftText, line.rightText
+    if type(left) == "string" and not issecretvalue(left) then
+      local lc = line.leftColor or HIGHLIGHT_FONT_COLOR
+      if type(right) == "string" and right ~= "" and not issecretvalue(right) then
+        local rc = line.rightColor or HIGHLIGHT_FONT_COLOR
+        GameTooltip:AddDoubleLine(left, right, lc.r, lc.g, lc.b, rc.r, rc.g, rc.b)
+      else
+        GameTooltip:AddLine(left, lc.r, lc.g, lc.b, line.wrapText)
+      end
+    end
+  end
 end
 
 function QuestTooltip:Hide()
