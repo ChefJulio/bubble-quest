@@ -1,0 +1,302 @@
+{"id": "28:s:8ebec56f", "decision": "hint", "text": "The bauble disappears 5 minutes after you loot it, and the whole quest has a 30-minute timer.", "reason": "timer"}
+{"id": "29:s:8ebec56f", "decision": "hint", "text": "The bauble disappears 5 minutes after you loot it, and the whole quest has a 30-minute timer.", "reason": "timer"}
+{"id": "49:s:8ebec56f", "decision": "hint", "text": "The sacks are objects you click in the world, not mob drops, and they are spread over three zones.", "reason": "non-obvious source"}
+{"id": "54:s:8ebec56f", "decision": "hint", "text": "You get the documents on accept. Keep them in your bags and hand them to Dughan.", "reason": "keep item"}
+{"id": "59:s:86d9a662", "decision": "skip", "reason": "accept row"}
+{"id": "61:s:85a3db72", "decision": "skip", "reason": "accept row"}
+{"id": "71:s:99c0d7ed", "decision": "skip", "reason": "accept row"}
+{"id": "78:s:e49bf98f", "decision": "skip", "reason": "accept row"}
+{"id": "79:s:127bd65f", "decision": "skip", "reason": "accept row"}
+{"id": "80:s:8ebec56f", "decision": "hint", "text": "Keep the Bloodstained Journal Page from the previous quest in your bags; the clerk takes it at turn-in.", "reason": "keep item"}
+{"id": "81:s:8ebec56f", "decision": "hint", "text": "You get the barrel on accept. Keep it in your bags, you hand it in at the end.", "reason": "keep item"}
+{"id": "94:s:c8cd5b92", "decision": "skip", "reason": "accept row"}
+{"id": "100:s:26c5927c", "decision": "skip", "reason": "accept row"}
+{"id": "113:s:1e66b858", "decision": "skip", "reason": "accept row"}
+{"id": "115:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "119:s:242b8b05", "decision": "skip", "reason": "accept row"}
+{"id": "129:s:a814a283", "decision": "skip", "reason": "accept row"}
+{"id": "131:s:8ebec56f", "decision": "hint", "text": "Martie gives you the bouquet on accept; there is nothing to find or loot.", "reason": "item given"}
+{"id": "135:s:1f6cc9a5", "decision": "skip", "reason": "accept row"}
+{"id": "143:s:4d0e68b4", "decision": "skip", "reason": "accept row"}
+{"id": "144:s:b7af9a9b", "decision": "skip", "reason": "accept row"}
+{"id": "160:s:8ebec56f", "decision": "hint", "text": "Abercrombie gives you the letter on accept. Don't lose it, you need it for the turn-in.", "reason": "keep item"}
+{"id": "161:s:adf43e6b", "decision": "skip", "reason": "accept row"}
+{"id": "166:s:c3d55592", "decision": "skip", "reason": "group only"}
+{"id": "166:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "172:s:8ebec56f-2", "decision": "hint", "text": "The turn-in NPC is not in the world until you summon it with the whistle.", "reason": "hidden spawn"}
+{"id": "198:s:32a7359a", "decision": "skip", "reason": "accept row"}
+{"id": "210:s:8ebec56f-2", "decision": "hint", "text": "Krazek gives you the crock pot on accept. Don't destroy it.", "reason": "keep item"}
+{"id": "216:s:cd8df964", "decision": "skip", "reason": "restates objective"}
+{"id": "216:s:1ba8a543", "decision": "skip", "reason": "general tactic"}
+{"id": "218:s:ac9f8b28", "decision": "skip", "reason": "obvious"}
+{"id": "232:s:16761166", "decision": "skip", "reason": "accept row"}
+{"id": "233:s:8e22b2eb", "decision": "skip", "reason": "accept row"}
+{"id": "234:s:87478e65", "decision": "skip", "reason": "accept row"}
+{"id": "234:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "238:s:8ebec56f", "decision": "hint", "text": "You get the kit on accept. Keep it in your bags, it is what you turn in.", "reason": "keep item"}
+{"id": "251:s:8ebec56f", "decision": "hint", "text": "The letter is given back to you for this quest. Sirra is in the same building as the mayor.", "reason": "where to go"}
+{"id": "253:s:b5333019", "decision": "skip", "reason": "elite"}
+{"id": "253:s:8ebec56f", "decision": "hint", "text": "Eliza has no fixed spawn. She only shows up after you click her grave.", "reason": "hidden spawn"}
+{"id": "255:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "264:s:ab3fafe5", "decision": "skip", "reason": "accept row"}
+{"id": "265:s:8ebec56f", "decision": "hint", "text": "Madame Eva gives you the Book from Sven's Farm on accept. Keep it, the quest chain needs it.", "reason": "keep item"}
+{"id": "268:s:8ebec56f", "decision": "hint", "text": "Jitters gives you the journal on accept. Keep it in your bags until you turn the quest in.", "reason": "keep item"}
+{"id": "269:s:8ebec56f", "decision": "hint", "text": "The journal comes from the previous quest; you need it in your bags to turn this one in.", "reason": "keep item"}
+{"id": "271:s:8ebec56f", "decision": "skip", "reason": "elite"}
+{"id": "274:s:fb7587f4", "decision": "skip", "reason": "accept row"}
+{"id": "282:s:a5c9b915", "decision": "skip", "reason": "accept row"}
+{"id": "286:s:8ebec56f", "decision": "hint", "text": "Accepting from the barrel puts the statuette straight into your bags, so there is nothing to search for.", "reason": "item given"}
+{"id": "293:s:7fe06e12", "decision": "skip", "reason": "accept row"}
+{"id": "299:s:87d9074b", "decision": "do", "objective": "Neru Fragment", "text": "Click a dirt mound of loose soil to get Neru", "reason": "clear instruction"}
+{"id": "301:s:97851c4d", "decision": "skip", "reason": "accept row"}
+{"id": "303:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "306:s:8ebec56f", "decision": "hint", "text": "Merrin gives you the letter on accept. Do not destroy it, the hand-in needs it.", "reason": "keep item"}
+{"id": "311:s:8ebec56f", "decision": "skip", "reason": "how to start"}
+{"id": "322:s:6d0724e3", "decision": "skip", "reason": "accept row"}
+{"id": "325:s:72107ecf", "decision": "skip", "reason": "accept row"}
+{"id": "329:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "334:s:1cf1a7e6", "decision": "skip", "reason": "accept row"}
+{"id": "336:s:024a6bf4", "decision": "skip", "reason": "accept row"}
+{"id": "340:s:40e52c6a", "decision": "skip", "reason": "drop source on card"}
+{"id": "341:s:693ce6ce", "decision": "skip", "reason": "drop source on card"}
+{"id": "348:s:8ebec56f", "decision": "hint", "text": "Mokk has no fixed spawn. He appears only in the last wave of the summoning event.", "reason": "hidden spawn"}
+{"id": "353:s:b0d71de4", "decision": "skip", "reason": "accept row"}
+{"id": "362:s:5e6b6cab", "decision": "skip", "reason": "restates objective"}
+{"id": "366:s:b4b13056", "decision": "skip", "reason": "accept row"}
+{"id": "377:s:0adc4ed6", "decision": "skip", "reason": "restates objective"}
+{"id": "382:s:5ab00446", "decision": "skip", "reason": "restates objective"}
+{"id": "383:s:b02d1aa6", "decision": "skip", "reason": "accept row"}
+{"id": "385:s:e3c751a8", "decision": "skip", "reason": "obvious drop source"}
+{"id": "386:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "387:s:fed19b3c", "decision": "skip", "reason": "dungeon"}
+{"id": "387:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "388:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "391:s:b918a840", "decision": "skip", "reason": "restates objective"}
+{"id": "391:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "393:s:059024c0", "decision": "skip", "reason": "accept row"}
+{"id": "396:s:749ac50e", "decision": "skip", "reason": "accept row"}
+{"id": "405:s:47ad431f", "decision": "skip", "reason": "accept row"}
+{"id": "407:s:a4095ead", "decision": "skip", "reason": "accept row"}
+{"id": "409:s:8ebec56f", "decision": "hint", "text": "Lillith has no static spawn. She shows up only after you light the candle at the altar.", "reason": "hidden spawn"}
+{"id": "411:s:84d8c25b", "decision": "skip", "reason": "accept row"}
+{"id": "412:s:c2eba07c", "decision": "skip", "reason": "obvious drop source"}
+{"id": "413:s:701852e2", "decision": "skip", "reason": "accept row"}
+{"id": "414:s:8932ad25", "decision": "skip", "reason": "accept row"}
+{"id": "417:s:19db50c7", "decision": "hint", "text": "Keep Hildelve's Journal from the dwarf corpse; you need it for the turn-in.", "reason": "keep item"}
+{"id": "420:s:886e6dd9", "decision": "skip", "reason": "accept row"}
+{"id": "421:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "429:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "430:s:2d4f5d3e", "decision": "skip", "reason": "accept row"}
+{"id": "434:s:8ebec56f", "decision": "hint", "text": "Marzon has no fixed spawn. He appears only during the scripted meeting after you accept the quest.", "reason": "hidden spawn"}
+{"id": "439:s:8ebec56f-2", "decision": "hint", "text": "Keep Deliah's Ring. It comes with the quest, and later quests in this chain need it too.", "reason": "keep item"}
+{"id": "440:s:8ebec56f", "decision": "hint", "text": "Keep Deliah's Ring. The next quest in the chain also uses it in the Undercity.", "reason": "keep item"}
+{"id": "441:s:8ebec56f", "decision": "hint", "text": "You need Deliah's Ring from earlier quests in the chain in your bags when you hand in.", "reason": "keep item"}
+{"id": "444:s:5bb9aaa8", "decision": "skip", "reason": "accept row"}
+{"id": "449:s:6172c692", "decision": "skip", "reason": "accept row"}
+{"id": "452:s:8ebec56f", "decision": "hint", "text": "The council members have no normal spawns. They show up in waves only after you accept the quest.", "reason": "hidden spawn"}
+{"id": "455:s:26c98c89", "decision": "skip", "reason": "accept row"}
+{"id": "461:s:cb54481c", "decision": "skip", "reason": "accept row"}
+{"id": "465:s:1ca34a1c", "decision": "skip", "reason": "accept row"}
+{"id": "465:s:8ebec56f-3", "decision": "hint", "text": "Keep the Dwarven Tinder; the catapult needs it to be lit.", "reason": "use item"}
+{"id": "474:s:8ebec56f", "decision": "skip", "reason": "elite"}
+{"id": "477:s:8ebec56f", "decision": "hint", "text": "The quest ends at the Dalaran Crate object, not at the NPC who gave it.", "reason": "surprising turn-in"}
+{"id": "480:s:a8379b58", "decision": "skip", "reason": "restates objective"}
+{"id": "484:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "492:s:70b23ed9", "decision": "skip", "reason": "accept row"}
+{"id": "493:s:48477c70", "decision": "skip", "reason": "accept row"}
+{"id": "505:s:532fc32c", "decision": "skip", "reason": "restates objective"}
+{"id": "508:s:8ebec56f", "decision": "hint", "text": "You get the necklace on accept. Nothing to farm, just carry it to Krusk.", "reason": "item given"}
+{"id": "515:s:54a8fbe6", "decision": "hint", "text": "Keep the Mudsnout Mixture from Faranell in your bags while you do this quest.", "reason": "keep item"}
+{"id": "520:s:6185edd9", "decision": "skip", "reason": "obvious drop source"}
+{"id": "524:s:aa45b685", "decision": "skip", "reason": "accept row"}
+{"id": "525:s:b8b64119", "decision": "skip", "reason": "accept row"}
+{"id": "527:s:b3c605be", "decision": "skip", "reason": "restates objective"}
+{"id": "527:s:93b63846", "decision": "skip", "reason": "restates objective"}
+{"id": "540:s:8ebec56f-2", "decision": "hint", "text": "The book comes from clicking the bookcase. It does not drop from the ogres.", "reason": "non-obvious source"}
+{"id": "541:s:2dccec26", "decision": "skip", "reason": "elite"}
+{"id": "541:s:1f13839a", "decision": "skip", "reason": "elite"}
+{"id": "541:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "542:s:8ebec56f", "decision": "hint", "text": "Dibbs gives you the Tomes on accept, so there is nothing to farm. Keep them in your bags.", "reason": "item given"}
+{"id": "547:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "550:s:5385f87f", "decision": "skip", "reason": "accept row"}
+{"id": "558:s:d903ca7b", "decision": "hint", "text": "Use the whistle to call your orphan; you hand the quest in to it.", "reason": "use item"}
+{"id": "560:s:87aff664", "decision": "skip", "reason": "accept row"}
+{"id": "563:s:43286cc2", "decision": "skip", "reason": "accept row"}
+{"id": "565:s:c55757b5", "decision": "do", "objective": "Hillman's Cloak", "text": "Craft with Leatherworking (5 Heavy Leather, 2 Fine Thread) or buy one", "reason": "how to get"}
+{"id": "591:s:3fb70f0a", "decision": "skip", "reason": "restates objective"}
+{"id": "602:s:6a42ab69", "decision": "skip", "reason": "accept row"}
+{"id": "610:s:94fb7ab2", "decision": "skip", "reason": "restates objective"}
+{"id": "613:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "619:s:ae92397c", "decision": "do", "objective": "Barbecued Buzzard Wing", "text": "Cook each from 1 Buzzard Wing and 1 Hot Spices", "reason": "how to get"}
+{"id": "622:s:2845884c", "decision": "skip", "reason": "accept row"}
+{"id": "623:s:a5787618", "decision": "skip", "reason": "accept row"}
+{"id": "623:s:8ebec56f", "decision": "hint", "text": "The quest giver provides the reed bundle, so you don't need to farm reeds for this part.", "reason": "item given"}
+{"id": "625:s:c1d8e068", "decision": "skip", "reason": "accept row"}
+{"id": "628:s:8ebec56f", "decision": "hint", "text": "Elder Saltwater Crocolisk is elite here; Horde can pull it to the Grom'Gol guards.", "reason": "approach"}
+{"id": "639:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "641:s:9f9e9d3d", "decision": "skip", "reason": "accept row"}
+{"id": "654:s:87d18922", "decision": "do", "objective": "Acceptable Basilisk Sample", "text": "Use untested basilisk samples until 8 pass; failed tests destroy them", "reason": "how to get"}
+{"id": "654:s:7f1ed647", "decision": "do", "objective": "Acceptable Hyena Sample", "text": "Use untested hyena samples until you have 8 acceptable ones", "reason": "how to get"}
+{"id": "654:s:764a0a12", "decision": "do", "objective": "Acceptable Scorpid Sample", "text": "Use untested scorpid samples until you have 8 acceptable ones", "reason": "how to get"}
+{"id": "666:s:4d6d7859", "decision": "skip", "reason": "accept row"}
+{"id": "667:s:1c8a1cbc", "decision": "hint", "text": "The naga attack starts as soon as you accept the quest.", "reason": "event trigger"}
+{"id": "668:s:8ebec56f", "decision": "hint", "text": "You get the Elven Gems on accept, and the turn-in NPC is only a few steps away.", "reason": "item given"}
+{"id": "669:s:74c7710f", "decision": "skip", "reason": "accept row"}
+{"id": "679:s:87719466", "decision": "skip", "reason": "elite"}
+{"id": "679:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "683:s:8ebec56f", "decision": "hint", "text": "You get the note on accept; keep it in your bags until you turn in.", "reason": "keep item"}
+{"id": "684:s:5739678b", "decision": "skip", "reason": "restates objective"}
+{"id": "692:s:534fdacf", "decision": "skip", "reason": "obvious drop source"}
+{"id": "697:s:8ebec56f", "decision": "hint", "text": "You get the letter on accept; it must still be in your bags at turn-in.", "reason": "keep item"}
+{"id": "701:s:883d6a6b", "decision": "skip", "reason": "restates objective"}
+{"id": "715:s:aebfd277", "decision": "skip", "reason": "unclear which potion"}
+{"id": "723:s:7c69b93a", "decision": "skip", "reason": "accept row"}
+{"id": "724:s:8ebec56f", "decision": "hint", "text": "Ryedol gives you the amulet on accept. Keep it, the turn-in needs it.", "reason": "keep item"}
+{"id": "735:s:8ebec56f", "decision": "hint", "text": "Dagun only appears after you use the Enchanted Sea Kelp at the Seaworn Altar.", "reason": "hidden spawn"}
+{"id": "736:s:57944d78", "decision": "skip", "reason": "elite"}
+{"id": "736:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "743:s:612e75ef", "decision": "skip", "reason": "obvious drop source"}
+{"id": "747:s:2af967d5", "decision": "skip", "reason": "obvious drop source"}
+{"id": "763:s:fc960843", "decision": "skip", "reason": "accept row"}
+{"id": "763:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "769:s:0153e2ab", "decision": "do", "objective": "Coarse Thread", "text": "Buy from a trade supplies vendor", "reason": "how to get"}
+{"id": "778:s:93fc09c8", "decision": "hint", "text": "Accepting the quest makes Lotwil summon the Fam'retor Guardian nearby.", "reason": "hidden spawn"}
+{"id": "786:s:89a2a673", "decision": "skip", "reason": "unclear which objective"}
+{"id": "786:s:e2e92086", "decision": "skip", "reason": "unclear which objective"}
+{"id": "812:s:8ebec56f", "decision": "hint", "text": "There is a 45-minute quest timer covering the whole chain.", "reason": "timer"}
+{"id": "830:s:23724120", "decision": "skip", "reason": "accept row"}
+{"id": "831:s:979fe620", "decision": "skip", "reason": "accept row"}
+{"id": "837:s:e2591135", "decision": "skip", "reason": "restates objective"}
+{"id": "837:s:f2a0acd7", "decision": "skip", "reason": "restates objective"}
+{"id": "837:s:b021355a", "decision": "skip", "reason": "restates objective"}
+{"id": "837:s:dbbb1c38", "decision": "skip", "reason": "restates objective"}
+{"id": "853:s:76723c4b", "decision": "hint", "text": "The quest has a 45 minute timer that starts when you accept it.", "reason": "timer"}
+{"id": "857:s:9cf53bd5", "decision": "do", "objective": "Tear of the Moons", "text": "Open the strongbox next to General Twinbraid", "reason": "clear instruction"}
+{"id": "864:s:8ebec56f", "decision": "hint", "text": "You get the kit on accept in Gadgetzan. Keep it in your bags until you hand it in.", "reason": "keep item"}
+{"id": "881:s:35fcec25", "decision": "skip", "reason": "spawn trigger not stated"}
+{"id": "882:s:8ebec56f-2", "decision": "hint", "text": "The carcass disappears 30 minutes after you get it.", "reason": "timer"}
+{"id": "887:s:867b939b", "decision": "skip", "reason": "restates objective"}
+{"id": "891:s:e026d09b", "decision": "skip", "reason": "unclear which target"}
+{"id": "892:s:55529083", "decision": "skip", "reason": "accept row"}
+{"id": "892:s:8ebec56f", "decision": "hint", "text": "The ledger comes from an earlier quest; keep it in your bags to turn this quest in.", "reason": "keep item"}
+{"id": "911:s:cadc5765", "decision": "skip", "reason": "covered by other row"}
+{"id": "911:s:8ebec56f", "decision": "hint", "text": "Summon your orphan with the whistle when you reach the spot; you finish the quest with it.", "reason": "use item"}
+{"id": "914:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "915:s:6a597bf8", "decision": "hint", "text": "Use the Orcish Orphan Whistle to call your orphan if he is not already out.", "reason": "use item"}
+{"id": "922:s:54f509f3", "decision": "skip", "reason": "accept row"}
+{"id": "924:s:8ebec56f", "decision": "hint", "text": "The stone disappears 30 minutes after pickup, so go straight to the altar.", "reason": "timer"}
+{"id": "925:s:6a597bf8", "decision": "hint", "text": "If your orphan is not out, use the Orcish Orphan Whistle to call it.", "reason": "use item"}
+{"id": "928:s:fffb6876", "decision": "skip", "reason": "accept row"}
+{"id": "929:s:ebbb4d9d", "decision": "skip", "reason": "accept row"}
+{"id": "938:s:8ebec56f-2", "decision": "hint", "text": "The quest has a 9 minute timer. Clear the mobs along the path before you start.", "reason": "timer"}
+{"id": "940:s:d45072a1", "decision": "skip", "reason": "accept row"}
+{"id": "941:s:5051a859", "decision": "skip", "reason": "accept row"}
+{"id": "944:s:b5b356ba", "decision": "hint", "text": "After the explore credit, use the phial on the ground inside the Glaive to place the Scrying Bowl.", "reason": "use item"}
+{"id": "944:s:8ebec56f-2", "decision": "hint", "text": "The turn-in happens at the bowl you place, not at Onu.", "reason": "surprising turn-in"}
+{"id": "952:s:40d63b51", "decision": "skip", "reason": "accept row"}
+{"id": "963:s:685d5664", "decision": "skip", "reason": "restates objective"}
+{"id": "967:s:3379f7f0", "decision": "skip", "reason": "accept row"}
+{"id": "971:s:8ebec56f-2", "decision": "skip", "reason": "dungeon"}
+{"id": "996:s:a927766a", "decision": "hint", "text": "The salves are rewards from the Cenarion plant salve quests; get two before you click the plant.", "reason": "non-obvious source"}
+{"id": "996:s:8ebec56f", "decision": "skip", "reason": "covered by other row"}
+{"id": "997:s:c68ac226", "decision": "skip", "reason": "accept row"}
+{"id": "998:s:a927766a", "decision": "hint", "text": "Get 2 salves first; they are rewards from the Felwood salve quests that use Corrupted plant samples.", "reason": "non-obvious source"}
+{"id": "1002:s:8ebec56f-2", "decision": "hint", "text": "The quest starts and ends at buzzbox objects, not NPCs.", "reason": "surprising turn-in"}
+{"id": "1013:s:8ebec56f-3", "decision": "skip", "reason": "dungeon"}
+{"id": "1014:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "1016:s:3d04008d", "decision": "do", "objective": "Divined Scroll", "text": "Use the provided scroll once you have the 5 intact bracers", "reason": "use item"}
+{"id": "1020:s:9ec6a0de", "decision": "skip", "reason": "accept row"}
+{"id": "1026:s:7c229c6a", "decision": "skip", "reason": "text does not match objective"}
+{"id": "1046:s:7a9d80a0", "decision": "skip", "reason": "accept row"}
+{"id": "1051:s:2f37a84b", "decision": "skip", "reason": "restates objective"}
+{"id": "1052:s:bfb8bce1", "decision": "skip", "reason": "accept row"}
+{"id": "1053:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "1057:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "1065:s:44b2459a", "decision": "skip", "reason": "accept row"}
+{"id": "1067:s:b9d730f9", "decision": "skip", "reason": "accept row"}
+{"id": "1073:s:e57065e9", "decision": "do", "objective": "Elixir of Minor Fortitude", "text": "Brew with Alchemy (2 Earthroot, 1 Peacebloom, 1 vial) or buy them", "reason": "how to get"}
+{"id": "1080:s:7248fcaf", "decision": "skip", "reason": "unclear"}
+{"id": "1094:s:f4dcd2e6", "decision": "skip", "reason": "accept row"}
+{"id": "1096:s:bcd04492", "decision": "skip", "reason": "restates objective"}
+{"id": "1099:s:8ebec56f", "decision": "hint", "text": "The Goblin Race Ticket disappears after 10 minutes, so turn it in quickly.", "reason": "timer"}
+{"id": "1102:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "1111:s:ede6dda8", "decision": "skip", "reason": "accept row"}
+{"id": "1112:s:8ebec56f", "decision": "hint", "text": "The quest item is given on accept; do not lose it, it is the turn-in item.", "reason": "keep item"}
+{"id": "1114:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "1118:s:15af08a1", "decision": "skip", "reason": "accept row"}
+{"id": "1120:s:d3959068", "decision": "skip", "reason": "accept row"}
+{"id": "1120:s:8ebec56f", "decision": "hint", "text": "You have 2 hours, and the stout disappears when the timer runs out.", "reason": "timer"}
+{"id": "1121:s:8ebec56f", "decision": "hint", "text": "You have 2 hours. When time runs out, the quest fails and the stout disappears.", "reason": "timer"}
+{"id": "1124:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "1126:s:6ca1b3cf", "decision": "hint", "text": "Opening the pod at the top spawns Hive'Ashi Ambushers.", "reason": "hidden spawn"}
+{"id": "1168:s:b3572538", "decision": "skip", "reason": "restates objective"}
+{"id": "1168:s:3a67274a", "decision": "skip", "reason": "restates objective"}
+{"id": "1168:s:175a4867", "decision": "skip", "reason": "restates objective"}
+{"id": "1174:s:8ebec56f", "decision": "hint", "text": "The Gnome Race Ticket disappears 10 minutes after you get it.", "reason": "timer"}
+{"id": "1179:s:9463276e", "decision": "skip", "reason": "accept row"}
+{"id": "1182:s:8ebec56f", "decision": "hint", "text": "The blueprints are in a footlocker that needs Cozzle's Key, which drops from Cozzle at the top of the tower.", "reason": "non-obvious source"}
+{"id": "1189:s:644a5a19", "decision": "skip", "reason": "accept row"}
+{"id": "1198:s:8ebec56f-2", "decision": "skip", "reason": "dungeon"}
+{"id": "1200:s:ad75ab3f", "decision": "skip", "reason": "dungeon"}
+{"id": "1200:s:8ebec56f-2", "decision": "skip", "reason": "dungeon"}
+{"id": "1239:s:8ebec56f-2", "decision": "hint", "text": "Keep the Defiant Orc Head; the next quest, The Troll Witchdoctor, uses it again.", "reason": "keep item"}
+{"id": "1240:s:dd2d7fcd", "decision": "skip", "reason": "accept row"}
+{"id": "1243:s:8ebec56f-2", "decision": "hint", "text": "You get the sealed note on accept. Keep it in your bags until you turn in.", "reason": "keep item"}
+{"id": "1262:s:8ebec56f", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "1276:s:881df38b", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "1318:s:8d6b8db1", "decision": "do", "objective": "Gauntlet of Gordok Might", "text": "Open the Prince's Chest near the prince", "reason": "clear instruction"}
+{"id": "1318:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "1319:s:8ebec56f", "decision": "hint", "text": "You need the Blackened Iron Shield from earlier in the chain in your bags, or you can't turn this in.", "reason": "keep item"}
+{"id": "1358:s:02e7c6ee", "decision": "skip", "reason": "accept row"}
+{"id": "1359:s:45a9d7be", "decision": "skip", "reason": "accept row"}
+{"id": "1369:s:8ebec56f", "decision": "hint", "text": "You need at least 3000 Magram reputation to complete or turn in this quest.", "reason": "reputation"}
+{"id": "1371:s:8ebec56f-2", "decision": "hint", "text": "Keep your Magram Clan reputation at 3000 or higher.", "reason": "reputation"}
+{"id": "1373:s:8ebec56f", "decision": "hint", "text": "The turn-in needs at least 3000 Gelkis Clan reputation as well as the shard.", "reason": "reputation"}
+{"id": "1374:s:8ebec56f", "decision": "hint", "text": "The turn-in needs 3000 Gelkis Clan Centaur reputation, not just the head.", "reason": "reputation"}
+{"id": "1375:s:8ebec56f-3", "decision": "hint", "text": "You need 3000 or more Magram reputation for this quest.", "reason": "reputation"}
+{"id": "1384:s:8ebec56f-2", "decision": "hint", "text": "You need 3000 reputation with the Gelkis to turn this in.", "reason": "reputation"}
+{"id": "1386:s:e43adf79", "decision": "skip", "reason": "accept row"}
+{"id": "1395:s:1c19e38c", "decision": "hint", "text": "The crate has a 60 minute timer that starts when you accept.", "reason": "timer"}
+{"id": "1420:s:2dc52a75", "decision": "skip", "reason": "accept row"}
+{"id": "1425:s:8ebec56f", "decision": "hint", "text": "Biggs gives you the shipment on accept; don't lose or destroy it, it is the only thing you hand in.", "reason": "keep item"}
+{"id": "1429:s:e4db37b2", "decision": "skip", "reason": "accept row"}
+{"id": "1446:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "1447:s:9a53981a", "decision": "hint", "text": "Accepting the quest makes Dashel and his thugs hostile.", "reason": "approach"}
+{"id": "1465:s:8ebec56f", "decision": "skip", "reason": "how to start"}
+{"id": "1467:s:8ebec56f", "decision": "hint", "text": "You get the package on accept. Keep it in your bags, the turn-in needs it.", "reason": "keep item"}
+{"id": "1468:s:8ebec56f", "decision": "skip", "reason": "holiday"}
+{"id": "1469:s:84567294", "decision": "skip", "reason": "accept row"}
+{"id": "1474:s:8ebec56f", "decision": "hint", "text": "The succubus only appears after you use the Pure Hearts at the circle. Keep the hearts for the turn-in.", "reason": "hidden spawn"}
+{"id": "1487:s:8ebec56f-2", "decision": "skip", "reason": "dungeon"}
+{"id": "1492:s:0e5dbaac", "decision": "skip", "reason": "accept row"}
+{"id": "1511:s:c0bb9eae", "decision": "skip", "reason": "accept row"}
+{"id": "1512:s:bd15506c", "decision": "skip", "reason": "accept row"}
+{"id": "1515:s:6f6570d1", "decision": "hint", "text": "Keep the draught from the previous quest in your bags; you hand it to Dogran.", "reason": "keep item"}
+{"id": "1518:s:8ebec56f-2", "decision": "hint", "text": "The Earth manifestation with the Rough Quartz shows up after you drink Earth Sapta at the Shaman Shrine.", "reason": "hidden spawn"}
+{"id": "1578:s:945c7cc2", "decision": "do", "objective": "Copper Axe", "text": "Blacksmith each from 6 Copper Bar, 1 Weak Flux and 2 Linen Cloth", "reason": "craft"}
+{"id": "1578:s:5907f839", "decision": "do", "objective": "Copper Chain Belt", "text": "Blacksmith each from 6 Copper Bar", "reason": "craft"}
+{"id": "1581:s:950932a0", "decision": "do", "objective": "Elixir of Lion's Strength", "text": "Brew with Alchemy from 1 Earthroot, 1 Silverleaf, 1 Empty Vial each", "reason": "craft"}
+{"id": "1581:s:ea2c897f", "decision": "do", "objective": "Elixir of Minor Defense", "text": "Brew with Alchemy from 2 Silverleaf and 1 Empty Vial each", "reason": "craft"}
+{"id": "1581:s:8ebec56f-2", "decision": "skip", "reason": "covered by other rows"}
+{"id": "1582:s:e0373433", "decision": "do", "objective": "Embossed Leather Gloves", "text": "Craft with Leatherworking from 3 Light Leather, 2 Coarse Thread each", "reason": "craft"}
+{"id": "1582:s:d92162fc", "decision": "do", "objective": "Embossed Leather Boots", "text": "Craft with Leatherworking from 8 Light Leather, 5 Coarse Thread each", "reason": "craft"}
+{"id": "1582:s:f587ab55", "decision": "do", "objective": "Embossed Leather Cloak", "text": "Craft with Leatherworking from 5 Light Leather, 2 Coarse Thread each", "reason": "craft"}
+{"id": "1618:s:1f1d1ba3", "decision": "do", "objective": "Runed Copper Belt", "text": "Blacksmith each from 10 Copper Bars", "reason": "craft"}
+{"id": "1618:s:14342644", "decision": "do", "objective": "Heavy Copper Maul", "text": "Blacksmith each from 12 Copper Bars, 2 Weak Flux and 2 Light Leather", "reason": "craft"}
+{"id": "1641:s:528d6671", "decision": "skip", "reason": "turn-in row"}
+{"id": "1646:s:e39bbcd2", "decision": "skip", "reason": "accept row"}
+{"id": "1654:s:8ebec56f-3", "decision": "skip", "reason": "dungeon"}
+{"id": "1656:s:cfc100bf", "decision": "skip", "reason": "accept row"}
+{"id": "1658:s:8ebec56f-2", "decision": "skip", "reason": "holiday"}
+{"id": "1665:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "1667:s:a0738074", "decision": "do", "objective": "Marshal Haggard's Badge", "text": "Open the strongbox in the crates near Jack, with the key in your bags", "reason": "clear instruction"}
+{"id": "1689:s:8ebec56f-2", "decision": "hint", "text": "The voidwalker only shows up after you use the choker at the circle.", "reason": "hidden spawn"}
+{"id": "1703:s:afb471f4", "decision": "skip", "reason": "accept row"}
+{"id": "1704:s:8ebec56f-2", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "1719:s:8ebec56f", "decision": "hint", "text": "The quest has a 10 minute timer.", "reason": "timer"}
+{"id": "1719:s:8ebec56f-2", "decision": "hint", "text": "Big Will has no fixed spawn. He shows up only after you beat every challenger.", "reason": "hidden spawn"}
+{"id": "1787:s:14dfe78f", "decision": "skip", "reason": "restates objective"}
+{"id": "1800:s:6a597bf8", "decision": "hint", "text": "Use the whistle to call your orphan; the quest is handed back to it.", "reason": "use item"}
+{"id": "1804:s:8ebec56f-2", "decision": "hint", "text": "Keep the Reconstructed Tome from the earlier quest in your bags; it is handed in with the rods.", "reason": "keep item"}
+{"id": "1805:s:8ebec56f-2", "decision": "hint", "text": "Keep the Reconstructed Tome from the earlier quest in your bags; it is handed in with the rods.", "reason": "keep item"}
+{"id": "1821:s:a24125b6", "decision": "do", "objective": "Agamand Family Dagger", "text": "Take it from a weapon rack in the crypt", "reason": "clear instruction"}

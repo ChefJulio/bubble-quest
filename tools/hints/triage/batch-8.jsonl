@@ -1,0 +1,295 @@
+{"id": "92459:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "92468:s:5e86fa15", "decision": "skip", "reason": "accept row"}
+{"id": "92468:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "92489:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "92516:s:b3a238c2", "decision": "skip", "reason": "restates objective"}
+{"id": "92516:s:0992af42", "decision": "do", "objective": "Hippogryph Matriarch", "text": "Kill the matriarch at the nest center", "reason": "location"}
+{"id": "92596:s:343c7943", "decision": "skip", "reason": "turn-in"}
+{"id": "92642:s:36591359", "decision": "skip", "reason": "turn-in"}
+{"id": "92706:s:f2ed41db", "decision": "skip", "reason": "accept row"}
+{"id": "92742:s:273dfd0d", "decision": "skip", "reason": "accept row"}
+{"id": "92751:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "92752:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "92753:s:8ebec56f-3", "decision": "skip", "reason": "trivia, NPC id detail"}
+{"id": "92840:s:2dd4f04b", "decision": "skip", "reason": "accept row"}
+{"id": "92867:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "93041:s:29d5cb75", "decision": "skip", "reason": "accept row"}
+{"id": "93065:s:8ebec56f", "decision": "hint", "text": "Turn in to the Valennia out on the road, not the quest giver back in town.", "reason": "surprising turn-in"}
+{"id": "93160:s:8ebec56f", "decision": "do", "objective": "Zephyrseed", "text": "Click Zephyrseed Cone objects to get Zephyrseed (the acorns)", "reason": "objects, not drops"}
+{"id": "93227:s:ec8c1288", "decision": "skip", "reason": "accept row"}
+{"id": "93318:s:8ebec56f", "decision": "skip", "reason": "elite, group"}
+{"id": "93430:s:06aca9fa", "decision": "skip", "reason": "obvious drop source"}
+{"id": "93678:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "93736:s:a54c0e81", "decision": "skip", "reason": "turn-in"}
+{"id": "93737:s:8ebec56f-2", "decision": "hint", "text": "The parts come from separate Construct Parts objects in different places, not from mob drops.", "reason": "objects, not drops"}
+{"id": "93862:s:8ebec56f", "decision": "skip", "reason": "no usable data"}
+{"id": "93927:s:7abef04d", "decision": "do", "objective": "Shadowsong Family Signet", "text": "Loot the body of Arvensus Shadowsong to get the signet", "reason": "clear source"}
+{"id": "93948:s:d2405121", "decision": "skip", "reason": "accept row"}
+{"id": "94003:s:4ec1237c", "decision": "skip", "reason": "restates objective"}
+{"id": "94004:s:51c5d15f", "decision": "do", "objective": "Elixir of Ogre's Strength", "text": "Brew with Alchemy (Earthroot, Kingsblood, Liferoot) or buy one", "reason": "craft recipe"}
+{"id": "94013:s:86a9658c", "decision": "skip", "reason": "accept row"}
+{"id": "94212:s:05b83674", "decision": "do", "objective": "Elixir of Wisdom", "text": "Brew with Alchemy (Mageroyal, Briarthorn, Leaded Vial) or buy one", "reason": "craft recipe"}
+{"id": "94214:s:cd18c854", "decision": "do", "objective": "Shadow Protection Potion", "text": "Brew with Alchemy, or buy one from a player or the auction house", "reason": "craft recipe"}
+{"id": "94215:s:894fcb3b", "decision": "do", "objective": "Free Action Potion", "text": "Brew with Alchemy (Blackmouth Oil, Stranglethorn Seed) or buy one", "reason": "craft recipe"}
+{"id": "94216:s:d7bfa350", "decision": "do", "objective": "Elixir of Lesser Agility", "text": "Brew with Alchemy (Wild Steelbloom, Swiftthistle) or buy one", "reason": "craft recipe"}
+{"id": "94217:s:38c20509", "decision": "skip", "reason": "text names a different item than the objective"}
+{"id": "94218:s:81019763", "decision": "do", "objective": "Elixir of Greater Defense", "text": "Brew with Alchemy (Wild Steelbloom, Goldthorn, Leaded Vial) or buy one", "reason": "craft recipe"}
+{"id": "94218:s:8ebec56f", "decision": "hint", "text": "You need Elixir of Greater Defense, not the plain Elixir of Defense the quest text names.", "reason": "wrong item name"}
+{"id": "94219:s:d06a1ae8", "decision": "do", "objective": "Elixir of Water Breathing", "text": "Brew with Alchemy (Stranglekelp, Blackmouth Oil, a vial) or buy one", "reason": "craft recipe"}
+{"id": "94220:s:364ff5c3", "decision": "do", "objective": "Pearl-handled Dagger", "text": "Make with Blacksmithing (bronze bars, strong flux, pearls) or buy one", "reason": "craft recipe"}
+{"id": "94221:s:40e81b83", "decision": "do", "objective": "Golden Rod", "text": "Make with Blacksmithing (Gold Bar, Coarse Grinding Stones) or buy one", "reason": "craft recipe"}
+{"id": "94222:s:b2b1187a", "decision": "do", "objective": "Iridescent Hammer", "text": "Make with Blacksmithing (bronze bars, iridescent pearl) or buy one", "reason": "craft recipe"}
+{"id": "94223:s:b824845e", "decision": "do", "objective": "Silver Skeleton Key", "text": "Make with Blacksmithing (Silver Bar, Coarse Grinding Stone) or get one", "reason": "craft recipe"}
+{"id": "94224:s:55344d25", "decision": "do", "objective": "Heavy Bronze Mace", "text": "Make with Blacksmithing (bronze bars, moss agate, moonstone) or buy", "reason": "craft recipe"}
+{"id": "94225:s:505fe013", "decision": "do", "objective": "Rough Bronze Leggings", "text": "Make with Blacksmithing from 6 Bronze Bars, or buy them", "reason": "craft recipe"}
+{"id": "94226:s:73a001ae", "decision": "do", "objective": "Green Iron Gauntlets", "text": "Make with Blacksmithing (Iron Bars, pearls, Green Dye) or buy them", "reason": "craft recipe"}
+{"id": "94227:s:194ae70c", "decision": "do", "objective": "Big Bronze Knife", "text": "Make with Blacksmithing (bronze bars, weak flux, tigerseye) or buy one", "reason": "craft recipe"}
+{"id": "94228:s:6b23f2b1", "decision": "do", "objective": "Green Iron Boots", "text": "Make with Blacksmithing (Iron Bars, Lesser Moonstones) or get a pair", "reason": "craft recipe"}
+{"id": "94229:s:5be1df26", "decision": "do", "objective": "Ornate Spyglass", "text": "Make with Engineering (Bronze Tube, Whirring Bronze Gizmo) or buy one", "reason": "craft recipe"}
+{"id": "94231:s:aee1d454", "decision": "do", "objective": "Moonsight Rifle", "text": "Make with Engineering, or get one from another player", "reason": "craft recipe"}
+{"id": "94232:s:aadf89f4", "decision": "do", "objective": "Minor Recombobulator", "text": "Make with Engineering (Bronze Tube, Whirring Bronze Gizmos) or buy one", "reason": "craft recipe"}
+{"id": "94235:s:174b8e33", "decision": "do", "objective": "Gnomish Universal Remote", "text": "Make with Engineering, or buy one from another player", "reason": "craft recipe"}
+{"id": "94236:s:f227e78b", "decision": "do", "objective": "Big Bronze Bomb", "text": "Make with Engineering (Heavy Blasting Powder, Bronze Bars) or buy one", "reason": "craft recipe"}
+{"id": "94237:s:dcd00f34", "decision": "do", "objective": "Crafted Solid Shot", "text": "Make with Engineering (Heavy Blasting Powder, Bronze Bar) or buy them", "reason": "craft recipe"}
+{"id": "94238:s:9b5487ae", "decision": "do", "objective": "Heavy Leather Ball", "text": "Buy a Heavy Leather Ball from a vendor", "reason": "vendor item"}
+{"id": "94239:s:350de3fe", "decision": "do", "objective": "Fine Leather Pants", "text": "Make with Leatherworking (Medium Leather, Blue Dye) or buy them", "reason": "craft recipe"}
+{"id": "94240:s:84fd719c", "decision": "do", "objective": "Herbalist's Gloves", "text": "Make with Leatherworking (Medium Leather, Kingsblood) or buy them", "reason": "craft recipe"}
+{"id": "94241:s:8cdbe169", "decision": "do", "objective": "Dark Leather Tunic", "text": "Make with Leatherworking (Medium Leather, Gray Dye) or buy one", "reason": "craft recipe"}
+{"id": "94242:s:a5ebc976", "decision": "do", "objective": "Pilferer's Gloves", "text": "Make with Leatherworking (Medium Leather, Shadowcat Hide) or buy them", "reason": "craft recipe"}
+{"id": "94244:s:917f030d", "decision": "do", "objective": "Dark Leather Shoulders", "text": "Make with Leatherworking (needs a Lesser Elixir of Agility) or get one", "reason": "craft recipe"}
+{"id": "94245:s:7945761e", "decision": "do", "objective": "Barbaric Gloves", "text": "Make with Leatherworking (Heavy Leather, Large Fang) or buy them", "reason": "craft recipe"}
+{"id": "94246:s:a73e2154", "decision": "do", "objective": "Red Whelp Gloves", "text": "Make with Leatherworking (Red Whelp Scales, Medium Leather) or buy", "reason": "craft recipe"}
+{"id": "94247:s:190b9b8b", "decision": "do", "objective": "Lesser Wizard's Robe", "text": "Make with Tailoring (Bolt of Silk Cloth, Red Dye) or buy one", "reason": "craft recipe"}
+{"id": "94249:s:3598023a", "decision": "do", "objective": "Azure Silk Hood", "text": "Make with Tailoring (Bolt of Silk Cloth, Blue Dye) or get one", "reason": "craft recipe"}
+{"id": "94250:s:a9c0a0b3", "decision": "do", "objective": "Small Silk Pack", "text": "Make with Tailoring (Bolt of Silk Cloth, Light Leather) or buy one", "reason": "craft recipe"}
+{"id": "94251:s:c414e8c9", "decision": "do", "objective": "Phoenix Pants", "text": "Make with Tailoring (Bolt of Woolen Cloth, Vibrant Plume) or get one", "reason": "craft recipe"}
+{"id": "94252:s:d4202a89", "decision": "do", "objective": "Red Woolen Boots", "text": "Make with Tailoring (Bolt of Woolen Cloth, Red Dye) or buy them", "reason": "craft recipe"}
+{"id": "94253:s:b02a8657", "decision": "do", "objective": "Colorful Kilt", "text": "Make with Tailoring (Bolt of Woolen Cloth, Red Dye) or get one", "reason": "craft recipe"}
+{"id": "94254:s:15655b0d", "decision": "do", "objective": "Greater Adept's Robe", "text": "Make with Tailoring (Bolt of Woolen Cloth, Red Dye) or buy one", "reason": "craft recipe"}
+{"id": "94255:s:a8648828", "decision": "do", "objective": "Spider Silk Slippers", "text": "Make with Tailoring (Bolt of Silk Cloth, Spider's Silk) or buy them", "reason": "craft recipe"}
+{"id": "94256:s:a3d62718", "decision": "do", "objective": "Frost Protection Potion", "text": "Brew with Alchemy (Dragon's Teeth, Goldthorn, Leaded Vial) or buy one", "reason": "craft recipe"}
+{"id": "94257:s:aebfd277", "decision": "do", "objective": "Lesser Invisibility Potion", "text": "Brew with Alchemy, or buy one from another player", "reason": "craft recipe"}
+{"id": "94259:s:0746e0e5", "decision": "do", "objective": "Nature Protection Potion", "text": "Brew with Alchemy (Liferoot, Stranglekelp, Leaded Vial) or buy one", "reason": "craft recipe"}
+{"id": "94263:s:17811ee9", "decision": "do", "objective": "Fire Protection Potion", "text": "Brew with Alchemy, or buy one from another player", "reason": "craft recipe"}
+{"id": "94266:s:d1f4bab4", "decision": "do", "objective": "Elixir of Agility", "text": "Brew with Alchemy, or buy one", "reason": "craft recipe"}
+{"id": "94268:s:e83ef14b", "decision": "do", "objective": "Steel Plate Helm", "text": "Make with Blacksmithing (Steel Bars, Solid Grinding Stone) or get one", "reason": "craft recipe"}
+{"id": "94270:s:22e3a94b", "decision": "do", "objective": "Steel Weapon Chain", "text": "Make with Blacksmithing (Steel Bars, Heavy Leather) or have one made", "reason": "craft recipe"}
+{"id": "94271:s:f10b58ba", "decision": "do", "objective": "Ornate Mithril Shoulder", "text": "Make with Blacksmithing (Mithril Bars, Truesilver Bar) or buy them", "reason": "craft recipe"}
+{"id": "94272:s:73ed2f74", "decision": "do", "objective": "Blue Glittering Axe", "text": "Make with Blacksmithing (Mithril Bars, Aquamarine) or buy one", "reason": "craft recipe"}
+{"id": "94273:s:88116a79", "decision": "do", "objective": "Moonsteel Broadsword", "text": "Make with Blacksmithing (Steel Bars, Lesser Moonstones) or get one", "reason": "craft recipe"}
+{"id": "94274:s:3caeea55", "decision": "do", "objective": "Golden Scale Coif", "text": "Make with Blacksmithing (Steel Bars, Gold Bars) or get one", "reason": "craft recipe"}
+{"id": "94275:s:684fa14f", "decision": "do", "objective": "Solid Sharpening Stone", "text": "Make with Blacksmithing from one Solid Stone, or get one", "reason": "craft recipe"}
+{"id": "94276:s:2d120ef1", "decision": "do", "objective": "Wicked Mithril Blade", "text": "Make with Blacksmithing (Mithril Bars, Truesilver Bars) or buy one", "reason": "craft recipe"}
+{"id": "94277:s:940534c8", "decision": "skip", "reason": "text seems wrong: names Enchanting for a smithing item"}
+{"id": "94278:s:022fc217", "decision": "do", "objective": "Golden Scale Gauntlets", "text": "Make with Blacksmithing (Steel Bars, Gold Bars, Citrine) or buy them", "reason": "craft recipe"}
+{"id": "94279:s:edc62073", "decision": "do", "objective": "Heavy Mithril Axe", "text": "Make with Blacksmithing (mithril bars, citrine) or buy one", "reason": "craft recipe"}
+{"id": "94280:s:173d866f", "decision": "do", "objective": "Mechanical Dragonling", "text": "Make with Engineering, or get one from another player", "reason": "craft recipe"}
+{"id": "94280:s:8ebec56f-2", "decision": "skip", "reason": "only item ids"}
+{"id": "94281:s:75b148f8", "decision": "do", "objective": "Advanced Target Dummy", "text": "Make with Engineering, or buy one from another player", "reason": "craft recipe"}
+{"id": "94282:s:4d4ef6a3", "decision": "do", "objective": "Craftsman's Monocle", "text": "Make with Engineering, or get one another way", "reason": "craft recipe"}
+{"id": "94285:s:0d94033c", "decision": "do", "objective": "Unstable Trigger", "text": "Make with Engineering (Mithril Bar, Mageweave Cloth) or buy one", "reason": "craft recipe"}
+{"id": "94289:s:5dc3f6d5", "decision": "do", "objective": "Gyromatic Micro-Adjustor", "text": "Make with Engineering from 4 Steel Bars, or buy one", "reason": "craft recipe"}
+{"id": "94290:s:57e64b8e", "decision": "do", "objective": "Mechanical Repair Kit", "text": "Make with Engineering (Mithril Bar, Mageweave Cloth) or buy one", "reason": "craft recipe"}
+{"id": "94291:s:76d81e3a", "decision": "do", "objective": "Dark Iron Bomb", "text": "Make with Engineering (Thorium Widget, Dark Iron Bar) or buy one", "reason": "craft recipe"}
+{"id": "94292:s:dde3259b", "decision": "do", "objective": "Comfortable Leather Hat", "text": "Make with Leatherworking (Heavy Leather, Cured Heavy Hide) or buy one", "reason": "craft recipe"}
+{"id": "94293:s:929b25ae", "decision": "do", "objective": "Guardian Cloak", "text": "Make with Leatherworking (Heavy Leather, Bolt of Silk Cloth) or get", "reason": "craft recipe"}
+{"id": "94294:s:8a071330", "decision": "do", "objective": "Dusky Bracers", "text": "Make with Leatherworking (Heavy Leather, Black Dye) or buy a pair", "reason": "craft recipe"}
+{"id": "94295:s:90a4c514", "decision": "do", "objective": "Wild Leather Helmet", "text": "Make with Leatherworking (Thick Leather, Wildvine) or get one", "reason": "craft recipe"}
+{"id": "94296:s:c1314d96", "decision": "do", "objective": "Wild Leather Shoulders", "text": "Make with Leatherworking (Thick Leather, Wildvine) or get them", "reason": "craft recipe"}
+{"id": "94297:s:2c41c404", "decision": "do", "objective": "Quickdraw Quiver", "text": "Make with Leatherworking (needs an Elixir of Agility) or buy one", "reason": "craft recipe"}
+{"id": "94298:s:b614b358", "decision": "do", "objective": "Swift Boots", "text": "Make with Leatherworking, or get the boots another way", "reason": "craft recipe"}
+{"id": "94299:s:99ac8b49", "decision": "do", "objective": "Nightscape Shoulders", "text": "Make with Leatherworking (Thick Leather, Mageweave Cloth) or buy them", "reason": "craft recipe"}
+{"id": "94300:s:08475159", "decision": "do", "objective": "Big Voodoo Mask", "text": "Make with Leatherworking (Thick Leather, Flask of Mojo) or get one", "reason": "craft recipe"}
+{"id": "94301:s:62ba2b02", "decision": "do", "objective": "Big Voodoo Robe", "text": "Make with Leatherworking (Thick Leather, Flask of Mojo) or get one", "reason": "craft recipe"}
+{"id": "94302:s:fa884312", "decision": "do", "objective": "Turtle Scale Breastplate", "text": "Make with Leatherworking (Thick Leather, Turtle Scale) or buy one", "reason": "craft recipe"}
+{"id": "94303:s:bdbe155f", "decision": "do", "objective": "Thick Leather Ammo Pouch", "text": "Make with Leatherworking (Thick Leather, Elemental Flux) or buy one", "reason": "craft recipe"}
+{"id": "94304:s:d619ebcd", "decision": "do", "objective": "Mageweave Bag", "text": "Make with Tailoring (Bolt of Mageweave, Silken Thread) or get one", "reason": "craft recipe"}
+{"id": "94305:s:a51e083d", "decision": "do", "objective": "Shadoweave Gloves", "text": "Make with Tailoring (Bolt of Mageweave, Shadow Silk) or get them", "reason": "craft recipe"}
+{"id": "94306:s:fc053f1f", "decision": "do", "objective": "Crimson Silk Robe", "text": "Make with Tailoring (silk, elemental fire, mana potions) or buy one", "reason": "craft recipe"}
+{"id": "94307:s:df413a1a", "decision": "do", "objective": "Shadoweave Robe", "text": "Make with Tailoring (Bolt of Mageweave, Shadow Silk) or get one", "reason": "craft recipe"}
+{"id": "94308:s:6515c92a", "decision": "do", "objective": "Enchanted Mageweave Pouch", "text": "Make with Tailoring (Bolt of Mageweave, Vision Dust) or buy one", "reason": "craft recipe"}
+{"id": "94310:s:cb95947c", "decision": "do", "objective": "Black Mageweave Vest", "text": "Make with Tailoring (Bolt of Mageweave, Silken Thread) or get one", "reason": "craft recipe"}
+{"id": "94311:s:7858c1d1", "decision": "do", "objective": "Red Mageweave Pants", "text": "Make with Tailoring (Bolt of Mageweave, Red Dye) or get a pair", "reason": "craft recipe"}
+{"id": "94312:s:03d528c7", "decision": "do", "objective": "Orange Martial Shirt", "text": "Make with Tailoring (Bolt of Mageweave, Orange Dye) or buy one", "reason": "craft recipe"}
+{"id": "94313:s:6cea94eb", "decision": "do", "objective": "White Bandit Mask", "text": "Make the mask with Tailoring", "reason": "craft recipe"}
+{"id": "94314:s:f20b1f1a", "decision": "do", "objective": "Cindercloth Robe", "text": "Make with Tailoring (Bolt of Mageweave, Heart of Fire) or buy one", "reason": "craft recipe"}
+{"id": "94315:s:6a89eba8", "decision": "do", "objective": "Earthen Silk Belt", "text": "Make with Tailoring (silk, Elemental Earth, Iron Buckle) or get one", "reason": "craft recipe"}
+{"id": "94317:s:7ca7ee2b", "decision": "do", "objective": "Dreamless Sleep Potion", "text": "Brew with Alchemy (Purple Lotus, Crystal Vial) or have one made", "reason": "craft recipe"}
+{"id": "94318:s:1f018e94", "decision": "do", "objective": "Greater Fire Protection Potion", "text": "Brew with Alchemy (Elemental Fire, Dreamfoil, Crystal Vial) or buy one", "reason": "craft recipe"}
+{"id": "94319:s:c84aa094", "decision": "do", "objective": "Elixir of Detect Demon", "text": "Brew with Alchemy, or buy one", "reason": "craft recipe"}
+{"id": "94320:s:a1a77b8b", "decision": "do", "objective": "Gift of Arthas", "text": "Brew with Alchemy (Arthas' Tears, Wild Steelbloom) or buy one", "reason": "craft recipe"}
+{"id": "94321:s:0ef12558", "decision": "do", "objective": "Flask of Chromatic Resistance", "text": "Brew with Alchemy (Icecap, Mountain Silversage, Black Lotus) or get", "reason": "craft recipe"}
+{"id": "94322:s:2b171a90", "decision": "do", "objective": "Limited Invulnerability Potion", "text": "Brew with Alchemy (Blindweed, Ghost Mushroom, Crystal Vial) or buy one", "reason": "craft recipe"}
+{"id": "94323:s:75256bb0", "decision": "do", "objective": "Major Rejuvenation Potion", "text": "Brew with Alchemy (Heart of the Wild, Golden Sansam) or buy one", "reason": "craft recipe"}
+{"id": "94325:s:1fb28911", "decision": "do", "objective": "Radiant Circlet", "text": "Make with Blacksmithing (Thorium Bars, Heart of Fire) or buy one", "reason": "craft recipe"}
+{"id": "94327:s:1bda12ec", "decision": "do", "objective": "Orcish War Leggings", "text": "Make with Blacksmithing (Mithril Bars, Elemental Earth) or get them", "reason": "craft recipe"}
+{"id": "94328:s:f67afec6", "decision": "do", "objective": "Mithril Spurs", "text": "Make with Blacksmithing (Mithril Bars, Solid Grinding Stones) or buy", "reason": "craft recipe"}
+{"id": "94329:s:a8f34367", "decision": "do", "objective": "Imperial Plate Chest", "text": "Make with Blacksmithing (40 Thorium Bars, 2 Star Rubies) or get one", "reason": "craft recipe"}
+{"id": "94330:s:8541f8b7", "decision": "do", "objective": "Darkrune Gauntlets", "text": "Make with Blacksmithing (Thorium, Dark Rune, Truesilver) or get them", "reason": "craft recipe"}
+{"id": "94331:s:f4fb11ad", "decision": "do", "objective": "Huge Thorium Battleaxe", "text": "Make with Blacksmithing (40 Thorium Bars, Rugged Leather) or buy one", "reason": "craft recipe"}
+{"id": "94333:s:25a63d9b", "decision": "do", "objective": "Ebon Shiv", "text": "Make with Blacksmithing (Mithril, Truesilver, Star Rubies) or buy one", "reason": "craft recipe"}
+{"id": "94334:s:eb5ea4b1", "decision": "do", "objective": "Masterwork Target Dummy", "text": "Make with Engineering, or buy one from another player", "reason": "craft recipe"}
+{"id": "94335:s:3c650c48", "decision": "do", "objective": "Green Lens", "text": "Make with Engineering (jade, aquamarine, heart of the wild) or buy one", "reason": "craft recipe"}
+{"id": "94336:s:208b711e", "decision": "do", "objective": "Lifelike Mechanical Toad", "text": "Make with Engineering, or buy one", "reason": "craft recipe"}
+{"id": "94337:s:cd2186ee", "decision": "do", "objective": "Alarm-O-Bot", "text": "Make with Engineering (Thorium Bars, Star Ruby, Thorium Widget) or buy", "reason": "craft recipe"}
+{"id": "94338:s:e8bb7d14", "decision": "do", "objective": "Goblin Jumper Cables XL", "text": "Make with Engineering, or trade for a pair", "reason": "craft recipe"}
+{"id": "94339:s:e8034c6b", "decision": "do", "objective": "Field Repair Bot 74A", "text": "Make with Engineering (Thorium Bars, Fused Wiring) or get one", "reason": "craft recipe"}
+{"id": "94341:s:a10feb72", "decision": "do", "objective": "Sniper Scope", "text": "Make with Engineering (Mithril Tube, Star Ruby, Truesilver) or get one", "reason": "craft recipe"}
+{"id": "94342:s:7d51b522", "decision": "do", "objective": "Tranquil Mechanical Yeti", "text": "Make with Engineering, or get one another way", "reason": "craft recipe"}
+{"id": "94343:s:ac3b1758", "decision": "do", "objective": "Wicked Leather Pants", "text": "Make with Leatherworking (Rugged Leather, Black Dye) or buy them", "reason": "craft recipe"}
+{"id": "94344:s:75519901", "decision": "do", "objective": "Gordok Ogre Suit", "text": "Make with Tailoring (Runecloth, Rugged Leather, Ogre Tannin) or get", "reason": "craft recipe"}
+{"id": "94345:s:41f3a06c", "decision": "do", "objective": "Volcanic Breastplate", "text": "Make with Leatherworking (Essence of Fire, Essence of Earth) or get", "reason": "craft recipe"}
+{"id": "94346:s:14f0d942", "decision": "do", "objective": "Runic Leather Headband", "text": "Make with Leatherworking (Rugged Leather, Runecloth) or buy one", "reason": "craft recipe"}
+{"id": "94347:s:70887beb", "decision": "do", "objective": "Wicked Leather Bracers", "text": "Make with Leatherworking (Rugged Leather, Black Dye) or buy them", "reason": "craft recipe"}
+{"id": "94348:s:4ffd67d6", "decision": "do", "objective": "Chimeric Vest", "text": "Make with Leatherworking (Rugged Leather, Chimera Leather) or get one", "reason": "craft recipe"}
+{"id": "94349:s:4a85112c", "decision": "do", "objective": "Heavy Scorpid Helm", "text": "Make with Leatherworking (Heavy Scorpid Scale) or buy one", "reason": "craft recipe"}
+{"id": "94351:s:1e26cc9d", "decision": "do", "objective": "Frostsaber Boots", "text": "Make with Leatherworking (Rugged Leather, Frostsaber Leather) or buy", "reason": "craft recipe"}
+{"id": "94352:s:397d5945", "decision": "do", "objective": "Wizardweave Turban", "text": "Make with Tailoring (Runecloth, Dream Dust, Star Ruby) or get one", "reason": "craft recipe"}
+{"id": "94353:s:27917f2c", "decision": "do", "objective": "Runecloth Bag", "text": "Make with Tailoring (Bolt of Runecloth, Rugged Leather) or get one", "reason": "craft recipe"}
+{"id": "94354:s:ba760899", "decision": "do", "objective": "Runecloth Boots", "text": "Make with Tailoring (Runecloth, Ironweb Spider Silk) or get them", "reason": "craft recipe"}
+{"id": "94355:s:fb731c3a", "decision": "do", "objective": "Tuxedo Jacket", "text": "Make with Tailoring (Bolt of Mageweave, Heavy Silken Thread) or get", "reason": "craft recipe"}
+{"id": "94356:s:e3f12495", "decision": "do", "objective": "Felcloth Boots", "text": "Make with Tailoring (Runecloth, Felcloth, Rugged Leather) or buy them", "reason": "craft recipe"}
+{"id": "94357:s:548cfa8a", "decision": "do", "objective": "Cenarion Herb Bag", "text": "Make with Tailoring (Runecloth, Purple Lotus, Morrowgrain) or buy one", "reason": "craft recipe"}
+{"id": "94358:s:b504dca8", "decision": "do", "objective": "Shadoweave Mask", "text": "Make with Tailoring (Bolt of Mageweave, Shadow Silk) or buy one", "reason": "craft recipe"}
+{"id": "94359:s:09fe9ab4", "decision": "do", "objective": "Ghostweave Vest", "text": "Make with Tailoring (Runecloth, Ghost Dye, Ironweb Spider Silk) or get", "reason": "craft recipe"}
+{"id": "94360:s:84310ffa", "decision": "do", "objective": "Soul Pouch", "text": "Make with Tailoring (Runecloth, Rugged Leather, Ichor of Undeath)", "reason": "craft recipe"}
+{"id": "94375:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "94465:s:4414362c", "decision": "skip", "reason": "accept row"}
+{"id": "94468:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "94488:s:a2e074bf", "decision": "skip", "reason": "restates objective"}
+{"id": "94491:s:8ebec56f", "decision": "hint", "text": "Keep the Mysterious Orders from the quest giver in your bags until you turn the quest in.", "reason": "keep item"}
+{"id": "94502:s:8ebec56f-2", "decision": "hint", "text": "Keep the Purest Water from the quest giver in your bags; you need it at the shrine turn-in.", "reason": "keep item"}
+{"id": "94505:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "94864:s:7df69a60", "decision": "skip", "reason": "accept row"}
+{"id": "94872:s:f6a55130", "decision": "skip", "reason": "accept row"}
+{"id": "94873:s:f6a55130", "decision": "skip", "reason": "accept row"}
+{"id": "94978:s:fd1121dc", "decision": "skip", "reason": "accept row"}
+{"id": "94979:s:3b68d0f4", "decision": "skip", "reason": "accept row"}
+{"id": "95111:s:49bdf32c", "decision": "skip", "reason": "accept row"}
+{"id": "95140:s:8ebec56f", "decision": "skip", "reason": "elite, group"}
+{"id": "95195:s:8ebec56f", "decision": "skip", "reason": "group only, quest start"}
+{"id": "95212:s:ffa7564a", "decision": "do", "objective": "Pristine Leopard Pelt", "text": "Hunt Elder Snow Leopards east of Amberstill Ranch for the pelts", "reason": "source and location"}
+{"id": "95213:s:88180c68", "decision": "skip", "reason": "accept row"}
+{"id": "95213:s:8ebec56f", "decision": "skip", "reason": "how to start, useless once accepted"}
+{"id": "95216:s:bb64ba10", "decision": "skip", "reason": "obvious drop source"}
+{"id": "95216:s:8ebec56f", "decision": "skip", "reason": "elite, group"}
+{"id": "95250:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "95495:s:0d09c151", "decision": "skip", "reason": "accept row"}
+{"id": "95621:s:22fdac6f", "decision": "skip", "reason": "restates objective"}
+{"id": "95646:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "95682:s:bc1db74b", "decision": "skip", "reason": "obvious drop source"}
+{"id": "95682:s:8ebec56f-2", "decision": "skip", "reason": "dungeon, group"}
+{"id": "95772:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "95773:s:55cc6ab5", "decision": "skip", "reason": "restates objective"}
+{"id": "95775:s:3082f5d3", "decision": "skip", "reason": "restates objective"}
+{"id": "95775:s:088736c2", "decision": "skip", "reason": "restates objective"}
+{"id": "95775:s:665ac094", "decision": "skip", "reason": "restates objective"}
+{"id": "95775:s:c46bbea7", "decision": "skip", "reason": "restates objective"}
+{"id": "95775:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "95776:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "95803:s:d2d947fd", "decision": "skip", "reason": "accept row"}
+{"id": "95803:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "95805:s:86dba1e8", "decision": "skip", "reason": "accept row, timer covered by gotcha"}
+{"id": "95805:s:8ebec56f", "decision": "hint", "text": "The incense pouch disappears after 10 minutes, so go straight to the shrine.", "reason": "timer"}
+{"id": "95883:s:8ebec56f", "decision": "hint", "text": "Turn the quest in at the Offering Stone object, not at an NPC.", "reason": "surprising turn-in"}
+{"id": "95884:s:8ebec56f", "decision": "hint", "text": "Turn the quest in at a world object, not at an NPC.", "reason": "surprising turn-in"}
+{"id": "95981:s:9c2a72d0", "decision": "skip", "reason": "restates objective"}
+{"id": "95999:s:9d910921", "decision": "skip", "reason": "restates objective"}
+{"id": "96135:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "96138:s:8ebec56f-2", "decision": "hint", "text": "Keep Merrick's Bow in your bags until you turn the quest in.", "reason": "keep item"}
+{"id": "96222:s:f299b782", "decision": "skip", "reason": "elite, group"}
+{"id": "96222:s:8ebec56f", "decision": "hint", "text": "Khan Hratha only shows up after you use the War Horn Mouthpiece on the highest peak.", "reason": "hidden spawn"}
+{"id": "96222:s:8ebec56f-2", "decision": "skip", "reason": "elite, group"}
+{"id": "96264:s:b34ab4e4", "decision": "skip", "reason": "obvious drop source"}
+{"id": "96264:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "96390:s:bcf0c500", "decision": "skip", "reason": "turn-in"}
+{"id": "96392:s:8ebec56f", "decision": "hint", "text": "Talk to Earthseer Farsen and use his far sight; the credit comes from his dialogue, not from fighting.", "reason": "talk, not fight"}
+{"id": "96403:s:8ebec56f-2", "decision": "skip", "reason": "dungeon, group"}
+{"id": "96628:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "96646:s:591eab4a", "decision": "skip", "reason": "turn-in"}
+{"id": "96652:s:642df344", "decision": "skip", "reason": "accept row"}
+{"id": "96655:s:b71fb076", "decision": "skip", "reason": "turn-in"}
+{"id": "96658:s:d59e059f", "decision": "skip", "reason": "turn-in"}
+{"id": "96659:s:cd0a83bd", "decision": "skip", "reason": "accept row"}
+{"id": "96774:s:4b3ce616", "decision": "skip", "reason": "turn-in"}
+{"id": "96783:s:8ebec56f", "decision": "hint", "text": "Turn the quest in at a footlocker object in Northfold Manor, not at an NPC.", "reason": "surprising turn-in"}
+{"id": "96800:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "96875:s:6b91f1e6", "decision": "do", "objective": "Cured Light Hide", "text": "Make Cured Light Hides with Leatherworking from Light Hide and Salt", "reason": "crafted, not dropped"}
+{"id": "96875:s:8ebec56f-2", "decision": "skip", "reason": "covered by do line"}
+{"id": "96876:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "96898:s:645b40fd", "decision": "skip", "reason": "accept row"}
+{"id": "96898:s:a5ad4139", "decision": "do", "objective": "Necrotic Crystal Fragment", "text": "Click crystal fragments, or kill Dark Neophytes and Dark Enforcers", "reason": "objects and drops"}
+{"id": "96898:s:117e6982", "decision": "skip", "reason": "turn-in"}
+{"id": "96986:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "96988:s:8ebec56f", "decision": "skip", "reason": "dungeon, group"}
+{"id": "97003:s:7f9ee90a", "decision": "skip", "reason": "elite, group"}
+{"id": "97047:s:21541d43", "decision": "do", "objective": "Kurzen Fighter's Uniform", "text": "Click the uniform object in the compound to take the disguise", "reason": "object"}
+{"id": "97242:s:3f4c6e9d", "decision": "do", "objective": "Handful of Cattails", "text": "Click Cattail plants near the water in Valley of Honor", "reason": "object"}
+{"id": "97242:s:5f3d7a8f", "decision": "do", "objective": "Speargrass Cuttings", "text": "Click Speargrass plants around the water in Valley of Honor", "reason": "object"}
+{"id": "97243:s:c95668e4", "decision": "skip", "reason": "accept row"}
+{"id": "97249:s:8fdb3f54", "decision": "skip", "reason": "accept row"}
+{"id": "97250:s:6f7d77b6", "decision": "skip", "reason": "elite, group"}
+{"id": "97250:s:8ebec56f", "decision": "skip", "reason": "elite, group"}
+{"id": "97257:s:55e7df1a", "decision": "skip", "reason": "accept row"}
+{"id": "97265:s:17a2733a", "decision": "skip", "reason": "unclear which objective"}
+{"id": "97265:s:8ac011be", "decision": "skip", "reason": "unclear which objective"}
+{"id": "97265:s:ce9cddd1", "decision": "skip", "reason": "unclear which objective"}
+{"id": "97265:s:ac899c97", "decision": "skip", "reason": "unclear which objective"}
+{"id": "97275:s:119b2b9c", "decision": "skip", "reason": "accept row"}
+{"id": "97282:s:8ebec56f", "decision": "do", "objective": "Charged Thunder Lizard Organ", "text": "Loot the organs from Thunder Lizards and Lightning Hides", "reason": "extra drop source"}
+{"id": "97284:s:0ecee2bf", "decision": "skip", "reason": "restates objective"}
+{"id": "97284:s:9319b4b9", "decision": "skip", "reason": "restates objective"}
+{"id": "97284:s:b822030b", "decision": "skip", "reason": "restates objective"}
+{"id": "97284:s:a2226d15", "decision": "do", "objective": "Burning Blade Felsworn", "text": "Kill Felsworn, mostly in the northern part of the fortress", "reason": "location"}
+{"id": "97286:s:d88e78e2", "decision": "skip", "reason": "accept row"}
+{"id": "97287:s:b60efcd3", "decision": "skip", "reason": "accept row"}
+{"id": "97289:s:1df081a6", "decision": "skip", "reason": "accept row"}
+{"id": "97930:s:81610834", "decision": "skip", "reason": "turn-in"}
+{"id": "98046:s:5b5d1465", "decision": "skip", "reason": "accept row"}
+{"id": "98065:s:c89a4d65", "decision": "skip", "reason": "accept row"}
+{"id": "98069:s:8ebec56f", "decision": "hint", "text": "The supplies are objects you click in the world, not drops from harpies.", "reason": "objects, not drops"}
+{"id": "98093:s:d7e3b192", "decision": "skip", "reason": "restates objective"}
+{"id": "98094:s:b9a52a4a", "decision": "skip", "reason": "accept row"}
+{"id": "98156:s:8ebec56f", "decision": "hint", "text": "Keep the pelt package from the quest giver; don't lose or destroy it before the turn-in.", "reason": "keep item"}
+{"id": "98189:s:4dd0987c", "decision": "skip", "reason": "accept row"}
+{"id": "98190:s:208a4322", "decision": "skip", "reason": "accept row"}
+{"id": "98191:s:f83a5d5a", "decision": "skip", "reason": "accept row"}
+{"id": "98209:s:d9d67119", "decision": "skip", "reason": "accept row"}
+{"id": "98216:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "98230:s:2473bb03", "decision": "skip", "reason": "accept row"}
+{"id": "98240:s:021750e3", "decision": "skip", "reason": "accept row"}
+{"id": "98240:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "98283:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "98291:s:f6671dcb", "decision": "skip", "reason": "elite, restates objective"}
+{"id": "98291:s:b91e7318", "decision": "skip", "reason": "elite, restates objective"}
+{"id": "98291:s:84f95549", "decision": "skip", "reason": "turn-in"}
+{"id": "98291:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "98300:s:101565b3", "decision": "skip", "reason": "accept row"}
+{"id": "98313:s:efcd0422", "decision": "skip", "reason": "accept row"}
+{"id": "98323:s:6db6a423", "decision": "skip", "reason": "accept row"}
+{"id": "98326:s:0412a8e9", "decision": "skip", "reason": "restates objective"}
+{"id": "98342:s:8923e360", "decision": "skip", "reason": "unclear which relic"}
+{"id": "98342:s:21933a75", "decision": "skip", "reason": "unclear which relic"}
+{"id": "98396:s:8923e360", "decision": "skip", "reason": "unclear which relic"}
+{"id": "98396:s:21933a75", "decision": "skip", "reason": "unclear which relic"}
+{"id": "98396:s:b3c76a7c", "decision": "skip", "reason": "unclear which relic"}
+{"id": "98403:s:d942425f", "decision": "do", "objective": "Mature Fel Moss", "text": "Kill the satyr demon in the small cave at the top of the Cleft", "reason": "source and location"}
+{"id": "98404:s:8923e360", "decision": "do", "objective": "Relic of the Fang", "text": "Click the Relic of the Fang object inside the den", "reason": "object"}
+{"id": "98404:s:21933a75", "decision": "do", "objective": "Relic of the Claw", "text": "Click the Relic of the Claw object inside the den", "reason": "object"}
+{"id": "98404:s:b3c76a7c", "decision": "do", "objective": "Relic of the Silent Shadow", "text": "Click the Relic of the Silent Shadow object inside the den", "reason": "object"}
+{"id": "98418:s:b1ebb04d", "decision": "skip", "reason": "restates objective"}
+{"id": "98418:s:1432fc73", "decision": "skip", "reason": "restates objective"}
+{"id": "98418:s:989df933", "decision": "skip", "reason": "restates objective"}
+{"id": "98435:s:8e569f59", "decision": "skip", "reason": "accept row"}
+{"id": "98461:s:0985de67", "decision": "skip", "reason": "accept row"}
+{"id": "98824:s:dd359f81", "decision": "skip", "reason": "accept row"}
+{"id": "98891:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "98893:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "98904:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "98908:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "99052:s:37ac0c1c", "decision": "skip", "reason": "restates objective"}
+{"id": "99081:s:8ebec56f", "decision": "hint", "text": "Keep the report from the quest giver in your bags until you hand it in.", "reason": "keep item"}
+{"id": "99128:s:e1720f2b", "decision": "skip", "reason": "accept row"}
+{"id": "99128:s:d58268ae", "decision": "skip", "reason": "turn-in"}
+{"id": "99158:s:c58017af", "decision": "skip", "reason": "accept row"}
+{"id": "99161:s:55195315", "decision": "skip", "reason": "restates objective"}

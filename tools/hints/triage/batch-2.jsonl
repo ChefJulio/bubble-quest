@@ -1,0 +1,302 @@
+{"id": "1821:s:b9198d01", "decision": "do", "objective": "Agamand Family Mace", "text": "Take the mace from another weapon rack in the crypt", "reason": "object location"}
+{"id": "1824:s:8ebec56f", "decision": "hint", "text": "30 minute quest timer, and each antenna disappears 15 minutes after you loot it.", "reason": "timer"}
+{"id": "1838:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "1843:s:91da29be", "decision": "skip", "reason": "turn-in"}
+{"id": "1847:s:d19e05c6", "decision": "skip", "reason": "turn-in"}
+{"id": "1878:s:53ff831f", "decision": "skip", "reason": "restates drop source"}
+{"id": "1948:s:0e38c751", "decision": "hint", "text": "Click the bramble on the stone to pick it up; it does not go into your bags by itself.", "reason": "object pickup"}
+{"id": "1957:s:f8608b11", "decision": "hint", "text": "Accepting opens the rift and starts a 10 minute timer.", "reason": "timer"}
+{"id": "2040:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "2160:s:2205228f", "decision": "skip", "reason": "accept"}
+{"id": "2318:s:0f73fbdd", "decision": "skip", "reason": "accept"}
+{"id": "2339:s:e23745cb", "decision": "skip", "reason": "drop source on card; elite"}
+{"id": "2339:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "2340:s:06e902a6", "decision": "skip", "reason": "accept"}
+{"id": "2341:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "2361:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "2381:s:8260ae9a", "decision": "hint", "text": "Stealth first so it does not attack, then use the E.C.A.C. on the giant Polly to shrink it.", "reason": "use item, approach"}
+{"id": "2418:s:80ecffa0", "decision": "skip", "reason": "restates drop source"}
+{"id": "2440:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "2520:s:b9e566ed", "decision": "skip", "reason": "accept"}
+{"id": "2606:s:5a0f4632", "decision": "skip", "reason": "accept"}
+{"id": "2751:s:f13eaae8", "decision": "do", "objective": "Patterned Bronze Bracers", "text": "Blacksmith them: 5 Bronze Bars and 2 Coarse Grinding Stones each", "reason": "craft recipe"}
+{"id": "2751:s:301be1f6", "decision": "do", "objective": "Bronze Greatsword", "text": "Blacksmith them: 12 Bronze Bars, 2 Strong Flux, 2 Medium Leather each", "reason": "craft recipe"}
+{"id": "2752:s:b840e5fc", "decision": "do", "objective": "Bronze Battle Axe", "text": "Blacksmith 4: 14 Bronze Bars, 1 Strong Flux, 2 Medium Leather each", "reason": "craft recipe"}
+{"id": "2752:s:80b68291", "decision": "do", "objective": "Bronze Warhammer", "text": "Blacksmith 4: 8 Bronze Bars, 1 Strong Flux, 1 Medium Leather each", "reason": "craft recipe"}
+{"id": "2753:s:e7b8f509", "decision": "do", "objective": "Green Iron Helm", "text": "Blacksmith 4: 12 Iron Bars, 1 Citrine, 1 Green Dye each", "reason": "craft recipe"}
+{"id": "2753:s:8b83b614", "decision": "do", "objective": "Green Iron Bracers", "text": "Blacksmith 4: 6 Iron Bars and 1 Green Dye each", "reason": "craft recipe"}
+{"id": "2753:s:86795309", "decision": "do", "objective": "Green Iron Leggings", "text": "Blacksmith 2: 8 Iron Bars, 1 Heavy Grinding Stone, 1 Green Dye each", "reason": "craft recipe"}
+{"id": "2754:s:85b39d40", "decision": "skip", "reason": "recipe too long for a do line, objective not named"}
+{"id": "2754:s:4ec09bde", "decision": "do", "objective": "Silvered Bronze Boots", "text": "Blacksmith 2: 6 Bronze Bars, 1 Silver Bar, 2 Coarse Grinding Stones", "reason": "craft recipe"}
+{"id": "2754:s:209f4606", "decision": "do", "objective": "Silvered Bronze Gauntlets", "text": "Blacksmith 2: 8 Bronze Bars, 1 Silver Bar, 2 Coarse Grinding Stones", "reason": "craft recipe"}
+{"id": "2757:s:8ebec56f-2", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "2759:s:8ebec56f-2", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "2761:s:04c48cf2", "decision": "do", "objective": "Iron Bar", "text": "Smelt Iron Ore into bars with Mining, or buy them", "reason": "craft method"}
+{"id": "2761:s:20a40fce", "decision": "do", "objective": "Mithril Bar", "text": "Smelt Mithril Ore into bars with Mining", "reason": "craft method"}
+{"id": "2763:s:20a40fce", "decision": "do", "objective": "Mithril Bar", "text": "Smelt Mithril Ore into bars with Mining, or buy them", "reason": "craft method"}
+{"id": "2768:s:d97b9fce", "decision": "skip", "reason": "elite; restates drop source"}
+{"id": "2771:s:7eeeb3b6", "decision": "do", "objective": "Mithril Coif", "text": "Blacksmith 2: 10 Mithril Bars and 6 Mageweave Cloth each", "reason": "craft recipe"}
+{"id": "2771:s:f10b58ba", "decision": "do", "objective": "Ornate Mithril Shoulder", "text": "Blacksmith from 12 Mithril Bars, 1 Truesilver Bar, 6 Thick Leather", "reason": "craft recipe"}
+{"id": "2772:s:ac61df55", "decision": "do", "objective": "Heavy Mithril Boots", "text": "Blacksmith them: 14 Mithril Bars and 4 Thick Leather each", "reason": "craft recipe"}
+{"id": "2772:s:2936a9c9", "decision": "skip", "reason": "reagents given only as ids, unclear"}
+{"id": "2773:s:299ab99b", "decision": "do", "objective": "Heavy Mithril Breastplate", "text": "Blacksmith with 16 Mithril Bars each; recipe from a trainer", "reason": "craft recipe"}
+{"id": "2773:s:1ed80b75", "decision": "do", "objective": "Ornate Mithril Gloves", "text": "Use 10 Mithril Bar, 6 Mageweave, Truesilver Bar, Solid Grinding Stone", "reason": "craft recipe"}
+{"id": "2845:s:8ebec56f", "decision": "hint", "text": "15 minute quest timer, and Shay's Bell also disappears after 15 minutes.", "reason": "timer"}
+{"id": "2849:s:fa884312", "decision": "do", "objective": "Turtle Scale Breastplate", "text": "Leatherwork: 6 Thick Leather, 12 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2850:s:e41904d7", "decision": "do", "objective": "Nightscape Tunic", "text": "Leatherwork them: 7 Thick Leather and 2 Silken Thread each", "reason": "craft recipe"}
+{"id": "2850:s:f6676c37", "decision": "do", "objective": "Nightscape Headband", "text": "Leatherwork them: 5 Thick Leather and 2 Silken Thread each", "reason": "craft recipe"}
+{"id": "2850:s:8ebec56f", "decision": "skip", "reason": "restates craft totals"}
+{"id": "2851:s:d35e9f00", "decision": "do", "objective": "Nightscape Pants", "text": "Leatherwork 2: 14 Thick Leather and 4 Silk Thread each", "reason": "craft recipe"}
+{"id": "2851:s:5aebd250", "decision": "do", "objective": "Nightscape Boots", "text": "Leatherwork 2: 16 Thick Leather and 2 Heavy Silken Thread each", "reason": "craft recipe"}
+{"id": "2852:s:77b2891a", "decision": "do", "objective": "Turtle Scale Helm", "text": "Leatherwork: 14 Thick Leather, 24 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2852:s:dbb4edb1", "decision": "do", "objective": "Turtle Scale Bracers", "text": "Leatherwork 2: 8 Thick Leather, 12 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2856:s:fa884312", "decision": "do", "objective": "Turtle Scale Breastplate", "text": "Leatherwork: 6 Thick Leather, 12 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2856:s:7537d414", "decision": "do", "objective": "Turtle Scale Gloves", "text": "Leatherwork: 6 Thick Leather, 8 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2857:s:e41904d7", "decision": "do", "objective": "Nightscape Tunic", "text": "Leatherwork them: 7 Thick Leather and 2 Silken Thread each", "reason": "craft recipe"}
+{"id": "2857:s:f6676c37", "decision": "do", "objective": "Nightscape Headband", "text": "Leatherwork them: 5 Thick Leather and 2 Silken Thread each", "reason": "craft recipe"}
+{"id": "2858:s:d35e9f00", "decision": "do", "objective": "Nightscape Pants", "text": "Leatherwork them: 14 Thick Leather and 4 Silk Thread each", "reason": "craft recipe"}
+{"id": "2858:s:5aebd250", "decision": "do", "objective": "Nightscape Boots", "text": "Leatherwork them: 16 Thick Leather and 2 Heavy Silken Thread each", "reason": "craft recipe"}
+{"id": "2858:s:8ebec56f-2", "decision": "skip", "reason": "restates craft totals"}
+{"id": "2859:s:77b2891a", "decision": "do", "objective": "Turtle Scale Helm", "text": "Leatherwork: 14 Thick Leather, 24 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2859:s:dbb4edb1", "decision": "do", "objective": "Turtle Scale Bracers", "text": "Leatherwork 2: 8 Thick Leather, 12 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft recipe"}
+{"id": "2860:s:6a093d88", "decision": "skip", "reason": "accept"}
+{"id": "2863:s:c7af8e9a", "decision": "skip", "reason": "accept; timer covered by gotcha row"}
+{"id": "2863:s:8ebec56f", "decision": "hint", "text": "One hour quest timer; if it runs out, abandon and re-accept the quest.", "reason": "timer"}
+{"id": "2871:s:9c707ace", "decision": "skip", "reason": "accept"}
+{"id": "2878:s:b7129f0f", "decision": "skip", "reason": "accept"}
+{"id": "2878:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "2878:s:8ebec56f", "decision": "hint", "text": "The salve does not drop from mobs; it is a reward from the Cenarion salve quests.", "reason": "item source"}
+{"id": "2926:s:8ebec56f-3", "decision": "skip", "reason": "elite"}
+{"id": "2929:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "2930:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "2936:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "2938:s:377349e3", "decision": "skip", "reason": "accept"}
+{"id": "2943:s:8ebec56f-2", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "2948:s:8ebec56f", "decision": "hint", "text": "Bring the Brilliant Gold Ring from the earlier Gnomeregan quest; it must still be in your bags.", "reason": "item from earlier quest"}
+{"id": "2948:s:8ebec56f-2", "decision": "hint", "text": "Turning in the quest costs 30 silver.", "reason": "turn-in cost"}
+{"id": "2950:s:8ebec56f", "decision": "hint", "text": "Bring 30 silver; Nogg takes it at turn-in.", "reason": "turn-in cost"}
+{"id": "2951:s:8ebec56f", "decision": "hint", "text": "The machine takes 3 silver at turn-in.", "reason": "turn-in cost"}
+{"id": "2962:s:8ebec56f-2", "decision": "hint", "text": "The fallout disappears after 2 hours, so hearth back and hand it in quickly.", "reason": "timer"}
+{"id": "2976:s:b66a3388", "decision": "skip", "reason": "accept"}
+{"id": "2988:s:8ad5491e", "decision": "do", "objective": "Second Witherbark Cage", "text": "Check the cage right beside the first one", "reason": "object location"}
+{"id": "2990:s:cb68bae8", "decision": "skip", "reason": "accept"}
+{"id": "2991:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "2994:s:d76d5c77", "decision": "do", "objective": "Sharpbeak's Cage", "text": "Get the key that opens the cage from Hexx", "reason": "key source"}
+{"id": "3002:s:139c71eb", "decision": "skip", "reason": "accept"}
+{"id": "3062:s:678fb052", "decision": "skip", "reason": "elite; combat tip"}
+{"id": "3065:s:49950a4a", "decision": "skip", "reason": "accept"}
+{"id": "3082:s:63bf771a", "decision": "skip", "reason": "accept"}
+{"id": "3084:s:725eb7c5", "decision": "skip", "reason": "accept"}
+{"id": "3085:s:3e2e3ede", "decision": "skip", "reason": "accept"}
+{"id": "3085:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3086:s:a45cddb0", "decision": "skip", "reason": "accept"}
+{"id": "3087:s:55b9d021", "decision": "skip", "reason": "accept"}
+{"id": "3092:s:320c6752", "decision": "skip", "reason": "accept"}
+{"id": "3093:s:1ac57020", "decision": "skip", "reason": "accept"}
+{"id": "3094:s:0cdd5787", "decision": "skip", "reason": "accept"}
+{"id": "3097:s:2be3d89d", "decision": "skip", "reason": "accept"}
+{"id": "3098:s:6a05b722", "decision": "skip", "reason": "accept"}
+{"id": "3099:s:5ee9d843", "decision": "skip", "reason": "accept"}
+{"id": "3099:s:8ebec56f", "decision": "skip", "reason": "trivia; delivery item given at accept"}
+{"id": "3100:s:f5616485", "decision": "skip", "reason": "accept"}
+{"id": "3101:s:6622ce10", "decision": "skip", "reason": "accept"}
+{"id": "3102:s:e4bf9f1a", "decision": "skip", "reason": "accept"}
+{"id": "3105:s:6622ce10", "decision": "skip", "reason": "accept"}
+{"id": "3106:s:debf44f2", "decision": "skip", "reason": "accept"}
+{"id": "3106:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3107:s:44295a86", "decision": "skip", "reason": "accept"}
+{"id": "3108:s:7dadf8c9", "decision": "skip", "reason": "accept"}
+{"id": "3109:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3112:s:894da0b4", "decision": "skip", "reason": "accept"}
+{"id": "3113:s:67907b7f", "decision": "skip", "reason": "accept"}
+{"id": "3114:s:8ebec56f", "decision": "skip", "reason": "class trivia; delivery item"}
+{"id": "3116:s:ca60aa33", "decision": "skip", "reason": "accept"}
+{"id": "3118:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3119:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3120:s:b64b3ecc", "decision": "skip", "reason": "accept"}
+{"id": "3124:s:db4e448c", "decision": "skip", "reason": "accept"}
+{"id": "3181:s:bc44aaad", "decision": "skip", "reason": "accept; delivery item"}
+{"id": "3301:s:0aa329a0", "decision": "skip", "reason": "accept"}
+{"id": "3301:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3363:s:8ebec56f", "decision": "hint", "text": "You cannot kill or loot anything for the salve; it is a reward from the Cenarion salve quests.", "reason": "item source"}
+{"id": "3364:s:9b49fe9f", "decision": "skip", "reason": "accept; timer covered by gotcha row"}
+{"id": "3364:s:8ebec56f", "decision": "hint", "text": "The quest and the mornbrew expire after 5 minutes, so go straight to Durnan.", "reason": "timer"}
+{"id": "3370:s:09d8782a", "decision": "skip", "reason": "accept"}
+{"id": "3373:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "3373:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "3382:s:eb61b0ca", "decision": "hint", "text": "The naga attack event starts as soon as you accept the quest.", "reason": "event starts at accept"}
+{"id": "3385:s:74797ed6", "decision": "skip", "reason": "elite; restates objective"}
+{"id": "3442:s:2ea32c4b", "decision": "skip", "reason": "restates drop source"}
+{"id": "3442:s:b620ee3d", "decision": "skip", "reason": "restates drop source"}
+{"id": "3452:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "3506:s:fff28e49", "decision": "skip", "reason": "spawn trigger unclear; combat tip"}
+{"id": "3507:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3510:s:6fcc727b", "decision": "skip", "reason": "restates objective"}
+{"id": "3513:s:7a928cb2", "decision": "skip", "reason": "quest start; delivery item"}
+{"id": "3513:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "3526:s:4ceaf140", "decision": "skip", "reason": "accept"}
+{"id": "3528:s:4f079edd", "decision": "hint", "text": "Use the Essence in your bags to fill the egg; that makes the Filled Egg of Hakkar.", "reason": "use item"}
+{"id": "3562:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3564:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3566:s:fc63746e", "decision": "hint", "text": "Accepting spawns Dorius, who turns into Lathoric and wakes Obsidion.", "reason": "hidden spawn"}
+{"id": "3566:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "3569:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "3601:s:ed7adf21", "decision": "do", "objective": "Kim'Jael's Scope", "text": "Keep opening boxes until the scope drops", "reason": "object source"}
+{"id": "3601:s:7bc464a9", "decision": "do", "objective": "Kim'Jael's Stuffed Chicken", "text": "Keep opening boxes until the stuffed chicken drops", "reason": "object source"}
+{"id": "3601:s:0d558bc1", "decision": "do", "objective": "Kim'Jael's Wizzlegoober", "text": "Keep opening boxes until the wizzlegoober drops", "reason": "object source"}
+{"id": "3621:s:7714c5bb", "decision": "skip", "reason": "accept"}
+{"id": "3630:s:46877fd2", "decision": "skip", "reason": "accept"}
+{"id": "3634:s:42e1eace", "decision": "skip", "reason": "accept"}
+{"id": "3635:s:975572b8", "decision": "skip", "reason": "accept"}
+{"id": "3639:s:bac3239e", "decision": "do", "objective": "Big Iron Bomb", "text": "Engineer 20: 3 Iron Bars, 3 Heavy Blasting Powder, 1 Silver Contact", "reason": "craft recipe"}
+{"id": "3639:s:d4faff80", "decision": "do", "objective": "Solid Dynamite", "text": "Engineer 20: 1 Solid Blasting Powder and 1 Silk Cloth each", "reason": "craft recipe"}
+{"id": "3641:s:0b445b90", "decision": "do", "objective": "Mithril Tube", "text": "Engineer them: 3 Mithril Bars each", "reason": "craft recipe"}
+{"id": "3643:s:0b445b90", "decision": "do", "objective": "Mithril Tube", "text": "Engineer them: 3 Mithril Bars each", "reason": "craft recipe"}
+{"id": "3643:s:afd21fe8", "decision": "do", "objective": "Accurate Scope", "text": "Engineer them; the recipe needs a Jade and a Citrine", "reason": "craft recipe"}
+{"id": "3643:s:75b148f8", "decision": "do", "objective": "Advanced Target Dummy", "text": "Engineer them; each also needs 4 Heavy Leather", "reason": "craft recipe"}
+{"id": "3782:s:316a33a3", "decision": "skip", "reason": "accept"}
+{"id": "3785:s:690b7255", "decision": "hint", "text": "Open the filled pouch; it gives Morrowgrain or a random herb, so repeat until you have 10.", "reason": "use item"}
+{"id": "3786:s:ad1d8ce8", "decision": "hint", "text": "Open the casing; it sometimes holds Morrowgrain and sometimes another herb. Repeat until you have 10.", "reason": "use item"}
+{"id": "3791:s:56318d66", "decision": "hint", "text": "Use the pouch with soil and Tharlendris Seeds in your bags; it makes a container item after a short wait.", "reason": "use item"}
+{"id": "3791:s:690b7255", "decision": "hint", "text": "Open the container items; each gives random herbs and sometimes Morrowgrain. Repeat until you have 10.", "reason": "use item"}
+{"id": "3802:s:6840171b", "decision": "skip", "reason": "restates drop source"}
+{"id": "3823:s:beff838f", "decision": "hint", "text": "Ogre mages are scarce; spawn points rotate between the three Firegut ogre types.", "reason": "conditional spawn"}
+{"id": "3842:s:8ebec56f", "decision": "hint", "text": "Bring Elixir of Lesser Fortitude, not Elixir of Fortitude as the quest text says.", "reason": "item mismatch"}
+{"id": "3907:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "3908:s:f5712fb2", "decision": "skip", "reason": "accept"}
+{"id": "3909:s:00b9fd8e", "decision": "skip", "reason": "unclear link to objective; vendor id"}
+{"id": "3913:s:8ebec56f-2", "decision": "hint", "text": "Linken's Tempered Sword from the previous quest must be in your bags.", "reason": "item from earlier quest"}
+{"id": "3923:s:37975e92", "decision": "skip", "reason": "accept"}
+{"id": "3924:s:98dff296", "decision": "hint", "text": "Use the cover while carrying the 5 pages to make the Samophlange Manual.", "reason": "combine"}
+{"id": "4001:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "4003:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "4041:s:7ab19aba", "decision": "do", "objective": "Evoroot", "text": "Loot one Evoroot from inside the enclosure", "reason": "object location"}
+{"id": "4063:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "4081:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "4082:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "4105:s:0cdfe899", "decision": "do", "objective": "Fel Creep", "text": "Gather Arthas' Tears herb nodes in Felwood for Fel Creep", "reason": "item source"}
+{"id": "4106:s:13f8932c", "decision": "do", "objective": "Patch of Tainted Skin", "text": "Skin the corpses for the patches; needs Skinning", "reason": "item source"}
+{"id": "4109:s:1983e260", "decision": "skip", "reason": "accept"}
+{"id": "4111:s:8ebec56f", "decision": "hint", "text": "The patches come from skinning the beasts, not from normal loot, so you need Skinning.", "reason": "item source"}
+{"id": "4113:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4113:s:8ebec56f", "decision": "hint", "text": "The salves come only from the Cenarion plant salve quests; have two in your bags before you click the flower.", "reason": "item source"}
+{"id": "4114:s:8ebec56f", "decision": "hint", "text": "Get two Cenarion Plant Salves from the separate salve quests; the songflower is both giver and turn-in.", "reason": "item source"}
+{"id": "4115:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4115:s:8ebec56f", "decision": "hint", "text": "Have two Cenarion Plant Salves in your bags before you click the plant; they come from the salve quests.", "reason": "item source"}
+{"id": "4116:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4116:s:8ebec56f", "decision": "hint", "text": "The salve comes only from separate Cenarion quests; have two in your bags before clicking the flower.", "reason": "item source"}
+{"id": "4117:s:8ebec56f", "decision": "hint", "text": "You need three salves from the Felwood salve quests; the quest starts and ends at the plant.", "reason": "item source"}
+{"id": "4118:s:2663bfcc", "decision": "skip", "reason": "accept"}
+{"id": "4118:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4118:s:8ebec56f", "decision": "hint", "text": "You need 2 Cenarion Plant Salves from the Cenarion plant salve quests to complete this.", "reason": "item source"}
+{"id": "4123:s:a44c4157", "decision": "do", "objective": "The Heart of the Mountain", "text": "Loot it from the safe on the ledge at the vault's back wall", "reason": "object location"}
+{"id": "4125:s:8ebec56f-3", "decision": "hint", "text": "The quest ends at the boat itself, not back at Ginro.", "reason": "surprising turn-in"}
+{"id": "4126:s:09ede59b", "decision": "skip", "reason": "restates objective"}
+{"id": "4126:s:8ebec56f", "decision": "hint", "text": "Hurley has no fixed spawn; he shows up only after the kegs in the Grim Guzzler are smashed.", "reason": "hidden spawn"}
+{"id": "4132:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "4136:s:cf99d207", "decision": "skip", "reason": "restates objective"}
+{"id": "4136:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "4142:s:41479ffa", "decision": "skip", "reason": "accept"}
+{"id": "4184:s:e47b7311", "decision": "skip", "reason": "accept"}
+{"id": "4186:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "4221:s:8ebec56f", "decision": "hint", "text": "Have two salves from the repeatable Cenarion salve quests in bags; the plant is both giver and turn-in.", "reason": "item source"}
+{"id": "4222:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4222:s:8ebec56f", "decision": "hint", "text": "The salves come from the repeatable Salve via quests; get two before you click the plant.", "reason": "item source"}
+{"id": "4267:s:c3dd0fb9", "decision": "skip", "reason": "accept"}
+{"id": "4282:s:891241bb", "decision": "hint", "text": "Loot one tablet from Angerforge's body and the other from Argelmach's.", "reason": "item source"}
+{"id": "4282:s:b54c143a", "decision": "skip", "reason": "covered by first tablet hint"}
+{"id": "4286:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "4289:s:2d0adc3b", "decision": "skip", "reason": "restates drop source"}
+{"id": "4289:s:ed2a593b", "decision": "skip", "reason": "restates drop source"}
+{"id": "4289:s:a116d0f8", "decision": "do", "objective": "Un'Goro Thunderer Pelt", "text": "Kill thunderers, mostly around and inside the cave", "reason": "mob location"}
+{"id": "4292:s:e1822f2b", "decision": "skip", "reason": "restates objective"}
+{"id": "4341:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "4342:s:8ebec56f", "decision": "hint", "text": "Talk to Kharan; the objective says kill, but you only need to listen to his dialogue.", "reason": "dialogue credit"}
+{"id": "4343:s:8ebec56f", "decision": "hint", "text": "The salves come only from other Cenarion quests; the corrupted plant is both giver and turn-in.", "reason": "item source"}
+{"id": "4361:s:d25d5a4f", "decision": "skip", "reason": "accept"}
+{"id": "4363:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "4381:s:9e979e7c", "decision": "do", "objective": "Yellow Power Crystal", "text": "Pick up yellow crystal clusters; Stone Guardians also drop them", "reason": "object source"}
+{"id": "4381:s:ded445f8", "decision": "do", "objective": "Green Power Crystal", "text": "Pick up green crystal clusters around Un'Goro", "reason": "object source"}
+{"id": "4382:s:ded445f8", "decision": "do", "objective": "Green Power Crystal", "text": "Pick up green crystal nodes; Stone Guardians also drop them", "reason": "object source"}
+{"id": "4382:s:ad71c17d", "decision": "do", "objective": "Blue Power Crystal", "text": "Pick up blue crystal nodes across Un'Goro", "reason": "object source"}
+{"id": "4384:s:e8044357", "decision": "skip", "reason": "accept"}
+{"id": "4384:s:1c253293", "decision": "do", "objective": "Red Power Crystal", "text": "Pick up red crystal nodes around Un'Goro; some mobs also drop them", "reason": "object source"}
+{"id": "4384:s:ad71c17d", "decision": "do", "objective": "Blue Power Crystal", "text": "Pick up blue crystal nodes around Un'Goro", "reason": "object source"}
+{"id": "4385:s:1c253293", "decision": "do", "objective": "Red Power Crystal", "text": "Pick up red crystal clusters scattered around Un'Goro", "reason": "object source"}
+{"id": "4385:s:9e979e7c", "decision": "do", "objective": "Yellow Power Crystal", "text": "Pick up yellow crystal clusters; Stone Guardians also drop them", "reason": "object source"}
+{"id": "4386:s:ad71c17d", "decision": "do", "objective": "Blue Power Crystal", "text": "Pick up blue crystal formations around Un'Goro Crater", "reason": "object source"}
+{"id": "4386:s:9e979e7c", "decision": "do", "objective": "Yellow Power Crystal", "text": "Pick up yellow crystals; Stone Guardians, King Mosh, Gruff drop them", "reason": "object source"}
+{"id": "4401:s:a927766a", "decision": "hint", "text": "Get 2 salves as rewards from the Salve via Gathering and Hunting quests.", "reason": "item source"}
+{"id": "4403:s:c8961c6a", "decision": "skip", "reason": "accept"}
+{"id": "4403:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4403:s:8ebec56f", "decision": "hint", "text": "The salves come only from the repeatable salve quests; have two before you click the plant.", "reason": "item source"}
+{"id": "4443:s:a927766a", "decision": "hint", "text": "Get three Cenarion Plant Salves as rewards from the Salve via Gathering and Hunting quests.", "reason": "item source"}
+{"id": "4445:s:a927766a", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "4445:s:8ebec56f", "decision": "hint", "text": "You need three Cenarion Plant Salves; they come only from the Salve via quests, so finish those first.", "reason": "item source"}
+{"id": "4446:s:8ebec56f", "decision": "hint", "text": "You need three Cenarion Plant Salves, which come only from the separate salve quests.", "reason": "item source"}
+{"id": "4447:s:8ebec56f", "decision": "hint", "text": "You need four salves at turn-in, and they only come from the Cenarion salve quests.", "reason": "item source"}
+{"id": "4448:s:a927766a", "decision": "hint", "text": "Get four salves from the Felwood salve quests by turning in Corrupted Soul Shards.", "reason": "item source"}
+{"id": "4461:s:8ebec56f", "decision": "hint", "text": "The salves come only from other quests; have three in your bags before you click the root.", "reason": "item source"}
+{"id": "4463:s:47bf79e2", "decision": "hint", "text": "Gizzard Gum comes from other quests.", "reason": "item source"}
+{"id": "4465:s:a927766a", "decision": "hint", "text": "Get 2 Cenarion Plant Salves as rewards from the Salve via quests; they must be in your bags.", "reason": "item source"}
+{"id": "4467:s:c2c41b00", "decision": "skip", "reason": "accept"}
+{"id": "4467:s:8ebec56f", "decision": "hint", "text": "You need two salves per plant; they come only from the Salve via quests, so get them first.", "reason": "item source"}
+{"id": "4481:s:52244587", "decision": "do", "objective": "Lung Juice Cocktail", "text": "Get it from the Blasted Lands quests", "reason": "item source"}
+{"id": "4481:s:8ebec56f", "decision": "hint", "text": "Turning in the quest costs 30 gold.", "reason": "turn-in cost"}
+{"id": "4482:s:54ce94db", "decision": "do", "objective": "Crystal Ward", "text": "Get them as a reward from an Un'Goro quest, or buy from players", "reason": "item source"}
+{"id": "4483:s:bbd3edd3", "decision": "do", "objective": "Crystal Spire", "text": "Get them as a reward from the Un'Goro crystal quest chain", "reason": "item source"}
+{"id": "4487:s:abded5c5", "decision": "skip", "reason": "accept"}
+{"id": "4491:s:8ebec56f", "decision": "hint", "text": "25 minute quest timer, and the canteen vanishes when it runs out.", "reason": "timer"}
+{"id": "4501:s:d32ab572", "decision": "skip", "reason": "accept"}
+{"id": "4508:s:676d7d9d", "decision": "skip", "reason": "accept"}
+{"id": "4509:s:676d7d9d", "decision": "skip", "reason": "accept"}
+{"id": "4511:s:2356a20c", "decision": "skip", "reason": "accept"}
+{"id": "4581:s:23149a28", "decision": "skip", "reason": "accept"}
+{"id": "4603:s:f8f001ae", "decision": "skip", "reason": "restates drop source"}
+{"id": "4603:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "4604:s:411c6bf7", "decision": "skip", "reason": "restates drop source"}
+{"id": "4734:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "4743:s:5673ae86", "decision": "hint", "text": "Open the gift you get on accepting; it holds the Orb of Draconic Energy and the Unforged Seal.", "reason": "use item"}
+{"id": "4743:s:d59336e6", "decision": "do", "objective": "Forged Seal of Ascension", "text": "Loot the forged seal object from the ground", "reason": "object source"}
+{"id": "4765:s:05d3edd7", "decision": "skip", "reason": "accept"}
+{"id": "4765:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "4771:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "4801:s:12c8df78", "decision": "skip", "reason": "restates drop source"}
+{"id": "4802:s:aa1d027f", "decision": "skip", "reason": "restates drop source"}
+{"id": "4803:s:a8a364d9", "decision": "skip", "reason": "restates drop source"}
+{"id": "4804:s:823ee9e7", "decision": "skip", "reason": "restates drop source"}
+{"id": "4805:s:eee8a497", "decision": "skip", "reason": "restates drop source"}
+{"id": "4806:s:8ebec56f", "decision": "skip", "reason": "elite"}
+{"id": "4807:s:44624e12", "decision": "skip", "reason": "restates drop source"}
+{"id": "4808:s:5c79decd", "decision": "skip", "reason": "accept"}
+{"id": "4810:s:2e2ee916", "decision": "skip", "reason": "accept"}
+{"id": "4822:s:f2171dcb", "decision": "hint", "text": "If the orphan is not with you, use the Human Orphan Whistle to call him.", "reason": "use item"}
+{"id": "4822:s:8ebec56f", "decision": "hint", "text": "You turn the quest in to your orphan; keep the whistle so you can call him back.", "reason": "surprising turn-in"}
+{"id": "4867:s:6ced7440", "decision": "skip", "reason": "text does not match objective"}
+{"id": "4903:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "4961:s:8ebec56f-3", "decision": "hint", "text": "The demon appears only when Tabetha releases it; clear nearby mobs first.", "reason": "hidden spawn"}
+{"id": "4971:s:21cb6f25", "decision": "skip", "reason": "trivia; count shown on card"}
+{"id": "4974:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "4976:s:8ebec56f-2", "decision": "skip", "reason": "quest chain bookkeeping"}
+{"id": "4981:s:8ebec56f", "decision": "hint", "text": "Turn the quest in to Bijou inside Blackrock Spire, not back at Lexlort.", "reason": "surprising turn-in"}
+{"id": "4983:s:c8aa7d15", "decision": "skip", "reason": "accept"}
+{"id": "4983:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "4987:s:8ebec56f", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "5001:s:8ebec56f-2", "decision": "skip", "reason": "dungeon"}
+{"id": "5042:s:aecd5369", "decision": "skip", "reason": "restates drop source"}
+{"id": "5044:s:aecd5369", "decision": "skip", "reason": "restates drop source"}
+{"id": "5045:s:aecd5369", "decision": "skip", "reason": "restates drop source"}
+{"id": "5046:s:aecd5369", "decision": "skip", "reason": "restates drop source"}
+{"id": "5047:s:8ebec56f-2", "decision": "skip", "reason": "delivery item given at accept"}
+{"id": "5048:s:8ebec56f-2", "decision": "hint", "text": "Janice's Parcel from the earlier Felstone quest must still be in your bags.", "reason": "item from earlier quest"}
+{"id": "5051:s:c1cbabf4", "decision": "do", "objective": "Good Luck Charm", "text": "Loot the other half of the charm from the Jabbering Ghoul", "reason": "item source"}
+{"id": "5051:s:62633945", "decision": "hint", "text": "Use the Other-Half-Charm to combine it with the Half-Charm from accept into the Good Luck Charm.", "reason": "combine"}
+{"id": "5063:s:c1b759fa", "decision": "skip", "reason": "elite dungeon; restates drop source"}
+{"id": "5063:s:4991695c", "decision": "do", "objective": "Enchanted Scarlet Thread", "text": "Pick up thread objects on the Scarlet side of Stratholme", "reason": "object source"}
+{"id": "5063:s:8ebec56f-2", "decision": "skip", "reason": "trivia; conflicts with objective data"}
+{"id": "5063:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "5067:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "5068:s:d98d1732", "decision": "skip", "reason": "accept"}
+{"id": "5068:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Have an alchemist transmute Thorium Bar + Arcane Crystal, or buy them", "reason": "craft method"}
+{"id": "5081:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "5087:s:eeb9a52e", "decision": "hint", "text": "The crate is usually carried by the runner at the back of the group.", "reason": "item source"}

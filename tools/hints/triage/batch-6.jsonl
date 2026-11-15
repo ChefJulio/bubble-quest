@@ -1,0 +1,302 @@
+{"id": "8758:s:3ab45ebb", "decision": "skip", "reason": "quest chain bookkeeping, restates objective"}
+{"id": "8759:s:b4797087", "decision": "skip", "reason": "accept row"}
+{"id": "8759:s:8ebec56f", "decision": "skip", "reason": "quest chain bookkeeping"}
+{"id": "8761:s:8ebec56f", "decision": "skip", "reason": "quest chain bookkeeping"}
+{"id": "8762:s:8ebec56f-2", "decision": "skip", "reason": "holiday only"}
+{"id": "8765:s:8ebec56f-2", "decision": "skip", "reason": "quest chain bookkeeping"}
+{"id": "8766:s:8ebec56f", "decision": "skip", "reason": "quest chain bookkeeping"}
+{"id": "8768:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8771:s:0bf9ed74", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8771:s:8ebec56f", "decision": "skip", "reason": "elite, group only"}
+{"id": "8772:s:8ebec56f", "decision": "skip", "reason": "elite, group only"}
+{"id": "8773:s:557bc408", "decision": "skip", "reason": "accept row"}
+{"id": "8774:s:8ebec56f", "decision": "skip", "reason": "elite, group only"}
+{"id": "8774:s:8ebec56f-2", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8775:s:251477cf", "decision": "skip", "reason": "accept row"}
+{"id": "8775:s:8ebec56f", "decision": "skip", "reason": "elite, group only"}
+{"id": "8776:s:0ef8ab62", "decision": "skip", "reason": "accept row"}
+{"id": "8776:s:8ebec56f", "decision": "skip", "reason": "elite, group only"}
+{"id": "8777:s:d535223c", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8778:s:8e95ee08", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8778:s:e682d1aa", "decision": "do", "objective": "Dense Blasting Powder", "text": "Make with Engineering from 2 Dense Stone each, or buy it", "reason": "craft source"}
+{"id": "8780:s:8ebec56f", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8781:s:8ebec56f", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8782:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailors make it from 2 Felcloth (has a cooldown), or buy it", "reason": "craft source"}
+{"id": "8783:s:bcbb4b22", "decision": "do", "objective": "Enchanted Thorium Bar", "text": "Enchant 1 Thorium Bar and 3 Dream Dust into each, or buy them", "reason": "craft source"}
+{"id": "8783:s:1bffa3b7", "decision": "do", "objective": "Enchanted Leather", "text": "Buy 2 Enchanted Leather from a vendor", "reason": "buy source"}
+{"id": "8783:s:8ebec56f", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8784:s:8ebec56f-2", "decision": "skip", "reason": "trivia, reward change"}
+{"id": "8785:s:6feed47c", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8786:s:b7a715f1", "decision": "do", "objective": "Massive Iron Axe", "text": "Make with Blacksmithing, or buy them from another player", "reason": "craft source"}
+{"id": "8786:s:8ebec56f-2", "decision": "skip", "reason": "recipe materials, shown in profession window"}
+{"id": "8787:s:8ebec56f", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8791:s:088786ee", "decision": "skip", "reason": "raid only"}
+{"id": "8791:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8793:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8795:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8801:s:ff2b8e8d", "decision": "skip", "reason": "raid only"}
+{"id": "8801:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8802:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8802:s:8ebec56f-3", "decision": "skip", "reason": "trivia, reward change"}
+{"id": "8803:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8804:s:3339d8c7", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8804:s:85887a91", "decision": "do", "objective": "Powerful Anti-Venom", "text": "Make with First Aid from 1 Huge Venom Sac each", "reason": "craft source"}
+{"id": "8804:s:768b4684", "decision": "do", "objective": "Smoked Desert Dumplings", "text": "Cook from Sandworm Meat plus Soothing Spices", "reason": "craft source"}
+{"id": "8805:s:8d8fe65b", "decision": "do", "objective": "Ornate Mithril Boots", "text": "Make with Blacksmithing, or buy them", "reason": "craft source"}
+{"id": "8805:s:8ebec56f", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8806:s:b67441bb", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8806:s:c7c8ff9a", "decision": "do", "objective": "Dense Grinding Stone", "text": "Make with Blacksmithing from 4 Dense Stone each", "reason": "craft source"}
+{"id": "8806:s:26dd0d0e", "decision": "do", "objective": "Solid Grinding Stone", "text": "Make with Blacksmithing from 4 Solid Stone each", "reason": "craft source"}
+{"id": "8806:s:1bb719ab", "decision": "do", "objective": "Heavy Grinding Stone", "text": "Make with Blacksmithing from 3 Heavy Stone each", "reason": "craft source"}
+{"id": "8807:s:9be7628d", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8808:s:e8987c67", "decision": "skip", "reason": "accept row"}
+{"id": "8808:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailors make it from 2 Felcloth, or buy it", "reason": "craft source"}
+{"id": "8809:s:bcbb4b22", "decision": "do", "objective": "Enchanted Thorium Bar", "text": "Enchant 1 Thorium Bar and 3 Dream Dust into each, or buy them", "reason": "craft source"}
+{"id": "8809:s:1bffa3b7", "decision": "skip", "reason": "unclear, vendor not named"}
+{"id": "8809:s:8ebec56f", "decision": "skip", "reason": "briefing is already an objective"}
+{"id": "8810:s:5e54024b", "decision": "skip", "reason": "accept row, briefing is already an objective"}
+{"id": "8810:s:b2447ccf", "decision": "do", "objective": "Heavy Mageweave Bandage", "text": "Make with First Aid from 2 Mageweave Cloth each", "reason": "craft source"}
+{"id": "8810:s:0c5742db", "decision": "do", "objective": "Heavy Silk Bandage", "text": "Make with First Aid from 2 Silk Cloth each", "reason": "craft source"}
+{"id": "8812:s:0c41bb30", "decision": "hint", "text": "Signets are rewards from the Ahn'Qiraj war effort supply turn-in quests.", "reason": "non-obvious source"}
+{"id": "8814:s:0c41bb30", "decision": "hint", "text": "Signets are rewards from the Ahn'Qiraj war effort resource turn-in quests.", "reason": "non-obvious source"}
+{"id": "8815:s:634f9588", "decision": "skip", "reason": "duplicate of the gotcha row"}
+{"id": "8815:s:8ebec56f", "decision": "hint", "text": "You can't loot or buy signets. They only come as rewards from the war effort supply quests.", "reason": "non-obvious source"}
+{"id": "8825:s:634f9588", "decision": "hint", "text": "Signets are rewards from the Ahn'Qiraj war effort supply turn-in quests.", "reason": "non-obvious source"}
+{"id": "8837:s:40f27fec", "decision": "skip", "reason": "accept row"}
+{"id": "8837:s:0c41bb30", "decision": "hint", "text": "Signets are rewards from the war effort resource turn-in quests.", "reason": "non-obvious source"}
+{"id": "8837:s:8ebec56f", "decision": "skip", "reason": "event only, duplicate source"}
+{"id": "8838:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8839:s:0c41bb30", "decision": "hint", "text": "Signets are rewards from the Ahn'Qiraj war effort resource turn-in quests.", "reason": "non-obvious source"}
+{"id": "8841:s:634f9588", "decision": "hint", "text": "Signets are rewards from the Ahn'Qiraj war effort supply turn-in quests.", "reason": "non-obvious source"}
+{"id": "8841:s:8ebec56f", "decision": "skip", "reason": "event only, duplicate source"}
+{"id": "8846:s:8ebec56f", "decision": "hint", "text": "Signets are rewards from the other war effort quests.", "reason": "non-obvious source"}
+{"id": "8848:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8850:s:c3f0caa2", "decision": "hint", "text": "Earn the signets from the war effort cloth and supply turn-in quests.", "reason": "non-obvious source"}
+{"id": "8855:s:8ebec56f-2", "decision": "hint", "text": "Signets are rewards from the war effort commendation turn-in quests.", "reason": "non-obvious source"}
+{"id": "8856:s:85887a91", "decision": "do", "objective": "Powerful Anti-Venom", "text": "Make with First Aid from 1 Huge Venom Sac each", "reason": "craft source"}
+{"id": "8856:s:768b4684", "decision": "do", "objective": "Smoked Desert Dumplings", "text": "Cook from 1 Sandworm Meat and 1 Soothing Spices each", "reason": "craft source"}
+{"id": "8857:s:8ebec56f", "decision": "hint", "text": "The husk vanishes 2 hours after you get it, so go straight to Booty Bay.", "reason": "timer"}
+{"id": "8858:s:3d275c60", "decision": "skip", "reason": "accept row"}
+{"id": "8858:s:8ebec56f", "decision": "hint", "text": "The husk disappears after 2 hours, so go straight to Searing Gorge.", "reason": "timer"}
+{"id": "8859:s:8ebec56f", "decision": "hint", "text": "The husk disappears after 2 hours, so travel straight to Light's Hope.", "reason": "timer"}
+{"id": "8860:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8861:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8862:s:48d8e325", "decision": "skip", "reason": "duplicate of the gotcha row"}
+{"id": "8862:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8862:s:8ebec56f-2", "decision": "hint", "text": "Coins of Ancestry are not mob drops. They are rewards from the Lunar Festival Elder quests.", "reason": "non-obvious source"}
+{"id": "8863:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards for honoring Elders in the other Lunar Festival quests.", "reason": "non-obvious source"}
+{"id": "8864:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are not mob drops. They are rewards from the Lunar Festival elder quests.", "reason": "non-obvious source"}
+{"id": "8864:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8865:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards from the Lunar Festival elder quests.", "reason": "non-obvious source"}
+{"id": "8868:s:8ebec56f", "decision": "skip", "reason": "holiday only, raid boss"}
+{"id": "8869:s:bb772ed9", "decision": "hint", "text": "In Stratholme, click the Blacksmithing Plans to make the Crimson Hammersmith appear.", "reason": "hidden spawn"}
+{"id": "8869:s:8ebec56f", "decision": "skip", "reason": "duplicate of the collect-object row"}
+{"id": "8869:s:8ebec56f-3", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8870:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8871:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8872:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8874:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8875:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8876:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards from the Lunar Festival Elder quests.", "reason": "non-obvious source"}
+{"id": "8876:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8876:s:8ebec56f-2", "decision": "skip", "reason": "trivia, reward change"}
+{"id": "8877:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards from the Lunar Festival Elder quests.", "reason": "non-obvious source"}
+{"id": "8878:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards for honoring Elders in the Lunar Festival elder quests.", "reason": "non-obvious source"}
+{"id": "8879:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards from the Lunar Festival elder quests.", "reason": "non-obvious source"}
+{"id": "8879:s:8ebec56f", "decision": "skip", "reason": "holiday only, reward change"}
+{"id": "8880:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8880:s:8ebec56f-2", "decision": "skip", "reason": "trivia, reward change"}
+{"id": "8881:s:48d8e325", "decision": "hint", "text": "Coins of Ancestry are rewards from the Lunar Festival Elder quests.", "reason": "non-obvious source"}
+{"id": "8881:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8881:s:8ebec56f-2", "decision": "skip", "reason": "trivia, reward change"}
+{"id": "8893:s:c7f63b07", "decision": "skip", "reason": "accept row"}
+{"id": "8897:s:5615a105", "decision": "skip", "reason": "accept row, holiday"}
+{"id": "8897:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8899:s:03cbbdab", "decision": "skip", "reason": "accept row, holiday"}
+{"id": "8900:s:ec039d1d", "decision": "skip", "reason": "accept row, holiday"}
+{"id": "8901:s:2326aa35", "decision": "skip", "reason": "accept row, holiday"}
+{"id": "8901:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8903:s:d33fb37a", "decision": "do", "objective": "Stormwind Guard's Card", "text": "Open the pledge container to get the card", "reason": "use item"}
+{"id": "8903:s:8ebec56f-2", "decision": "skip", "reason": "holiday only"}
+{"id": "8904:s:8ebec56f-2", "decision": "skip", "reason": "holiday only"}
+{"id": "8905:s:8ebec56f-2", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8906:s:8ebec56f", "decision": "hint", "text": "The turn-in costs 20 gold, so carry it with you.", "reason": "surprising turn-in cost"}
+{"id": "8906:s:8ebec56f-2", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8907:s:8ebec56f-2", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8918:s:8ebec56f", "decision": "hint", "text": "The turn-in costs 20 gold, so carry it with you.", "reason": "surprising turn-in cost"}
+{"id": "8918:s:8ebec56f-2", "decision": "skip", "reason": "dungeon boss, item is already an objective"}
+{"id": "8921:s:254d81a8", "decision": "do", "objective": "Delicate Arcanite Converter", "text": "Engineers make it from an arcanite bar and ironweb spider silk, or buy", "reason": "craft source"}
+{"id": "8921:s:2e377329", "decision": "do", "objective": "Greater Eternal Essence", "text": "Combine two Lesser Eternal Essences into each, or buy them", "reason": "combine"}
+{"id": "8921:s:2ac33d73", "decision": "do", "objective": "Stonescale Oil", "text": "Alchemists make it from Stonescale Eel and a leaded vial, or buy it", "reason": "craft source"}
+{"id": "8922:s:3f46f4ab", "decision": "skip", "reason": "accept row"}
+{"id": "8923:s:b40b2643", "decision": "skip", "reason": "accept row"}
+{"id": "8923:s:8ebec56f", "decision": "skip", "reason": "container is already an objective"}
+{"id": "8927:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8931:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8934:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8935:s:8ebec56f", "decision": "hint", "text": "One of the two items drops from a rare spawn, so it is not always up.", "reason": "rare spawn"}
+{"id": "8936:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8937:s:8ebec56f", "decision": "hint", "text": "The boss that drops the Gauntlets of Valor has no static spawn.", "reason": "hidden spawn"}
+{"id": "8938:s:0928b87a", "decision": "skip", "reason": "dungeon boss, group only"}
+{"id": "8938:s:50b14035", "decision": "skip", "reason": "dungeon boss, group only"}
+{"id": "8939:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8942:s:8ebec56f", "decision": "hint", "text": "One of the two items drops from a rare elite, so it is not always up.", "reason": "rare spawn"}
+{"id": "8944:s:8ebec56f", "decision": "hint", "text": "The boss that drops the Gauntlets of Valor has no fixed spawn point.", "reason": "hidden spawn"}
+{"id": "8945:s:8ebec56f-2", "decision": "hint", "text": "Ysida has no static spawn. She only appears after the timed run succeeds.", "reason": "conditional spawn"}
+{"id": "8947:s:871ea178", "decision": "do", "objective": "Dark Iron Bar", "text": "Smelt 8 Dark Iron Ore per bar at the Black Forge, or buy them", "reason": "craft source"}
+{"id": "8947:s:1bffa3b7", "decision": "do", "objective": "Enchanted Leather", "text": "Buy it from a vendor, or have an enchanter make it", "reason": "buy source"}
+{"id": "8947:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailors make it from 2 Felcloth each, or buy it", "reason": "craft source"}
+{"id": "8947:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft source"}
+{"id": "8948:s:171acdc5", "decision": "skip", "reason": "accept row"}
+{"id": "8951:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8952:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8954:s:083de805", "decision": "skip", "reason": "accept row"}
+{"id": "8954:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8955:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, trivia"}
+{"id": "8956:s:083de805", "decision": "skip", "reason": "accept row"}
+{"id": "8956:s:2747b15d", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "8956:s:0263090c", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "8956:s:7aebe26d", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "8956:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8957:s:083de805", "decision": "skip", "reason": "accept row"}
+{"id": "8957:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8958:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8959:s:44c5014f", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "8959:s:214955d9", "decision": "skip", "reason": "covered by the gotcha row"}
+{"id": "8959:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "8959:s:8ebec56f-2", "decision": "hint", "text": "Rend Blackhand has no fixed spawn, and the boots mob appears only after a scripted object is used.", "reason": "hidden spawn"}
+{"id": "8966:s:41ed0fc9", "decision": "skip", "reason": "restates objective"}
+{"id": "8979:s:802c71ca", "decision": "do", "objective": "Perfume Bottle", "text": "Buy one from the innkeeper", "reason": "buy source"}
+{"id": "8979:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8980:s:8ebec56f", "decision": "skip", "reason": "holiday only, chain bookkeeping"}
+{"id": "8981:s:2e800fe4", "decision": "do", "objective": "Horde Gift Collection", "text": "Use a city gift collection while carrying all three", "reason": "combine"}
+{"id": "8981:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8984:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8988:s:8ebec56f", "decision": "skip", "reason": "elite, group only"}
+{"id": "8989:s:8ebec56f", "decision": "hint", "text": "Mor Grayhoof only shows up after you use the brazier.", "reason": "summoned spawn"}
+{"id": "8990:s:8ebec56f-3", "decision": "hint", "text": "Keep the left amulet piece in your bags to combine. Keep the Brazier too, you hand it in.", "reason": "keep item"}
+{"id": "8992:s:8ebec56f-2", "decision": "hint", "text": "Carry the right amulet piece from the earlier quest so you can combine it with the left piece.", "reason": "keep item"}
+{"id": "8993:s:f047624d", "decision": "do", "objective": "Alliance Gift Collection", "text": "Use one collection while carrying the other two to combine them", "reason": "combine"}
+{"id": "8993:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "8995:s:8ebec56f", "decision": "hint", "text": "Valthalak only appears after you use the brazier in The Beast's room.", "reason": "summoned spawn"}
+{"id": "8996:s:8ebec56f", "decision": "skip", "reason": "brazier is already an objective"}
+{"id": "8999:s:beebd95b", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "8999:s:8ebec56f", "decision": "skip", "reason": "dungeon boss, group only"}
+{"id": "9002:s:8ebec56f", "decision": "skip", "reason": "dungeon boss, restates objective"}
+{"id": "9003:s:8ebec56f", "decision": "hint", "text": "The boss that drops the Devout Crown has no static spawn.", "reason": "hidden spawn"}
+{"id": "9004:s:8ebec56f", "decision": "skip", "reason": "dungeon boss, trivia"}
+{"id": "9007:s:7492b39e", "decision": "hint", "text": "Gandling only appears once the other Scholomance bosses are dead.", "reason": "conditional spawn"}
+{"id": "9007:s:beebd95b", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9007:s:8ebec56f", "decision": "skip", "reason": "duplicate of the loot row"}
+{"id": "9008:s:8ebec56f", "decision": "skip", "reason": "spawn condition too vague"}
+{"id": "9010:s:8ebec56f-2", "decision": "skip", "reason": "dungeon boss, group only"}
+{"id": "9012:s:fe164f9a", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9012:s:8ebec56f", "decision": "skip", "reason": "dungeon boss, group only"}
+{"id": "9014:s:8ebec56f", "decision": "skip", "reason": "dungeon boss, group only"}
+{"id": "9016:s:8ebec56f", "decision": "hint", "text": "The boss that drops the Wildheart Spaulders has no static spawn.", "reason": "hidden spawn"}
+{"id": "9019:s:26f1af06", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9019:s:c20762f7", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9019:s:cd98145f", "decision": "hint", "text": "The Devout Mantle drops from an elite with no fixed spawn point.", "reason": "hidden spawn"}
+{"id": "9019:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "9021:s:083de805", "decision": "skip", "reason": "accept row"}
+{"id": "9021:s:8f5f6bb5", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9021:s:730432ef", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9021:s:8ebec56f", "decision": "skip", "reason": "dungeon elite, group only"}
+{"id": "9022:s:44c5014f", "decision": "skip", "reason": "drop source already on the card"}
+{"id": "9022:s:214955d9", "decision": "hint", "text": "The Spaulders of Valor boss has no static spawn and only shows up during a scripted event.", "reason": "conditional spawn"}
+{"id": "9022:s:8ebec56f", "decision": "skip", "reason": "dungeon, group only"}
+{"id": "9023:s:47dc3cc2", "decision": "skip", "reason": "raid only"}
+{"id": "9023:s:0196c861", "decision": "skip", "reason": "raid only"}
+{"id": "9023:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9024:s:7488569a", "decision": "do", "objective": "Cologne Bottle", "text": "Buy one from a holiday vendor", "reason": "buy source"}
+{"id": "9024:s:f242504c", "decision": "do", "objective": "Perfume Bottle", "text": "Buy one from the same holiday vendors", "reason": "buy source"}
+{"id": "9025:s:8ebec56f", "decision": "skip", "reason": "holiday only"}
+{"id": "9033:s:f7e348c9", "decision": "skip", "reason": "raid only"}
+{"id": "9033:s:cdc8bc31", "decision": "skip", "reason": "raid only"}
+{"id": "9033:s:1084b030", "decision": "skip", "reason": "raid only"}
+{"id": "9033:s:cfed4f43", "decision": "skip", "reason": "raid only"}
+{"id": "9034:s:616ab3f2", "decision": "skip", "reason": "raid only"}
+{"id": "9034:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9034:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9036:s:431375bd", "decision": "skip", "reason": "raid only"}
+{"id": "9036:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9036:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9036:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft source"}
+{"id": "9037:s:759d95c2", "decision": "skip", "reason": "raid only"}
+{"id": "9037:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9037:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9037:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9038:s:dba809fb", "decision": "skip", "reason": "raid only"}
+{"id": "9038:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9038:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9038:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9038:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9040:s:9fc29550", "decision": "skip", "reason": "raid only"}
+{"id": "9040:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9040:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9040:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9040:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9041:s:2b4406ee", "decision": "skip", "reason": "raid only"}
+{"id": "9041:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9041:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9041:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9041:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9042:s:5cc561fb", "decision": "skip", "reason": "raid only"}
+{"id": "9042:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9042:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9042:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9043:s:6d125a6f", "decision": "skip", "reason": "raid only"}
+{"id": "9043:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9043:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft source"}
+{"id": "9043:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9044:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9045:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9045:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9045:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9045:s:8ebec56f-2", "decision": "skip", "reason": "covered by the craft rows"}
+{"id": "9046:s:055cd0b5", "decision": "skip", "reason": "raid only"}
+{"id": "9046:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9046:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9047:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9048:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9048:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9048:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9049:s:d4366aa7", "decision": "skip", "reason": "raid only"}
+{"id": "9049:s:825f33a6", "decision": "skip", "reason": "raid only"}
+{"id": "9049:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9049:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9050:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9051:s:8ebec56f-2", "decision": "hint", "text": "Devilsaurs run faster than travel form, so you cannot outrun them.", "reason": "approach warning"}
+{"id": "9053:s:1c6a0189", "decision": "skip", "reason": "elite, restates objective"}
+{"id": "9054:s:6d125a6f", "decision": "skip", "reason": "raid only"}
+{"id": "9054:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9054:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft source"}
+{"id": "9054:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9055:s:b70ceef7", "decision": "skip", "reason": "raid only"}
+{"id": "9055:s:06a61c68", "decision": "skip", "reason": "raid only"}
+{"id": "9055:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9055:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9055:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9056:s:06a61c68", "decision": "skip", "reason": "raid only"}
+{"id": "9056:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9056:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9057:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9057:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9057:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9058:s:25c75fb6", "decision": "skip", "reason": "raid only"}
+{"id": "9058:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9058:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9059:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9059:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9059:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9060:s:d4366aa7", "decision": "skip", "reason": "raid only"}
+{"id": "9060:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9060:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9068:s:ee544acf", "decision": "skip", "reason": "raid only"}
+{"id": "9068:s:06a61c68", "decision": "skip", "reason": "raid only"}
+{"id": "9068:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9068:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9068:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9069:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar plus Arcane Crystal, or buy", "reason": "craft source"}
+{"id": "9069:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworkers cure Rugged Hide with Refined Deeprock Salt", "reason": "craft source"}
+{"id": "9069:s:8ebec56f", "decision": "skip", "reason": "raid only"}

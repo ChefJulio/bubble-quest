@@ -40,6 +40,15 @@ Neru", "Smelt Thorium Ore into bars with Mining, or buy them"). It replaces that
   unless it also says something that matters while doing the quest;
 - `turn-in` rows, unless the turn-in is genuinely surprising (not the giver, a different place).
 
+**Rules settled after the first run** (batches disagreed; these are now fixed):
+- **Reputation needed to turn in** ("You must be Honored with X to turn this in"): **hint**, worded
+  "You must be <standing> with <faction> to turn this in." It blocks the turn-in, which the card
+  can't show. (Reputation that only matters to accept a quest: skip.)
+- **"Keep item X"** where X is one of the row's `objectives`: **skip**, the card already lists it.
+  Hint only if a later quest in the chain also needs it, or it is a tool you use ("the catapult
+  needs the Dwarven Tinder to be lit"). "Keep" items that are *not* objectives (from an earlier
+  quest, handed in at the end) stay hints.
+
 **Mixed rows**: if a row has a generic part and a real trick ("needs a group. The boss has no static
 spawn, it appears after an event"), keep only the trick, as a hint.
 

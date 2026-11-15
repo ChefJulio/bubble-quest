@@ -66,8 +66,8 @@
 {"id": "7943:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "7943:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
 {"id": "7981:s:8ebec56f", "decision": "skip", "reason": "event only"}
-{"id": "8044:s:52a3a72a", "decision": "hint", "text": "You need the Strength of Mugamba from the earlier quest in your bags, so keep it.", "reason": "keep item"}
-{"id": "8052:s:8a7421b1", "decision": "hint", "text": "Keep The Eye of Zuldazar from the earlier quest in your bags for this one.", "reason": "keep item"}
+{"id": "8044:s:52a3a72a", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "8052:s:8a7421b1", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8052:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8053:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8054:s:3e6ae84a", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
@@ -260,8 +260,8 @@
 {"id": "8497:s:768b4684", "decision": "skip", "reason": "unclear which objective, reagents only IDs"}
 {"id": "8499:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore into bars with Mining, or buy them", "reason": "craft instruction"}
 {"id": "8501:s:8ebec56f", "decision": "skip", "reason": "group only"}
-{"id": "8501:s:8ebec56f-3", "decision": "hint", "text": "The Combat Task Briefing XII comes from a container item; keep it until you turn in.", "reason": "keep item"}
-{"id": "8502:s:4118f079", "decision": "hint", "text": "Keep the Combat Task Briefing III in your bags; you need it for the turn-in.", "reason": "keep item"}
+{"id": "8501:s:8ebec56f-3", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "8502:s:4118f079", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8502:s:8ebec56f", "decision": "skip", "reason": "group only"}
 {"id": "8504:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "8506:s:8ebec56f", "decision": "skip", "reason": "event only"}
@@ -288,7 +288,7 @@
 {"id": "8527:s:8ebec56f-2", "decision": "skip", "reason": "duplicate of craft row"}
 {"id": "8535:s:8fa1dde2", "decision": "skip", "reason": "group only"}
 {"id": "8535:s:8ebec56f", "decision": "hint", "text": "The templar only appears after you summon it at a wind stone.", "reason": "hidden spawn"}
-{"id": "8535:s:8ebec56f-2", "decision": "hint", "text": "Tactical Task Briefing IV comes from a container item; keep it until you turn in.", "reason": "keep item"}
+{"id": "8535:s:8ebec56f-2", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8535:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
 {"id": "8537:s:8ebec56f", "decision": "hint", "text": "Summon the Crimson Templar at a wind stone while wearing the Twilight cultist gear.", "reason": "hidden spawn"}
 {"id": "8537:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
@@ -296,7 +296,7 @@
 {"id": "8538:s:1a53c3a4", "decision": "skip", "reason": "elite, restates objective"}
 {"id": "8538:s:1cd15f0b", "decision": "skip", "reason": "elite, restates objective"}
 {"id": "8538:s:8ebec56f", "decision": "hint", "text": "The dukes have no fixed spawn; summon each one at a wind stone.", "reason": "hidden spawn"}
-{"id": "8539:s:77243e50", "decision": "hint", "text": "Keep the Combat Task Briefing V in your bags; you need it for the turn-in.", "reason": "keep item"}
+{"id": "8539:s:77243e50", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8540:s:c39e86cb", "decision": "skip", "reason": "accept row"}
 {"id": "8541:s:26dd0d0e", "decision": "do", "objective": "Solid Grinding Stone", "text": "Craft from 4 Solid Stone each, mined from mithril veins", "reason": "craft instruction"}
 {"id": "8541:s:1bb719ab", "decision": "do", "objective": "Heavy Grinding Stone", "text": "Craft from 3 Heavy Stone each, mined from iron veins", "reason": "craft instruction"}

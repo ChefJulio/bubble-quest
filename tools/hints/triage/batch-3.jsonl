@@ -1,0 +1,302 @@
+{"id": "5088:s:89fc617c", "decision": "skip", "reason": "duplicate of the gotcha row"}
+{"id": "5088:s:8ebec56f", "decision": "hint", "text": "Arikara only appears once you light the fire with the powder.", "reason": "hidden spawn"}
+{"id": "5102:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "5102:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "5124:s:bcbb4b22", "decision": "do", "objective": "Enchanted Thorium Bar", "text": "Have an enchanter make them from Thorium Bar and Dream Dust, or buy", "reason": "clear source"}
+{"id": "5125:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "5128:s:a32bf513", "decision": "skip", "reason": "accept row"}
+{"id": "5141:s:7a188e60", "decision": "do", "objective": "Tough Scorpid Breastplate", "text": "Leatherwork: 12 Thick Leather, 12 Scorpid Scale, 4 Silken Thread", "reason": "recipe reagents"}
+{"id": "5141:s:34467760", "decision": "do", "objective": "Tough Scorpid Gloves", "text": "Leatherwork: 6 Thick Leather, 8 Scorpid Scale, 2 Silken Thread each", "reason": "recipe reagents"}
+{"id": "5143:s:8b14f421", "decision": "skip", "reason": "unclear: reagent IDs, objective not named"}
+{"id": "5143:s:90a4c514", "decision": "skip", "reason": "unclear: reagent IDs, objective not named"}
+{"id": "5144:s:1c22f896", "decision": "do", "objective": "Heart of Fire", "text": "Loot from Searing Gorge fire elementals, or buy at the auction house", "reason": "clear source"}
+{"id": "5145:s:34467760", "decision": "do", "objective": "Tough Scorpid Gloves", "text": "Leatherwork: 6 Thick Leather, 8 Scorpid Scale, 2 Silken Thread each", "reason": "recipe reagents"}
+{"id": "5148:s:8b14f421", "decision": "skip", "reason": "unclear reagent, objective not named"}
+{"id": "5148:s:90a4c514", "decision": "skip", "reason": "unclear: item ID, objective not named"}
+{"id": "5150:s:1c3d56e5", "decision": "do", "objective": "Bloodpetal Sprout", "text": "Pick up Bloodpetal Sprouts from the ground all over Un'Goro Crater", "reason": "ground objects"}
+{"id": "5151:s:05d26cb0", "decision": "hint", "text": "The panther moves slowly and can be feared, so you can kite it.", "reason": "approach"}
+{"id": "5166:s:c9599646", "decision": "do", "objective": "Blood of Heroes", "text": "Click Blood of Heroes objects near Fallen Heroes in the Plaguelands", "reason": "objects, not drops"}
+{"id": "5166:s:8ebec56f", "decision": "skip", "reason": "trivia: removed objective and reward"}
+{"id": "5166:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "5210:s:767fdb7b", "decision": "skip", "reason": "accept row"}
+{"id": "5214:s:fa215a60", "decision": "hint", "text": "Click the tobacco box in the shop to make Fras Siabi appear.", "reason": "hidden spawn"}
+{"id": "5214:s:77d76aea", "decision": "skip", "reason": "covered by summon row"}
+{"id": "5216:s:235f597d", "decision": "skip", "reason": "accept row"}
+{"id": "5218:s:8ebec56f", "decision": "hint", "text": "The Arcane Quickener expires 30 minutes after you get it, so gather the rest first.", "reason": "timer"}
+{"id": "5219:s:03415dca", "decision": "skip", "reason": "accept row"}
+{"id": "5220:s:8ebec56f", "decision": "hint", "text": "The filled bottle comes from the Scourge Cauldron, not from a mob drop.", "reason": "non-obvious source"}
+{"id": "5221:s:8ebec56f", "decision": "hint", "text": "The Arcane Quickener disappears 30 minutes after you get it, so farm the rest first and buy it last.", "reason": "timer"}
+{"id": "5224:s:5c322c2b", "decision": "do", "objective": "Runecloth", "text": "Loot Runecloth from undead humanoids in Western Plaguelands", "reason": "clear source"}
+{"id": "5224:s:8ebec56f", "decision": "hint", "text": "The Arcane Quickener vanishes after 30 minutes, so gather the other reagents before buying it.", "reason": "timer"}
+{"id": "5227:s:8ebec56f", "decision": "hint", "text": "The Arcane Quickener disappears after 30 minutes, so buy it right before you go to the cauldron.", "reason": "timer"}
+{"id": "5231:s:8ebec56f-3", "decision": "hint", "text": "Keep the empty bottle from the earlier cauldron quest in your bags, or the cauldron turn-in fails.", "reason": "keep item"}
+{"id": "5234:s:8ebec56f", "decision": "hint", "text": "Keep the bottle from the previous quest in your bags; you hand it in here.", "reason": "keep item"}
+{"id": "5236:s:8ebec56f", "decision": "hint", "text": "The filled bottle comes from using the bottle at the cauldron in the previous quest.", "reason": "non-obvious source"}
+{"id": "5248:s:b78a15f9", "decision": "skip", "reason": "accept row"}
+{"id": "5251:s:8ebec56f-3", "decision": "skip", "reason": "dungeon group"}
+{"id": "5252:s:bfe9bbcc", "decision": "skip", "reason": "accept row"}
+{"id": "5262:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "5265:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "5283:s:aea4f22a", "decision": "do", "objective": "Ornate Mithril Helm", "text": "Blacksmith each: 16 Mithril Bar, 2 Truesilver Bar and other reagents", "reason": "recipe reagents"}
+{"id": "5283:s:8d8fe65b", "decision": "skip", "reason": "restates objective"}
+{"id": "5283:s:62e21a16", "decision": "do", "objective": "Ornate Mithril Breastplate", "text": "Blacksmith it; the recipe also needs a Heart of Fire", "reason": "extra reagent"}
+{"id": "5284:s:88116a79", "decision": "skip", "reason": "duplicate of plans row"}
+{"id": "5284:s:b7a715f1", "decision": "hint", "text": "Buy the plans from a vendor in Stranglethorn Vale; they are limited supply.", "reason": "non-obvious source"}
+{"id": "5284:s:f1ac5c01", "decision": "skip", "reason": "unclear which weapon"}
+{"id": "5301:s:aea4f22a", "decision": "do", "objective": "Ornate Mithril Helm", "text": "Blacksmith each: 16 Mithril Bar, 2 Truesilver Bar and other reagents", "reason": "recipe reagents"}
+{"id": "5301:s:8d8fe65b", "decision": "do", "objective": "Ornate Mithril Boots", "text": "Blacksmith each pair: 14 Mithril, 2 Truesilver Bar, 4 Thick Leather", "reason": "recipe reagents"}
+{"id": "5301:s:62e21a16", "decision": "do", "objective": "Ornate Mithril Breastplate", "text": "Blacksmith with 16 Mithril Bar, 6 Truesilver Bar and a Heart of Fire", "reason": "recipe reagents"}
+{"id": "5307:s:63793c9c", "decision": "skip", "reason": "elite, obvious"}
+{"id": "5343:s:8ebec56f", "decision": "hint", "text": "The deeds are objects you click inside Scholomance, not mob drops.", "reason": "objects, not drops"}
+{"id": "5361:s:19408fb0", "decision": "skip", "reason": "accept row"}
+{"id": "5381:s:1e817de9", "decision": "skip", "reason": "accept row"}
+{"id": "5384:s:8ebec56f-3", "decision": "skip", "reason": "dungeon group"}
+{"id": "5385:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "5402:s:ed04cad3", "decision": "do", "objective": "Minion's Scourgestone", "text": "Loot from undead in Western Plaguelands, e.g. around Andorhal", "reason": "clear source"}
+{"id": "5462:s:85900518", "decision": "skip", "reason": "accept row"}
+{"id": "5466:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "5504:s:70bae0f9", "decision": "skip", "reason": "accept row"}
+{"id": "5504:s:8b2b2b7d", "decision": "do", "objective": "Argent Dawn Valor Token", "text": "Earn them as rewards from the Argent Dawn token turn-in quests", "reason": "non-obvious source"}
+{"id": "5507:s:8b2b2b7d", "decision": "do", "objective": "Argent Dawn Valor Token", "text": "Earn them from the Argent Dawn scourgestone turn-in quests", "reason": "non-obvious source"}
+{"id": "5513:s:8ebec56f-2", "decision": "hint", "text": "Valor Tokens are rewards from the Argent Dawn turn-in quests, not mob drops.", "reason": "non-obvious source"}
+{"id": "5514:s:38166fe9", "decision": "skip", "reason": "accept row"}
+{"id": "5514:s:8ebec56f", "decision": "hint", "text": "Bring 15 gold: turning this quest in costs it.", "reason": "turn-in cost"}
+{"id": "5519:s:e2630b8e", "decision": "do", "objective": "Rune Thread", "text": "Buy from a trade supplies vendor", "reason": "vendor item"}
+{"id": "5519:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "5521:s:8b2b2b7d", "decision": "do", "objective": "Argent Dawn Valor Token", "text": "Earn them as rewards from the Argent Dawn quests that award them", "reason": "non-obvious source"}
+{"id": "5524:s:3e6ae84a", "decision": "skip", "reason": "accept requirement"}
+{"id": "5524:s:94a7bb76", "decision": "skip", "reason": "covered by gotcha row"}
+{"id": "5524:s:8ebec56f", "decision": "skip", "reason": "accept requirement"}
+{"id": "5524:s:8ebec56f-2", "decision": "hint", "text": "Valor Tokens are not mob drops; they come only as rewards from other Argent Dawn quests.", "reason": "non-obvious source"}
+{"id": "5525:s:ed8c7c4c", "decision": "skip", "reason": "dungeon drop"}
+{"id": "5525:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "5526:s:bec37e11", "decision": "do", "objective": "Sealed Reliquary of Purity", "text": "Use the Reliquary of Purity you got at accept to seal the shard", "reason": "use item"}
+{"id": "5526:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "5528:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "5531:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "5538:s:cb088920", "decision": "skip", "reason": "accept row"}
+{"id": "5636:s:e40d8d36", "decision": "skip", "reason": "accept row"}
+{"id": "5645:s:8ebec56f", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "5646:s:24d3a998", "decision": "skip", "reason": "turn-in row"}
+{"id": "5659:s:8ebec56f", "decision": "skip", "reason": "trivia: not implemented"}
+{"id": "5723:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "5728:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "5762:s:b4d09a7b", "decision": "skip", "reason": "accept row"}
+{"id": "5861:s:6ddc14ac", "decision": "skip", "reason": "accept row"}
+{"id": "5885:s:dcd7aaa3", "decision": "do", "objective": "Patch of Tainted Skin", "text": "Skin tainted beasts in Felwood; needs Skinning", "reason": "skinning, not drops"}
+{"id": "5885:s:8ebec56f", "decision": "skip", "reason": "covered by do row"}
+{"id": "5887:s:a9fc1952", "decision": "do", "objective": "Corrupted Soul Shard", "text": "Loot from corrupted Felwood oozes, Ironbeak owls, treants and satyrs", "reason": "clear source"}
+{"id": "5890:s:50f1b82b", "decision": "do", "objective": "Patch of Tainted Skin", "text": "Skin Jaedenar Hunters, Angerclaw Grizzlies or Felpaw Ravagers", "reason": "skinning, not drops"}
+{"id": "5890:s:8ebec56f", "decision": "skip", "reason": "covered by do row"}
+{"id": "5941:s:63adf17d", "decision": "skip", "reason": "accept row"}
+{"id": "6022:s:9b99ef68", "decision": "hint", "text": "Use the Mortar and Pestle with all 7 rots in your bags to make the Coagulated Rot.", "reason": "use item"}
+{"id": "6024:s:c820f171", "decision": "skip", "reason": "obvious"}
+{"id": "6026:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "6026:s:40e81b83", "decision": "do", "objective": "Golden Rod", "text": "Have a blacksmith make it from a Gold Bar and 2 Coarse Grinding Stones", "reason": "crafted item"}
+{"id": "6026:s:0d94033c", "decision": "hint", "text": "Have an engineer make extra Unstable Triggers; crafting the bombs uses some up.", "reason": "item consumed"}
+{"id": "6029:s:1d9ebeb1", "decision": "skip", "reason": "accept row"}
+{"id": "6081:s:8ebec56f", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "6086:s:89211660", "decision": "skip", "reason": "turn-in row, trivia"}
+{"id": "6089:s:b0d7737d", "decision": "skip", "reason": "turn-in row, trivia"}
+{"id": "6102:s:8ebec56f-2", "decision": "hint", "text": "Use the rod on a living Strigid Screecher; do not kill it.", "reason": "approach"}
+{"id": "6103:s:8ebec56f", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "6126:s:f358ba5e", "decision": "skip", "reason": "accept row"}
+{"id": "6130:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "6131:s:2610311d", "decision": "skip", "reason": "restates objective"}
+{"id": "6131:s:f7c1c21c", "decision": "skip", "reason": "restates objective"}
+{"id": "6131:s:d0379560", "decision": "skip", "reason": "turn-in row"}
+{"id": "6146:s:19cc535a", "decision": "do", "objective": "The Grand Crusader's Command", "text": "Open the chest you got when accepting the quest", "reason": "use item"}
+{"id": "6162:s:c6f64177", "decision": "skip", "reason": "obvious"}
+{"id": "6163:s:8ebec56f", "decision": "hint", "text": "Ramstein has no static spawn; he shows up in undead Stratholme just before the Baron.", "reason": "hidden spawn"}
+{"id": "6185:s:cc9f1765", "decision": "do", "objective": "SI:7 Insignia (Turyen)", "text": "Click the remains on the hill east of the house", "reason": "object location"}
+{"id": "6187:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6221:s:1fc5b75a", "decision": "skip", "reason": "restates objective"}
+{"id": "6221:s:8dbcc00a", "decision": "skip", "reason": "restates objective"}
+{"id": "6221:s:fe5bdede", "decision": "skip", "reason": "restates objective"}
+{"id": "6221:s:d0379560", "decision": "skip", "reason": "turn-in row"}
+{"id": "6241:s:75d4f11b", "decision": "skip", "reason": "restates objective"}
+{"id": "6241:s:660d57b4", "decision": "skip", "reason": "restates objective"}
+{"id": "6241:s:2b13f4c5", "decision": "skip", "reason": "restates objective"}
+{"id": "6241:s:bfbb6f8d", "decision": "skip", "reason": "turn-in row"}
+{"id": "6261:s:ce87c447", "decision": "skip", "reason": "accept row"}
+{"id": "6285:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "6321:s:bd2bc2cb", "decision": "skip", "reason": "accept row"}
+{"id": "6322:s:7e3d78f3", "decision": "skip", "reason": "accept row"}
+{"id": "6324:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "6343:s:a8abe482", "decision": "skip", "reason": "accept row"}
+{"id": "6362:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "6363:s:64ab74a0", "decision": "skip", "reason": "accept row"}
+{"id": "6364:s:a5caaebe", "decision": "skip", "reason": "accept row"}
+{"id": "6365:s:f61506f0", "decision": "skip", "reason": "accept row"}
+{"id": "6381:s:f81a84c2", "decision": "skip", "reason": "accept row"}
+{"id": "6384:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "6385:s:6cbb26f1", "decision": "skip", "reason": "accept row"}
+{"id": "6387:s:9e4c0621", "decision": "skip", "reason": "accept row"}
+{"id": "6481:s:91bb72ea", "decision": "hint", "text": "Goggeroc appears from the cask; he is a level 20 elite.", "reason": "hidden spawn"}
+{"id": "6501:s:8fe584a6", "decision": "skip", "reason": "accept row"}
+{"id": "6502:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6504:s:6c37aae2", "decision": "do", "objective": "Shredder Operating Manual - Chapter 1", "text": "Collect pages 1-4, then use one to bind them into the chapter", "reason": "combine"}
+{"id": "6504:s:57cc96dc", "decision": "do", "objective": "Shredder Operating Manual - Chapter 2", "text": "Collect pages 5-8, then use one to bind them into the chapter", "reason": "combine"}
+{"id": "6544:s:5e70d4ee", "decision": "skip", "reason": "accept row"}
+{"id": "6565:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "6569:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6584:s:2840ba48", "decision": "skip", "reason": "obvious"}
+{"id": "6602:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6610:s:7e3829d0", "decision": "do", "objective": "Zesty Clam Meat", "text": "Open clams to get the Zesty Clam Meat", "reason": "use item"}
+{"id": "6642:s:8ebec56f-3", "decision": "skip", "reason": "dungeon"}
+{"id": "6643:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6644:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6646:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "6662:s:2c8d92ae", "decision": "skip", "reason": "accept row"}
+{"id": "6824:s:1b0d77ff", "decision": "skip", "reason": "raid only"}
+{"id": "6824:s:242f71ab", "decision": "skip", "reason": "raid only"}
+{"id": "6824:s:776bdc34", "decision": "skip", "reason": "raid only"}
+{"id": "6824:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "6827:s:8ebec56f-2", "decision": "skip", "reason": "battleground"}
+{"id": "6846:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "6862:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "6862:s:20a40fce", "decision": "do", "objective": "Mithril Bar", "text": "Smelt Mithril Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "6862:s:04c48cf2", "decision": "do", "objective": "Iron Bar", "text": "Smelt Iron Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "6881:s:75621687", "decision": "skip", "reason": "battleground"}
+{"id": "6901:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "6922:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "6942:s:8ebec56f-2", "decision": "skip", "reason": "battleground"}
+{"id": "6961:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "6962:s:46c035ef", "decision": "skip", "reason": "holiday event"}
+{"id": "6962:s:03fb071e", "decision": "skip", "reason": "holiday event"}
+{"id": "6962:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "6963:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "6964:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "6983:s:8ebec56f-3", "decision": "skip", "reason": "holiday event"}
+{"id": "6984:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7002:s:ab79cc5b", "decision": "skip", "reason": "accept row, battleground"}
+{"id": "7021:s:5949eb29", "decision": "skip", "reason": "accept row, holiday event"}
+{"id": "7021:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7022:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7023:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7024:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7025:s:46c035ef", "decision": "skip", "reason": "holiday event"}
+{"id": "7025:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7042:s:8ebec56f", "decision": "skip", "reason": "holiday event"}
+{"id": "7043:s:8ebec56f-2", "decision": "skip", "reason": "holiday event"}
+{"id": "7044:s:8ebec56f-3", "decision": "skip", "reason": "dungeon group"}
+{"id": "7067:s:9d052a3a", "decision": "do", "objective": "Amulet of Union", "text": "Use a gem to combine the five gems and the Amulet of Spirits", "reason": "combine"}
+{"id": "7068:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7070:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7082:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7101:s:8ebec56f-2", "decision": "skip", "reason": "battleground"}
+{"id": "7121:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7122:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7164:s:d8597eeb", "decision": "skip", "reason": "turn-in row, battleground"}
+{"id": "7168:s:8ebec56f", "decision": "skip", "reason": "battleground chain bookkeeping"}
+{"id": "7169:s:8ebec56f-2", "decision": "skip", "reason": "battleground chain bookkeeping"}
+{"id": "7170:s:8ebec56f", "decision": "skip", "reason": "battleground chain bookkeeping"}
+{"id": "7171:s:1c635d7d", "decision": "skip", "reason": "battleground chain bookkeeping"}
+{"id": "7171:s:8ebec56f", "decision": "skip", "reason": "battleground chain bookkeeping"}
+{"id": "7172:s:2349f7b8", "decision": "skip", "reason": "turn-in row, battleground"}
+{"id": "7201:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "7224:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7282:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7302:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7341:s:59111e0d", "decision": "do", "objective": "Thorium Shells", "text": "Buy them from a vendor, or make them with Engineering", "reason": "clear source"}
+{"id": "7367:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7368:s:8ebec56f-2", "decision": "skip", "reason": "battleground"}
+{"id": "7381:s:426f88eb", "decision": "skip", "reason": "obvious"}
+{"id": "7382:s:426f88eb", "decision": "skip", "reason": "obvious"}
+{"id": "7382:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "7386:s:8ebec56f-2", "decision": "skip", "reason": "battleground"}
+{"id": "7422:s:21a7eb42", "decision": "skip", "reason": "turn-in row"}
+{"id": "7423:s:bbd372a3", "decision": "skip", "reason": "turn-in row"}
+{"id": "7424:s:ef409f3a", "decision": "skip", "reason": "turn-in row"}
+{"id": "7427:s:6e0239a7", "decision": "skip", "reason": "turn-in row"}
+{"id": "7428:s:56c4bf24", "decision": "skip", "reason": "turn-in row"}
+{"id": "7429:s:ed8c7c4c", "decision": "skip", "reason": "dungeon drop"}
+{"id": "7429:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "7441:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "7461:s:8ebec56f-3", "decision": "skip", "reason": "dungeon group"}
+{"id": "7462:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7463:s:2a60eb9e", "decision": "skip", "reason": "obvious"}
+{"id": "7478:s:c9599646", "decision": "do", "objective": "Blood of Heroes", "text": "Click Blood of Heroes objects on the ground", "reason": "objects, not drops"}
+{"id": "7479:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "7480:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "7483:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "7488:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "7488:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7489:s:8e1298b7", "decision": "skip", "reason": "obvious"}
+{"id": "7489:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7490:s:08b80294", "decision": "skip", "reason": "raid only"}
+{"id": "7498:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7499:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7500:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7501:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7502:s:8ebec56f-2", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7505:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7509:s:8ebec56f", "decision": "hint", "text": "The Heated Ancient Blade disappears after 20 minutes, so put it down late in the fight.", "reason": "timer"}
+{"id": "7509:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7521:s:f7f6c16c", "decision": "skip", "reason": "raid only"}
+{"id": "7521:s:95a4507d", "decision": "skip", "reason": "raid only"}
+{"id": "7521:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "7564:s:2557baa2", "decision": "skip", "reason": "accept row"}
+{"id": "7629:s:4d997aab", "decision": "hint", "text": "Let the imp out of the jar to spawn J'eevee; he makes the parchment and that completes it.", "reason": "use item, hidden spawn"}
+{"id": "7640:s:8ebec56f", "decision": "hint", "text": "The spirits only appear when you use the Exorcism Censer inside a green aura.", "reason": "hidden spawn"}
+{"id": "7642:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Have an alchemist transmute it from Thorium Bar and Arcane Crystal", "reason": "crafted item"}
+{"id": "7645:s:8ebec56f", "decision": "hint", "text": "Bring 50 gold: turning this quest in costs it.", "reason": "turn-in cost"}
+{"id": "7650:s:8ebec56f", "decision": "skip", "reason": "dungeon group"}
+{"id": "7651:s:941b0358", "decision": "skip", "reason": "starts the quest, item ID"}
+{"id": "7651:s:8ebec56f-2", "decision": "skip", "reason": "starts the quest"}
+{"id": "7653:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore or buy bars; Fel Interlopers also drop them", "reason": "clear source"}
+{"id": "7655:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "7656:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "7657:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore with Mining, or buy the bars", "reason": "clear source"}
+{"id": "7668:s:9df7b17a", "decision": "skip", "reason": "covered by gotcha row"}
+{"id": "7668:s:8ebec56f", "decision": "hint", "text": "Darkreaver only spawns after you use the scryer and clear the spirit waves.", "reason": "hidden spawn"}
+{"id": "7671:s:e3336d7a", "decision": "skip", "reason": "accept row"}
+{"id": "7676:s:988d3b80", "decision": "skip", "reason": "turn-in row"}
+{"id": "7703:s:8ebec56f-3", "decision": "skip", "reason": "trivia: reward change"}
+{"id": "7724:s:8ebec56f", "decision": "hint", "text": "Kill Searing Lava Spiders for credit, not the Greater Lava Spider the quest text names.", "reason": "wrong target name"}
+{"id": "7728:s:2209c689", "decision": "skip", "reason": "accept row"}
+{"id": "7728:s:dca86454", "decision": "skip", "reason": "turn-in row"}
+{"id": "7737:s:8ebec56f-2", "decision": "skip", "reason": "dungeon group"}
+{"id": "7781:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "7783:s:c7a9dc70", "decision": "skip", "reason": "raid only"}
+{"id": "7783:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "7786:s:95a4507d", "decision": "skip", "reason": "raid only"}
+{"id": "7786:s:f7f6c16c", "decision": "skip", "reason": "raid only"}
+{"id": "7786:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "7787:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "7789:s:dc6d2abe", "decision": "skip", "reason": "battleground"}
+{"id": "7790:s:8ebec56f", "decision": "skip", "reason": "unused quest"}
+{"id": "7791:s:7f963a54", "decision": "skip", "reason": "obvious source"}
+{"id": "7792:s:7f963a54", "decision": "skip", "reason": "obvious source"}
+{"id": "7792:s:8ebec56f-2", "decision": "skip", "reason": "obvious"}
+{"id": "7793:s:35d760d8", "decision": "skip", "reason": "obvious source"}
+{"id": "7794:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7796:s:3cb36907", "decision": "skip", "reason": "turn-in row"}
+{"id": "7798:s:35d760d8", "decision": "skip", "reason": "obvious source"}
+{"id": "7799:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7801:s:56cc9565", "decision": "skip", "reason": "accept row"}
+{"id": "7801:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7802:s:7f963a54", "decision": "skip", "reason": "obvious source"}
+{"id": "7803:s:35d760d8", "decision": "skip", "reason": "obvious source"}
+{"id": "7804:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7805:s:8ebec56f-3", "decision": "skip", "reason": "accept requirement"}
+{"id": "7806:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7809:s:25bcf679", "decision": "skip", "reason": "obvious source"}
+{"id": "7812:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7813:s:7f963a54", "decision": "skip", "reason": "obvious source"}
+{"id": "7814:s:35d760d8", "decision": "skip", "reason": "obvious source"}
+{"id": "7817:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7819:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7821:s:35d760d8", "decision": "skip", "reason": "obvious source"}
+{"id": "7822:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7825:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7826:s:7f963a54", "decision": "skip", "reason": "obvious source"}
+{"id": "7827:s:35d760d8", "decision": "skip", "reason": "obvious source"}
+{"id": "7831:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7832:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7833:s:7f963a54", "decision": "skip", "reason": "obvious source"}
+{"id": "7834:s:645654fe", "decision": "skip", "reason": "obvious source"}
+{"id": "7835:s:acde458b", "decision": "skip", "reason": "obvious source"}
+{"id": "7837:s:5c322c2b", "decision": "skip", "reason": "obvious source"}
+{"id": "7873:s:8ebec56f", "decision": "skip", "reason": "battleground"}
+{"id": "7874:s:8ebec56f", "decision": "skip", "reason": "battleground"}

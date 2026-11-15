@@ -1,0 +1,302 @@
+{"id": "9070:s:ddf4376c", "decision": "skip", "reason": "raid only"}
+{"id": "9070:s:06a61c68", "decision": "skip", "reason": "raid only"}
+{"id": "9070:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9070:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9071:s:06a61c68", "decision": "skip", "reason": "raid only"}
+{"id": "9071:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9071:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9071:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9072:s:d691418c", "decision": "skip", "reason": "raid only"}
+{"id": "9072:s:9cba861d", "decision": "skip", "reason": "raid only"}
+{"id": "9072:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9072:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9073:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9073:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9073:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9074:s:d4366aa7", "decision": "skip", "reason": "raid only"}
+{"id": "9074:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9077:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9077:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9077:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9078:s:431375bd", "decision": "skip", "reason": "raid only"}
+{"id": "9078:s:80047a07", "decision": "skip", "reason": "raid only"}
+{"id": "9078:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9078:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9078:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9079:s:759d95c2", "decision": "skip", "reason": "raid only"}
+{"id": "9079:s:80047a07", "decision": "skip", "reason": "raid only"}
+{"id": "9079:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9079:s:8ebec56f", "decision": "hint", "text": "Bring 75 gold: turning this quest in costs that much.", "reason": "turn-in cost"}
+{"id": "9079:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9080:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9080:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9080:s:8ebec56f-2", "decision": "hint", "text": "Bring 50 gold: turning this quest in costs that much.", "reason": "turn-in cost"}
+{"id": "9083:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: make it from Rugged Hide and Salt, or buy it", "reason": "craft path"}
+{"id": "9083:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9083:s:8ebec56f-2", "decision": "hint", "text": "Bring 15 gold: turning this quest in costs that much.", "reason": "turn-in cost"}
+{"id": "9085:s:8ebec56f", "decision": "hint", "text": "The Shadow of Doom only appears after a shard is broken down and runes are spent on a summoner.", "reason": "hidden spawn"}
+{"id": "9086:s:6d125a6f", "decision": "skip", "reason": "raid only"}
+{"id": "9086:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9086:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9087:s:4e58a834", "decision": "skip", "reason": "raid only"}
+{"id": "9087:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9087:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9088:s:7bfa3143", "decision": "skip", "reason": "raid only"}
+{"id": "9088:s:80047a07", "decision": "skip", "reason": "raid only"}
+{"id": "9088:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9088:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9089:s:055cd0b5", "decision": "skip", "reason": "raid only"}
+{"id": "9089:s:80047a07", "decision": "skip", "reason": "raid only"}
+{"id": "9089:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9089:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9090:s:25c75fb6", "decision": "skip", "reason": "raid only"}
+{"id": "9090:s:80047a07", "decision": "skip", "reason": "raid only"}
+{"id": "9090:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9090:s:88c8ba76", "decision": "skip", "reason": "only item ids, unclear"}
+{"id": "9090:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9091:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9092:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9092:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9092:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9093:s:44191ed6", "decision": "skip", "reason": "raid only"}
+{"id": "9093:s:80047a07", "decision": "skip", "reason": "raid only"}
+{"id": "9093:s:88c8ba76", "decision": "skip", "reason": "only ids, reagents unclear"}
+{"id": "9093:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9094:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9095:s:e74b5313", "decision": "skip", "reason": "raid only"}
+{"id": "9095:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9095:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9096:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9096:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9097:s:5f6b722f", "decision": "skip", "reason": "raid only"}
+{"id": "9097:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9097:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9097:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9098:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from Felcloth, or buy it", "reason": "craft path"}
+{"id": "9098:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9098:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9099:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9099:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9099:s:88c8ba76", "decision": "skip", "reason": "only item ids, unclear"}
+{"id": "9099:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9100:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9100:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9101:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9102:s:96dbfbaa", "decision": "skip", "reason": "raid only"}
+{"id": "9102:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9103:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9103:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9104:s:7f7d5235", "decision": "skip", "reason": "raid only"}
+{"id": "9104:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9104:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9104:s:8ebec56f-2", "decision": "skip", "reason": "duplicate of craft row"}
+{"id": "9105:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9105:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9105:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9106:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from Felcloth, or buy it", "reason": "craft path"}
+{"id": "9106:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9106:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9107:s:014b5d0c", "decision": "skip", "reason": "raid only"}
+{"id": "9107:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9107:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9107:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9107:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9108:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9108:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9109:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each", "reason": "craft path"}
+{"id": "9109:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9110:s:96dbfbaa", "decision": "skip", "reason": "raid only"}
+{"id": "9110:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9110:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9111:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9111:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9112:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9113:s:5f6b722f", "decision": "skip", "reason": "raid only"}
+{"id": "9113:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9113:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9113:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9114:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9114:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9114:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9115:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9115:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9115:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9116:s:8229ebf9", "decision": "skip", "reason": "raid only"}
+{"id": "9116:s:130f2dec", "decision": "skip", "reason": "raid only"}
+{"id": "9116:s:8d761673", "decision": "do", "objective": "Mooncloth", "text": "Tailoring: make it from 2 Felcloth each, or buy it", "reason": "craft path"}
+{"id": "9116:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9117:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9118:s:96dbfbaa", "decision": "skip", "reason": "raid only"}
+{"id": "9118:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9120:s:1e4fca8a", "decision": "skip", "reason": "raid only"}
+{"id": "9120:s:8ebec56f", "decision": "skip", "reason": "raid only, start info"}
+{"id": "9122:s:8ebec56f", "decision": "hint", "text": "You must be Revered with Argent Dawn to turn this in.", "reason": "turn-in requirement"}
+{"id": "9142:s:8b2b2b7d", "decision": "hint", "text": "The Argent Dawn Valor Token is a reward from other Argent Dawn quests.", "reason": "non-obvious source"}
+{"id": "9153:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9179:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9181:s:85773c62", "decision": "skip", "reason": "recipe restates profession UI"}
+{"id": "9182:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9183:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9184:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9185:s:e5fd0504", "decision": "skip", "reason": "accept row"}
+{"id": "9185:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9186:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9187:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9188:s:6b38b1df", "decision": "skip", "reason": "recipe restates profession UI"}
+{"id": "9188:s:8ebec56f", "decision": "skip", "reason": "start info"}
+{"id": "9190:s:ba760899", "decision": "skip", "reason": "recipe restates profession UI"}
+{"id": "9190:s:8ebec56f", "decision": "skip", "reason": "start info"}
+{"id": "9191:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9195:s:8ebec56f", "decision": "skip", "reason": "start info"}
+{"id": "9197:s:c308f971", "decision": "skip", "reason": "only ids, unclear"}
+{"id": "9197:s:8ebec56f-2", "decision": "skip", "reason": "start info"}
+{"id": "9201:s:8ebec56f", "decision": "skip", "reason": "start info"}
+{"id": "9202:s:8ebec56f", "decision": "skip", "reason": "writ is already an objective; start info"}
+{"id": "9203:s:8ebec56f", "decision": "hint", "text": "The flask takes a Black Lotus and must be made at an alchemy lab.", "reason": "non-obvious craft need"}
+{"id": "9204:s:36c555a1", "decision": "skip", "reason": "accept row"}
+{"id": "9205:s:664a9f23", "decision": "skip", "reason": "accept row"}
+{"id": "9205:s:8ebec56f", "decision": "skip", "reason": "unclear: raw vs cooked item name"}
+{"id": "9208:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9209:s:9c5352d4", "decision": "hint", "text": "The Arcanum of Rapidity comes from another quest, so do that quest first.", "reason": "non-obvious source"}
+{"id": "9209:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "9210:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9211:s:1778fb68", "decision": "skip", "reason": "duplicate of gotcha row"}
+{"id": "9211:s:8ebec56f-2", "decision": "hint", "text": "Insignia can't be looted from mobs; they are rewards from other Argent Dawn quests.", "reason": "non-obvious source"}
+{"id": "9213:s:1778fb68", "decision": "do", "objective": "Insignia of the Crusade", "text": "Earn them from Scourge stone turn-in quests at Light's Hope Chapel", "reason": "non-obvious source"}
+{"id": "9221:s:ee640fb2", "decision": "do", "objective": "Insignia of the Dawn", "text": "Earn them by turning in Argent Dawn resource quests", "reason": "non-obvious source"}
+{"id": "9221:s:1778fb68", "decision": "do", "objective": "Insignia of the Crusade", "text": "Earn them by turning in Argent Dawn resource quests", "reason": "non-obvious source"}
+{"id": "9222:s:b0cd3fb3", "decision": "do", "objective": "Insignia of the Dawn", "text": "Earn them from Argent Dawn Scourge-invasion turn-in quests", "reason": "non-obvious source"}
+{"id": "9222:s:b38a735b", "decision": "do", "objective": "Insignia of the Crusade", "text": "Earn them from the related Argent Dawn turn-in quests", "reason": "non-obvious source"}
+{"id": "9224:s:ee640fb2", "decision": "do", "objective": "Insignia of the Dawn", "text": "Earn them from the Argent Dawn insignia quests", "reason": "non-obvious source"}
+{"id": "9224:s:1778fb68", "decision": "do", "objective": "Insignia of the Crusade", "text": "Earn them from the Argent Dawn insignia quests", "reason": "non-obvious source"}
+{"id": "9225:s:ee640fb2", "decision": "do", "objective": "Insignia of the Dawn", "text": "Earn them from the Argent Dawn repeatable quests", "reason": "non-obvious source"}
+{"id": "9225:s:1778fb68", "decision": "do", "objective": "Insignia of the Crusade", "text": "Earn them from the Argent Dawn repeatable quests", "reason": "non-obvious source"}
+{"id": "9227:s:ee640fb2", "decision": "do", "objective": "Insignia of the Dawn", "text": "Earn them from Argent Dawn material turn-ins at Light's Hope Chapel", "reason": "non-obvious source"}
+{"id": "9227:s:1778fb68", "decision": "do", "objective": "Insignia of the Crusade", "text": "Earn them from the matching Argent Dawn material turn-in quests", "reason": "non-obvious source"}
+{"id": "9230:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9232:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9233:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9234:s:8ebec56f", "decision": "hint", "text": "Bring 200 gold: turning this quest in costs that much.", "reason": "turn-in cost"}
+{"id": "9235:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore with Mining, or buy them; extras feed the transmute", "reason": "craft path"}
+{"id": "9235:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Alchemy: transmute Thorium Bar and Arcane Crystal, or buy it", "reason": "craft path"}
+{"id": "9235:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9235:s:8ebec56f-2", "decision": "hint", "text": "Bring 200 gold: turning this quest in costs that much.", "reason": "turn-in cost"}
+{"id": "9239:s:37289ac1", "decision": "do", "objective": "Frozen Rune", "text": "Click Frozen Rune objects inside Naxxramas", "reason": "objects, not drops"}
+{"id": "9239:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9240:s:8ebec56f-2", "decision": "do", "objective": "Frozen Rune", "text": "Click Frozen Rune objects inside Naxxramas", "reason": "objects, not drops"}
+{"id": "9241:s:37289ac1", "decision": "do", "objective": "Frozen Rune", "text": "Click Frozen Rune objects inside Naxxramas", "reason": "objects, not drops"}
+{"id": "9241:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9241:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9241:s:8ebec56f-2", "decision": "hint", "text": "Bring 200 gold: turning this quest in costs that much.", "reason": "turn-in cost"}
+{"id": "9242:s:37289ac1", "decision": "do", "objective": "Frozen Rune", "text": "Click Frozen Rune objects inside Naxxramas", "reason": "objects, not drops"}
+{"id": "9242:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9242:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9243:s:37289ac1", "decision": "do", "objective": "Frozen Rune", "text": "Click Frozen Rune objects inside Naxxramas", "reason": "objects, not drops"}
+{"id": "9243:s:1bffa3b7", "decision": "do", "objective": "Enchanted Leather", "text": "Buy it from a vendor, or have an enchanter make it", "reason": "non-obvious source"}
+{"id": "9243:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9243:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9244:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9244:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9245:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt, or buy it", "reason": "craft path"}
+{"id": "9245:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9246:s:37289ac1", "decision": "do", "objective": "Frozen Rune", "text": "Click Frozen Rune objects inside Naxxramas", "reason": "objects, not drops"}
+{"id": "9246:s:88c8ba76", "decision": "do", "objective": "Cured Rugged Hide", "text": "Leatherworking: cure Rugged Hide with Refined Deeprock Salt", "reason": "craft path"}
+{"id": "9246:s:8ebec56f", "decision": "hint", "text": "You need Exalted with Argent Dawn, and the quest costs 300 gold.", "reason": "rep and gold requirement"}
+{"id": "9248:s:0d31af94", "decision": "hint", "text": "Any of the four summoned Lords can drop the Abyssal Scepter.", "reason": "non-obvious source"}
+{"id": "9250:s:491d7ec2", "decision": "skip", "reason": "start info, raid only"}
+{"id": "9250:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9251:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "9257:s:8ebec56f", "decision": "hint", "text": "Atiesh only appears after you use the staff on the Consecrated Earth.", "reason": "hidden spawn"}
+{"id": "9257:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "9259:s:35d760d8", "decision": "skip", "reason": "obvious"}
+{"id": "9259:s:1fe23783", "decision": "do", "objective": "Red Dye", "text": "Buy it from a trade goods vendor", "reason": "vendor item"}
+{"id": "9259:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "9260:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9261:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9262:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9266:s:5c322c2b", "decision": "skip", "reason": "obvious"}
+{"id": "9266:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "9267:s:47a5c21a", "decision": "do", "objective": "Empty Vial", "text": "Buy them from a trade goods or reagent vendor", "reason": "vendor item"}
+{"id": "9267:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "9268:s:acde458b", "decision": "skip", "reason": "obvious"}
+{"id": "9269:s:b4797087", "decision": "skip", "reason": "accept row"}
+{"id": "9269:s:8ebec56f", "decision": "hint", "text": "Atiesh only appears after you use the staff on the Consecrated Earth in Stratholme.", "reason": "hidden spawn"}
+{"id": "9269:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "9270:s:8ebec56f", "decision": "hint", "text": "Atiesh only appears when you use the staff on the Consecrated Earth in Stratholme.", "reason": "hidden spawn"}
+{"id": "9271:s:8ebec56f", "decision": "hint", "text": "Atiesh only appears after you use the staff on the Consecrated Earth in Stratholme.", "reason": "hidden spawn"}
+{"id": "9271:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "9317:s:a964a8ff", "decision": "skip", "reason": "accept row, event only"}
+{"id": "9317:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9318:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9319:s:8ebec56f", "decision": "skip", "reason": "event only, dungeons"}
+{"id": "9320:s:46e10555", "decision": "skip", "reason": "accept row, event only"}
+{"id": "9320:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9321:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9322:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9323:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9332:s:8ebec56f-2", "decision": "skip", "reason": "event only, start info"}
+{"id": "9333:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9334:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9335:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9336:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9337:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9338:s:28d96597", "decision": "do", "objective": "Cenarion Combat Badge", "text": "Earn it from a Cenarion Field Duty combat quest in Silithus", "reason": "non-obvious source"}
+{"id": "9338:s:4f14e830", "decision": "do", "objective": "Cenarion Logistics Badge", "text": "Earn it from a Cenarion Field Duty logistics quest", "reason": "non-obvious source"}
+{"id": "9338:s:11c6be53", "decision": "do", "objective": "Cenarion Tactical Badge", "text": "Earn it from a Cenarion Field Duty tactical quest", "reason": "non-obvious source"}
+{"id": "9343:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9365:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9386:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9388:s:d74deda8", "decision": "skip", "reason": "event only; flame not named"}
+{"id": "9388:s:374ac11d", "decision": "skip", "reason": "event only; flame not named"}
+{"id": "9388:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "9389:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "65602:s:8ebec56f-2", "decision": "hint", "text": "The Burning Torch disappears after 5 minutes, so go straight back to the house.", "reason": "timer"}
+{"id": "76156:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "78124:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "78133:s:7bb18b86", "decision": "skip", "reason": "accept row"}
+{"id": "78142:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "78143:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "78145:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "78146:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "78147:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "78150:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "78261:s:f24185e8", "decision": "do", "objective": "Horn of Xelthos", "text": "Open the chest with the Twin Key", "reason": "clear action"}
+{"id": "78823:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "79094:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79095:s:00438022", "decision": "skip", "reason": "turn-in row"}
+{"id": "79095:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79097:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79358:s:8ebec56f-2", "decision": "skip", "reason": "trivia, class quest"}
+{"id": "79360:s:b34ab4e4", "decision": "skip", "reason": "obvious drop, dungeon"}
+{"id": "79360:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "79364:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79535:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79624:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79947:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79948:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "79949:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "79950:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79951:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "79952:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "79976:s:17921e5d", "decision": "skip", "reason": "accept row"}
+{"id": "81949:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "81952:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "81953:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "81955:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "84397:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "84398:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "84399:s:8ebec56f", "decision": "skip", "reason": "trivia"}
+{"id": "86585:s:ac0a1596", "decision": "skip", "reason": "accept row"}
+{"id": "86757:s:0eb0ffeb", "decision": "do", "objective": "Jagged Orcish Sword", "text": "Kill Horde Grunts in the orc camp in southeastern Ashenvale", "reason": "names the source mob"}
+{"id": "86757:s:4326059f", "decision": "do", "objective": "Curved Orcish Dagger", "text": "Kill Horde Scouts near the orc camp", "reason": "names the source mob"}
+{"id": "91209:s:f9243fee", "decision": "skip", "reason": "accept row"}
+{"id": "91751:s:e6ce9245", "decision": "hint", "text": "Skinning Gray Forest Wolves also gives the pelts.", "reason": "extra source"}
+{"id": "91777:s:3b1081f4", "decision": "do", "objective": "Arcane Explainer: Magical Stuff in Simple Words", "text": "Kill the elite spider in Jasperlode Mine", "reason": "names the source mob"}
+{"id": "91777:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "91860:s:8ebec56f", "decision": "hint", "text": "Turn this in at the Charred Remains, a world object, not an NPC.", "reason": "surprising turn-in"}
+{"id": "91921:s:114484db", "decision": "skip", "reason": "accept row"}
+{"id": "92109:s:47a5c21a", "decision": "do", "objective": "Empty Vial", "text": "Buy them from a trade supplies or alchemy vendor", "reason": "vendor item"}
+{"id": "92421:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "92422:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "92456:s:8ebec56f", "decision": "skip", "reason": "dungeon"}
+{"id": "92457:s:8ebec56f-2", "decision": "skip", "reason": "dungeon"}

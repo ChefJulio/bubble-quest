@@ -1,4 +1,4 @@
-{"id": "8541:s:8ebec56f", "decision": "hint", "text": "Keep Logistics Task Briefing III in your bags; you need it when you turn the quest in.", "reason": "keep item"}
+{"id": "8541:s:8ebec56f", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8544:s:fd388624", "decision": "skip", "reason": "raid only"}
 {"id": "8544:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8548:s:28d96597", "decision": "do", "objective": "Cenarion Combat Badge", "text": "Earn from Cenarion Hold combat assignment quests", "reason": "real source"}
@@ -10,7 +10,7 @@
 {"id": "8556:s:94c120c4", "decision": "skip", "reason": "raid only"}
 {"id": "8556:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8557:s:7cdb96d8", "decision": "skip", "reason": "raid only"}
-{"id": "8557:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8557:s:3e6ae84a", "decision": "hint", "text": "You must be Revered with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8557:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8558:s:088786ee", "decision": "skip", "reason": "raid only"}
 {"id": "8558:s:8ebec56f", "decision": "skip", "reason": "raid only"}
@@ -20,12 +20,12 @@
 {"id": "8560:s:ddf2d5be", "decision": "skip", "reason": "raid only"}
 {"id": "8560:s:f6d82ec2", "decision": "skip", "reason": "raid only"}
 {"id": "8560:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8560:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8560:s:8ebec56f-2", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8561:s:3c37feb1", "decision": "skip", "reason": "raid only"}
 {"id": "8561:s:7e8d066b", "decision": "skip", "reason": "raid only"}
 {"id": "8561:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8562:s:ca2f4c3b", "decision": "skip", "reason": "raid only"}
-{"id": "8562:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8562:s:3e6ae84a", "decision": "hint", "text": "You must be Honored with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8562:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8565:s:105e1262", "decision": "skip", "reason": "PvP"}
 {"id": "8566:s:16469032", "decision": "skip", "reason": "PvP"}
@@ -50,7 +50,7 @@
 {"id": "8590:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "8591:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "8592:s:46cdf939", "decision": "skip", "reason": "raid only"}
-{"id": "8592:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8592:s:8ebec56f", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8592:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8593:s:ddf2d5be", "decision": "skip", "reason": "raid only"}
 {"id": "8593:s:8ebec56f", "decision": "skip", "reason": "raid only"}
@@ -91,15 +91,15 @@
 {"id": "8621:s:2ee554de", "decision": "skip", "reason": "raid only"}
 {"id": "8621:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8622:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8622:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8622:s:8ebec56f-2", "decision": "hint", "text": "You must be Honored with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8623:s:acf0131f", "decision": "skip", "reason": "raid only"}
 {"id": "8623:s:3e1aa100", "decision": "skip", "reason": "raid only"}
-{"id": "8623:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8623:s:3e6ae84a", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8623:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8624:s:15ce9636", "decision": "skip", "reason": "raid only"}
 {"id": "8624:s:98081772", "decision": "skip", "reason": "raid only"}
 {"id": "8624:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8624:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8624:s:8ebec56f-2", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8625:s:f6d82ec2", "decision": "skip", "reason": "raid only"}
 {"id": "8625:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8626:s:28c1100d", "decision": "skip", "reason": "raid only"}
@@ -107,7 +107,7 @@
 {"id": "8627:s:ca2f4c3b", "decision": "skip", "reason": "raid only"}
 {"id": "8627:s:2ee554de", "decision": "skip", "reason": "raid only"}
 {"id": "8627:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8627:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8627:s:8ebec56f-2", "decision": "hint", "text": "You must be Honored with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8628:s:acf0131f", "decision": "skip", "reason": "raid only"}
 {"id": "8628:s:3e1aa100", "decision": "skip", "reason": "raid only"}
 {"id": "8628:s:8ebec56f", "decision": "skip", "reason": "raid only"}
@@ -123,7 +123,7 @@
 {"id": "8632:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8633:s:fc732691", "decision": "skip", "reason": "raid only"}
 {"id": "8633:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8633:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8633:s:8ebec56f-2", "decision": "hint", "text": "You must be Honored with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8634:s:7e8d066b", "decision": "skip", "reason": "raid only"}
 {"id": "8635:s:044f00a0", "decision": "skip", "reason": "turn-in to giver"}
 {"id": "8635:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
@@ -131,19 +131,19 @@
 {"id": "8637:s:98081772", "decision": "skip", "reason": "raid only"}
 {"id": "8638:s:bc2bcb4c", "decision": "skip", "reason": "raid only"}
 {"id": "8638:s:e55db868", "decision": "skip", "reason": "raid only"}
-{"id": "8638:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8638:s:3e6ae84a", "decision": "hint", "text": "You must be Honored with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8638:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8639:s:acf0131f", "decision": "skip", "reason": "raid only"}
 {"id": "8639:s:41b1735f", "decision": "skip", "reason": "raid only"}
-{"id": "8639:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8639:s:8ebec56f", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8639:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8640:s:e7a2df84", "decision": "skip", "reason": "raid only"}
 {"id": "8640:s:d8266bb6", "decision": "skip", "reason": "raid only"}
 {"id": "8640:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8640:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8640:s:8ebec56f-2", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8641:s:95f86eca", "decision": "skip", "reason": "raid only"}
 {"id": "8641:s:7e8d066b", "decision": "skip", "reason": "raid only"}
-{"id": "8641:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8641:s:8ebec56f", "decision": "hint", "text": "You must be Neutral with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8641:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8642:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "8643:s:5b3d7b98", "decision": "skip", "reason": "turn-in to giver"}
@@ -167,7 +167,7 @@
 {"id": "8655:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8656:s:bc2bcb4c", "decision": "skip", "reason": "raid only"}
 {"id": "8656:s:25faf1e3", "decision": "skip", "reason": "raid only"}
-{"id": "8656:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8656:s:3e6ae84a", "decision": "hint", "text": "You must be Honored with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8656:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8657:s:acf0131f", "decision": "skip", "reason": "raid only"}
 {"id": "8657:s:98081772", "decision": "skip", "reason": "raid only"}
@@ -191,7 +191,7 @@
 {"id": "8666:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8667:s:acf0131f", "decision": "skip", "reason": "raid only"}
 {"id": "8667:s:28c1100d", "decision": "skip", "reason": "raid only"}
-{"id": "8667:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8667:s:8ebec56f", "decision": "hint", "text": "You must be Friendly with the Brood of Nozdormu to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8667:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8668:s:15ce9636", "decision": "skip", "reason": "raid only"}
 {"id": "8668:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
@@ -217,54 +217,54 @@
 {"id": "8684:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "8685:s:8ebec56f", "decision": "skip", "reason": "event only"}
 {"id": "8686:s:8ebec56f", "decision": "skip", "reason": "event only"}
-{"id": "8687:s:d073adae", "decision": "hint", "text": "Keep Combat Task Briefing VII in your bags; you need it for the turn-in.", "reason": "keep item"}
+{"id": "8687:s:d073adae", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8687:s:8ebec56f", "decision": "skip", "reason": "elite, group"}
 {"id": "8688:s:8ebec56f", "decision": "skip", "reason": "event only"}
-{"id": "8689:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8689:s:3e6ae84a", "decision": "hint", "text": "You must be Revered with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8689:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8690:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8691:s:648bc7ce", "decision": "skip", "reason": "raid only"}
-{"id": "8691:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8691:s:8ebec56f", "decision": "hint", "text": "You must be Revered with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8691:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8692:s:87da371d", "decision": "skip", "reason": "raid only"}
 {"id": "8692:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8694:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8694:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, event"}
-{"id": "8695:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8694:s:8ebec56f-2", "decision": "hint", "text": "You must be Revered with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
+{"id": "8695:s:3e6ae84a", "decision": "hint", "text": "You must be Revered with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8695:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8696:s:87da371d", "decision": "skip", "reason": "raid only"}
-{"id": "8696:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8696:s:3e6ae84a", "decision": "hint", "text": "You must be Revered with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8696:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8697:s:7142a1ea", "decision": "skip", "reason": "raid only"}
 {"id": "8697:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8697:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8697:s:8ebec56f-2", "decision": "hint", "text": "You must be Honored with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8698:s:5ef20336", "decision": "skip", "reason": "raid only"}
-{"id": "8698:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8698:s:3e6ae84a", "decision": "hint", "text": "You must be Honored with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8698:s:8ebec56f", "decision": "skip", "reason": "raid only"}
-{"id": "8699:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8699:s:3e6ae84a", "decision": "hint", "text": "You must be Honored with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8699:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8700:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8701:s:dc6c89f8", "decision": "skip", "reason": "raid only"}
 {"id": "8701:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8703:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
-{"id": "8704:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8704:s:3e6ae84a", "decision": "hint", "text": "You must be Honored with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8704:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8705:s:337d3f6e", "decision": "skip", "reason": "raid only"}
 {"id": "8705:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8706:s:cc90277e", "decision": "skip", "reason": "raid only"}
-{"id": "8706:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8706:s:8ebec56f", "decision": "hint", "text": "You must be Exalted with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8706:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
-{"id": "8707:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8707:s:3e6ae84a", "decision": "hint", "text": "You must be Exalted with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8707:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8708:s:eb143df0", "decision": "skip", "reason": "raid only"}
 {"id": "8708:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8709:s:cc90277e", "decision": "skip", "reason": "raid only"}
-{"id": "8709:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8709:s:8ebec56f", "decision": "hint", "text": "You must be Exalted with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8709:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8710:s:eb143df0", "decision": "skip", "reason": "raid only"}
 {"id": "8710:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
 {"id": "8711:s:dbfb0123", "decision": "skip", "reason": "raid only"}
-{"id": "8711:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8711:s:3e6ae84a", "decision": "hint", "text": "You must be Exalted with the Cenarion Circle to turn this in.", "reason": "rep gate at turn-in (harmonized)"}
 {"id": "8711:s:8ebec56f", "decision": "skip", "reason": "raid only"}
 {"id": "8713:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
 {"id": "8715:s:78825fdf", "decision": "skip", "reason": "turn-in to giver"}
@@ -288,8 +288,8 @@
 {"id": "8730:s:8ebec56f-4", "decision": "skip", "reason": "raid only"}
 {"id": "8737:s:8ebec56f", "decision": "hint", "text": "No fixed spawn: summon it at a Lesser Wind Stone while wearing the full Twilight set.", "reason": "hidden spawn"}
 {"id": "8737:s:8ebec56f-3", "decision": "skip", "reason": "elite, group"}
-{"id": "8738:s:8ebec56f-3", "decision": "hint", "text": "Keep Tactical Task Briefing VII in your bags; you need it when you turn in.", "reason": "keep item"}
-{"id": "8739:s:8ebec56f-2", "decision": "hint", "text": "Keep Tactical Task Briefing VIII in your bags; you need it when you turn in.", "reason": "keep item"}
+{"id": "8738:s:8ebec56f-3", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
+{"id": "8739:s:8ebec56f-2", "decision": "skip", "reason": "item already an objective on the card (harmonized)"}
 {"id": "8741:s:389a6a94", "decision": "skip", "reason": "accept row"}
 {"id": "8743:s:de8ce07f", "decision": "skip", "reason": "accept row"}
 {"id": "8745:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
