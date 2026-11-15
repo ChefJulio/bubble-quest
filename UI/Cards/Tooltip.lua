@@ -44,20 +44,20 @@ function QuestTooltip:Show(owner, quest)
   end
   add(table.concat(facts, "  -  "), GRAY)
 
+  -- Objectives show on ready quests too (greyed, done), so the tooltip still says what the quest
+  -- was (asked for in review); sources only for unfinished ones.
+  for _, objective in ipairs(quest.objectives) do
+    add("- " .. (objective.text or "?"), (objective.finished or quest.readyForTurnIn) and GRAY or WHITE, true)
+    local sources = not quest.readyForTurnIn and sourcesLine(questID, objective)
+    if sources then
+      add("    " .. sources, GRAY, true)
+    end
+  end
   if quest.readyForTurnIn then
     local turnIn = ns.ForeverData:TurnInName(questID)
     add(turnIn and ("Turn in to " .. turnIn) or "Ready to turn in", GREEN)
-  else
-    for _, objective in ipairs(quest.objectives) do
-      add("- " .. (objective.text or "?"), objective.finished and GRAY or WHITE, true)
-      local sources = sourcesLine(questID, objective)
-      if sources then
-        add("    " .. sources, GRAY, true)
-      end
-    end
-    if #quest.objectives == 0 then
-      add("No objectives listed.", GRAY)
-    end
+  elseif #quest.objectives == 0 then
+    add("No objectives listed.", GRAY)
   end
 
   local nav = ns.Navigation:Compute(quest)
