@@ -90,9 +90,15 @@ function Fonts:Apply()
   local scale = (settings.scale or 100) / 100
   for _, object in ipairs(self.objects) do
     local size = math.floor(object.size * scale + 0.5)
-    -- SetFont returns false when the file can't be loaded: fall back to the default face.
-    if not (path and object.font:SetFont(path, size, object.flags)) then
-      object.font:SetFont(object.path, size, object.flags)
+    local flags = object.flags or ""
+    -- A Font object's SetFont returns nothing (unlike a FontString's, which returns success:
+    -- SimpleFontAPIDocumentation.lua:199 vs SimpleFontStringAPIDocumentation.lua:500), so treating
+    -- its result as a failure put the default face straight back. Ask the object what it holds.
+    if path then
+      object.font:SetFont(path, size, flags)
+    end
+    if not path or not object.font:GetFont() then
+      object.font:SetFont(object.path, size, flags)
     end
   end
   ns.Bus:Fire("FontsChanged")
