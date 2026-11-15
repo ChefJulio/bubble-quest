@@ -88,12 +88,38 @@ end
 -- tooltip lines: a member's name, then their objectives ("0/3 Bear Meat", seen in game). A line with
 -- a counter is an objective of the member above it; any other line starts a new member.
 
+-- Names of the other group members (party1-4, or raid1-40), for telling a member's name line from a
+-- status line like "Ready for turn-in" (seen in review: it was taken for a player).
+local function rosterNames()
+  local names = {}
+  local prefix, count = "party", GetNumSubgroupMembers()
+  if IsInRaid() then
+    prefix, count = "raid", GetNumGroupMembers()
+  end
+  for i = 1, count do
+    -- apiguard: allow secret names are skipped (issecretvalue below); none readable -> fallback rule
+    local name = UnitName(prefix .. i)
+    if type(name) == "string" and not issecretvalue(name) then
+      names[name] = true
+    end
+  end
+  return names
+end
+
+-- Is this line a member's name? Exact, or "Name-Realm" for someone from another realm.
+local function isMemberName(text, roster)
+  return roster[text] or roster[(text:match("^([^%-]+)%-") or "")] or false
+end
+
 ---@param questID number
----@return table[]? members { name, color, counts = { { name, done, total, used } } }; nil when solo
+---@return table[]? members { name, color, status?, statusColor?, counts = { { name, done, total, used } } };
+---  nil when solo
 local function partyMembers(questID)
   if not IsInGroup() then
     return nil
   end
+  local roster = rosterNames()
+  local knowNames = next(roster) ~= nil
   -- omitTitle: we show it; ignoreActivePlayer: your own row comes from the quest log.
   local data = C_TooltipInfo.GetQuestPartyProgress(questID, true, true)
   local members, member = {}, nil
@@ -106,8 +132,16 @@ local function partyMembers(questID)
           name = ns.QuestLog.StripProgress(text), done = tonumber(done), total = tonumber(total), used = false,
         }
       elseif not done then
-        member = { name = text, color = line.leftColor, counts = {} }
-        members[#members + 1] = member
+        -- A name starts a member; any other line is the current member's status ("Ready for
+        -- turn-in"). Without readable roster names, fall back to: first such line after a member's
+        -- counts or at the start is a name.
+        local isName = knowNames and isMemberName(text, roster) or (not knowNames and (not member or #member.counts > 0))
+        if isName or not member then
+          member = { name = text, color = line.leftColor, counts = {} }
+          members[#members + 1] = member
+        else
+          member.status, member.statusColor = text, line.leftColor
+        end
       end
     end
   end
@@ -150,9 +184,14 @@ local function addGroupedProgress(quest, members)
 
   for _, member in ipairs(members) do
     local cells = {}
-    for i, objective in ipairs(quest.objectives) do
-      local count = countFor(member, ns.QuestLog.ObjectiveName(objective))
-      cells[i] = count and barAndCount(count.done, count.total) or "-"
+    if #member.counts == 0 and member.status then
+      -- No counts, just a status (e.g. "Ready for turn-in"): that's the row.
+      cells[1] = colorize(member.status, member.statusColor)
+    else
+      for i, objective in ipairs(quest.objectives) do
+        local count = countFor(member, ns.QuestLog.ObjectiveName(objective))
+        cells[i] = count and barAndCount(count.done, count.total) or "-"
+      end
     end
     addRow(colorize(member.name, member.color), cells)
   end
