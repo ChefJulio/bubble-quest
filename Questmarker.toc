@@ -2,7 +2,7 @@
 ## Title: Questmarker
 ## Notes: Quest cards with what to do, where to go, and a hint for confusing steps
 ## Author: ChefJulio
-## Version: 0.1.0
+## Version: @project-version@
 ## Category: Quests
 ## SavedVariables: QuestmarkerDB
 ## SavedVariablesPerCharacter: QuestmarkerCharDB

@@ -21,6 +21,14 @@ Run `python tools/lint.py` after every Lua/XML change. It must print `lint: OK`.
 - A clean lint does not prove runtime behavior: secret values, taint and combat lockdown only show up
   in-game. Say so when handing changes over for testing.
 
+## Releases
+
+Automatic: pushing a tag `vX.Y.Z` runs `.github/workflows/release.yml` (BigWigs packager), which
+uploads the zip to CurseForge and GitHub Releases. `-beta`/`-alpha` in the tag sets the release type.
+Before tagging: replace `CHANGELOG.md` with this release's notes (only this release's), commit, and
+check `python tools/package.py --check`. The TOC's version is `@project-version@`, filled from the
+tag. `python tools/package.py` builds the same zip locally for testing.
+
 ## Conventions
 
 - Lua: 2-space indent; addon state lives on the private namespace (`local ADDON_NAME, ns = ...`).

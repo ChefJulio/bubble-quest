@@ -1,0 +1,36 @@
+# Release: push a version tag (git tag -a v0.2.0 -m "..." && git push origin v0.2.0) and this builds
+# the zip and uploads it to CurseForge and GitHub Releases. Tags with "beta" or "alpha" in the name
+# (v0.2.0-beta) are uploaded as that release type.
+#
+# Needs the repository secret CF_API_KEY (a CurseForge API token) and ## X-Curse-Project-ID in the
+# TOC. GITHUB_TOKEN is provided by GitHub.
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      CF_API_KEY: ${{ secrets.CF_API_KEY }}
+      GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      # The shipped file set must match between package.py and .pkgmeta.
+      - name: Check package contents
+        run: python tools/package.py --check
+
+      - uses: BigWigsMods/packager@v2

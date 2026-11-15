@@ -1,0 +1,20 @@
+package-as: Questmarker
+
+# Release notes for CurseForge and GitHub: CHANGELOG.md holds only the coming release's notes;
+# replace them before tagging (past notes stay on the release pages).
+manual-changelog:
+  filename: CHANGELOG.md
+  markup-type: markdown
+
+# Everything not shipped. tools/package.py --check (run by the release workflow) fails if this and
+# package.py's list of shipped files ever disagree.
+ignore:
+  - .github
+  - .vscode
+  - .luarc.json
+  - .gitattributes
+  - .gitignore
+  - .pkgmeta
+  - CLAUDE.md
+  - docs
+  - tools
