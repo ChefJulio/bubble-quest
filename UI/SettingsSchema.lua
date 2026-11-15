@@ -13,12 +13,24 @@ local ADDON_NAME, ns = ...
 --             option's label in (Questmarker's window only)
 --   column   1 or 2 in Questmarker's window
 --   grid     dropdowns sharing a grid name and the same options form one table in Questmarker's window
+-- Questmarker's window only (Blizzard's panel shows every entry on its own line, full label):
+--   row         entries sharing a row name sit on one line; the first one's rowLabel leads the line,
+--               checkboxes show their `short` label, dropdowns are `width` wide
+--   enabledWhen(profile) -> false greys the control out (e.g. automation options while it's all off)
+--
+-- List order is the order in Blizzard's panel, and per column in Questmarker's window.
 
 local Schema = {}
 ns.SettingsSchema = Schema
 
 local function percent(value)
   return ("%d%%"):format(value)
+end
+
+-- Any automation on: its override-key options only matter then.
+local function automating(p)
+  local a = p.automation
+  return a.accept or a.acceptDaily or a.acceptWeekly or a.turnIn
 end
 
 ---The list of entries (built on demand: categories come from ns.Categories).
@@ -87,52 +99,6 @@ function Schema:Entries()
       set = function(p, v) p.cards.nearestAnywhere = v; ns.Bus:Fire("TrackingResortWanted") end,
     },
 
-    { kind = "section", label = "Automation", column = 1 },
-    {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT", column = 1, default = false,
-      label = "Accept regular quests automatically",
-      tooltip = "Accepts quests when an NPC offers them, and picks them from the NPC's dialogue. "
-        .. "Stands aside while Leatrix Plus's quest automation is on.",
-      get = function(p) return p.automation.accept end,
-      set = function(p, v) p.automation.accept = v end,
-    },
-    {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_DAILY", column = 1, default = false,
-      label = "Accept daily quests automatically",
-      get = function(p) return p.automation.acceptDaily end,
-      set = function(p, v) p.automation.acceptDaily = v end,
-    },
-    {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_WEEKLY", column = 1, default = false,
-      label = "Accept weekly quests automatically",
-      get = function(p) return p.automation.acceptWeekly end,
-      set = function(p, v) p.automation.acceptWeekly = v end,
-    },
-    {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_TURN_IN", column = 1, default = false,
-      label = "Turn in completed quests automatically",
-      tooltip = "Turns in completed quests when you talk to the NPC. Never picks between rewards (you "
-        .. "choose when there's more than one), never pays gold or currency, never hands over crafting "
-        .. "reagents. Stands aside while Leatrix Plus's quest automation is on.",
-      get = function(p) return p.automation.turnIn end,
-      set = function(p, v) p.automation.turnIn = v end,
-    },
-    {
-      kind = "dropdown", id = "QUESTMARKER_AUTO_KEY", column = 1, default = "SHIFT",
-      label = "Override key",
-      tooltip = "Hold this while talking to an NPC to do it yourself (or, with the option below, to "
-        .. "automate only then).",
-      options = function() return { { "SHIFT", "Shift" }, { "CTRL", "Ctrl" }, { "ALT", "Alt" } } end,
-      get = function(p) return p.automation.key end,
-      set = function(p, v) p.automation.key = v end,
-    },
-    {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_REQUIRE_KEY", column = 1, default = false,
-      label = "Only automate while holding the override key",
-      get = function(p) return p.automation.requireKey end,
-      set = function(p, v) p.automation.requireKey = v end,
-    },
-
     { kind = "section", label = "Look", column = 1 },
     {
       kind = "checkbox", id = "QUESTMARKER_PROGRESS_BAR", column = 1, default = true,
@@ -177,30 +143,6 @@ function Schema:Entries()
       set = function(p, v) p.cards.opacity = v; ns.Stack:ApplyBackground() end,
     },
 
-    { kind = "section", label = "Arrows", column = 1 },
-    {
-      kind = "dropdown", id = "QUESTMARKER_ARROW_STYLE", column = 1, default = "classic",
-      label = "Arrow style",
-      tooltip = "The arrow on each card. /qm arrows shows them all side by side.",
-      options = function()
-        local list = {}
-        for _, style in ipairs(ns.Card.ARROW_STYLES) do
-          list[#list + 1] = { style.key, style.label }
-        end
-        return list
-      end,
-      get = function(p) return p.cards.arrowStyle end,
-      set = function(p, v) p.cards.arrowStyle = v; ns.Stack:Request(false, true) end,
-    },
-    {
-      kind = "checkbox", id = "QUESTMARKER_ARROW_COLOR", column = 1, default = true,
-      label = "Color arrows by distance",
-      tooltip = "Green when close, through yellow and orange, to red when far (or in another zone). "
-        .. "Off: gold. Applies to Questmarker's own arrow styles.",
-      get = function(p) return p.cards.arrowColorByDistance end,
-      set = function(p, v) p.cards.arrowColorByDistance = v end,
-    },
-
     { kind = "section", label = "Quest categories", column = 2 },
   }
 
@@ -220,6 +162,86 @@ function Schema:Entries()
       get = function() return ns.Categories:Mode(name) end,
       set = function(p, v) p.categories[name] = v; ns.Stack:Request(true, true) end,
     }
+  end
+
+  local rest = {
+    { kind = "section", label = "Automation", column = 2 },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT", column = 2, default = false,
+      row = "accept", rowLabel = "Accept:", short = "Regular",
+      label = "Accept regular quests automatically",
+      tooltip = "Accepts quests when an NPC offers them, and picks them from the NPC's dialogue. "
+        .. "Stands aside while Leatrix Plus's quest automation is on.",
+      get = function(p) return p.automation.accept end,
+      set = function(p, v) p.automation.accept = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_DAILY", column = 2, default = false,
+      row = "accept", short = "Daily",
+      label = "Accept daily quests automatically",
+      get = function(p) return p.automation.acceptDaily end,
+      set = function(p, v) p.automation.acceptDaily = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_WEEKLY", column = 2, default = false,
+      row = "accept", short = "Weekly",
+      label = "Accept weekly quests automatically",
+      get = function(p) return p.automation.acceptWeekly end,
+      set = function(p, v) p.automation.acceptWeekly = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_TURN_IN", column = 2, default = false,
+      label = "Turn in completed quests automatically",
+      tooltip = "Turns in completed quests when you talk to the NPC. Never picks between rewards (you "
+        .. "choose when there's more than one), never pays gold or currency, never hands over crafting "
+        .. "reagents. Stands aside while Leatrix Plus's quest automation is on.",
+      get = function(p) return p.automation.turnIn end,
+      set = function(p, v) p.automation.turnIn = v end,
+    },
+    {
+      kind = "dropdown", id = "QUESTMARKER_AUTO_KEY", column = 2, default = "SHIFT",
+      row = "key", rowLabel = "Override key", width = 80, enabledWhen = automating,
+      label = "Override key",
+      tooltip = "Hold this while talking to an NPC to do it yourself (or, with \"only while held\", to "
+        .. "automate only then).",
+      options = function() return { { "SHIFT", "Shift" }, { "CTRL", "Ctrl" }, { "ALT", "Alt" } } end,
+      get = function(p) return p.automation.key end,
+      set = function(p, v) p.automation.key = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_REQUIRE_KEY", column = 2, default = false,
+      row = "key", short = "only while held", enabledWhen = automating,
+      label = "Only automate while holding the override key",
+      get = function(p) return p.automation.requireKey end,
+      set = function(p, v) p.automation.requireKey = v end,
+    },
+
+    { kind = "section", label = "Arrows", column = 2 },
+    {
+      kind = "dropdown", id = "QUESTMARKER_ARROW_STYLE", column = 2, default = "classic",
+      label = "Arrow style",
+      tooltip = "The arrow on each card. /qm arrows shows them all side by side.",
+      options = function()
+        local list = {}
+        for _, style in ipairs(ns.Card.ARROW_STYLES) do
+          list[#list + 1] = { style.key, style.label }
+        end
+        return list
+      end,
+      get = function(p) return p.cards.arrowStyle end,
+      set = function(p, v) p.cards.arrowStyle = v; ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_ARROW_COLOR", column = 2, default = true,
+      label = "Color arrows by distance",
+      tooltip = "Green when close, through yellow and orange, to red when far (or in another zone). "
+        .. "Off: gold. Applies to Questmarker's own arrow styles.",
+      get = function(p) return p.cards.arrowColorByDistance end,
+      set = function(p, v) p.cards.arrowColorByDistance = v end,
+    },
+  }
+  for _, entry in ipairs(rest) do
+    entries[#entries + 1] = entry
   end
 
   self.entries = entries

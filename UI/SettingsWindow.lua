@@ -12,12 +12,14 @@ local ADDON_NAME, ns = ...
 -- Every control reads its value from the profile when the window opens or a setting changes
 -- (SettingChanged); `refreshing` stops those refreshes from counting as the player's changes.
 
-local COLUMN_WIDTH = 270
+local COLUMN_WIDTH = 300
 local PAD = 18
 local HEADER_HEIGHT = 30
 local SECTION_HEIGHT = 30
 local CHECKBOX_HEIGHT = 26
-local LABELLED_HEIGHT = 48     -- label above a slider or dropdown
+local INLINE_HEIGHT = 30       -- label and slider or dropdown on one row (review: half the height)
+local INLINE_LABEL_WIDTH = 120
+local SLIDER_VALUE_WIDTH = 36  -- room right of the slider for its value ("100%")
 local GRID_LABEL_WIDTH = 120
 local GRID_COLUMN_WIDTH = 50
 local GRID_ROW_HEIGHT = 24
@@ -59,6 +61,16 @@ local function divider(parent, x, y, width)
   return line
 end
 
+-- Greyed out while entry.enabledWhen(profile) says so (applied on every refresh).
+local function enabledNow(entry)
+  return entry.enabledWhen == nil or entry.enabledWhen(ns.DB.profile) and true or false
+end
+
+local function setTextEnabled(fontString, enabled)
+  local color = enabled and HIGHLIGHT_FONT_COLOR or GRAY_FONT_COLOR
+  fontString:SetTextColor(color:GetRGB())
+end
+
 -- Builders: build(parent, entry, x, y) -> height used, refresh function (optional).
 local builders = {}
 
@@ -70,26 +82,46 @@ function builders.section(parent, entry, x, y)
   return SECTION_HEIGHT
 end
 
-function builders.checkbox(parent, entry, x, y)
+-- A checkbox; `label` overrides entry.label (rows use the short label). Returns the box too, for rows.
+local function checkbox(parent, entry, x, y, label)
   local box = CreateFrame("CheckButton", nil, parent, "UICheckButtonTemplate")
   box:SetPoint("TOPLEFT", x - 4, y)
   box:SetSize(24, 24)
   box.Text:SetFontObject("GameFontHighlight")
-  box.Text:SetText(entry.label)
-  box.Text:SetWidth(COLUMN_WIDTH - 28)
+  box.Text:SetText(label or entry.label)
   box.Text:SetJustifyH("LEFT")
   box:SetScript("OnClick", function(self) change(entry, self:GetChecked()) end)
   tooltip(box, entry.label, entry.tooltip)
-  return CHECKBOX_HEIGHT, function() box:SetChecked(entry.get(ns.DB.profile)) end
+  local refresh = function()
+    box:SetChecked(entry.get(ns.DB.profile))
+    local enabled = enabledNow(entry)
+    box:SetEnabled(enabled)
+    setTextEnabled(box.Text, enabled)
+  end
+  return box, refresh
+end
+
+function builders.checkbox(parent, entry, x, y)
+  local box, refresh = checkbox(parent, entry, x, y)
+  box.Text:SetWidth(COLUMN_WIDTH - 28)
+  return CHECKBOX_HEIGHT, refresh
+end
+
+-- The label left, the control right of it, on one row.
+local function inlineLabel(parent, entry, x, y)
+  local label = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+  label:SetPoint("LEFT", parent, "TOPLEFT", x, y - INLINE_HEIGHT / 2)
+  label:SetWidth(INLINE_LABEL_WIDTH - 6)
+  label:SetJustifyH("LEFT")
+  label:SetText(entry.label)
+  return label
 end
 
 function builders.slider(parent, entry, x, y)
-  local label = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-  label:SetPoint("TOPLEFT", x, y - 2)
-  label:SetText(entry.label)
+  inlineLabel(parent, entry, x, y)
   local slider = CreateFrame("Frame", nil, parent, "MinimalSliderWithSteppersTemplate")
-  slider:SetPoint("TOPLEFT", x - 4, y - 18)
-  slider:SetWidth(COLUMN_WIDTH - 40)
+  slider:SetPoint("LEFT", parent, "TOPLEFT", x + INLINE_LABEL_WIDTH - 4, y - INLINE_HEIGHT / 2)
+  slider:SetWidth(COLUMN_WIDTH - INLINE_LABEL_WIDTH - SLIDER_VALUE_WIDTH)
   local formatters = { [MinimalSliderWithSteppersMixin.Label.Right] = entry.format }
   slider:Init(entry.get(ns.DB.profile), entry.min, entry.max, (entry.max - entry.min) / entry.step, formatters)
   slider:RegisterCallback(MinimalSliderWithSteppersMixin.Event.OnValueChanged, function(_, value)
@@ -97,16 +129,14 @@ function builders.slider(parent, entry, x, y)
     change(entry, entry.min + math.floor((value - entry.min) / entry.step + 0.5) * entry.step)
   end, slider)
   tooltip(slider, entry.label, entry.tooltip)
-  return LABELLED_HEIGHT, function() slider:SetValue(entry.get(ns.DB.profile)) end
+  return INLINE_HEIGHT, function() slider:SetValue(entry.get(ns.DB.profile)) end
 end
 
-function builders.dropdown(parent, entry, x, y)
-  local label = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-  label:SetPoint("TOPLEFT", x, y - 2)
-  label:SetText(entry.label)
+-- A dropdown `width` wide at x, vertically centred on the row at y. Returns it and its refresh.
+local function dropdownAt(parent, entry, x, y, width)
   local dropdown = CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
-  dropdown:SetPoint("TOPLEFT", x, y - 18)
-  dropdown:SetWidth(COLUMN_WIDTH - 40)
+  dropdown:SetPoint("LEFT", parent, "TOPLEFT", x, y - INLINE_HEIGHT / 2)
+  dropdown:SetWidth(width)
   dropdown:SetupMenu(function(_, root)
     local options = entry.options()
     if #options > MENU_SCROLL_AFTER then
@@ -130,7 +160,53 @@ function builders.dropdown(parent, entry, x, y)
     end
   end)
   tooltip(dropdown, entry.label, entry.tooltip)
-  return LABELLED_HEIGHT, function() dropdown:GenerateMenu() end
+  return dropdown, function()
+    dropdown:GenerateMenu()
+    dropdown:SetEnabled(enabledNow(entry))
+  end
+end
+
+function builders.dropdown(parent, entry, x, y)
+  local label = inlineLabel(parent, entry, x, y)
+  local _, refresh = dropdownAt(parent, entry, x + INLINE_LABEL_WIDTH, y, COLUMN_WIDTH - INLINE_LABEL_WIDTH)
+  return INLINE_HEIGHT, function()
+    refresh()
+    setTextEnabled(label, enabledNow(entry))
+  end
+end
+
+-- Entries sharing a `row`, left to right on one line: the first one's rowLabel, then each control
+-- (checkboxes with their short label, dropdowns `width` wide). Greys the row label with the first.
+local function buildRow(parent, members, x, y)
+  local cursor = x
+  local refreshes = {}
+  local lead
+  if members[1].rowLabel then
+    lead = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+    lead:SetPoint("LEFT", parent, "TOPLEFT", x, y - INLINE_HEIGHT / 2)
+    lead:SetText(members[1].rowLabel)
+    cursor = cursor + math.max(lead:GetStringWidth() + 10, members[1].kind == "dropdown" and INLINE_LABEL_WIDTH or 0)
+  end
+  for _, entry in ipairs(members) do
+    if entry.kind == "checkbox" then
+      local box, refresh = checkbox(parent, entry, cursor, y - (INLINE_HEIGHT - 24) / 2, entry.short)
+      cursor = cursor + 24 + box.Text:GetStringWidth() + 14
+      refreshes[#refreshes + 1] = refresh
+    elseif entry.kind == "dropdown" then
+      local width = entry.width or 90
+      local _, refresh = dropdownAt(parent, entry, cursor, y, width)
+      cursor = cursor + width + 12
+      refreshes[#refreshes + 1] = refresh
+    end
+  end
+  return INLINE_HEIGHT, function()
+    for _, refresh in ipairs(refreshes) do
+      refresh()
+    end
+    if lead then
+      setTextEnabled(lead, enabledNow(members[1]))
+    end
+  end
 end
 
 -- A table for entries sharing a grid: column headings from the options, a row per entry with one
@@ -245,22 +321,30 @@ end
 local function create()
   local frame = createPanel()
   local y = { -HEADER_HEIGHT - 6, -HEADER_HEIGHT - 6 }
-  local gridsBuilt = {}
+  local groupsBuilt = {}  -- grids and rows are built once, at their first entry
   local entries = ns.SettingsSchema:Entries()
+  local function membersOf(field, name)
+    local members = {}
+    for _, other in ipairs(entries) do
+      if other[field] == name then
+        members[#members + 1] = other
+      end
+    end
+    return members
+  end
   for _, entry in ipairs(entries) do
     local column = entry.column or 1
     local x = PAD + (column - 1) * (COLUMN_WIDTH + PAD * 2)
     local height, refresh = 0, nil
-    if entry.grid then
-      if not gridsBuilt[entry.grid] then
-        gridsBuilt[entry.grid] = true
-        local members = {}
-        for _, other in ipairs(entries) do
-          if other.grid == entry.grid then
-            members[#members + 1] = other
-          end
+    local group = entry.grid and ("grid:" .. entry.grid) or entry.row and ("row:" .. entry.row)
+    if group then
+      if not groupsBuilt[group] then
+        groupsBuilt[group] = true
+        if entry.grid then
+          height, refresh = buildGrid(frame, membersOf("grid", entry.grid), x, y[column])
+        else
+          height, refresh = buildRow(frame, membersOf("row", entry.row), x, y[column])
         end
-        height, refresh = buildGrid(frame, members, x, y[column])
       end
     else
       height, refresh = builders[entry.kind](frame, entry, x, y[column])
