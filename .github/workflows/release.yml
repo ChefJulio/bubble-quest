@@ -21,16 +21,15 @@ jobs:
       CF_API_KEY: ${{ secrets.CF_API_KEY }}
       GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      # The shipped file set must match between package.py and .pkgmeta.
+      # The shipped file set must match between package.py and .pkgmeta. The runner's own Python 3.
       - name: Check package contents
-        run: python tools/package.py --check
+        run: python3 tools/package.py --check
 
+      # Zip and CurseForge label "Questmarker-v0.2.0": the defaults add "-forever" and drop the name.
       - uses: BigWigsMods/packager@v2
+        with:
+          args: -n "{package-name}-{project-version}:{package-name}-{project-version}"
