@@ -37,7 +37,18 @@ local function collectLine(questID, itemName)
   if not sources or #sources.names == 0 then
     return "Collect " .. itemName
   end
-  local from = table.concat(sources.names, ", ")
+  -- A source named like the item adds nothing ("Gather Milly's Harvest from Milly's Harvest": the
+  -- crates you click share the item's name, seen in game).
+  local names = {}
+  for _, name in ipairs(sources.names) do
+    if name ~= itemName then
+      names[#names + 1] = name
+    end
+  end
+  if #names == 0 then
+    return ("%s %s"):format(SOURCE_VERBS[sources.kind] or "Collect", itemName)
+  end
+  local from = table.concat(names, ", ")
   if sources.more > 0 then
     from = ("%s +%d"):format(from, sources.more)
   end
