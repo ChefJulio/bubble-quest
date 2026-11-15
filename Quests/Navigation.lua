@@ -48,10 +48,7 @@ local function markerPoint(questID)
   return { map = instanceMap, x = world.x, y = world.y, marker = true }
 end
 
--- "item:Kobold Vermin slain#2" -> "Kobold Vermin slain"
-local function objectiveName(objective)
-  return (objective.key:gsub("^[^:]*:", ""):gsub("#%d+$", ""))
-end
+local objectiveName = ns.QuestLog.ObjectiveName
 
 local function buildTargets(quest)
   local points, spawnBased = {}, false
@@ -67,7 +64,9 @@ local function buildTargets(quest)
   else
     for i, objective in ipairs(quest.objectives) do
       if not objective.finished then
-        local found = ns.ForeverData:ObjectivePoints(quest.questID, objectiveName(objective))
+        local name = objectiveName(objective)
+        -- forever-db first; spots learned in play (Data/Learned.lua) where it has nothing.
+        local found = ns.ForeverData:ObjectivePoints(quest.questID, name) or ns.Learned:Points(quest.questID, name)
         if found then add(found, i) end
       end
     end
@@ -138,10 +137,34 @@ function Navigation:Distance(quest)
   return best
 end
 
+-- A creature for one of the quest's unfinished objectives has its nameplate up (Quests/Nearby.lua):
+-- the player is in the area whatever the target data says. Returns that objective's index.
+local function nearbyObjective(quest)
+  if quest.readyForTurnIn or not ns.Nearby:Has(quest.questID) then
+    return nil
+  end
+  for i, objective in ipairs(quest.objectives) do
+    if not objective.finished and ns.Nearby:Has(quest.questID, objectiveName(objective)) then
+      return i
+    end
+  end
+  return nil
+end
+
 ---Everything a card's arrow needs, or nil (no position, no target).
 ---@param quest table
 ---@return table? nav { distance, angle?, inArea, objective?, zone? }
 function Navigation:Compute(quest)
+  local nav = self:ComputeTarget(quest)
+  local nearby = nearbyObjective(quest)
+  if nearby then
+    nav = nav or {}
+    nav.inArea, nav.objective = true, nearby
+  end
+  return nav
+end
+
+function Navigation:ComputeTarget(quest)
   local north, west, instanceMap = self:PlayerPosition()
   if not north then
     return nil
@@ -217,6 +240,7 @@ local function forget(questID)
   Navigation.targets[questID] = nil
 end
 ns.Bus:On("QuestChanged", function(quest) forget(quest.questID) end)
+ns.Bus:On("LearnedChanged", forget)
 ns.Bus:On("QuestRemoved", function(questID)
   forget(questID)
   Navigation.current[questID] = nil

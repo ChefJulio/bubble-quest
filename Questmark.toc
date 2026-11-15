@@ -23,11 +23,13 @@ Core\Combat.lua
 Core\DB.lua
 Data\ForeverData.lua
 Data\CategoryOverrides.lua
+Data\Learned.lua
 Quests\QuestLog.lua
 Quests\Categories.lua
 Quests\Zone.lua
 Quests\DoLine.lua
 Quests\Navigation.lua
+Quests\Nearby.lua
 Quests\Tracking.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua

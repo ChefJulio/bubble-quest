@@ -31,6 +31,14 @@ local function stripProgress(text)
   local stripped = text:gsub("%s*:?%s*%d+%s*/%s*%d+", ""):gsub("%s*%(%d+%%%)", "")
   return (stripped:match("^%s*(.-)%s*$"))
 end
+QuestLog.StripProgress = stripProgress  -- also used for nameplate tooltip lines (Quests/Nearby.lua)
+
+---An objective's name: its text without the progress counter, as used in its key.
+---@param objective table from a quest snapshot
+---@return string
+function QuestLog.ObjectiveName(objective)
+  return (objective.key:gsub("^[^:]*:", ""):gsub("#%d+$", ""))
+end
 
 -- Rows are keyed by objective, not position: Forever quests can gain objectives mid-quest and take
 -- them in any order. Key = type + text without progress; exact duplicates get "#2", "#3".

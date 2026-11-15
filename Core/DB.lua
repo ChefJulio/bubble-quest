@@ -11,6 +11,7 @@ local SCHEMA = 1
 
 local ACCOUNT_DEFAULTS = {
   profiles = {},
+  learned = {},  -- [questID] = { [objective name] = { { map, x, y } } }, see Data/Learned.lua
   debug = {
     events = false,
   },
