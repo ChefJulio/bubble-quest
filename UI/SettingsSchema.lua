@@ -32,8 +32,9 @@ function Schema:Entries()
     {
       kind = "checkbox", id = "QUESTMARKER_HIDE_BLIZZARD_TRACKER", column = 1, default = true,
       label = "Hide Blizzard quest tracker",
-      tooltip = "Hide the game's objective tracker so Questmarker's cards replace it. Quest auto-complete "
-        .. "popups and the scenario tracker are part of it and hide too.",
+      tooltip = "Hide the game's objective tracker so Questmarker's cards replace it. Done by untracking "
+        .. "quests in the game's own tracker (Questmarker doesn't use it); they come back when you untick "
+        .. "this. Tracked achievements, scenarios and quest popups still show the game's tracker.",
       get = function(p) return p.blizzardTracker.hide end,
       set = function(p, v) p.blizzardTracker.hide = v; ns.BlizzardTracker:Apply() end,
     },

@@ -303,8 +303,8 @@ commands.tracker = {
   help = "Blizzard tracker state",
   run = function()
     local state = ns.BlizzardTracker:State()
-    print(("Blizzard tracker: exists=%s shown=%s protected=%s hooked=%s setting=%s"):format(
-      tostring(state.exists), tostring(state.shown), tostring(state.protected), tostring(state.hooked), state.setting))
+    print(("Blizzard tracker: exists=%s shown=%s watches=%d removedWatches=%d setting=%s"):format(
+      tostring(state.exists), tostring(state.shown), state.watches, state.removedWatches, state.setting))
   end,
 }
 
