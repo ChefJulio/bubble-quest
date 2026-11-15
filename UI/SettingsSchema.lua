@@ -11,6 +11,7 @@ local ADDON_NAME, ns = ...
 --   slider:   min, max, step, format(value) -> text
 --   dropdown: options() -> { { value, label }, ... }
 --   column   1 or 2 in Questmark's window
+--   grid     dropdowns sharing a grid name and the same options form one table in Questmark's window
 
 local Schema = {}
 ns.SettingsSchema = Schema
@@ -110,7 +111,9 @@ function Schema:Entries()
   end
   for _, name in ipairs(ns.Categories.ORDER) do
     entries[#entries + 1] = {
-      kind = "dropdown", id = "QUESTMARK_CATEGORY_" .. name:upper(), column = 2,
+      -- grid: Questmark's window shows these as one table (a row each, a radio per option); Blizzard's
+      -- panel, which has no such control, keeps dropdowns.
+      kind = "dropdown", grid = "categories", id = "QUESTMARK_CATEGORY_" .. name:upper(), column = 2,
       default = ns.Categories.DEFAULT_MODES[name],
       label = ns.Categories.LABELS[name],
       tooltip = "Show: as normal cards with this zone's quests. Separate: in their own collapsed group. "
