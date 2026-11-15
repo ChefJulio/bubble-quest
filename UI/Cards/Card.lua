@@ -12,16 +12,29 @@ local TITLE_HEIGHT = 16
 local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
-local NAV_WIDTH = 74     -- arrow + "1234 yd" / zone name, left of the collapse button
+local TOGGLE_WIDTH = 20  -- the collapse button at the right of the title line
 local ARROW_SIZE = 14
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready"
-local ARROW_ATLAS = "Navigation-Tracked-Arrow"   -- SuperTrackedFrame.xml:14
 local IN_AREA_ATLAS = "Navigation-Tracked-Icon"
 
 local Card = {}
 Card.__index = Card
 ns.Card = Card
 Card.WIDTH = WIDTH
+
+-- Arrow art, in order of preference; the first the client has is used. All point up unrotated
+-- (the names say so), which the angle maths relies on. Navigation-Tracked-Arrow (the in-world
+-- beacon's) was tried first and read as a triangle at this size. /qm arrows previews them all.
+Card.ARROW_CANDIDATES = { "NPE_ArrowUp", "housing-floor-arrow-up", "poi-traveldirections-arrow",
+  "Navigation-Tracked-Arrow" }
+local function arrowAtlas()
+  for _, atlas in ipairs(Card.ARROW_CANDIDATES) do
+    if C_Texture.GetAtlasInfo(atlas) then
+      return atlas
+    end
+  end
+  return "Navigation-Tracked-Arrow"
+end
 
 local function createRow(card)
   local row = CreateFrame("Frame", nil, card.frame)
@@ -68,16 +81,16 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
 
   self.title = frame:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerHeaderFont")
   self.title:SetPoint("TOPLEFT", 0, 0)
-  self.title:SetWidth(WIDTH - 20 - NAV_WIDTH)
+  self.title:SetWidth(WIDTH - TOGGLE_WIDTH)  -- narrowed by SetNavigation while an arrow shows
   self.title:SetJustifyH("LEFT")
   self.title:SetWordWrap(false)
 
   -- Arrow / in-area diamond and the distance or zone name, right-aligned before the toggle.
   self.navText = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
-  self.navText:SetPoint("TOPRIGHT", -20, -2)
+  self.navText:SetPoint("TOPRIGHT", -TOGGLE_WIDTH, -2)
   self.navText:SetJustifyH("RIGHT")
   self.arrow = frame:CreateTexture(nil, "ARTWORK")
-  self.arrow:SetAtlas(ARROW_ATLAS)
+  self.arrow:SetAtlas(arrowAtlas())
   self.arrow:SetSize(ARROW_SIZE, ARROW_SIZE)
   self.arrow:SetPoint("RIGHT", self.navText, "LEFT", -3, 0)
   self.arrow:Hide()
@@ -199,9 +212,13 @@ function Card:SetNavigation(nav)
       text = nav.zone or (nav.distance and ("%d yd"):format(nav.distance)) or ""
     end
   end
-  if text ~= self.lastNavText then
+  local icon = arrow or inArea
+  if text ~= self.lastNavText or icon ~= self.lastNavIcon then
     self.navText:SetText(text)
-    self.lastNavText = text
+    self.lastNavText, self.lastNavIcon = text, icon
+    -- The title gets whatever the arrow text doesn't need ("721 yd" is short, a zone name isn't).
+    local navWidth = (text ~= "" and self.navText:GetStringWidth() + 6 or 0) + (icon and ARROW_SIZE + 3 or 0)
+    self.title:SetWidth(WIDTH - TOGGLE_WIDTH - navWidth)
   end
   self.arrow:SetShown(arrow)
   if arrow and nav then

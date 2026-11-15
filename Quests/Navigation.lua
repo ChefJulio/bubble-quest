@@ -95,14 +95,29 @@ local function yards(n1, w1, n2, w2)
   return math.sqrt(dn * dn + dw * dw)
 end
 
+-- The zone a target point is in, for the "other zone" label. The client decides whether it lies on
+-- the player's own zone map. LibForeverData's ToUiMap picks the smallest map rectangle holding the
+-- point, which is wrong where rectangles overlap at zone borders (Defias Thugs in Northshire came
+-- out as Burning Steppes, verified in game); it is only used to name zones the player isn't in.
+-- Cached on the point; targets are rebuilt on every zone change.
 local function zoneNameOf(point, questID)
   if point.marker then
     return ns.Zone.questZone[questID]
   end
-  if point.uiMap == nil then
-    point.uiMap = ns.ForeverData:UiMapOf(point.map, point.x, point.y) or false
+  if point.zone == nil then
+    local zoneMap, world = ns.Zone.mapID, CreateVector2D(point.x, point.y)
+    local _, position
+    if zoneMap then
+      _, position = C_Map.GetMapPosFromWorldPos(point.map, world, zoneMap)
+    end
+    if position and position.x >= 0 and position.x <= 1 and position.y >= 0 and position.y <= 1 then
+      point.zone = ns.Zone.name or false
+    else
+      local uiMap = ns.ForeverData:UiMapOf(point.map, point.x, point.y)
+      point.zone = uiMap and ns.Zone:MapName(uiMap) or false
+    end
   end
-  return point.uiMap and ns.Zone:MapName(point.uiMap) or nil
+  return point.zone or nil
 end
 
 ---Distance to the nearest target, no hysteresis (for sorting). Nil when unknown or on another map.
