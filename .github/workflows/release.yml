@@ -29,11 +29,14 @@ jobs:
       - name: Check package contents
         run: python3 tools/package.py --check
 
-      # Names as set on CurseForge by hand (review): "Questmarker-v0.2.0.zip". The release type (beta,
-      # alpha) shows as CurseForge's badge, so it's cut from the name: tag v0.2.0-beta -> v0.2.0.
+      # Names like most addons in the CurseForge app (review): "Questmarker-0.2.0.zip", as Bagnon-12.1.10.zip.
+      # The release type (beta, alpha) shows as CurseForge's badge, so it's cut from the name along
+      # with the tag's "v": tag v0.2.0-beta -> 0.2.0.
       - name: Release name
         id: name
-        run: echo "version=${GITHUB_REF_NAME%%-*}" >> "$GITHUB_OUTPUT"
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          echo "version=${version%%-*}" >> "$GITHUB_OUTPUT"
 
       - uses: BigWigsMods/packager@v2
         with:
