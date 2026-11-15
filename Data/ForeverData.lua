@@ -66,6 +66,25 @@ end
 
 local MAX_SOURCE_NAMES = 2
 
+-- Yards from the player to a creature's or object's nearest spawn on this continent, or nil.
+local function nearestSpawn(lib, kind, id)
+  local north, west, map = ns.Navigation:PlayerPosition()
+  if not north then
+    return nil
+  end
+  local best
+  for _, p in ipairs(lib.Spawns(kind, id)) do
+    if p.map == map then
+      local dn, dw = p.x - north, p.y - west
+      local d = dn * dn + dw * dw
+      if not best or d < best then
+        best = d
+      end
+    end
+  end
+  return best and math.sqrt(best) or nil
+end
+
 ---Where a collect objective's item comes from, matched by item name among the quest's item
 ---objectives. Coverage: about half of item objectives, mostly classic quests; few Forever-new ones.
 ---@param questID number
@@ -83,19 +102,39 @@ function ForeverData:ItemSources(questID, itemName, maxNames)
     if objective.kind == "item" and objective.target and lib.Name("item", objective.target) == itemName then
       local item = lib.Get("item", objective.target)
       local sources = item and item.sources or {}
-      table.sort(sources, function(a, b) return (a.chance or 0) > (b.chance or 0) end)
-      local first = sources[1]
-      if not first then
+      if not sources[1] then
         return nil
       end
-      local result = { kind = first.kind, names = {}, more = 0 }
+      -- The main kind (npc / object / item) is that of the likeliest source.
+      local best = sources[1]
       for _, source in ipairs(sources) do
-        if source.kind == first.kind then
-          if #result.names < maxNames then
-            result.names[#result.names + 1] = lib.Name(source.kind, source.id)
-          else
-            result.more = result.more + 1
-          end
+        if (source.chance or 0) > (best.chance or 0) then
+          best = source
+        end
+      end
+      -- Nearest first (closest spawn to the player, this continent), then by drop chance: sorted by
+      -- chance alone, a Loch Modan quest led with Badlands boars and Ashenvale bears (seen in review).
+      local list, distance = {}, {}
+      for _, source in ipairs(sources) do
+        if source.kind == best.kind then
+          list[#list + 1] = source
+          distance[source] = nearestSpawn(lib, source.kind, source.id)
+        end
+      end
+      table.sort(list, function(a, b)
+        local da, db = distance[a], distance[b]
+        if da ~= db then
+          if da and db then return da < db end
+          return da ~= nil
+        end
+        return (a.chance or 0) > (b.chance or 0)
+      end)
+      local result = { kind = best.kind, names = {}, more = 0 }
+      for _, source in ipairs(list) do
+        if #result.names < maxNames then
+          result.names[#result.names + 1] = lib.Name(source.kind, source.id)
+        else
+          result.more = result.more + 1
         end
       end
       return result

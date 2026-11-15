@@ -6,6 +6,7 @@ local ADDON_NAME, ns = ...
 -- shared GameTooltip, as addons normally do.
 
 local WHITE, GRAY, GREEN = { 1, 1, 1 }, { 0.6, 0.6, 0.6 }, { 0.2, 1, 0.2 }
+local MAX_TOOLTIP_SOURCES = 4
 
 local QuestTooltip = {}
 ns.QuestTooltip = QuestTooltip
@@ -20,18 +21,24 @@ local function sourcesLine(questID, objective)
     return nil
   end
   local name = ns.QuestLog.ObjectiveName(objective)
-  local sources = ns.ForeverData:ItemSources(questID, name, 20)
-  local names, kind
+  -- At most MAX_TOOLTIP_SOURCES names, nearest first, then "+N more" (all 20 was a wall of text).
+  local sources = ns.ForeverData:ItemSources(questID, name, MAX_TOOLTIP_SOURCES)
+  local names, kind, more
   if sources then
-    names, kind = sources.names, sources.kind
+    names, kind, more = sources.names, sources.kind, sources.more
   else
     names, kind = ns.Learned:Sources(questID, name)
+    more = names and math.max(0, #names - MAX_TOOLTIP_SOURCES) or 0
+    if more > 0 then
+      names = { unpack(names, 1, MAX_TOOLTIP_SOURCES) }
+    end
   end
   if not names or #names == 0 then
     return nil
   end
   local verb = kind == "object" and "Gathered from" or "Dropped by"
-  return ("%s %s"):format(verb, table.concat(names, ", "))
+  local text = ("%s %s"):format(verb, table.concat(names, ", "))
+  return more > 0 and ("%s +%d more"):format(text, more) or text
 end
 
 ---@param owner table the card's frame
