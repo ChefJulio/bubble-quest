@@ -61,6 +61,27 @@ function Fonts:Path(face)
   return nil
 end
 
+local previewObjects = {}  -- [font file] = Font object, for drawing menu entries in their own font
+local previewCount = 0     -- names them uniquely (CreateFont names are global)
+
+---A Font object in the given face at menu size, created once per face. Menu entries can't take
+---SetFont (Blizzard_Menu/Compositor.lua:166-169 disallows it on their font strings), only
+---SetFontObject.
+---@param path string font file
+---@return table
+function Fonts:PreviewObject(path)
+  local object = previewObjects[path]
+  if not object then
+    previewCount = previewCount + 1
+    object = CreateFont(("QuestmarkPreviewFont%d"):format(previewCount))
+    object:CopyFontObject("GameFontHighlight")
+    local _, size = object:GetFont()
+    object:SetFont(path, size or 12, "")
+    previewObjects[path] = object
+  end
+  return object
+end
+
 ---{ value, label } choices for the font setting: game default, then every known face.
 ---@return table[]
 function Fonts:Options()

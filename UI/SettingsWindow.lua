@@ -119,10 +119,12 @@ function builders.dropdown(parent, entry, x, y)
         function() change(entry, value) end)
       local font = entry.preview and entry.preview(value)
       if font then
-        -- Draw the option in its own font (Blizzard_Menu/11_0_0_MenuImplementationGuide.lua:202-205).
+        -- Draw the option in its own font, the guide's way (Blizzard_Menu/
+        -- 11_0_0_MenuImplementationGuide.lua:202-205): SetFontObject. Menu font strings disallow
+        -- SetFont (Compositor.lua:166-169), which errored once per entry.
+        local object = ns.Fonts:PreviewObject(font)
         radio:AddInitializer(function(button)
-          local _, size = button.fontString:GetFont()
-          button.fontString:SetFont(font, size or 12, "")
+          button.fontString:SetFontObject(object)
         end)
       end
     end
