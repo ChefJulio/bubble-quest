@@ -69,6 +69,7 @@ local function placeCard(quest, options)
   card.ready = quest.readyForTurnIn
   cursor.y = cursor.y + card:SetQuest(quest, ns.DB.char.collapsed[quest.questID] == true, options)
   cursor.any = true
+  ns.ItemButtons:Attach(card, quest, Stack.container)  -- refused in combat; the queued layout adds it
 end
 
 local function placeHeading(text)
@@ -137,6 +138,12 @@ function Stack:Layout()
   if not self.container then
     return
   end
+  -- Quest item buttons are secure: nothing they're anchored to may move in combat. Request() already
+  -- defers; this is the backstop.
+  if InCombatLockdown() and ns.ItemButtons:AnyShown() then
+    return
+  end
+  ns.ItemButtons:ReleaseAll()
   cardPool:ReleaseAll()
   headingPool:ReleaseAll()
   linePool:ReleaseAll()
@@ -252,7 +259,9 @@ function Stack:Request(resort, playerAction)
     self:Flush()
     return
   end
-  if playerAction then
+  -- The player's own click lays out at once, unless a secure quest item button is up: then nothing
+  -- anchored to it may move until combat ends, so even clicks wait.
+  if playerAction and not ns.ItemButtons:AnyShown() then
     self:Layout()
   end
   ns.Combat:Run("cards", function() self:Flush() end)
