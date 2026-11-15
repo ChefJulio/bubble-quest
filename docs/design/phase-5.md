@@ -80,6 +80,26 @@ or triangles at card size. Questmark draws its own (`tools/make_arrows.py` -> `M
 arrow (default), dart, thin; plus the minimap arrow and Blizzard's chevron. Setting "Arrow style";
 `/qm arrows` previews them.
 
+**Added after review (all verified in game):**
+
+- Arrow colour by distance (green close, yellow, orange, red far or other zone); setting, off = gold.
+  The art is white-filled and tinted in game. Camera-relative arrows were asked for but aren't
+  possible: no addon API gives the camera's direction (only barbershop/commentator cameras).
+- Nameplates mark "here" (`Quests/Nearby.lua`): `C_QuestLog.UnitIsRelatedToActiveQuest`, then the
+  unit's tooltip data: `QuestTitle` lines (type 17) carry the quest `id`, `QuestObjective` lines
+  (type 8) the objective text and `completed`, the `UnitName` line (type 2) the creature's name
+  [Read: `/qm unit` on Kobold Worker and Kobold Vermin]. Secret in combat: skipped, re-read after.
+  A quest gaining its first nearby creature is a re-sort event, and sorts as distance 0.
+- Learned in play (`Data/Learned.lua`, account-wide): spots where an objective's creatures were seen
+  (arrow targets where forever-db has no spawns) and which creatures count for it (Do line: "Loot
+  Stolen Book from Kobold Vermin, Kobold Worker"). The spec's phase 8 "where collector", pulled
+  forward for Forever-new quests.
+- Ready turn-ins jump to the top only within 250 yd (in-zone alone put a 700 yd turn-in on top).
+- Progress bar under each card (setting, default on), segmented when progress is a whole-number
+  count of 2-20 steps.
+- Hover tooltip: description (`GetQuestLogQuestText`, as Blizzard's quest tooltip), every
+  objective, all item sources, turn-in, distance, click help.
+
 ## Also in this phase
 
 - Sorting (phase 3) switches from the single marker to these better distances, through the same
