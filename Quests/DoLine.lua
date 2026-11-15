@@ -16,8 +16,24 @@ local ENGLISH = GetLocale() == "enUS" or GetLocale() == "enGB"
 -- forever-db's names are English, so this runs on English clients only.
 local SOURCE_VERBS = { npc = "Loot", object = "Gather", item = "Open" }
 
+local MAX_LEARNED_NAMES = 2
+
+-- Creatures seen in play whose tooltips list this objective (Data/Learned.lua), for items forever-db
+-- has no sources for (e.g. Stolen Book: Kobold Worker and Kobold Vermin, both seen in game).
+local function learnedSources(questID, itemName)
+  local names = ns.Learned:Sources(questID, itemName)
+  if not names then
+    return nil
+  end
+  local shown = {}
+  for i = 1, math.min(#names, MAX_LEARNED_NAMES) do
+    shown[i] = names[i]
+  end
+  return { kind = "npc", names = shown, more = #names - #shown }
+end
+
 local function collectLine(questID, itemName)
-  local sources = questID and ns.ForeverData:ItemSources(questID, itemName)
+  local sources = questID and (ns.ForeverData:ItemSources(questID, itemName) or learnedSources(questID, itemName))
   if not sources or #sources.names == 0 then
     return "Collect " .. itemName
   end

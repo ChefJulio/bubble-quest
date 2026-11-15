@@ -11,8 +11,10 @@ local ADDON_NAME, ns = ...
 -- Vermin]. Tooltip quest data is secret in combat on Forever: secret values are skipped (the last
 -- known state stays) and every nameplate is re-read when combat ends.
 --
--- Each sighting also teaches Data/Learned.lua a spot for that objective.
+-- Each sighting also teaches Data/Learned.lua a spot for that objective, and the creature's name as
+-- one of its sources (who drops the item).
 
+local LINE_UNIT_NAME = Enum.TooltipDataLineType.UnitName              -- 2
 local LINE_QUEST_TITLE = Enum.TooltipDataLineType.QuestTitle          -- 17
 local LINE_QUEST_OBJECTIVE = Enum.TooltipDataLineType.QuestObjective  -- 8
 
@@ -27,7 +29,7 @@ local function readable(value)
 end
 
 -- What a unit counts for: { [questID] = { [objective name] = true } }, or false when nothing (or
--- when it can't be read right now, e.g. in combat).
+-- when it can't be read right now, e.g. in combat); and its name (the UnitName line), if readable.
 local function scan(unit)
   local related = C_QuestLog.UnitIsRelatedToActiveQuest(unit)
   if not readable(related) or not related then
@@ -37,7 +39,7 @@ local function scan(unit)
   if not data or not data.lines then
     return false
   end
-  local result, questID = {}, nil
+  local result, questID, creatureName = {}, nil, nil
   for _, typedLine in ipairs(data.lines) do
     -- `id` (QuestTitle) and `completed` (QuestObjective) are real fields (seen with /qm unit in game)
     -- that the WoW API annotations don't declare; read the line as a plain table.
@@ -46,7 +48,9 @@ local function scan(unit)
     if not readable(lineType) then
       return false
     end
-    if lineType == LINE_QUEST_TITLE then
+    if lineType == LINE_UNIT_NAME then
+      creatureName = readable(line.leftText) and line.leftText or nil
+    elseif lineType == LINE_QUEST_TITLE then
       questID = readable(line.id) and line.id or nil
     elseif lineType == LINE_QUEST_OBJECTIVE and questID then
       if readable(line.leftText) and readable(line.completed) and not line.completed then
@@ -55,7 +59,10 @@ local function scan(unit)
       end
     end
   end
-  return next(result) and result or false
+  if not next(result) then
+    return false
+  end
+  return result, creatureName
 end
 
 -- Fires NearbyQuestEntered(questID) when a quest gains its first nearby creature: entering an
@@ -82,22 +89,25 @@ local function rebuild()
   end
 end
 
-local function learn(found)
+local function learn(found, creatureName)
   for questID, objectives in pairs(found) do
     for name in pairs(objectives) do
       ns.Learned:Record(questID, name)
+      if creatureName then
+        ns.Learned:RecordSource(questID, name, creatureName)
+      end
     end
   end
 end
 
 local function update(unit)
-  local found = scan(unit)
+  local found, creatureName = scan(unit)
   if found == false and InCombatLockdown() and Nearby.units[unit] then
     return  -- can't read it now; keep what we knew
   end
   Nearby.units[unit] = found
   if found then
-    learn(found)
+    learn(found, creatureName)
   end
   rebuild()
 end

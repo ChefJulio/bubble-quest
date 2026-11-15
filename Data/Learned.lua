@@ -19,6 +19,47 @@ local function store()
   return ns.DB.account.learned
 end
 
+-- Sources ----------------------------------------------------------------------------------------
+-- Which creatures count for an objective, learned from their nameplates' tooltips (a Kobold Worker's
+-- tooltip lists "3/8 Stolen Book" under Rascally Rodents). For an item objective that is who drops
+-- it; the Do line names them where forever-db has no item sources.
+
+---Record that a creature counts for an objective.
+---@param questID number
+---@param objectiveName string
+---@param creatureName string
+function Learned:RecordSource(questID, objectiveName, creatureName)
+  local all = ns.DB.account.learnedSources
+  local quest = all[questID] or {}
+  all[questID] = quest
+  local names = quest[objectiveName] or {}
+  quest[objectiveName] = names
+  if not names[creatureName] then
+    names[creatureName] = true
+    ns.Bus:Fire("LearnedSourcesChanged", questID)
+  end
+end
+
+---Creature names learned for an objective, sorted, or nil.
+---@param questID number
+---@param objectiveName string
+---@return string[]?
+function Learned:Sources(questID, objectiveName)
+  local quest = ns.DB.account.learnedSources[questID]
+  local names = quest and quest[objectiveName]
+  if not names then
+    return nil
+  end
+  local list = {}
+  for name in pairs(names) do
+    list[#list + 1] = name
+  end
+  table.sort(list)
+  return #list > 0 and list or nil
+end
+
+-- Spots ------------------------------------------------------------------------------------------
+
 ---Known spots for an objective, as { { map, x, y } }, or nil.
 ---@param questID number
 ---@param objectiveName string objective text without its counter

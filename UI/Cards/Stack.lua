@@ -487,6 +487,8 @@ end
 ns.Bus:On("QuestLogChanged", function() Stack:Request(true) end)
 ns.Bus:On("TrackingResortWanted", function() Stack:Request(true) end)
 ns.Bus:On("NearbyQuestEntered", function() Stack:Request(true) end)
+-- A newly learned item source changes a Do line ("Loot Stolen Book from ..."): redraw, no re-sort.
+ns.Bus:On("LearnedSourcesChanged", function() Stack:Request(false) end)
 
 -- These can change membership (subzone fallback, map markers) but are not re-sort events.
 for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "QUEST_POI_UPDATE" }) do
