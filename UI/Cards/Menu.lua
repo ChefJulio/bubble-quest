@@ -21,21 +21,11 @@ function QuestmarkerMenu:OpenForCard(owner, quest)
     root:CreateButton("Hide", function() ns.Tracking:SetIgnored(questID, true) end)
     local collapsed = ns.DB.char.collapsed[questID]
     root:CreateButton(collapsed and "Expand" or "Collapse", function() ns.Tracking:ToggleCollapsed(questID) end)
-    -- Shown greyed out when it can't be shared (solo, or a quest the game won't share), like the
-    -- quest map's menu does (QuestMapFrame.lua:2395-2400), so the option is never a mystery.
-    local share = root:CreateButton("Share quest", function() QuestmarkerMenu:Share(questID) end)
-    if not (IsInGroup() and C_QuestLog.IsPushableQuest(questID)) then
-      share:SetEnabled(false)
-    end
+    -- No "Share quest": sharing (QuestLogPushQuest) is protected on Forever, blocked even through
+    -- Blizzard's QuestUtil.ShareQuest (ADDON_ACTION_BLOCKED in game). Opening the quest details for
+    -- Blizzard's Share button doesn't help either: the button reads the details frame's questID,
+    -- which our call would have written, so its click would be blocked too. Share from the quest log.
   end)
-end
-
----Offer the quest to the party, through the helper Blizzard's own tracker menu calls
----(Blizzard_QuestObjectiveTracker.lua:115, QuestUtils.lua:356). The quest map plays this sound too.
----@param questID number
-function QuestmarkerMenu:Share(questID)
-  QuestUtil.ShareQuest(questID)
-  PlaySound(SOUNDKIT.IG_QUEST_LOG_OPEN)
 end
 
 ---Menu for a quest in the Hidden group.

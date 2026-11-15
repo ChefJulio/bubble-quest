@@ -250,6 +250,20 @@ class ApiDb:
   blizzard_globals: set[str] = field(default_factory=set)
 
 
+# Protected functions the generated docs don't list, each seen blocked in game. They feed the same
+# checks as documented ones, including the Blizzard-wrapper index (so QuestUtil.ShareQuest is caught).
+# Add one only with in-game evidence (BugSack ADDON_ACTION_BLOCKED), and say where it was seen.
+OBSERVED_PROTECTED = {
+  # ADDON_ACTION_BLOCKED from the card menu's Share quest, via QuestUtil.ShareQuest (Forever 1.60.1).
+  "QuestLogPushQuest": "Forever 1.60.1.70938, card menu Share quest",
+}
+
+
+def add_observed(db: "ApiDb") -> None:
+  for name in OBSERVED_PROTECTED:
+    db.globals[name] = ApiEntry(name=name, system="observed in game", protected=True)
+
+
 def load_docs(docs_dir: Path) -> ApiDb:
   db = ApiDb()
   files = sorted(docs_dir.glob("*.lua"))
@@ -596,9 +610,11 @@ def run(docs_dir: Path, targets: list[Path], method_sources: list[Path] | None =
   When given, the addon's own files are added and the unknown-method check is enabled.
   wrapper_source: (UI source dir, cache file, cache key) enables the Blizzard-wrapper check."""
   db = load_docs(docs_dir)
+  add_observed(db)
   if wrapper_source is not None:
     ui_dir, cache, key = wrapper_source
-    db.wrappers = load_wrapper_index(ui_dir, db, cache, key)
+    # The observed list changes what counts as restricted, so it's part of the cache key.
+    db.wrappers = load_wrapper_index(ui_dir, db, cache, key + "|" + ",".join(sorted(OBSERVED_PROTECTED)))
     db.blizzard_globals = load_blizzard_globals(ui_dir, cache.with_name("blizzard-globals.json"), key)
   files = iter_source_files(targets, exclude)
   if method_sources is not None:
