@@ -21,11 +21,16 @@ local function sourcesLine(questID, objective)
   end
   local name = ns.QuestLog.ObjectiveName(objective)
   local sources = ns.ForeverData:ItemSources(questID, name, 20)
-  local names = sources and sources.names or ns.Learned:Sources(questID, name)
+  local names, kind
+  if sources then
+    names, kind = sources.names, sources.kind
+  else
+    names, kind = ns.Learned:Sources(questID, name)
+  end
   if not names or #names == 0 then
     return nil
   end
-  local verb = sources and sources.kind == "object" and "Gathered from" or "Dropped by"
+  local verb = kind == "object" and "Gathered from" or "Dropped by"
   return ("%s %s"):format(verb, table.concat(names, ", "))
 end
 

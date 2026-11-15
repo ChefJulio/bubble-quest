@@ -32,6 +32,7 @@ Quests\Zone.lua
 Quests\DoLine.lua
 Quests\Navigation.lua
 Quests\Nearby.lua
+Quests\Mouseover.lua
 Quests\Tracking.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua

@@ -20,42 +20,54 @@ local function store()
 end
 
 -- Sources ----------------------------------------------------------------------------------------
--- Which creatures count for an objective, learned from their nameplates' tooltips (a Kobold Worker's
--- tooltip lists "3/8 Stolen Book" under Rascally Rodents). For an item objective that is who drops
--- it; the Do line names them where forever-db has no item sources.
+-- Which creatures or objects count for an objective, learned from their tooltips: a Kobold Worker's
+-- nameplate tooltip lists "3/8 Stolen Book" under Rascally Rodents (Quests/Nearby.lua); a Snowdrift's
+-- mouseover tooltip lists "1/7 Gnomeregan Archival Data" under Data Hoarders (Quests/Mouseover.lua).
+-- For an item objective that is who drops it or what it's gathered from; the Do line names them
+-- where forever-db has no item sources. Stored as [name] = "npc" | "object" (true, from before
+-- objects were learned, means "npc").
 
----Record that a creature counts for an objective.
+---Record that a creature or object counts for an objective.
 ---@param questID number
 ---@param objectiveName string
----@param creatureName string
-function Learned:RecordSource(questID, objectiveName, creatureName)
+---@param sourceName string
+---@param kind string? "npc" (default) or "object"
+function Learned:RecordSource(questID, objectiveName, sourceName, kind)
   local all = ns.DB.account.learnedSources
   local quest = all[questID] or {}
   all[questID] = quest
   local names = quest[objectiveName] or {}
   quest[objectiveName] = names
-  if not names[creatureName] then
-    names[creatureName] = true
+  kind = kind or "npc"
+  local known = names[sourceName]
+  if known ~= kind and not (known == true and kind == "npc") then
+    names[sourceName] = kind
     ns.Bus:Fire("LearnedSourcesChanged", questID)
   end
 end
 
----Creature names learned for an objective, sorted, or nil.
+---Source names learned for an objective, sorted, and their kind ("object" when every one is an
+---object, else "npc"); or nil.
 ---@param questID number
 ---@param objectiveName string
 ---@return string[]?
+---@return string? kind
 function Learned:Sources(questID, objectiveName)
   local quest = ns.DB.account.learnedSources[questID]
   local names = quest and quest[objectiveName]
   if not names then
     return nil
   end
-  local list = {}
-  for name in pairs(names) do
+  local list, allObjects = {}, true
+  for name, kind in pairs(names) do
     list[#list + 1] = name
+    allObjects = allObjects and kind == "object"
   end
   table.sort(list)
-  return #list > 0 and list or nil
+  if #list == 0 then
+    return nil
+  end
+  return list, allObjects and "object" or "npc"
 end
 
 -- Spots ------------------------------------------------------------------------------------------

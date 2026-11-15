@@ -18,10 +18,11 @@ local SOURCE_VERBS = { npc = "Loot", object = "Gather", item = "Open" }
 
 local MAX_LEARNED_NAMES = 2
 
--- Creatures seen in play whose tooltips list this objective (Data/Learned.lua), for items forever-db
--- has no sources for (e.g. Stolen Book: Kobold Worker and Kobold Vermin, both seen in game).
+-- Creatures and objects seen in play whose tooltips list this objective (Data/Learned.lua), for items
+-- forever-db has no sources for (e.g. Stolen Book: Kobold Worker and Kobold Vermin; Gnomeregan
+-- Archival Data: Snowdrift).
 local function learnedSources(questID, itemName)
-  local names = ns.Learned:Sources(questID, itemName)
+  local names, kind = ns.Learned:Sources(questID, itemName)
   if not names then
     return nil
   end
@@ -29,7 +30,7 @@ local function learnedSources(questID, itemName)
   for i = 1, math.min(#names, MAX_LEARNED_NAMES) do
     shown[i] = names[i]
   end
-  return { kind = "npc", names = shown, more = #names - #shown }
+  return { kind = kind, names = shown, more = #names - #shown }
 end
 
 local function collectLine(questID, itemName)
