@@ -9,7 +9,8 @@ local ADDON_NAME, ns = ...
 --   label, tooltip, default
 --   get(profile) / set(profile, value)   read and change the active profile
 --   slider:   min, max, step, format(value) -> text
---   dropdown: options() -> { { value, label }, ... }
+--   dropdown: options() -> { { value, label }, ... }; preview(value) -> font file to draw that
+--             option's label in (Questmark's window only)
 --   column   1 or 2 in Questmark's window
 --   grid     dropdowns sharing a grid name and the same options form one table in Questmark's window
 
@@ -69,6 +70,24 @@ function Schema:Entries()
         .. "turn in. Split into segments when progress is a count.",
       get = function(p) return p.cards.progressBar end,
       set = function(p, v) p.cards.progressBar = v; ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "dropdown", id = "QUESTMARK_FONT", column = 1, default = "default",
+      label = "Font",
+      tooltip = "The tracker's font. Lists every font your addons share through SharedMedia (MSBT, "
+        .. "Details, ...), or WoW's own fonts if none do.",
+      options = function() return ns.Fonts:Options() end,
+      preview = function(value) return ns.Fonts:Path(value) end,  -- each name drawn in its own font
+      get = function(p) return p.font.face end,
+      set = function(p, v) p.font.face = v; ns.Fonts:Apply() end,
+    },
+    {
+      kind = "slider", id = "QUESTMARK_FONT_SCALE", column = 1, default = 100, min = 80, max = 140, step = 5,
+      label = "Text size",
+      tooltip = "Size of the tracker's text.",
+      format = percent,
+      get = function(p) return p.font.scale end,
+      set = function(p, v) p.font.scale = v; ns.Fonts:Apply() end,
     },
     {
       kind = "checkbox", id = "QUESTMARK_HINTS", column = 1, default = true,

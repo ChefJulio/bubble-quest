@@ -22,6 +22,8 @@ local GRID_LABEL_WIDTH = 120
 local GRID_COLUMN_WIDTH = 50
 local GRID_ROW_HEIGHT = 24
 local DIVIDER_ALPHA = 0.12
+local MENU_SCROLL_AFTER = 15   -- dropdown entries before the menu scrolls
+local MENU_MAX_HEIGHT = 360
 
 local Window = {
   frame = nil,
@@ -106,11 +108,23 @@ function builders.dropdown(parent, entry, x, y)
   dropdown:SetPoint("TOPLEFT", x, y - 18)
   dropdown:SetWidth(COLUMN_WIDTH - 40)
   dropdown:SetupMenu(function(_, root)
-    for _, option in ipairs(entry.options()) do
+    local options = entry.options()
+    if #options > MENU_SCROLL_AFTER then
+      root:SetScrollMode(MENU_MAX_HEIGHT)  -- long lists (fonts) scroll instead of running off screen
+    end
+    for _, option in ipairs(options) do
       local value = option[1]
-      root:CreateRadio(option[2],
+      local radio = root:CreateRadio(option[2],
         function() return entry.get(ns.DB.profile) == value end,
         function() change(entry, value) end)
+      local font = entry.preview and entry.preview(value)
+      if font then
+        -- Draw the option in its own font (Blizzard_Menu/11_0_0_MenuImplementationGuide.lua:202-205).
+        radio:AddInitializer(function(button)
+          local _, size = button.fontString:GetFont()
+          button.fontString:SetFont(font, size or 12, "")
+        end)
+      end
     end
   end)
   tooltip(dropdown, entry.label, entry.tooltip)

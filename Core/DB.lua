@@ -34,6 +34,10 @@ local PROFILE_DEFAULTS = {
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
+  font = {
+    face = "default",  -- a LibSharedMedia font name, or "default" (the game's)
+    scale = 100,       -- text size, percent
+  },
 }
 
 local CHAR_DEFAULTS = {

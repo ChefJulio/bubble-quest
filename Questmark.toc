@@ -36,6 +36,7 @@ Quests\Tracking.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua
 UI\Pool.lua
+UI\Fonts.lua
 UI\Cards\Card.lua
 UI\Cards\Menu.lua
 UI\Cards\Tooltip.lua

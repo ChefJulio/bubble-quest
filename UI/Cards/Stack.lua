@@ -361,7 +361,7 @@ local function createHeader(container)
   band:SetAllPoints()
   band:SetColorTexture(0, 0, 0, 0.35)
 
-  header.title = header:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerHeaderFont")
+  header.title = header:CreateFontString(nil, "ARTWORK", "QuestmarkHeaderFont")
   header.title:SetPoint("LEFT", PAD, 0)
   header.title:SetText("Questmark")
 
@@ -392,11 +392,11 @@ local function createHeader(container)
   if lockAtlas then
     header.lock:SetNormalAtlas(lockAtlas)
   else
-    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "QuestmarkSmallHighlightFont")
     header.lock.fallback:SetPoint("CENTER")
   end
 
-  header.count = header:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+  header.count = header:CreateFontString(nil, "ARTWORK", "QuestmarkSmallFont")
   header.count:SetPoint("RIGHT", header.lock, "LEFT", -6, 0)
 
   return header
@@ -444,7 +444,7 @@ function Stack:Create()
   end)
 
   headingPool = ns.CreatePool(function()
-    local heading = body:CreateFontString(nil, "ARTWORK", "GameFontNormalSmall")
+    local heading = body:CreateFontString(nil, "ARTWORK", "QuestmarkSmallFont")
     heading:SetTextColor(0.7, 0.7, 0.7)
     return heading
   end)
@@ -453,7 +453,7 @@ function Stack:Create()
     local line = CreateFrame("Button", nil, body)
     line:SetSize(ns.Card.WIDTH, LINE_HEIGHT)
     line:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    line.label = line:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerLineFont")
+    line.label = line:CreateFontString(nil, "ARTWORK", "QuestmarkLineFont")
     line.label:SetPoint("LEFT")
     line:SetScript("OnClick", function(self, button)
       if self.onClick then
@@ -494,6 +494,9 @@ ns.Bus:On("LearnedSourcesChanged", function() Stack:Request(false) end)
 for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "QUEST_POI_UPDATE" }) do
   ns.Events:On(event, function() Stack:Request(false) end)
 end
+
+-- Font face or size changed: text heights change, so lay out again (no re-sort).
+ns.Bus:On("FontsChanged", function() Stack:Request(false, true) end)
 
 -- Pin, hide, collapse: the player's own actions.
 ns.Bus:On("TrackingChanged", function() Stack:Request(false, true) end)
