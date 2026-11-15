@@ -24,8 +24,10 @@ Core\DB.lua
 Data\ForeverData.lua
 Data\CategoryOverrides.lua
 Data\Learned.lua
+Data\Hints.lua
 Quests\QuestLog.lua
 Quests\Categories.lua
+Quests\Hints.lua
 Quests\Zone.lua
 Quests\DoLine.lua
 Quests\Navigation.lua

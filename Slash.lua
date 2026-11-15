@@ -61,6 +61,13 @@ local function describeQuest(quest, lines)
   else
     lines[#lines + 1] = "  forever-db: no record"
   end
+  local hintData = ns.Hints:Raw(quest.questID)
+  for _, hint in ipairs(hintData and hintData.hints or {}) do
+    lines[#lines + 1] = ("  hint: %s  [%s]"):format(hint[1], hint[2])
+  end
+  for name, line in pairs(hintData and hintData.objectives or {}) do
+    lines[#lines + 1] = ("  do (%s): %s  [%s]"):format(name, line[1], line[2])
+  end
   for i, objective in ipairs(quest.objectives) do
     lines[#lines + 1] = ("  objective %d: type=%s text=%q fulfilled=%s required=%s finished=%s"):format(i,
       tostring(objective.type), objective.text, tostring(objective.fulfilled), tostring(objective.required),

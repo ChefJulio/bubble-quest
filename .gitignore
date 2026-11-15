@@ -5,3 +5,5 @@ Thumbs.db
 .tools/
 __pycache__/
 .vscode/settings.json
+tools/hints/candidates.jsonl
+tools/hints/batches/

@@ -55,10 +55,19 @@ function DoLine:For(objective, questID)
   local text = objective.text or ""
   local rest = text:match("^%d+%s*/%s*%d+%s+(.+)$")  -- "1/10 Kobold Vermin slain"
     or text:match("^(.-)%s*:%s*%d+%s*/%s*%d+$")      -- "Kobold Vermin slain: 1/10"
+  local counter = rest and ("%d/%d"):format(objective.fulfilled or 0, objective.required or 0) or nil
+
+  -- A triaged forever-db step that says more clearly what to do (phase 7, Data/Hints.lua) wins.
+  -- English only, like the rewrites below.
+  if ENGLISH and questID then
+    local better = ns.Hints:DoFor(questID, rest or text)
+    if better then
+      return better, counter
+    end
+  end
   if not rest then
     return text, nil
   end
-  local counter = ("%d/%d"):format(objective.fulfilled or 0, objective.required or 0)
 
   if ENGLISH then
     if objective.type == "monster" then

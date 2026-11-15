@@ -13,6 +13,7 @@ local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
 local TOGGLE_WIDTH = 20  -- the collapse button at the right of the title line
+local HINT_COLOR = { 0.55, 0.8, 1 }  -- soft blue "Tip:" lines
 local BAR_HEIGHT = 4     -- progress bar under the card
 local MAX_SEGMENTS = 20  -- more steps than this and segments get too thin to read: smooth bar
 local BAR_GAP = 3
@@ -259,6 +260,23 @@ function Card:SetQuest(quest, collapsed, options)
       local text, counter = ns.DoLine:For(objective, quest.questID)
       setRow(row, text, counter, objective.finished)
     end
+    row:ClearAllPoints()
+    row:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -y)
+    row:SetSize(WIDTH, row.text:GetStringHeight())
+    row:Show()
+    y = y + row.text:GetStringHeight() + ROW_GAP
+  end
+
+  -- Hint lines (phase 7): after the objectives, only for quests with a known tricky step; shown on
+  -- ready cards too ("keep the item, you hand it in"), not on collapsed ones. Setting, default on.
+  -- They come after the objective rows, so UpdateInPlace (objective rows only) never touches them.
+  local hints = not collapsed and ns.DB.profile.cards.hints and ns.Hints:For(quest.questID)
+  for h, hint in ipairs(hints or {}) do
+    local i = self.rowCount + h
+    local row = self.rows[i] or createRow(self)
+    self.rows[i] = row
+    setRow(row, "Tip: " .. hint, nil, false)
+    row.text:SetTextColor(HINT_COLOR[1], HINT_COLOR[2], HINT_COLOR[3])
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -y)
     row:SetSize(WIDTH, row.text:GetStringHeight())

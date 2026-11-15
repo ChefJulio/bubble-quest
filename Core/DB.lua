@@ -29,7 +29,8 @@ local PROFILE_DEFAULTS = {
     clickOpensMap = true,
     arrowStyle = "classic",  -- key in Card.ARROW_STYLES
     arrowColorByDistance = true,  -- green close -> red far; off = gold
-    progressBar = true,           -- thin progress bar under each card  -- left-clicking a card highlights the quest and opens the map at it
+    progressBar = true,           -- thin progress bar under each card
+    hints = true,                 -- "Tip:" lines for quests with a known tricky step  -- left-clicking a card highlights the quest and opens the map at it
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES

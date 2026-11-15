@@ -1,0 +1,302 @@
+{"id": "7877:s:8ebec56f", "decision": "hint", "text": "Turn this in at a chest object, not an NPC.", "reason": "unusual turn-in"}
+{"id": "7877:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7881:s:d92162fc", "decision": "do", "objective": "Embossed Leather Boots", "text": "Leatherwork them (8 Light Leather, 5 Coarse Thread each) or buy them", "reason": "craft instruction"}
+{"id": "7881:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7881:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7882:s:f0ba6b1c", "decision": "do", "objective": "Toughened Leather Armor", "text": "Leatherwork: 10 Medium Leather, 2 Cured Medium Hide, 2 Coarse Thread", "reason": "craft instruction"}
+{"id": "7882:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7882:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7883:s:dd8937a8", "decision": "do", "objective": "Barbaric Harness", "text": "Leatherwork: 14 Heavy Leather, 2 Fine Thread, 1 Iron Buckle, or buy", "reason": "craft instruction"}
+{"id": "7883:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7883:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7884:s:5194fb48", "decision": "do", "objective": "Turtle Scale Leggings", "text": "Leatherwork: 14 Thick Leather, 28 Turtle Scale, 1 Heavy Silken Thread", "reason": "craft instruction"}
+{"id": "7884:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7884:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7885:s:bf3dc0d9", "decision": "skip", "reason": "turn-in, event only"}
+{"id": "7885:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7885:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7889:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7890:s:1bb719ab", "decision": "do", "objective": "Heavy Grinding Stone", "text": "Craft with Blacksmithing from 3 Heavy Stone each, or buy them", "reason": "craft instruction"}
+{"id": "7890:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7891:s:8b83b614", "decision": "do", "objective": "Green Iron Bracers", "text": "Craft with Blacksmithing from 6 Iron Bar and 1 Green Dye each", "reason": "craft instruction"}
+{"id": "7891:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7891:s:8ebec56f-2", "decision": "skip", "reason": "duplicate of craft row"}
+{"id": "7892:s:f1ac5c01", "decision": "do", "objective": "Big Black Mace", "text": "Craft with Blacksmithing: 16 Mithril Bar, 4 Shadowgem, and more", "reason": "craft instruction"}
+{"id": "7892:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7892:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7893:s:c7c8ff9a", "decision": "do", "objective": "Dense Grinding Stone", "text": "Craft with Blacksmithing from 4 Dense Stone each, or buy them", "reason": "craft instruction"}
+{"id": "7893:s:8ebec56f", "decision": "skip", "reason": "event only, trivia"}
+{"id": "7894:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7894:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7895:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7895:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7896:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7897:s:57e64b8e", "decision": "do", "objective": "Mechanical Repair Kit", "text": "Engineer: Mithril Bar, Heavy Leather, Solid Blasting Powder, or buy", "reason": "craft instruction"}
+{"id": "7897:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7897:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7898:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7898:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7899:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7899:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "7900:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7900:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7901:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7902:s:716dff8d", "decision": "skip", "reason": "accept row"}
+{"id": "7902:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7902:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7903:s:716dff8d", "decision": "skip", "reason": "accept row"}
+{"id": "7903:s:8ebec56f", "decision": "skip", "reason": "event only, trivia"}
+{"id": "7907:s:1fa17ebd", "decision": "skip", "reason": "how to start, useless once accepted"}
+{"id": "7927:s:015c8aa8", "decision": "skip", "reason": "how to start, useless once accepted"}
+{"id": "7929:s:0f93152c", "decision": "skip", "reason": "how to start, useless once accepted"}
+{"id": "7930:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7931:s:8ebec56f", "decision": "skip", "reason": "event only, trivia"}
+{"id": "7932:s:8ebec56f", "decision": "skip", "reason": "event only, obvious"}
+{"id": "7933:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7934:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7935:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7936:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7939:s:c7c8ff9a", "decision": "do", "objective": "Dense Grinding Stone", "text": "Craft with Blacksmithing from 4 Dense Stone each, or buy them", "reason": "craft instruction"}
+{"id": "7939:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7939:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "7941:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7941:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7942:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7942:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7943:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "7943:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "7981:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8044:s:52a3a72a", "decision": "hint", "text": "You need the Strength of Mugamba from the earlier quest in your bags, so keep it.", "reason": "keep item"}
+{"id": "8052:s:8a7421b1", "decision": "hint", "text": "Keep The Eye of Zuldazar from the earlier quest in your bags for this one.", "reason": "keep item"}
+{"id": "8052:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8053:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8054:s:3e6ae84a", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8055:s:ff65f4aa", "decision": "skip", "reason": "raid only, restates objective"}
+{"id": "8055:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8056:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8056:s:8ebec56f-2", "decision": "hint", "text": "You need Friendly with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8057:s:8a312d65", "decision": "skip", "reason": "raid only"}
+{"id": "8057:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8058:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8059:s:8a312d65", "decision": "skip", "reason": "raid only"}
+{"id": "8059:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8060:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8061:s:3036079b", "decision": "skip", "reason": "raid only"}
+{"id": "8061:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8061:s:8ebec56f-2", "decision": "hint", "text": "You need Friendly with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8062:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8062:s:8ebec56f-2", "decision": "hint", "text": "You need Friendly with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8063:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8064:s:59b61491", "decision": "skip", "reason": "raid only"}
+{"id": "8064:s:8ebec56f", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8064:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8065:s:ff65f4aa", "decision": "skip", "reason": "raid only"}
+{"id": "8066:s:8ebec56f-2", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8067:s:8ebec56f", "decision": "hint", "text": "You need Revered with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8067:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8069:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8070:s:59b61491", "decision": "skip", "reason": "raid only"}
+{"id": "8070:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8070:s:8ebec56f-2", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8071:s:9beea3ae", "decision": "skip", "reason": "raid only"}
+{"id": "8071:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8072:s:8ebec56f", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8072:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8073:s:9beea3ae", "decision": "skip", "reason": "raid only"}
+{"id": "8073:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8074:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8075:s:8a312d65", "decision": "skip", "reason": "raid only"}
+{"id": "8075:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8076:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8076:s:8ebec56f-2", "decision": "hint", "text": "You need Honored with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8077:s:8a312d65", "decision": "skip", "reason": "raid only"}
+{"id": "8077:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8077:s:8ebec56f-2", "decision": "hint", "text": "You need Revered with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8078:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8079:s:8ebec56f", "decision": "hint", "text": "You need Revered with the Zandalar Tribe before you can turn this in.", "reason": "reputation gate"}
+{"id": "8079:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8114:s:8ebec56f-2", "decision": "skip", "reason": "PvP"}
+{"id": "8114:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "8117:s:159b8fd8", "decision": "hint", "text": "Bring the Vision of Voodress from the earlier quest; you hand it in for an upgraded version.", "reason": "keep item"}
+{"id": "8120:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8121:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "8123:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8143:s:8ebec56f", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "8154:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8160:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8161:s:1b6f1aef", "decision": "skip", "reason": "turn-in row"}
+{"id": "8161:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8167:s:8ebec56f-3", "decision": "skip", "reason": "PvP"}
+{"id": "8169:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8170:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8171:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8183:s:ecd3bca8", "decision": "skip", "reason": "raid only"}
+{"id": "8184:s:f389c458", "decision": "skip", "reason": "raid only"}
+{"id": "8184:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8185:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8186:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8187:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8188:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8190:s:8a312d65", "decision": "skip", "reason": "raid only"}
+{"id": "8191:s:f389c458", "decision": "skip", "reason": "raid only"}
+{"id": "8191:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8192:s:f389c458", "decision": "skip", "reason": "raid only"}
+{"id": "8193:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8194:s:f6b6f9b0", "decision": "skip", "reason": "accept row"}
+{"id": "8194:s:ba44e442", "decision": "do", "objective": "Speckled Tastyfish", "text": "Fish from Schools of Tastyfish", "reason": "clear instruction"}
+{"id": "8194:s:8ebec56f", "decision": "skip", "reason": "event only, covered by do"}
+{"id": "8201:s:8d8ad71a", "decision": "hint", "text": "Use the Sacred Cord you got with the quest to string the 5 heads into the collection.", "reason": "use item"}
+{"id": "8221:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8222:s:ecca16f9", "decision": "skip", "reason": "turn-in row"}
+{"id": "8222:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8222:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8223:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8223:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8224:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8228:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8229:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8236:s:cb66aeb7", "decision": "skip", "reason": "restates objective"}
+{"id": "8241:s:04c48cf2", "decision": "do", "objective": "Iron Bar", "text": "Smelt iron ore into bars with Mining, or buy them", "reason": "craft instruction"}
+{"id": "8242:s:b9d2fadf", "decision": "skip", "reason": "restates objective"}
+{"id": "8246:s:a52ef99b", "decision": "skip", "reason": "accept row"}
+{"id": "8253:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8257:s:49409c37", "decision": "skip", "reason": "restates objective"}
+{"id": "8257:s:8ebec56f", "decision": "skip", "reason": "dungeon only"}
+{"id": "8257:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "8258:s:a0d413b1", "decision": "skip", "reason": "restates objective"}
+{"id": "8258:s:8ebec56f", "decision": "hint", "text": "Darkreaver only appears after you use the scryer and kill all the spirit waves.", "reason": "hidden spawn"}
+{"id": "8258:s:8ebec56f-3", "decision": "skip", "reason": "trivia"}
+{"id": "8266:s:032adc66", "decision": "skip", "reason": "turn-in row"}
+{"id": "8285:s:e2da7438", "decision": "skip", "reason": "accept row"}
+{"id": "8287:s:d73ee3dd", "decision": "skip", "reason": "accept row"}
+{"id": "8288:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8290:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8295:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8296:s:9a44ed51", "decision": "skip", "reason": "accept row"}
+{"id": "8296:s:032adc66", "decision": "skip", "reason": "turn-in row"}
+{"id": "8302:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "8310:s:ce474857", "decision": "do", "objective": "Hive'Ashi Silithid Brain", "text": "Kill Hive'Ashi silithids at the northern hive", "reason": "location"}
+{"id": "8310:s:54e4b956", "decision": "do", "objective": "Hive'Zora Silithid Brain", "text": "Kill Hive'Zora silithids at the western hive", "reason": "location"}
+{"id": "8310:s:fa4b09d7", "decision": "do", "objective": "Hive'Regal Silithid Brain", "text": "Kill Hive'Regal silithids at the southern hive", "reason": "location"}
+{"id": "8312:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8316:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8322:s:8ebec56f-3", "decision": "skip", "reason": "event only"}
+{"id": "8324:s:88e49b24", "decision": "skip", "reason": "obvious drop source"}
+{"id": "8332:s:7fce2fba", "decision": "hint", "text": "Abyssal Crests drop from templars of any element, and the templars have to be summoned.", "reason": "hidden spawn"}
+{"id": "8332:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "8333:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "8342:s:a19e16b2", "decision": "skip", "reason": "group only, restates objective"}
+{"id": "8342:s:8ebec56f-2", "decision": "hint", "text": "The Abyssal Dukes have no static spawn; they only appear when summoned.", "reason": "hidden spawn"}
+{"id": "8348:s:d9ced247", "decision": "hint", "text": "The signet comes from a Duke you have to summon yourself.", "reason": "hidden spawn"}
+{"id": "8354:s:2b4eae28", "decision": "skip", "reason": "accept row"}
+{"id": "8354:s:8ebec56f", "decision": "hint", "text": "Target Innkeeper Norman and do the chicken emote.", "reason": "emote credit"}
+{"id": "8357:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8359:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8360:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8362:s:8ebec56f", "decision": "hint", "text": "Templars do not spawn on their own; you have to summon them.", "reason": "hidden spawn"}
+{"id": "8363:s:272082e3", "decision": "hint", "text": "The Dukes only appear when summoned.", "reason": "hidden spawn"}
+{"id": "8363:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "8364:s:28726f91", "decision": "skip", "reason": "raid only"}
+{"id": "8364:s:8ebec56f", "decision": "hint", "text": "The Abyssal Lords only appear when summoned at a Greater Windstone.", "reason": "hidden spawn"}
+{"id": "8370:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8370:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8371:s:8ebec56f-2", "decision": "skip", "reason": "PvP"}
+{"id": "8372:s:dc6d2abe", "decision": "skip", "reason": "PvP"}
+{"id": "8372:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8377:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8380:s:1f62ddc2", "decision": "skip", "reason": "accept row"}
+{"id": "8383:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8385:s:e18967d1", "decision": "skip", "reason": "PvP"}
+{"id": "8385:s:36775a55", "decision": "skip", "reason": "PvP"}
+{"id": "8386:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8389:s:8ebec56f", "decision": "skip", "reason": "PvP, trivia"}
+{"id": "8390:s:8ebec56f", "decision": "skip", "reason": "PvP, trivia"}
+{"id": "8391:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8393:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8393:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8395:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8397:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8398:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8400:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8402:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8402:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8403:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8405:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8406:s:90db85b3", "decision": "skip", "reason": "turn-in row"}
+{"id": "8407:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8408:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8409:s:8ebec56f", "decision": "skip", "reason": "event only, how to start"}
+{"id": "8413:s:8ebec56f", "decision": "skip", "reason": "dungeon only"}
+{"id": "8413:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8418:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8425:s:8ebec56f-2", "decision": "skip", "reason": "dungeon only"}
+{"id": "8429:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8429:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8431:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8432:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8434:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8435:s:9ef5dcac", "decision": "skip", "reason": "accept row"}
+{"id": "8435:s:5e50a993", "decision": "skip", "reason": "turn-in row"}
+{"id": "8435:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8436:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8438:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8439:s:8ebec56f", "decision": "skip", "reason": "PvP, trivia"}
+{"id": "8440:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8441:s:4ecb531e", "decision": "skip", "reason": "PvP"}
+{"id": "8441:s:8ebec56f", "decision": "skip", "reason": "PvP"}
+{"id": "8443:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8481:s:8ebec56f-4", "decision": "skip", "reason": "accept requirement"}
+{"id": "8484:s:7b4b4caf", "decision": "skip", "reason": "accept row"}
+{"id": "8484:s:8ebec56f", "decision": "skip", "reason": "accept requirement"}
+{"id": "8484:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8485:s:7b4b4caf", "decision": "skip", "reason": "accept row"}
+{"id": "8485:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8492:s:431947ae", "decision": "do", "objective": "Copper Bar", "text": "Smelt copper ore into bars with Mining, or buy them", "reason": "craft instruction"}
+{"id": "8493:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8494:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8496:s:0c5742db", "decision": "do", "objective": "Heavy Silk Bandage", "text": "Make them with First Aid, 2 silk cloth each", "reason": "craft instruction"}
+{"id": "8496:s:b2447ccf", "decision": "do", "objective": "Heavy Mageweave Bandage", "text": "Make them with First Aid, 2 mageweave cloth each", "reason": "craft instruction"}
+{"id": "8497:s:85887a91", "decision": "skip", "reason": "unclear which objective, reagent only an ID"}
+{"id": "8497:s:768b4684", "decision": "skip", "reason": "unclear which objective, reagents only IDs"}
+{"id": "8499:s:14cdd0a5", "decision": "do", "objective": "Thorium Bar", "text": "Smelt Thorium Ore into bars with Mining, or buy them", "reason": "craft instruction"}
+{"id": "8501:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "8501:s:8ebec56f-3", "decision": "hint", "text": "The Combat Task Briefing XII comes from a container item; keep it until you turn in.", "reason": "keep item"}
+{"id": "8502:s:4118f079", "decision": "hint", "text": "Keep the Combat Task Briefing III in your bags; you need it for the turn-in.", "reason": "keep item"}
+{"id": "8502:s:8ebec56f", "decision": "skip", "reason": "group only"}
+{"id": "8504:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8506:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8508:s:e783d742", "decision": "skip", "reason": "accept row"}
+{"id": "8509:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8510:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8514:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8515:s:d43e9a3c", "decision": "do", "objective": "Thick Leather", "text": "Skin for Thick Leather or buy it at the Auction House", "reason": "clear instruction"}
+{"id": "8517:s:1921b138", "decision": "do", "objective": "Linen Bandage", "text": "Make them with First Aid, 1 Linen Cloth each, or buy them", "reason": "craft instruction"}
+{"id": "8518:s:1921b138", "decision": "do", "objective": "Linen Bandage", "text": "Make them with First Aid, 1 Linen Cloth each, or buy them", "reason": "craft instruction"}
+{"id": "8518:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8520:s:29889817", "decision": "do", "objective": "Silk Bandage", "text": "Make them with First Aid, 1 Silk Cloth each, or buy them", "reason": "craft instruction"}
+{"id": "8521:s:29889817", "decision": "do", "objective": "Silk Bandage", "text": "Make them with First Aid, 1 Silk Cloth each, or buy them", "reason": "craft instruction"}
+{"id": "8521:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8522:s:2b9257aa", "decision": "do", "objective": "Runecloth Bandage", "text": "Make them with First Aid, 1 Runecloth each, or buy them", "reason": "craft instruction"}
+{"id": "8523:s:2b9257aa", "decision": "do", "objective": "Runecloth Bandage", "text": "Make them with First Aid, 1 Runecloth each, or buy them", "reason": "craft instruction"}
+{"id": "8524:s:d62e3a36", "decision": "do", "objective": "Rainbow Fin Albacore", "text": "Cook the raw fish into Rainbow Fin Albacore with Cooking", "reason": "craft instruction"}
+{"id": "8525:s:d62e3a36", "decision": "do", "objective": "Rainbow Fin Albacore", "text": "Fish for raw albacore and cook it with Cooking", "reason": "craft instruction"}
+{"id": "8525:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8526:s:5e90d666", "decision": "do", "objective": "Roast Raptor", "text": "Cook them with Cooking, one Raptor Flesh and one Hot Spices each", "reason": "craft instruction"}
+{"id": "8526:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8526:s:8ebec56f-2", "decision": "skip", "reason": "duplicate of craft row"}
+{"id": "8527:s:5e90d666", "decision": "do", "objective": "Roast Raptor", "text": "Cook them with Cooking, one Raptor Flesh and one Hot Spices each", "reason": "craft instruction"}
+{"id": "8527:s:8ebec56f-2", "decision": "skip", "reason": "duplicate of craft row"}
+{"id": "8535:s:8fa1dde2", "decision": "skip", "reason": "group only"}
+{"id": "8535:s:8ebec56f", "decision": "hint", "text": "The templar only appears after you summon it at a wind stone.", "reason": "hidden spawn"}
+{"id": "8535:s:8ebec56f-2", "decision": "hint", "text": "Tactical Task Briefing IV comes from a container item; keep it until you turn in.", "reason": "keep item"}
+{"id": "8535:s:8ebec56f-3", "decision": "skip", "reason": "group only"}
+{"id": "8537:s:8ebec56f", "decision": "hint", "text": "Summon the Crimson Templar at a wind stone while wearing the Twilight cultist gear.", "reason": "hidden spawn"}
+{"id": "8537:s:8ebec56f-2", "decision": "skip", "reason": "group only"}
+{"id": "8538:s:d9ced247", "decision": "skip", "reason": "group only"}
+{"id": "8538:s:1a53c3a4", "decision": "skip", "reason": "elite, restates objective"}
+{"id": "8538:s:1cd15f0b", "decision": "skip", "reason": "elite, restates objective"}
+{"id": "8538:s:8ebec56f", "decision": "hint", "text": "The dukes have no fixed spawn; summon each one at a wind stone.", "reason": "hidden spawn"}
+{"id": "8539:s:77243e50", "decision": "hint", "text": "Keep the Combat Task Briefing V in your bags; you need it for the turn-in.", "reason": "keep item"}
+{"id": "8540:s:c39e86cb", "decision": "skip", "reason": "accept row"}
+{"id": "8541:s:26dd0d0e", "decision": "do", "objective": "Solid Grinding Stone", "text": "Craft from 4 Solid Stone each, mined from mithril veins", "reason": "craft instruction"}
+{"id": "8541:s:1bb719ab", "decision": "do", "objective": "Heavy Grinding Stone", "text": "Craft from 3 Heavy Stone each, mined from iron veins", "reason": "craft instruction"}

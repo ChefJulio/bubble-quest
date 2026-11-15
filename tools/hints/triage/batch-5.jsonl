@@ -1,0 +1,302 @@
+{"id": "8541:s:8ebec56f", "decision": "hint", "text": "Keep Logistics Task Briefing III in your bags; you need it when you turn the quest in.", "reason": "keep item"}
+{"id": "8544:s:fd388624", "decision": "skip", "reason": "raid only"}
+{"id": "8544:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8548:s:28d96597", "decision": "do", "objective": "Cenarion Combat Badge", "text": "Earn from Cenarion Hold combat assignment quests", "reason": "real source"}
+{"id": "8548:s:4f14e830", "decision": "do", "objective": "Cenarion Logistics Badge", "text": "Earn from Cenarion Hold logistics assignment quests", "reason": "real source"}
+{"id": "8548:s:11c6be53", "decision": "do", "objective": "Cenarion Tactical Badge", "text": "Earn from Cenarion Hold tactical assignment quests", "reason": "real source"}
+{"id": "8548:s:8ebec56f-3", "decision": "hint", "text": "Badges do not drop from mobs; they come only as rewards from the assignment quests.", "reason": "real source"}
+{"id": "8550:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8554:s:8ebec56f", "decision": "hint", "text": "Negolash has no static spawn; he shows up only after you place the food and wine in the lifeboat.", "reason": "hidden spawn"}
+{"id": "8556:s:94c120c4", "decision": "skip", "reason": "raid only"}
+{"id": "8556:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8557:s:7cdb96d8", "decision": "skip", "reason": "raid only"}
+{"id": "8557:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8557:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8558:s:088786ee", "decision": "skip", "reason": "raid only"}
+{"id": "8558:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8559:s:95f86eca", "decision": "skip", "reason": "raid only"}
+{"id": "8559:s:41b1735f", "decision": "skip", "reason": "raid only"}
+{"id": "8559:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8560:s:ddf2d5be", "decision": "skip", "reason": "raid only"}
+{"id": "8560:s:f6d82ec2", "decision": "skip", "reason": "raid only"}
+{"id": "8560:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8560:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8561:s:3c37feb1", "decision": "skip", "reason": "raid only"}
+{"id": "8561:s:7e8d066b", "decision": "skip", "reason": "raid only"}
+{"id": "8561:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8562:s:ca2f4c3b", "decision": "skip", "reason": "raid only"}
+{"id": "8562:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8562:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8565:s:105e1262", "decision": "skip", "reason": "PvP"}
+{"id": "8566:s:16469032", "decision": "skip", "reason": "PvP"}
+{"id": "8567:s:d0d0ebc4", "decision": "skip", "reason": "PvP"}
+{"id": "8568:s:9ef5dcac", "decision": "skip", "reason": "PvP, accept row"}
+{"id": "8568:s:5e50a993", "decision": "skip", "reason": "PvP"}
+{"id": "8573:s:28d96597", "decision": "do", "objective": "Cenarion Combat Badge", "text": "Earn from combat assignment quests obtained via Field Duty", "reason": "real source"}
+{"id": "8573:s:4f14e830", "decision": "do", "objective": "Cenarion Logistics Badge", "text": "Earn from logistics assignment quests", "reason": "real source"}
+{"id": "8573:s:11c6be53", "decision": "do", "objective": "Cenarion Tactical Badge", "text": "Earn from tactical assignment quests", "reason": "real source"}
+{"id": "8574:s:4f14e830", "decision": "do", "objective": "Cenarion Logistics Badge", "text": "Earn from logistics assignment quests", "reason": "real source"}
+{"id": "8574:s:11c6be53", "decision": "do", "objective": "Cenarion Tactical Badge", "text": "Earn from tactical assignment quests", "reason": "real source"}
+{"id": "8576:s:58132b59", "decision": "skip", "reason": "turn-in, restates"}
+{"id": "8579:s:d71a0804", "decision": "skip", "reason": "raid only"}
+{"id": "8579:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8579:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8580:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8581:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8582:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8583:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8588:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8589:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8590:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8591:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8592:s:46cdf939", "decision": "skip", "reason": "raid only"}
+{"id": "8592:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8592:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8593:s:ddf2d5be", "decision": "skip", "reason": "raid only"}
+{"id": "8593:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8594:s:95f86eca", "decision": "skip", "reason": "raid only"}
+{"id": "8594:s:3e1aa100", "decision": "skip", "reason": "raid only"}
+{"id": "8594:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8595:s:8932c83b", "decision": "skip", "reason": "raid only"}
+{"id": "8595:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8595:s:8ebec56f-2", "decision": "skip", "reason": "trivia"}
+{"id": "8596:s:f6d82ec2", "decision": "skip", "reason": "raid only"}
+{"id": "8596:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8598:s:28aa5970", "decision": "skip", "reason": "accept row"}
+{"id": "8600:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8601:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8602:s:28c1100d", "decision": "skip", "reason": "raid only"}
+{"id": "8602:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8603:s:fc732691", "decision": "skip", "reason": "raid only"}
+{"id": "8603:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8604:s:ed748509", "decision": "do", "objective": "Wool Bandage", "text": "Make with First Aid, one Wool Cloth each, or buy them", "reason": "crafted item"}
+{"id": "8605:s:ed748509", "decision": "do", "objective": "Wool Bandage", "text": "Make with First Aid, one Wool Cloth each, or buy them", "reason": "crafted item"}
+{"id": "8605:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8608:s:190a54c0", "decision": "do", "objective": "Mageweave Bandage", "text": "Make with First Aid, one Mageweave Cloth each, or get them elsewhere", "reason": "crafted item"}
+{"id": "8609:s:2b9257aa", "decision": "do", "objective": "Runecloth Bandage", "text": "Make with First Aid, one Runecloth each, or buy them", "reason": "crafted item"}
+{"id": "8609:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8610:s:2b9257aa", "decision": "do", "objective": "Runecloth Bandage", "text": "Make with First Aid, one Runecloth each, or buy them", "reason": "crafted item"}
+{"id": "8610:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8611:s:e9670823", "decision": "do", "objective": "Lean Wolf Steak", "text": "Cook them, each from one flank and one Mild Spices", "reason": "crafted item"}
+{"id": "8611:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8612:s:e9670823", "decision": "do", "objective": "Lean Wolf Steak", "text": "Cook from Lean Wolf Flank and Mild Spices, or buy them", "reason": "crafted item"}
+{"id": "8612:s:8ebec56f-2", "decision": "skip", "reason": "covered by do line"}
+{"id": "8614:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8616:s:b816e6a8", "decision": "do", "objective": "Baked Salmon", "text": "Cook from Raw Whitescale Salmon and Soothing Spices, or buy them", "reason": "crafted item"}
+{"id": "8616:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8617:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8619:s:1021d630", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8619:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8620:s:2a61019a", "decision": "hint", "text": "Use the binding with all eight chapters in your bags to create Volume II.", "reason": "combine items"}
+{"id": "8621:s:2ee554de", "decision": "skip", "reason": "raid only"}
+{"id": "8621:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8622:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8622:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8623:s:acf0131f", "decision": "skip", "reason": "raid only"}
+{"id": "8623:s:3e1aa100", "decision": "skip", "reason": "raid only"}
+{"id": "8623:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8623:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8624:s:15ce9636", "decision": "skip", "reason": "raid only"}
+{"id": "8624:s:98081772", "decision": "skip", "reason": "raid only"}
+{"id": "8624:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8624:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8625:s:f6d82ec2", "decision": "skip", "reason": "raid only"}
+{"id": "8625:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8626:s:28c1100d", "decision": "skip", "reason": "raid only"}
+{"id": "8626:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8627:s:ca2f4c3b", "decision": "skip", "reason": "raid only"}
+{"id": "8627:s:2ee554de", "decision": "skip", "reason": "raid only"}
+{"id": "8627:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8627:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8628:s:acf0131f", "decision": "skip", "reason": "raid only"}
+{"id": "8628:s:3e1aa100", "decision": "skip", "reason": "raid only"}
+{"id": "8628:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8629:s:15ce9636", "decision": "skip", "reason": "raid only"}
+{"id": "8629:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8630:s:49b73abf", "decision": "skip", "reason": "raid only"}
+{"id": "8630:s:28c1100d", "decision": "skip", "reason": "raid only"}
+{"id": "8630:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8631:s:e7a2df84", "decision": "skip", "reason": "raid only"}
+{"id": "8631:s:2ee554de", "decision": "skip", "reason": "raid only"}
+{"id": "8631:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8632:s:46cdf939", "decision": "skip", "reason": "raid only"}
+{"id": "8632:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8633:s:fc732691", "decision": "skip", "reason": "raid only"}
+{"id": "8633:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8633:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8634:s:7e8d066b", "decision": "skip", "reason": "raid only"}
+{"id": "8635:s:044f00a0", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8635:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8636:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8637:s:98081772", "decision": "skip", "reason": "raid only"}
+{"id": "8638:s:bc2bcb4c", "decision": "skip", "reason": "raid only"}
+{"id": "8638:s:e55db868", "decision": "skip", "reason": "raid only"}
+{"id": "8638:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8638:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8639:s:acf0131f", "decision": "skip", "reason": "raid only"}
+{"id": "8639:s:41b1735f", "decision": "skip", "reason": "raid only"}
+{"id": "8639:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8639:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8640:s:e7a2df84", "decision": "skip", "reason": "raid only"}
+{"id": "8640:s:d8266bb6", "decision": "skip", "reason": "raid only"}
+{"id": "8640:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8640:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8641:s:95f86eca", "decision": "skip", "reason": "raid only"}
+{"id": "8641:s:7e8d066b", "decision": "skip", "reason": "raid only"}
+{"id": "8641:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8641:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8642:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8643:s:5b3d7b98", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8643:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8644:s:2c644940", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8644:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8645:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8646:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8647:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8648:s:e563d20a", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8648:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8649:s:11397578", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8649:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8650:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8651:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8652:s:b68e761d", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8652:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8653:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8654:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8655:s:2ee554de", "decision": "skip", "reason": "raid only"}
+{"id": "8655:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8656:s:bc2bcb4c", "decision": "skip", "reason": "raid only"}
+{"id": "8656:s:25faf1e3", "decision": "skip", "reason": "raid only"}
+{"id": "8656:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8656:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8657:s:acf0131f", "decision": "skip", "reason": "raid only"}
+{"id": "8657:s:98081772", "decision": "skip", "reason": "raid only"}
+{"id": "8657:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8658:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8659:s:41b1735f", "decision": "skip", "reason": "raid only"}
+{"id": "8660:s:fd388624", "decision": "skip", "reason": "raid only"}
+{"id": "8661:s:bc2bcb4c", "decision": "skip", "reason": "raid only"}
+{"id": "8661:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8662:s:ee2bc4d2", "decision": "skip", "reason": "raid only"}
+{"id": "8662:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8663:s:15ce9636", "decision": "skip", "reason": "raid only"}
+{"id": "8663:s:3e1aa100", "decision": "skip", "reason": "raid only"}
+{"id": "8663:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8664:s:a1ec50c8", "decision": "skip", "reason": "raid only"}
+{"id": "8664:s:2ee554de", "decision": "skip", "reason": "raid only"}
+{"id": "8664:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8665:s:3e1aa100", "decision": "skip", "reason": "raid only"}
+{"id": "8666:s:fc732691", "decision": "skip", "reason": "raid only"}
+{"id": "8666:s:3e1aa100", "decision": "skip", "reason": "raid only"}
+{"id": "8666:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8667:s:acf0131f", "decision": "skip", "reason": "raid only"}
+{"id": "8667:s:28c1100d", "decision": "skip", "reason": "raid only"}
+{"id": "8667:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8667:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8668:s:15ce9636", "decision": "skip", "reason": "raid only"}
+{"id": "8668:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8669:s:98081772", "decision": "skip", "reason": "raid only"}
+{"id": "8669:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8670:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8671:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8672:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8673:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8674:s:c7d4827a", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8674:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8675:s:737cb95f", "decision": "skip", "reason": "turn-in to giver, event only"}
+{"id": "8675:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8676:s:30a4af9a", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8677:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8678:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8679:s:655e668e", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8679:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8680:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8681:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8682:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8683:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8684:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8685:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8686:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8687:s:d073adae", "decision": "hint", "text": "Keep Combat Task Briefing VII in your bags; you need it for the turn-in.", "reason": "keep item"}
+{"id": "8687:s:8ebec56f", "decision": "skip", "reason": "elite, group"}
+{"id": "8688:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8689:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8689:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8690:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8691:s:648bc7ce", "decision": "skip", "reason": "raid only"}
+{"id": "8691:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8691:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8692:s:87da371d", "decision": "skip", "reason": "raid only"}
+{"id": "8692:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8694:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8694:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, event"}
+{"id": "8695:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8695:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8696:s:87da371d", "decision": "skip", "reason": "raid only"}
+{"id": "8696:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8696:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8697:s:7142a1ea", "decision": "skip", "reason": "raid only"}
+{"id": "8697:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8697:s:8ebec56f-2", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8698:s:5ef20336", "decision": "skip", "reason": "raid only"}
+{"id": "8698:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8698:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8699:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8699:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8700:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8701:s:dc6c89f8", "decision": "skip", "reason": "raid only"}
+{"id": "8701:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8703:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8704:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8704:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8705:s:337d3f6e", "decision": "skip", "reason": "raid only"}
+{"id": "8705:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8706:s:cc90277e", "decision": "skip", "reason": "raid only"}
+{"id": "8706:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8706:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8707:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8707:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8708:s:eb143df0", "decision": "skip", "reason": "raid only"}
+{"id": "8708:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8709:s:cc90277e", "decision": "skip", "reason": "raid only"}
+{"id": "8709:s:8ebec56f", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8709:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8710:s:eb143df0", "decision": "skip", "reason": "raid only"}
+{"id": "8710:s:8ebec56f-2", "decision": "skip", "reason": "raid only"}
+{"id": "8711:s:dbfb0123", "decision": "skip", "reason": "raid only"}
+{"id": "8711:s:3e6ae84a", "decision": "skip", "reason": "rep gate, trivia"}
+{"id": "8711:s:8ebec56f", "decision": "skip", "reason": "raid only"}
+{"id": "8713:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8715:s:78825fdf", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8715:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8716:s:6ee5f0e0", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8717:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8718:s:01348ecc", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8719:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8720:s:254a3b19", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8720:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8721:s:e82fb272", "decision": "skip", "reason": "turn-in to giver, reward trivia"}
+{"id": "8722:s:0f923e68", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8722:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8723:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8724:s:1575da5d", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8724:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8726:s:8ebec56f", "decision": "skip", "reason": "event only"}
+{"id": "8727:s:47992b7a", "decision": "skip", "reason": "turn-in to giver"}
+{"id": "8727:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8728:s:ac187d26", "decision": "do", "objective": "Arcanite Bar", "text": "Transmute with Alchemy from Thorium Bar and Arcane Crystal, or buy", "reason": "crafted item"}
+{"id": "8730:s:8ebec56f-4", "decision": "skip", "reason": "raid only"}
+{"id": "8737:s:8ebec56f", "decision": "hint", "text": "No fixed spawn: summon it at a Lesser Wind Stone while wearing the full Twilight set.", "reason": "hidden spawn"}
+{"id": "8737:s:8ebec56f-3", "decision": "skip", "reason": "elite, group"}
+{"id": "8738:s:8ebec56f-3", "decision": "hint", "text": "Keep Tactical Task Briefing VII in your bags; you need it when you turn in.", "reason": "keep item"}
+{"id": "8739:s:8ebec56f-2", "decision": "hint", "text": "Keep Tactical Task Briefing VIII in your bags; you need it when you turn in.", "reason": "keep item"}
+{"id": "8741:s:389a6a94", "decision": "skip", "reason": "accept row"}
+{"id": "8743:s:de8ce07f", "decision": "skip", "reason": "accept row"}
+{"id": "8745:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8746:s:8ebec56f-2", "decision": "skip", "reason": "event only"}
+{"id": "8748:s:af51ac8b", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "8748:s:8ebec56f", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "8751:s:8ebec56f", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "8754:s:108c336f", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "8754:s:8ebec56f", "decision": "skip", "reason": "chain bookkeeping"}
+{"id": "8756:s:8ebec56f", "decision": "skip", "reason": "chain bookkeeping"}

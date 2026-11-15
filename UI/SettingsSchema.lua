@@ -71,6 +71,14 @@ function Schema:Entries()
       set = function(p, v) p.cards.progressBar = v; ns.Stack:Request(false, true) end,
     },
     {
+      kind = "checkbox", id = "QUESTMARK_HINTS", column = 1, default = true,
+      label = "Show hints for tricky steps",
+      tooltip = "A \"Tip:\" line under quests that have a step players often get stuck on (timers, hidden "
+        .. "spawns, items to use or keep). Only some quests have one.",
+      get = function(p) return p.cards.hints end,
+      set = function(p, v) p.cards.hints = v; ns.Stack:Request(false, true) end,
+    },
+    {
       kind = "slider", id = "QUESTMARK_BACKGROUND_OPACITY", column = 1, default = 25, min = 0, max = 100, step = 5,
       label = "Background opacity",
       tooltip = "How dark the panel behind the cards is. 0% shows no panel.",
