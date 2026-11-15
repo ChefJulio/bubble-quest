@@ -135,7 +135,7 @@ function Card:SetQuest(quest, collapsed, options)
       row.text:SetTextColor(0.2, 1, 0.2)
     else
       local objective = quest.objectives[i]
-      local text, counter = ns.DoLine:For(objective)
+      local text, counter = ns.DoLine:For(objective, quest.questID)
       setRow(row, text, counter, objective.finished)
     end
     row:ClearAllPoints()
@@ -159,7 +159,7 @@ function Card:UpdateInPlace(quest)
   for i = 1, self.rowCount do
     local objective = quest.objectives[i]
     if objective then
-      local text, counter = ns.DoLine:For(objective)
+      local text, counter = ns.DoLine:For(objective, quest.questID)
       setRow(self.rows[i], text, counter, objective.finished)
     end
   end

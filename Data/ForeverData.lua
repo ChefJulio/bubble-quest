@@ -64,6 +64,44 @@ function ForeverData:TurnInName(questID)
   return lib.Name(finisher.kind, finisher.id)
 end
 
+local MAX_SOURCE_NAMES = 2
+
+---Where a collect objective's item comes from, matched by item name among the quest's item
+---objectives. Coverage: about half of item objectives, mostly classic quests; few Forever-new ones.
+---@param questID number
+---@param itemName string the objective text without its counter
+---@return table? sources { kind = "npc" | "object" | "item", names = { ... }, more = n }
+function ForeverData:ItemSources(questID, itemName)
+  local lib = library()
+  local record = self:Quest(questID)
+  if not lib or not record then
+    return nil
+  end
+  for _, objective in ipairs(record.objectives or {}) do
+    if objective.kind == "item" and objective.target and lib.Name("item", objective.target) == itemName then
+      local item = lib.Get("item", objective.target)
+      local sources = item and item.sources or {}
+      table.sort(sources, function(a, b) return (a.chance or 0) > (b.chance or 0) end)
+      local first = sources[1]
+      if not first then
+        return nil
+      end
+      local result = { kind = first.kind, names = {}, more = 0 }
+      for _, source in ipairs(sources) do
+        if source.kind == first.kind then
+          if #result.names < MAX_SOURCE_NAMES then
+            result.names[#result.names + 1] = lib.Name(source.kind, source.id)
+          else
+            result.more = result.more + 1
+          end
+        end
+      end
+      return result
+    end
+  end
+  return nil
+end
+
 ---The quest's area (zone or subzone) name, from its AreaTable id.
 ---@param questID number
 ---@return string?

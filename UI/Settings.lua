@@ -98,6 +98,18 @@ function SettingsPanel:Register()
   self.category = category
 end
 
+---Change the lock from outside the panel (the header's lock button). Settings.SetValue runs our
+---setter and refreshes the checkbox if the panel is open.
+---@param locked boolean
+function SettingsPanel:SetLocked(locked)
+  if self.category then
+    Settings.SetValue("QUESTMARK_LOCK_CARDS", locked)
+  else
+    ns.DB.profile.cards.locked = locked
+    ns.Stack:ApplyLock()
+  end
+end
+
 -- Opening goes through C_SettingsUtil.OpenSettingsPanel, which is HasRestrictions on Forever with no
 -- stated rule; assume combat is the restriction and don't try then.
 function SettingsPanel:Open()

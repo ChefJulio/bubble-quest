@@ -272,6 +272,10 @@ function Stack:ApplyPosition()
   container:ClearAllPoints()
   if saved then
     container:SetPoint(saved[1], UIParent, saved[2], saved[3], saved[4])
+    if saved[1] ~= "TOPLEFT" then
+      -- Saved before positions were normalized: convert once, so the stack grows only downward.
+      ns.DB.profile.cards.position = Stack:AnchorTopLeft() or saved
+    end
   elseif ObjectiveTrackerFrame then
     container:SetPoint("TOPRIGHT", ObjectiveTrackerFrame, "TOPRIGHT")
   else
@@ -286,15 +290,27 @@ function Stack:ApplyLock()
   end
 end
 
--- StartMoving re-anchors the frame to UIParent, so the point read back is screen-relative.
+-- Pin the stack's top-left corner where it is now, so changes in height only grow or shrink it
+-- downward. (After StartMoving the frame can be anchored by another point, e.g. its center, and
+-- would then grow both up and down.) Returns the position to save, or nil if not laid out yet.
+function Stack:AnchorTopLeft()
+  local container = self.container
+  local left, top = container and container:GetLeft(), container and container:GetTop()
+  if not container or not left or not top then
+    return nil
+  end
+  container:ClearAllPoints()
+  container:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+  return { "TOPLEFT", "BOTTOMLEFT", left, top }
+end
+
 local function savePosition()
   local container = Stack.container
   if not container then
     return
   end
   container:StopMovingOrSizing()
-  local point, _, relativePoint, x, y = container:GetPoint(1)
-  ns.DB.profile.cards.position = { point, relativePoint, x, y }
+  ns.DB.profile.cards.position = Stack:AnchorTopLeft() or ns.DB.profile.cards.position
 end
 
 -- Construction -------------------------------------------------------------------------------------
@@ -322,12 +338,23 @@ local function createHeader(container)
   header:SetHeight(HEADER_HEIGHT)
   header:EnableMouse(true)
   header:RegisterForDrag("LeftButton")
+  -- Drag (when unlocked) moves the stack; a plain left click opens settings. A drag that ends over
+  -- the header also produces a mouse-up, so remember whether the press turned into a drag.
+  header:SetScript("OnMouseDown", function()
+    header.dragged = false
+  end)
   header:SetScript("OnDragStart", function()
+    header.dragged = true
     if not ns.DB.profile.cards.locked then
       container:StartMoving()
     end
   end)
   header:SetScript("OnDragStop", savePosition)
+  header:SetScript("OnMouseUp", function(_, button)
+    if button == "LeftButton" and not header.dragged and header:IsMouseOver() then
+      ns.Settings:Open()
+    end
+  end)
 
   -- Darker band behind the header, on top of the panel background.
   local band = header:CreateTexture(nil, "BACKGROUND", nil, 1)
@@ -357,9 +384,8 @@ local function createHeader(container)
     return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag this header to move the cards."
       or "Unlocked: drag this header to move the cards. Click to lock."
   end, function()
-    local cards = ns.DB.profile.cards
-    cards.locked = not cards.locked
-    updateHeader()
+    -- Through the setting, so an open settings panel's checkbox follows (its setter applies it).
+    ns.Settings:SetLocked(not ns.DB.profile.cards.locked)
   end)
   header.lock:SetPoint("RIGHT", header.settings, "LEFT", -2, 0)
   local lockAtlas = firstAtlas("worldquest-tracker-lock", "honorsystem-bar-lock", "groupfinder-icon-lock")
