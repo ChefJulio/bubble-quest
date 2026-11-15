@@ -1,4 +1,4 @@
-Questmark is licensed under the GNU General Public License, version 3 or later (see LICENSE).
+Questmarker is licensed under the GNU General Public License, version 3 or later (see LICENSE).
 It bundles the following third-party work.
 
 ------------------------------------------------------------------------------------------------
@@ -15,11 +15,11 @@ Bundled unmodified; the version is in Libs/LibForeverData/LibForeverData.toc.
 - The quest steps and notes layer ("our own layer" in forever-db) is licensed under the Creative
   Commons Attribution 4.0 International licence: Libs/LibForeverData/LICENSE-CC-BY-4.0.txt.
   Attribution: quest steps and notes from forever-db by the Polestar contributors,
-  https://github.com/fitzforge/polestar/tree/next/forever-db, CC BY 4.0. Questmark may shorten or
+  https://github.com/fitzforge/polestar/tree/next/forever-db, CC BY 4.0. Questmarker may shorten or
   reword them for display; where it does, the text is changed from the original.
 - forever-db's own credits for its sources (EG Link / Efficient Games, CMaNGOS classic-db,
   VMaNGOS through pfQuest, pfQuest, Factoruide, ForeverTDB, QuestieDB, the game client's tables),
   with the pfQuest MIT notice: Libs/LibForeverData/NOTICE.md.
 
 World of Warcraft and Blizzard Entertainment are trademarks or registered trademarks of Blizzard
-Entertainment, Inc. Questmark is not made, endorsed or supported by Blizzard Entertainment.
+Entertainment, Inc. Questmarker is not made, endorsed or supported by Blizzard Entertainment.

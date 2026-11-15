@@ -1,6 +1,6 @@
 local ADDON_NAME, ns = ...
 
--- Questmark runs alongside Questie and replaces only its quest tracker. If Questie's tracker is on,
+-- Questmarker runs alongside Questie and replaces only its quest tracker. If Questie's tracker is on,
 -- say once (per character) where to turn it off. Never change Questie's settings ourselves.
 --
 -- Questie is an AceAddon global; its tracker toggle is Questie.db.profile.trackerEnabled
@@ -29,7 +29,7 @@ ns.Events:On("PLAYER_ENTERING_WORLD", function()
       return
     end
     notices[NOTICE] = true
-    ns.Debug:Print("Questie's quest tracker is also on. Questmark replaces it: turn it off in "
+    ns.Debug:Print("Questie's quest tracker is also on. Questmarker replaces it: turn it off in "
       .. "Questie's options under Tracker > Enable Tracker.")
   end)
 end)

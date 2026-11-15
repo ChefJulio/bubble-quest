@@ -370,19 +370,19 @@ local function createHeader(container)
   band:SetAllPoints()
   band:SetColorTexture(0, 0, 0, 0.35)
 
-  header.title = header:CreateFontString(nil, "ARTWORK", "QuestmarkHeaderFont")
+  header.title = header:CreateFontString(nil, "ARTWORK", "QuestmarkerHeaderFont")
   header.title:SetPoint("LEFT", PAD, 0)
-  header.title:SetText("Questmark")
+  header.title:SetText("Questmarker")
 
   header.minimize = headerButton(header, function()
-    return ns.DB.char.minimized and "Show Questmark's cards" or "Minimize to this header"
+    return ns.DB.char.minimized and "Show Questmarker's cards" or "Minimize to this header"
   end, function()
     ns.DB.char.minimized = not ns.DB.char.minimized
     Stack:Request(false, true)
   end)
   header.minimize:SetPoint("RIGHT", -PAD + 2, 0)
 
-  header.settings = headerButton(header, function() return "Questmark settings" end, function()
+  header.settings = headerButton(header, function() return "Questmarker settings" end, function()
     ns.Settings:Open()
   end)
   header.settings:SetNormalAtlas("ui-questtrackerbutton-filter")
@@ -394,25 +394,25 @@ local function createHeader(container)
       or "Unlocked: drag this header to move the cards. Click to lock."
   end, function()
     -- Through the setting, so both settings UIs follow (their checkboxes refresh on SettingChanged).
-    ns.Settings:SetValue("QUESTMARK_LOCK_CARDS", not ns.DB.profile.cards.locked)
+    ns.Settings:SetValue("QUESTMARKER_LOCK_CARDS", not ns.DB.profile.cards.locked)
   end)
   header.lock:SetPoint("RIGHT", header.settings, "LEFT", -2, 0)
   local lockAtlas = firstAtlas("worldquest-tracker-lock", "honorsystem-bar-lock", "groupfinder-icon-lock")
   if lockAtlas then
     header.lock:SetNormalAtlas(lockAtlas)
   else
-    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "QuestmarkSmallHighlightFont")
+    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallHighlightFont")
     header.lock.fallback:SetPoint("CENTER")
   end
 
-  header.count = header:CreateFontString(nil, "ARTWORK", "QuestmarkSmallFont")
+  header.count = header:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
   header.count:SetPoint("RIGHT", header.lock, "LEFT", -6, 0)
 
   return header
 end
 
 function Stack:Create()
-  local container = CreateFrame("Frame", "QuestmarkStack", UIParent)
+  local container = CreateFrame("Frame", "QuestmarkerStack", UIParent)
   container:SetSize(ns.Card.WIDTH + 2 * PAD, HEADER_HEIGHT)
   container:SetMovable(true)
   container:SetClampedToScreen(true)
@@ -453,7 +453,7 @@ function Stack:Create()
   end)
 
   headingPool = ns.CreatePool(function()
-    local heading = body:CreateFontString(nil, "ARTWORK", "QuestmarkSmallFont")
+    local heading = body:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
     heading:SetTextColor(0.7, 0.7, 0.7)
     return heading
   end)
@@ -462,7 +462,7 @@ function Stack:Create()
     local line = CreateFrame("Button", nil, body)
     line:SetSize(ns.Card.WIDTH, LINE_HEIGHT)
     line:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    line.label = line:CreateFontString(nil, "ARTWORK", "QuestmarkLineFont")
+    line.label = line:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
     line.label:SetPoint("LEFT")
     line:SetScript("OnClick", function(self, button)
       if self.onClick then

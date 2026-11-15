@@ -1,7 +1,7 @@
 local ADDON_NAME, ns = ...
 
 -- Every setting, defined once. Both Blizzard's Options > AddOns panel (UI/Settings.lua) and
--- Questmark's own window (UI/SettingsWindow.lua) are built from this list, so they can't drift apart.
+-- Questmarker's own window (UI/SettingsWindow.lua) are built from this list, so they can't drift apart.
 --
 -- Entry fields:
 --   kind     "checkbox" | "slider" | "dropdown" | "section"
@@ -10,9 +10,9 @@ local ADDON_NAME, ns = ...
 --   get(profile) / set(profile, value)   read and change the active profile
 --   slider:   min, max, step, format(value) -> text
 --   dropdown: options() -> { { value, label }, ... }; preview(value) -> font file to draw that
---             option's label in (Questmark's window only)
---   column   1 or 2 in Questmark's window
---   grid     dropdowns sharing a grid name and the same options form one table in Questmark's window
+--             option's label in (Questmarker's window only)
+--   column   1 or 2 in Questmarker's window
+--   grid     dropdowns sharing a grid name and the same options form one table in Questmarker's window
 
 local Schema = {}
 ns.SettingsSchema = Schema
@@ -30,22 +30,22 @@ function Schema:Entries()
   local entries = {
     { kind = "section", label = "Tracker", column = 1 },
     {
-      kind = "checkbox", id = "QUESTMARK_HIDE_BLIZZARD_TRACKER", column = 1, default = true,
+      kind = "checkbox", id = "QUESTMARKER_HIDE_BLIZZARD_TRACKER", column = 1, default = true,
       label = "Hide Blizzard quest tracker",
-      tooltip = "Hide the game's objective tracker so Questmark's cards replace it. Quest auto-complete "
+      tooltip = "Hide the game's objective tracker so Questmarker's cards replace it. Quest auto-complete "
         .. "popups and the scenario tracker are part of it and hide too.",
       get = function(p) return p.blizzardTracker.hide end,
       set = function(p, v) p.blizzardTracker.hide = v; ns.BlizzardTracker:Apply() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARK_LOCK_CARDS", column = 1, default = true,
+      kind = "checkbox", id = "QUESTMARKER_LOCK_CARDS", column = 1, default = true,
       label = "Lock card position",
-      tooltip = "Untick to drag Questmark's cards by their header; tick again to lock them there.",
+      tooltip = "Untick to drag Questmarker's cards by their header; tick again to lock them there.",
       get = function(p) return p.cards.locked end,
       set = function(p, v) p.cards.locked = v; ns.Stack:ApplyLock() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARK_CLICK_OPENS_MAP", column = 1, default = true,
+      kind = "checkbox", id = "QUESTMARKER_CLICK_OPENS_MAP", column = 1, default = true,
       label = "Click a card to show its quest on the map",
       tooltip = "Left-clicking a card makes it your tracked quest (map highlight and in-world beacon) and "
         .. "opens the map at it. Out of combat only.",
@@ -53,7 +53,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.clickOpensMap = v end,
     },
     {
-      kind = "slider", id = "QUESTMARK_CARD_CAP", column = 1, default = 5, min = 1, max = 15, step = 1,
+      kind = "slider", id = "QUESTMARKER_CARD_CAP", column = 1, default = 5, min = 1, max = 15, step = 1,
       label = "Cards shown for this zone",
       tooltip = "How many of this zone's quests get a card before the rest go behind \"+ N more here\". "
         .. "Pinned quests always show and don't count.",
@@ -64,7 +64,7 @@ function Schema:Entries()
 
     { kind = "section", label = "Look", column = 1 },
     {
-      kind = "checkbox", id = "QUESTMARK_PROGRESS_BAR", column = 1, default = true,
+      kind = "checkbox", id = "QUESTMARKER_PROGRESS_BAR", column = 1, default = true,
       label = "Progress bar under each quest",
       tooltip = "A thin bar under each card showing how far along the quest is; green when ready to "
         .. "turn in. Split into segments when progress is a count.",
@@ -72,7 +72,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.progressBar = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "dropdown", id = "QUESTMARK_FONT", column = 1, default = "default",
+      kind = "dropdown", id = "QUESTMARKER_FONT", column = 1, default = "default",
       label = "Font",
       tooltip = "The tracker's font. Lists every font your addons share through SharedMedia (MSBT, "
         .. "Details, ...), or WoW's own fonts if none do.",
@@ -82,7 +82,7 @@ function Schema:Entries()
       set = function(p, v) p.font.face = v; ns.Fonts:Apply() end,
     },
     {
-      kind = "slider", id = "QUESTMARK_FONT_SCALE", column = 1, default = 100, min = 80, max = 140, step = 5,
+      kind = "slider", id = "QUESTMARKER_FONT_SCALE", column = 1, default = 100, min = 80, max = 140, step = 5,
       label = "Text size",
       tooltip = "Size of the tracker's text.",
       format = percent,
@@ -90,7 +90,7 @@ function Schema:Entries()
       set = function(p, v) p.font.scale = v; ns.Fonts:Apply() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARK_HINTS", column = 1, default = true,
+      kind = "checkbox", id = "QUESTMARKER_HINTS", column = 1, default = true,
       label = "Show hints for tricky steps",
       tooltip = "A \"Tip:\" line under quests that have a step players often get stuck on (timers, hidden "
         .. "spawns, items to use or keep). Only some quests have one.",
@@ -98,7 +98,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.hints = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "slider", id = "QUESTMARK_BACKGROUND_OPACITY", column = 1, default = 25, min = 0, max = 100, step = 5,
+      kind = "slider", id = "QUESTMARKER_BACKGROUND_OPACITY", column = 1, default = 25, min = 0, max = 100, step = 5,
       label = "Background opacity",
       tooltip = "How dark the panel behind the cards is. 0% shows no panel.",
       format = percent,
@@ -108,7 +108,7 @@ function Schema:Entries()
 
     { kind = "section", label = "Arrows", column = 1 },
     {
-      kind = "dropdown", id = "QUESTMARK_ARROW_STYLE", column = 1, default = "classic",
+      kind = "dropdown", id = "QUESTMARKER_ARROW_STYLE", column = 1, default = "classic",
       label = "Arrow style",
       tooltip = "The arrow on each card. /qm arrows shows them all side by side.",
       options = function()
@@ -122,10 +122,10 @@ function Schema:Entries()
       set = function(p, v) p.cards.arrowStyle = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARK_ARROW_COLOR", column = 1, default = true,
+      kind = "checkbox", id = "QUESTMARKER_ARROW_COLOR", column = 1, default = true,
       label = "Color arrows by distance",
       tooltip = "Green when close, through yellow and orange, to red when far (or in another zone). "
-        .. "Off: gold. Applies to Questmark's own arrow styles.",
+        .. "Off: gold. Applies to Questmarker's own arrow styles.",
       get = function(p) return p.cards.arrowColorByDistance end,
       set = function(p, v) p.cards.arrowColorByDistance = v end,
     },
@@ -138,9 +138,9 @@ function Schema:Entries()
   end
   for _, name in ipairs(ns.Categories.ORDER) do
     entries[#entries + 1] = {
-      -- grid: Questmark's window shows these as one table (a row each, a radio per option); Blizzard's
+      -- grid: Questmarker's window shows these as one table (a row each, a radio per option); Blizzard's
       -- panel, which has no such control, keeps dropdowns.
-      kind = "dropdown", grid = "categories", id = "QUESTMARK_CATEGORY_" .. name:upper(), column = 2,
+      kind = "dropdown", grid = "categories", id = "QUESTMARKER_CATEGORY_" .. name:upper(), column = 2,
       default = ns.Categories.DEFAULT_MODES[name],
       label = ns.Categories.LABELS[name],
       tooltip = "Show: as normal cards with this zone's quests. Separate: in their own collapsed group. "

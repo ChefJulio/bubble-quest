@@ -12,7 +12,7 @@ Paths below are relative to the clone root unless they start with `docs/` of thi
 
 ## Verdict
 
-**Do not ship GuideMate data or text inside Questmark, and do not treat
+**Do not ship GuideMate data or text inside Questmarker, and do not treat
 `useClientText = false` as a hint marker. Use GuideMate only as a private lookup
 for which quests need a hint, then write the hints ourselves. The one clean, reusable
 piece is the shape of its dungeon guides, as a design template for the pre-dungeon
@@ -266,7 +266,7 @@ coordinates are facts, but the step order, decomposition, and pin selection come
 a proprietary guide, and GuideMate offers no license grant from Zygor. About 579 goals
 also embed Blizzard quest text verbatim. The dungeon guides are probably the author's
 own GPL work. Still, given the rest of the repo, provenance cannot be proven step by
-step. Safe use for a GPLv3 Questmark: read GuideMate as a pointer to which quests are
+step. Safe use for a GPLv3 Questmarker: read GuideMate as a pointer to which quests are
 confusing, never as copied text or data.
 
 ---
@@ -426,4 +426,4 @@ Leveling/Loremaster duplication. The unique hint-bearing content is a tiny fract
 - Guide commits: daily bursts 2026-09-23 to 2026-10-22 (up to 30 a day), then one
   a day on 11-03 to 11-07, then archive.
 - Contributors: 1 human (Tyler Akins) + dependabot. Interface 16001 (`AGENTS.md:4`),
-  the same as Questmark.
+  the same as Questmarker.

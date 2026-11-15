@@ -1,4 +1,4 @@
-# Questmark competitive landscape (WoW Forever, client 1.60.1)
+# Questmarker competitive landscape (WoW Forever, client 1.60.1)
 
 Researched 2026-11-14. Tags: **[Read]** = seen at the cited URL or local file;
 **[Inferred]** = deduced from what was read, not directly confirmed. CurseForge
@@ -31,7 +31,7 @@ at the data level, though it is still true at the presentation level.**
    and the whole quest has a 30-minute timer." (quest 28); "The sacks are
    objects you click in the world, not mob drops, and they are spread over
    three zones." (49); "You need two salves for each plant..." (4467).
-   Many gotchas are low-value for Questmark ("needs a raid group", "holiday
+   Many gotchas are low-value for Questmarker ("needs a raid group", "holiday
    only") but a real share are exactly the spec's Hint line.
 2. **Questie has a small hint layer too.** Questie's `extraObjectives` put a map
    icon plus a sentence on non-obvious steps ("Slay Vale Screechers and use
@@ -84,7 +84,7 @@ at the data level, though it is still true at the presentation level.**
   unclear provenance should be considered "all rights reserved" [Read: local
   QuestieDB/LICENSE.md]. Polestar uses it only "with the Questie maintainers'
   agreement" and can rebuild `--no-questie` [Read: polestar THIRD_PARTY.md].
-  Do not bake QuestieDB data into Questmark without asking.
+  Do not bake QuestieDB data into Questmarker without asking.
 - **Drop "Research first: Forever GuideMate".** The repo is archived,
   read-only, "no longer maintained", and its guides are "being ported to
   RestedXP" [Read: github.com/TylerAkins/forever-guide-mate README, issue
@@ -100,14 +100,14 @@ at the data level, though it is still true at the presentation level.**
   [Read: Questie issues #7929, #7930, #7931]. The Do-line model must allow
   objectives appearing and an "optional" marker.
 - **Own Blizzard's super-track.** Native auto-focus on quest accept is a live
-  complaint (#8313). Spec should say Questmark decides supertrack, or
+  complaint (#8313). Spec should say Questmarker decides supertrack, or
   suppresses auto-focus when its native-waypoint setting is off.
 - **Reconsider phases 10-11 (replace Questie and the quest log).** That space
   is saturated: Questie, ForeverQuest, Questdon, QuestForever, Everything
   Quests, Quester Forever, Quest Completist, Forever Quest Pins all do pins and
   quest browsing. Coexisting with a pin addon (Questie exposes a public API:
   `Public/RegisterForQuestUpdates.lua`, `GetQuestObjectiveIconForUnit.lua`
-  [Read: local Questie_Forever.toc]) is cheaper and is where Questmark adds
+  [Read: local Questie_Forever.toc]) is cheaper and is where Questmarker adds
   nothing unique anyway. Keep "Available nearby" only if data is free from
   LibForeverData.
 - **Dungeon mode: keep in-dungeon cards, treat the pre-dungeon reminder as
@@ -119,7 +119,7 @@ at the data level, though it is still true at the presentation level.**
 ## Feature-overlap matrix
 
 Y = has it, P = partial / weaker form, N = no, ? = could not verify.
-Columns are Questmark features.
+Columns are Questmarker features.
 
 | Addon | Cards per quest | Do/Where lines | Live arrows | Calm tracking rules | Categories | Background objectives | Dungeon mode | Hints for tricky steps | In-game learning | Map pins | Quest log replacement |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -165,7 +165,7 @@ Columns are Questmark features.
 - **Complaints:** tracker auto-focus (#8313), zone order (#8294), minimized
   category lost on reload (#8321), tooltip quest lines vanish for quests it
   doesn't know (#8027), tracker visibility/tracking toggles out of sync (#8196).
-- **Useful for Questmark:** remaining-work doc and tooltip-secrets doc are
+- **Useful for Questmarker:** remaining-work doc and tooltip-secrets doc are
   the best public notes on Forever API restrictions
   [Read: FOREVER_WORK_LEFT_TO_DO.md, docs/forever-tooltip-secrets.md].
   Note: installed QuestieTrace has only Classic-family TOCs
@@ -221,7 +221,7 @@ Columns are Questmark features.
 - **Features:** replaces Blizzard quest UI on Retail/Classic/TBC/Forever;
   separate EQ Objective Tracker (sort modes, filters, auto-hide rules,
   sections); nameplate icons; **bag-item tooltips showing which quest needs an
-  item and how many** (Questmark's keep-item idea); Forever map markers from
+  item and how many** (Questmarker's keep-item idea); Forever map markers from
   its own data; Chain Guide for every Forever chain; Quest Browser with
   "why you can't take this yet"; Quest History (5,000 turn-ins, cross-char);
   group progress; automation (Alt pauses); 6 translations.
@@ -308,7 +308,7 @@ player's own quests* is the remaining open slot.
    `mechanic` kinds to Hint templates: `use-item-on-mob` / `summon-by-item` /
    `use-item-at-place` / `escort` / `timed` / `multi-step-in-one-objective`
    are the spec's "non-obvious step" categories, already classified for
-   3,401 rows. Use its stable step/note IDs as Questmark's hint keys so
+   3,401 rows. Use its stable step/note IDs as Questmarker's hint keys so
    player notes can be submitted upstream.
 2. **Hint confidence label.** forever-db marks `confidence: "unconfirmed"`;
    ForeverQuest shows a "location-source label" (legacy vs verified). Show a
@@ -340,7 +340,7 @@ player's own quests* is the remaining open slot.
 
 ## Complaints worth fixing
 
-| Complaint | Source | Questmark answer |
+| Complaint | Source | Questmarker answer |
 |---|---|---|
 | Guide doesn't say the target is summoned with an item on a corpse | Polestar #2326 [Read] | Hint line (core thesis) |
 | "Talk to X" but you must click through dialogue | Polestar #1590 [Read] | Auto-hint for talk objectives |
@@ -353,7 +353,7 @@ player's own quests* is the remaining open slot.
 | Collapsed state lost on /reload | Questie #8321 [Read] | Persist collapse in SavedVariables |
 | Route only the quests I pick | Adventure Guide #772 [Read] | Player-picked order (core non-goal of routing) |
 | Keep the game's own quest markers alongside | Adventure Guide #764 [Read] | Don't hide native markers; optional native waypoint |
-| Want an info-only mode with routes off | Adventure Guide #715 [Read] | Questmark is that mode |
+| Want an info-only mode with routes off | Adventure Guide #715 [Read] | Questmarker is that mode |
 | Old/unverified coordinates point to wrong spots | wowforeveraddons.wiki on ForeverQuest [Read] | Prefer verified data; label confidence |
 | Pins/skips reset on reload | wowforeveraddons.wiki on ForeverQuest [Read] | Persist pins/ignores |
 | Duplicate same-name quests, wrong class/race availability | EQ page, Questie #8264/#8281 [Read] | Use quest IDs everywhere; Forever-specific DB |

@@ -7,7 +7,7 @@ local Debug = {
 }
 ns.Debug = Debug
 
-local PREFIX = "|cff66ccffQuestmark|r:"
+local PREFIX = "|cff66ccffQuestmarker|r:"
 local HISTORY_SIZE = 300
 
 local function stripColors(text)

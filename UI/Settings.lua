@@ -1,17 +1,17 @@
 local ADDON_NAME, ns = ...
 
 -- Settings. Every setting is defined once in UI/SettingsSchema.lua. This file:
---   - registers them in Blizzard's Options > AddOns > Questmark panel (proxies onto the active
+--   - registers them in Blizzard's Options > AddOns > Questmarker panel (proxies onto the active
 --     profile, so switching profiles later needs no re-registration);
---   - opens Questmark's own window (UI/SettingsWindow.lua) for /qm, the header and its button.
+--   - opens Questmarker's own window (UI/SettingsWindow.lua) for /qm, the header and its button.
 --     Blizzard's panel always reopens the game menu when it closes
 --     (Blizzard_SettingsPanel.lua:295-302, TransitionBackOpeningPanel); our window doesn't, and as a
 --     plain frame it also opens in combat.
 
-local QuestmarkSettings = {
+local QuestmarkerSettings = {
   category = nil,  -- Blizzard panel category, once registered
 }
-ns.Settings = QuestmarkSettings
+ns.Settings = QuestmarkerSettings
 
 local VAR_TYPE = { checkbox = "Boolean", slider = "Number", dropdown = "String" }
 
@@ -42,8 +42,8 @@ local function register(category, layout, entry)
 end
 
 -- Called once SavedVariables are loaded.
-function QuestmarkSettings:Register()
-  local category = Settings.RegisterVerticalLayoutCategory("Questmark")
+function QuestmarkerSettings:Register()
+  local category = Settings.RegisterVerticalLayoutCategory("Questmarker")
   -- SettingsPanel is Blizzard's global frame. (This module's table was once a local of the same name,
   -- which hid it: the panel never registered.)
   local layout = SettingsPanel:GetLayout(category)
@@ -56,21 +56,21 @@ end
 
 ---Change a setting from outside both UIs (the header's lock button).
 ---@param id string
-function QuestmarkSettings:SetValue(id, value)
+function QuestmarkerSettings:SetValue(id, value)
   local entry = ns.SettingsSchema:Find(id)
   if entry then
     ns.SettingsSchema:Set(entry, value)
   end
 end
 
----Open Questmark's own settings window.
-function QuestmarkSettings:Open()
+---Open Questmarker's own settings window.
+function QuestmarkerSettings:Open()
   ns.SettingsWindow:Toggle()
 end
 
 -- Keep Blizzard's panel in step when a setting changes elsewhere (our window, the lock button).
 ns.Bus:On("SettingChanged", function(id)
-  if QuestmarkSettings.category then
+  if QuestmarkerSettings.category then
     Settings.NotifyUpdate(id)
   end
 end)

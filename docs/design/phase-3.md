@@ -10,7 +10,7 @@ Evidence tags: [Read] verified in the Forever UI source or in game; [Assumes] to
 ## What you see
 
 ```
- Questmark                12/40  [L] [S] [-]   <- header row (below)
+ Questmarker                12/40  [L] [S] [-]   <- header row (below)
  [2] Rest and Relaxation          (pin)  -     <- pinned: always shown, any zone
      Ready to turn in
  [2] Wolves Across the Border            -     <- ready turn-in in this zone: top
@@ -28,13 +28,13 @@ Evidence tags: [Read] verified in the Forever UI source or in game; [Assumes] to
 
 Requested in review. One line above the cards:
 
-- **"Questmark"** title.
+- **"Questmarker"** title.
 - **Quest count** "12/40": quests in the log / `C_QuestLog.GetMaxNumQuestsCanAccept()` (40 on
   Forever [Read: research A1]). Orange from 35, red at the cap. This is the spec's log capacity
   indicator, placed where it's always visible.
 - **Lock** button: toggles the position lock. Unlocked, the header is the drag handle (replaces
   phase 2's blue overlay, which covered the cards).
-- **Settings** button: opens Questmark's settings (out of combat, as `/qm`).
+- **Settings** button: opens Questmarker's settings (out of combat, as `/qm`).
 - **Minimize** `-` / `+`: collapses the whole tracker to the header row. Saved per character.
 - Icons from textures/atlases verified in Forever's UI source at build time; plain-text
   fallbacks otherwise. Tooltips on each button.

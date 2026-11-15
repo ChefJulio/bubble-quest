@@ -5,7 +5,7 @@ Research the spec asked for before building. Four reports:
 | Report | Question |
 | --- | --- |
 | [guidemate.md](guidemate.md) | Forever GuideMate: coverage, hint quality, provenance, fit |
-| [sources-and-licenses.md](sources-and-licenses.md) | Licenses of every data source; Questmark's own license |
+| [sources-and-licenses.md](sources-and-licenses.md) | Licenses of every data source; Questmarker's own license |
 | [landscape.md](landscape.md) | Existing Forever quest addons; is the hint layer unoccupied? |
 | [forever-api-and-questiedb.md](forever-api-and-questiedb.md) | Forever quest/map/settings APIs, hiding the tracker, QuestieDB |
 
@@ -38,7 +38,7 @@ Spot-checked by the main session after the reports came in:
   966 distinct quests. [Read]
 - Gotcha quality is mixed. Real tricks ("Hurley only shows up after the kegs in the Grim Guzzler
   are smashed", "the ticket disappears after 600 seconds") sit next to generic ones ("needs a
-  group", "only during the Lunar Festival"), which Questmark should show as tags, not hints. [Read]
+  group", "only during the Lunar Festival"), which Questmarker should show as tags, not hints. [Read]
 - Provenance: forever-db's NOTICE credits EG Link (CC BY 4.0), CMaNGOS, VMaNGOS/Factoruide,
   ForeverTDB, QuestieDB, pfQuest and client tables. Its pipeline code
   (`rust/crates/forge-data/src/kb.rs:58,1135-1140`) records that gotcha evidence includes web

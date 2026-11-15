@@ -1,4 +1,4 @@
-# Questmark data sources and licenses
+# Questmarker data sources and licenses
 
 Research date: 2026-11-14. Answers the SPEC.md open question "Exact licenses for QuestieDB and
 AllTheThings data", plus wiki coverage of new Forever quests and the licensing note.
@@ -8,7 +8,7 @@ Tags: **[Read]** = verified at the cited URL or local file during this research.
 
 ## Summary table
 
-| Source | License (SPDX) | Evidence | Can Questmark use it, and how | Obligations |
+| Source | License (SPDX) | Evidence | Can Questmarker use it, and how | Obligations |
 | --- | --- | --- | --- | --- |
 | Questie (addon + its `Database/`) | None. GitHub reports `NOASSERTION`. LICENSE.md: "when in doubt consider Questie as 'all rights reserved'", but team "is alright with others forking ... or copying code from it under the GPLv3 terms". Partial GPL-3.0 (named contributors only) | [LICENSE.md](https://github.com/Questie/Questie/blob/master/LICENSE.md); local `Questie\LICENSE.md` (identical to upstream) [Read] | Yes for reading data at runtime via QuestieDB (below). Copying under GPLv3 is tolerated by the team, with stated residual risk | If copied: GPLv3 terms, do not use the Questie name/logo, attribution |
 | QuestieDB (separate addon/repo) | Same as Questie: `NOASSERTION`, all-rights-reserved fallback, team permits GPLv3 copying. Contributions after 2026-10-21 are GPLv3 | [Questie/QuestieDB LICENSE.md](https://github.com/Questie/QuestieDB/blob/master/LICENSE.md), [PROVENANCE.md](https://github.com/Questie/QuestieDB/blob/master/PROVENANCE.md); local `QuestieDB\LICENSE.md` [Read] | (a) Optional runtime dependency: yes, cleanest option. (b) Build-time bake-in with attribution: permitted per the team's GPLv3 statement, but not a clean license chain | (a) none beyond not bundling it. (b) GPLv3, credit, no Questie name/logo, provenance caveats below |
@@ -52,14 +52,14 @@ Tags: **[Read]** = verified at the cited URL or local file during this research.
 
 ### Can a GPLv3 addon use it?
 
-- **(a) Optional runtime dependency: yes.** [Inferred] Questmark would only call QuestieDB's published API in a separately installed addon, without copying or distributing its files. That does not create a derivative distribution of QuestieDB, so its license does not bind Questmark's distribution. Use `## OptionalDeps: QuestieDB` (not `Dependencies`, which the API doc suggests) and degrade gracefully when it is absent. Check `RequireContract(4)` and handle failure. Do not ship QuestieDB inside the Questmark zip.
+- **(a) Optional runtime dependency: yes.** [Inferred] Questmarker would only call QuestieDB's published API in a separately installed addon, without copying or distributing its files. That does not create a derivative distribution of QuestieDB, so its license does not bind Questmarker's distribution. Use `## OptionalDeps: QuestieDB` (not `Dependencies`, which the API doc suggests) and degrade gracefully when it is absent. Check `RequireContract(4)` and handle failure. Do not ship QuestieDB inside the Questmarker zip.
 - **(b) Bake its data in at build time with attribution: permitted by the maintainers' stated position, but not a clean chain.** [Inferred]
-  - The team explicitly allows copying "under the GPLv3 terms", and Questmark would be GPLv3, so the team's position allows this.
+  - The team explicitly allows copying "under the GPLv3 terms", and Questmarker would be GPLv3, so the team's position allows this.
   - Residual risk: by the team's own statement, not all historic contributors consented, and they say "when in doubt consider ... all rights reserved".
   - Mitigating [Inferred]: bare facts such as quest IDs, NPC IDs and coordinates are weakly protected by copyright in the US. The EU has a sui generis database right, so this is jurisdiction-dependent.
   - Inherited taint: part of the data was scraped from Wowhead against ZAM's ToS (see section 5).
   - If baked: credit Questie/QuestieDB, record the source commit, do not use the "Questie" name or logo, and ship GPLv3.
-  - Recommendation [Inferred]: prefer (a). Use (b) only for the narrow fields Questmark truly needs, and prefer ATT (MIT) for anything ATT covers.
+  - Recommendation [Inferred]: prefer (a). Use (b) only for the narrow fields Questmarker truly needs, and prefer ATT (MIT) for anything ATT covers.
 
 ## 2. AllTheThings (ATT)
 
@@ -97,7 +97,7 @@ Tags: **[Read]** = verified at the cited URL or local file during this research.
   - comply with the GPL source requirement ("Do not apply the GPLv3 if you cannot comply with the source requirement")
   - "both licenses apply and downstream users must comply with both licenses"
 
-### What Questmark must do (from BY-SA 4.0 legal code s.3(a), s.3(b)) [Read], applied [Inferred]
+### What Questmarker must do (from BY-SA 4.0 legal code s.3(a), s.3(b)) [Read], applied [Inferred]
 
 1. Per hint entry, keep `source` = wiki page title + revision URL (`oldid`). In a shipped `CREDITS` file, name "Warcraft Wiki contributors", link each source page or its history, and link CC BY-SA 4.0. Section 3(a)(2) allows doing this "by providing a URI or hyperlink to a resource that includes the required information".
 2. State that the text was modified (LLM rewrite plus human edit).
@@ -170,7 +170,7 @@ Tags: **[Read]** = verified at the cited URL or local file during this research.
 
 ## Recommendation: addon license
 
-**License Questmark GPL-3.0-or-later** (SPDX `GPL-3.0-or-later`) [Inferred, based on the evidence above].
+**License Questmarker GPL-3.0-or-later** (SPDX `GPL-3.0-or-later`) [Inferred, based on the evidence above].
 
 - It is required if any Warcraft Wiki text is adapted: BY-SA 4.0 only flows one way into GPLv3, and an MIT or "GPL-3.0-only" release would not accept it as cleanly. "-or-later" matches CC's "this version or later" spirit and keeps future options open.
 - It is required if Forever GuideMate guide text is used (GPL-3.0).
@@ -181,7 +181,7 @@ Tags: **[Read]** = verified at the cited URL or local file during this research.
   - LevelForge user guides (no license): do not use.
   - Wowhead content (ToS forbids automated access; comments are user-copyrighted): manual inspiration only.
   - Blizzard quest text quoted on the wiki: do not ship it as "CC BY-SA" text. The in-game API supplies it at runtime anyway.
-  - Questie name and logo: never use them in Questmark's name, UI or icons.
+  - Questie name and logo: never use them in Questmarker's name, UI or icons.
 - Practical setup:
   - root `LICENSE` (GPL-3.0 text)
   - `THIRD-PARTY-NOTICES` with the ATT MIT notice, Questie/QuestieDB credit and source commit if any data is baked, and Warcraft Wiki attribution plus a CC BY-SA 4.0 link
@@ -191,4 +191,4 @@ Tags: **[Read]** = verified at the cited URL or local file during this research.
   - Where data: QuestieDB as an **optional runtime dependency**, plus ATT (MIT) baked in for the Forever quest list, givers and coords.
   - Hint text: wiki and GuideMate, mostly useful for classic quests.
   - New Forever quests: manual hints driven by the confusion detector.
-  - Avoid baking QuestieDB unless ATT is missing a field Questmark truly needs.
+  - Avoid baking QuestieDB unless ATT is missing a field Questmarker truly needs.

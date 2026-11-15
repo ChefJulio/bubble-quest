@@ -54,8 +54,8 @@ A note on the restriction flags. Nearly every quest and map API carries `SecretA
    - Questie also uses `## LoadSavedVariablesFirst: 1`. `## Category:` and `## IconTexture:` are read by the addon list and the addon compartment.
    - `## AllowAddOnTableAccess` and `## SuppressLocalTableRef` appear only on Blizzard addons and are not for us [Inferred].
    - **Phase 1 decision:**
-     - `## SavedVariables: QuestmarkDB` holds account-wide profiles and settings, which the spec wants shared across characters.
-     - `## SavedVariablesPerCharacter: QuestmarkCharDB` holds pins, the ignore list, collapse state and the selected profile name.
+     - `## SavedVariables: QuestmarkerDB` holds account-wide profiles and settings, which the spec wants shared across characters.
+     - `## SavedVariablesPerCharacter: QuestmarkerCharDB` holds pins, the ignore list, collapse state and the selected profile name.
      - Add `## Category: Quests` and `## IconTexture:` for the addon list.
 8. **Position and facing APIs exist with no restriction flags.**
    - `C_Map.GetBestMapForUnit`, `C_Map.GetPlayerMapPosition` (nilable return), `C_Map.GetWorldPosFromMapPos`, `C_Map.GetMapWorldSize`, `UnitPosition` and `GetPlayerFacing` (nilable return).
@@ -72,12 +72,12 @@ A note on the restriction flags. Nearly every quest and map API carries `SecretA
 11. **Recommendation on the spec's database question: a hybrid.**
     - Phases 1-9 need no quest database at all.
     - For phase 10, read QuestieDB at runtime as an optional dependency, guarded by `LibQuestieDB.RequireContract(4)`.
-    - Bake only Questmark's own derived data at build time: hints, classification overrides and background-objective cluster flags computed from QuestieDB spawns.
+    - Bake only Questmarker's own derived data at build time: hints, classification overrides and background-objective cluster flags computed from QuestieDB spawns.
     - Re-baking all of QuestieDB would duplicate a 16 MB generated store, a correction pipeline and a release cadence that its maintainers already run. See B5.
-12. **Hiding the tracker has side effects Questmark must cover itself.**
+12. **Hiding the tracker has side effects Questmarker must cover itself.**
     - The quest auto-complete popups (`AutoQuestPopUpTracker`) are hidden with it.
-    - Blizzard's tracker keeps auto-adding quest watches on `QUEST_ACCEPTED` when the `autoQuestWatch` CVar is set (UI/Blizzard_ObjectiveTracker/Blizzard_ObjectiveTracker.lua:32-38) [Read]. This is harmless, but Questmark should not treat Blizzard's watch list as the user's pins.
-    - Questmark must handle `QUEST_AUTOCOMPLETE` itself in a later phase.
+    - Blizzard's tracker keeps auto-adding quest watches on `QUEST_ACCEPTED` when the `autoQuestWatch` CVar is set (UI/Blizzard_ObjectiveTracker/Blizzard_ObjectiveTracker.lua:32-38) [Read]. This is harmless, but Questmarker should not treat Blizzard's watch list as the user's pins.
+    - Questmarker must handle `QUEST_AUTOCOMPLETE` itself in a later phase.
 
 ---
 
@@ -351,11 +351,11 @@ Source: `FA/Questie/Modules/QuestieCompat.lua:365-434`.
    - Never call `ObjectiveTrackerFrame:Update()` or any other Blizzard layout method.
    - Provide an "Show Blizzard tracker" setting that releases the hide by clearing the flag and calling `Show()`.
 2. **This is a hook.** CLAUDE.md says "Hide Blizzard UI, never modify or hook it". `HookScript` is a post-hook: Blizzard's own OnShow runs first, unchanged, and the hook only calls `Hide()`. It is the narrowest hook possible, but it still needs the user's explicit sign-off as an exception, plus an `apiguard` acknowledgment if the linter flags it.
-3. **A hook-free alternative exists but has gaps.** Questmark's own event frame could call `ObjectiveTrackerFrame:Hide()` after the same events that make Blizzard re-show the tracker (`QUEST_LOG_UPDATE`, `QUEST_WATCH_LIST_CHANGED`, `SUPER_TRACKING_CHANGED`, `ZONE_CHANGED_NEW_AREA`, `EditMode.Exit`, `UPDATE_ALL_UI_WIDGETS`). That avoids hooking Blizzard, but:
+3. **A hook-free alternative exists but has gaps.** Questmarker's own event frame could call `ObjectiveTrackerFrame:Hide()` after the same events that make Blizzard re-show the tracker (`QUEST_LOG_UPDATE`, `QUEST_WATCH_LIST_CHANGED`, `SUPER_TRACKING_CHANGED`, `ZONE_CHANGED_NEW_AREA`, `EditMode.Exit`, `UPDATE_ALL_UI_WIDGETS`). That avoids hooking Blizzard, but:
    - handler order versus Blizzard's module handlers is not guaranteed, so the tracker could flash;
    - any trigger missing from the list leaves the tracker visible.
 4. **Side effects to cover:**
-   - The tracker hosts `AutoQuestPopUpTracker`, so auto-complete and auto-accept popups disappear with it. Handle `QUEST_AUTOCOMPLETE` in Questmark (later phase).
+   - The tracker hosts `AutoQuestPopUpTracker`, so auto-complete and auto-accept popups disappear with it. Handle `QUEST_AUTOCOMPLETE` in Questmarker (later phase).
    - `ScenarioObjectiveTracker` also lives in this frame, so scenario and dungeon-stage UI is hidden too [Inferred]. Decide whether the tracker should be released inside scenarios.
    - Questie's tracker anchors to `ObjectiveTrackerFrame:GetPoint()` (QuestieCompat.lua:438-441). If both addons run, both will hide the tracker; that is harmless.
 
@@ -389,12 +389,12 @@ One caution: `Settings.OpenToCategory` goes through `C_SettingsUtil.OpenSettings
   - `Group` and `Category` (:453-456).
   - `AddonCompartmentFunc` (UI/Blizzard_Minimap/Mainline/AddonCompartment.lua:106-111). Forever loads its own `[Game]\AddonCompartment.lua` under `[AllowLoadGameType camelot]` (UI/Blizzard_Minimap/Blizzard_Minimap.toc:48-51).
 - **Blizzard-only directives** seen on Forever's Blizzard addons: `## AllowAddOnTableAccess: 1` (Blizzard_CombatAudioAlerts.toc:6), `## SuppressLocalTableRef: 1` (Blizzard_RecruitAFriend.toc:5), `## UseSecureEnvironment`, `## AllowLoad`, `## AllowLoadGameType`, `## DefaultState` and `## LoadFirst`. They are not for third-party addons [Inferred].
-- **How the client picks files on Forever.** Inside Blizzard tocs, files are gated with `[AllowLoadGameType camelot]` / `[ExcludeLoadGameType camelot]`. 209 lines are `camelot`-gated, and Mainline files load unless they exclude camelot [Read: counts over UI/*/*.toc]. Third-party addons instead pick a flavor by file name: QuestieDB and Questie ship `_Forever.toc` and `_Camelot.toc` (sub-research). Questmark's single `Questmark.toc` with `## Interface: 16001` is enough.
-- **Recommended Questmark.toc additions for phase 1:**
-  - `## SavedVariables: QuestmarkDB`
-  - `## SavedVariablesPerCharacter: QuestmarkCharDB`
+- **How the client picks files on Forever.** Inside Blizzard tocs, files are gated with `[AllowLoadGameType camelot]` / `[ExcludeLoadGameType camelot]`. 209 lines are `camelot`-gated, and Mainline files load unless they exclude camelot [Read: counts over UI/*/*.toc]. Third-party addons instead pick a flavor by file name: QuestieDB and Questie ship `_Forever.toc` and `_Camelot.toc` (sub-research). Questmarker's single `Questmarker.toc` with `## Interface: 16001` is enough.
+- **Recommended Questmarker.toc additions for phase 1:**
+  - `## SavedVariables: QuestmarkerDB`
+  - `## SavedVariablesPerCharacter: QuestmarkerCharDB`
   - `## Category: Quests`
-  - `## IconTexture: Interface\AddOns\Questmark\...`
+  - `## IconTexture: Interface\AddOns\Questmarker\...`
   - optionally `## AddonCompartmentFunc`
   - Add both globals to `.luarc.json` `diagnostics.globals`, as CLAUDE.md requires.
 
@@ -462,7 +462,7 @@ Source: sub-research, with header and globals spot-checked by me.
   - Questie binds `LibQuestieDB.Quest.Get` and similar at file load (FA/Questie/Database/QuestieDB.lua:209-262).
   - `VersionCheckDB.lua:21-59` aborts Questie's startup if `C_AddOns.IsAddOnLoaded("QuestieDB")` or the contract check fails.
 - **Standalone use.** QuestieDB has no dependency on Questie, so another addon can depend on it alone (`## OptionalDeps: QuestieDB` or `## Dependencies: QuestieDB`).
-- **Distribution is unknown.** Whether QuestieDB is distributed standalone or only in the Questie bundle was not verified [Assumes]. It decides whether Questmark users who drop Questie can keep QuestieDB.
+- **Distribution is unknown.** Whether QuestieDB is distributed standalone or only in the Questie bundle was not verified [Assumes]. It decides whether Questmarker users who drop Questie can keep QuestieDB.
 
 ## B4. Counts and availability fields
 
@@ -491,7 +491,7 @@ The quests under 10k are most likely classic base data and the 90k+ quests are m
 - `startedBy` / `finishedBy`: `{npcIds?, objectIds?, itemIds?}`. Example: quest 2 is `{[3]={16305}}`, started by an item.
 - `requiredRaces` / `requiredClasses`: bitmasks.
   - Forever adds Skyborne race bits 2^32 (Alliance) and 2^33 (Horde) (FA/Questie/Database/QuestieDB.lua:158-159).
-  - Questie checks races arithmetically, not with `bit.*`, because the bits exceed 32 (QuestiePlayer.lua:86-96). **Questmark must do the same.**
+  - Questie checks races arithmetically, not with `bit.*`, because the bits exceed 32 (QuestiePlayer.lua:86-96). **Questmarker must do the same.**
   - Common values: all-Alliance 4294967373 (1,838 quests), unrestricted 0 (1,765), all-Horde 8589934770 (1,577).
 - `preQuestSingle` (any one completed) and `preQuestGroup` (all completed): ID lists.
 - `exclusiveTo`: ID list. Quest counts per field are in the usage table below.
@@ -534,17 +534,17 @@ The available-quests pass skips quests that are blacklisted, completed, hidden o
   - `disabledByQuest` is active, or daily-quest hiding applies;
   - the `availableUntilCompleted` / `availableStartingWith` window fails.
 
-This rule set is the reference implementation for the spec's "available-quest filtering". Questmark should reuse it as-is, either by calling Questie-equivalent logic over QuestieDB or by porting it, rather than inventing new rules.
+This rule set is the reference implementation for the spec's "available-quest filtering". Questmarker should reuse it as-is, either by calling Questie-equivalent logic over QuestieDB or by porting it, rather than inventing new rules.
 
 ## B5. Recommendation: runtime QuestieDB vs. build-time bake
 
 | Factor | Runtime dependency on QuestieDB | Bake at build time |
 |---|---|---|
 | Memory | Very low and lazy. Data sits in toc metadata and decodes per entity on access (B2). | Plain Lua tables for about 5.7k quests plus about 15.5k NPCs with spawn coordinates would cost several MB of resident Lua memory [Inferred]. Matching QuestieDB's efficiency means re-implementing its baked-toc codec. |
-| Update cadence | Fixes arrive automatically, including the trace-based Forever corrections (config.lua:165-189), whenever the user updates QuestieDB. | Questmark must re-run its pipeline and ship a release for every upstream data fix. Forever is new and its data churns. |
-| Coupling | Depends on a versioned contract (`RequireContract`, contract 4) and on the global names. Users must install QuestieDB, and distribution is unknown (B3). A breaking upstream contract disables Questmark features until it is fixed. | No runtime coupling. The build depends on QuestieDB's generator or format instead. |
+| Update cadence | Fixes arrive automatically, including the trace-based Forever corrections (config.lua:165-189), whenever the user updates QuestieDB. | Questmarker must re-run its pipeline and ship a release for every upstream data fix. Forever is new and its data churns. |
+| Coupling | Depends on a versioned contract (`RequireContract`, contract 4) and on the global names. Users must install QuestieDB, and distribution is unknown (B3). A breaking upstream contract disables Questmarker features until it is fixed. | No runtime coupling. The build depends on QuestieDB's generator or format instead. |
 | Licensing | Both are GPL-3 (`LICENSE.md` and `gpl-3.0.md` are present). Using it at runtime as a separate addon involves no redistribution. | Redistributes derived data, which needs GPL-3 compliance and attribution. The spec already plans GPL-3. A separate agent covers licensing. |
-| Extensibility | `LibQuestieDB.RegisterCorrection` / `RegisterRuntimeCorrection` let Questmark patch fields at runtime. Hints and other Questmark-only fields still need Questmark's own table. | Full control over the schema. |
+| Extensibility | `LibQuestieDB.RegisterCorrection` / `RegisterRuntimeCorrection` let Questmarker patch fields at runtime. Hints and other Questmarker-only fields still need Questmarker's own table. | Full control over the schema. |
 
 **Recommendation: a hybrid, decided per phase.**
 
@@ -555,12 +555,12 @@ This rule set is the reference implementation for the spec's "available-quest fi
 2. **Phase 10 (Questie replacement):**
    - Read QuestieDB at runtime as `## OptionalDeps: QuestieDB` and degrade gracefully when it is absent: no available-quest pins and no unit tooltips.
    - Do not re-bake the whole database. Duplicating a 16 MB generated store and its correction pipeline is the expensive path, with no upside unless QuestieDB turns out not to be installable standalone.
-3. **Bake only Questmark's own derived data at build time**, by reading QuestieDB's toc offline:
+3. **Bake only Questmarker's own derived data at build time**, by reading QuestieDB's toc offline:
    - the hint table;
    - category overrides;
    - background-objective flags and dense-cluster centers computed from spawns;
    - the dungeon-quest index for the pre-dungeon reminder.
-   These are small, Questmark-specific, and expensive to compute in game.
+   These are small, Questmarker-specific, and expensive to compute in game.
 4. **Re-evaluate if any of these turns out true:**
    - QuestieDB is only distributed inside the Questie bundle;
    - its contract changes more often than about once a quarter;

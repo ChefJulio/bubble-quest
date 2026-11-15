@@ -16,7 +16,7 @@ Evidence tags: [Read] verified in the LibForeverData release, the Forever UI sou
   3.7 MB unpacked, SHA-256 matches the release's `SHA256SUMS` [Read].
 - **Vendored in the repo** at `Libs/LibForeverData/`, unmodified, with its `LICENSE.txt`
   (GPL-3.0), `LICENSE-CC-BY-4.0.txt` and `NOTICE.md`. Its files are listed first in
-  `Questmark.toc`. Designed for this: "embed the folder; the newest copy loaded wins" — if Polestar
+  `Questmarker.toc`. Designed for this: "embed the folder; the newest copy loaded wins" — if Polestar
   or another addon loads a newer copy, ours steps aside [Read: Core.lua:6-7, 37-41].
 - Writes only `ns.LuaChunks`, `ns.LibForeverData` and the global `LibForeverData` [Read:
   LuaChunks.lua:146, Core.lua:44-45]. No clash with our names.
@@ -107,7 +107,7 @@ no record (new or unpublished quests).
 ## Debug
 
 - `/qm quest <id>` adds the category, the rule that decided it, and the forever-db record summary.
-- `/qm memory`: Questmark's memory use (`UpdateAddOnMemoryUsage`, `GetAddOnMemoryUsage`).
+- `/qm memory`: Questmarker's memory use (`UpdateAddOnMemoryUsage`, `GetAddOnMemoryUsage`).
 
 ## Files
 
@@ -123,7 +123,7 @@ no record (new or unpublished quests).
 
 ## In-game test (after build)
 
-1. `/qm memory` before and after: Questmark's memory with the library loaded.
+1. `/qm memory` before and after: Questmarker's memory with the library loaded.
 2. Camping 101 quests appear under "+ Camping (N)", not as zone cards.
 3. A turn-in card says "Turn in to <name>".
 4. Settings: set Camping to Show: Camping quests become zone/Elsewhere cards; Hide: gone.

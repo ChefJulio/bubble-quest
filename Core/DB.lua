@@ -1,8 +1,8 @@
 local ADDON_NAME, ns = ...
 
 -- SavedVariables.
---   QuestmarkDB      account-wide: profiles (settings shared across characters), debug flags
---   QuestmarkCharDB  per character: which profile, pins, ignore list, collapse state, notices
+--   QuestmarkerDB      account-wide: profiles (settings shared across characters), debug flags
+--   QuestmarkerCharDB  per character: which profile, pins, ignore list, collapse state, notices
 -- Defaults are deep-filled on load (missing keys only), so new settings reach existing users.
 -- When a later version changes the shape, bump SCHEMA and add MIGRATIONS[SCHEMA]: it receives the
 -- saved table at schema SCHEMA - 1 and upgrades it in place.
@@ -103,10 +103,10 @@ end
 
 -- Called once, on our ADDON_LOADED (SavedVariables are available from then on).
 function DB:Load()
-  QuestmarkDB = prepare(QuestmarkDB, MIGRATIONS.account, ACCOUNT_DEFAULTS)
-  QuestmarkCharDB = prepare(QuestmarkCharDB, MIGRATIONS.char, CHAR_DEFAULTS)
-  self.account = QuestmarkDB
-  self.char = QuestmarkCharDB
+  QuestmarkerDB = prepare(QuestmarkerDB, MIGRATIONS.account, ACCOUNT_DEFAULTS)
+  QuestmarkerCharDB = prepare(QuestmarkerCharDB, MIGRATIONS.char, CHAR_DEFAULTS)
+  self.account = QuestmarkerDB
+  self.char = QuestmarkerCharDB
   self:UseProfile(self.char.profile)
 end
 

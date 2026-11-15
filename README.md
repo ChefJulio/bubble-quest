@@ -1,14 +1,14 @@
-# Questmark
+# Questmarker
 
 A quest helper addon for World of Warcraft: Forever. Licensed under GPL-3.0-or-later (see `LICENSE`).
 
 ## Install (dev)
 
-Junction this folder into the Forever AddOns directory as `Questmark`, so the game reads the repo
+Junction this folder into the Forever AddOns directory as `Questmarker`, so the game reads the repo
 directly and changes only need a `/reload` (PowerShell):
 
 ```
-New-Item -ItemType Junction -Path "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\Questmark" -Target <repo path>
+New-Item -ItemType Junction -Path "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\Questmarker" -Target <repo path>
 ```
 
 Then `/reload` in game and type `/qm`.

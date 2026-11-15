@@ -1,4 +1,4 @@
-# Questmark
+# Questmarker
 
 WoW Forever quest addon. Spec: [docs/SPEC.md](docs/SPEC.md). Build order: the spec's "Implementation plan".
 

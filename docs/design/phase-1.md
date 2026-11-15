@@ -9,7 +9,7 @@ confirmed in game (each one has a debug command or test step below).
 
 ## Files
 
-Load order in `Questmark.toc`. Each file starts with `local ADDON_NAME, ns = ...` and adds one
+Load order in `Questmarker.toc`. Each file starts with `local ADDON_NAME, ns = ...` and adds one
 module to `ns`; nothing but SavedVariables and slash globals touches `_G`.
 
 | File | Module | Job |
@@ -25,7 +25,7 @@ module to `ns`; nothing but SavedVariables and slash globals touches `_G`.
 | `Slash.lua` | | `/qm` command router |
 | `Init.lua` | | Wires it together on `ADDON_LOADED` / `PLAYER_LOGIN` |
 
-The current `Questmark.lua` becomes `Init.lua` + `Slash.lua`.
+The current `Questmarker.lua` becomes `Init.lua` + `Slash.lua`.
 
 **Why an internal bus.** Later phases (cards, tracking rules, arrows) react to quest-log changes.
 They subscribe to `ns.Bus` events ("QuestAdded", ...) instead of game events, so the quest log is
@@ -35,12 +35,12 @@ spec's tracking rule 4 ("re-sort only on events") enforceable: the bus is the li
 ## SavedVariables
 
 ```
-## SavedVariables: QuestmarkDB                  -- account-wide
-## SavedVariablesPerCharacter: QuestmarkCharDB  -- this character
+## SavedVariables: QuestmarkerDB                  -- account-wide
+## SavedVariablesPerCharacter: QuestmarkerCharDB  -- this character
 ```
 
 ```lua
-QuestmarkDB = {
+QuestmarkerDB = {
   schema = 1,
   profiles = {
     Default = {
@@ -49,7 +49,7 @@ QuestmarkDB = {
   },
 }
 
-QuestmarkCharDB = {
+QuestmarkerCharDB = {
   schema = 1,
   profile = "Default",   -- which account-wide profile this character uses
   pins = {},             -- [questID] = true         (phase 3)
@@ -167,21 +167,21 @@ Questie's proven Forever pattern [Read: research A5]:
 - Setting "Hide Blizzard quest tracker" (default on). Turning it off calls `Show()` and leaves the
   hook inert. No reload needed.
 - Known side effect, accepted for phase 1: quest auto-complete popups and the scenario UI live in
-  that frame and disappear with it. The settings tooltip says so; Questmark takes these over in a
+  that frame and disappear with it. The settings tooltip says so; Questmarker takes these over in a
   later phase.
 
 ## Questie
 
 - If `Questie` is loaded and `Questie.db.profile.trackerEnabled` is true [Read: Questie
   NativeOptionsTracker.lua:101], print once per character: "Questie's tracker is also on. Turn it
-  off in Questie's options: Tracker > Enable Tracker." Recorded in `QuestmarkCharDB.notices`.
-- Questmark never writes Questie's settings. Both addons hiding Blizzard's tracker is harmless.
+  off in Questie's options: Tracker > Enable Tracker." Recorded in `QuestmarkerCharDB.notices`.
+- Questmarker never writes Questie's settings. Both addons hiding Blizzard's tracker is harmless.
 - Read guarded (`Questie and Questie.db and Questie.db.profile`), after `PLAYER_LOGIN`, so a
   Questie update that renames things degrades to "no notice", never an error.
 
 ## Settings panel
 
-`Settings.RegisterVerticalLayoutCategory("Questmark")` + `Settings.RegisterAddOnCategory`
+`Settings.RegisterVerticalLayoutCategory("Questmarker")` + `Settings.RegisterAddOnCategory`
 [Read: research A6]. Settings use `Settings.RegisterProxySetting` with getter/setter on the
 *active profile*, so switching profiles later needs no re-registration. Phase 1 contents:
 

@@ -25,11 +25,11 @@
   ],
   "workspace.checkThirdParty": false,
   "diagnostics.globals": [
-    "QuestmarkDB",
-    "QuestmarkCharDB",
+    "QuestmarkerDB",
+    "QuestmarkerCharDB",
     "LibForeverData",
-    "SLASH_QUESTMARK1",
-    "SLASH_QUESTMARK2"
+    "SLASH_QUESTMARKER1",
+    "SLASH_QUESTMARKER2"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {

@@ -1,6 +1,6 @@
 local ADDON_NAME, ns = ...
 
--- Questmark's own settings window, built from UI/SettingsSchema.lua (the same list Blizzard's
+-- Questmarker's own settings window, built from UI/SettingsSchema.lua (the same list Blizzard's
 -- Options > AddOns panel is built from). Opened by /qm, the header and its settings button. Unlike
 -- Blizzard's panel it doesn't reopen the game menu when closed, and it opens in combat.
 --
@@ -192,7 +192,7 @@ local function buildGrid(parent, entries, x, y)
 end
 
 local function createPanel()
-  local frame = CreateFrame("Frame", "QuestmarkSettingsWindow", UIParent)
+  local frame = CreateFrame("Frame", "QuestmarkerSettingsWindow", UIParent)
   -- New frames start shown; start hidden so the first Toggle opens it (and runs OnShow's refresh).
   frame:Hide()
   frame:SetPoint("CENTER")
@@ -200,7 +200,7 @@ local function createPanel()
   frame:SetMovable(true)
   frame:EnableMouse(true)
   frame:SetClampedToScreen(true)
-  tinsert(UISpecialFrames, "QuestmarkSettingsWindow")  -- Escape closes it
+  tinsert(UISpecialFrames, "QuestmarkerSettingsWindow")  -- Escape closes it
 
   local background = frame:CreateTexture(nil, "BACKGROUND", nil, 0)
   background:SetAllPoints()
@@ -234,7 +234,7 @@ local function createPanel()
   band:SetColorTexture(0, 0, 0, 0.45)
   local title = header:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerHeaderFont")
   title:SetPoint("LEFT", PAD - 4, 0)
-  title:SetText("Questmark settings")
+  title:SetText("Questmarker settings")
   local close = CreateFrame("Button", nil, header, "UIPanelCloseButtonNoScripts")
   close:SetPoint("RIGHT", -2, 0)
   close:SetScript("OnClick", function() frame:Hide() end)
@@ -273,7 +273,7 @@ local function create()
 
   local note = frame:CreateFontString(nil, "ARTWORK", "GameFontDisableSmall")
   note:SetPoint("BOTTOMRIGHT", -PAD, 10)
-  note:SetText("Also in Options > AddOns > Questmark")
+  note:SetText("Also in Options > AddOns > Questmarker")
 
   frame:SetSize(2 * COLUMN_WIDTH + 4 * PAD, -math.min(y[1], y[2]) + 32)
   frame:SetScript("OnShow", function() Window:Refresh() end)

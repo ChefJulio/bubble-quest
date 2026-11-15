@@ -53,7 +53,7 @@ can't sort these, so the triage is a reading pass, as the spec planned.
    (and corrected in review) stay.
 
 Attribution: the source text is CC BY 4.0; our reworded versions are adaptations, which
-THIRD-PARTY-NOTICES already covers ("Questmark may shorten or reword them"). Each entry keeps
+THIRD-PARTY-NOTICES already covers ("Questmarker may shorten or reword them"). Each entry keeps
 its `source` step id.
 
 ## Data format (`Data/Hints.lua`)
@@ -69,7 +69,7 @@ ns.HintData = {
 }
 ```
 
-Objectives are keyed by name (the objective text without its counter), like the rest of Questmark.
+Objectives are keyed by name (the objective text without its counter), like the rest of Questmarker.
 Phase 8's player notes merge into the same shape.
 
 ## On the card

@@ -76,7 +76,7 @@ Steppes). Whether a target is in the player's zone is now asked of the client
 (`GetMapPosFromWorldPos` with the zone map).
 
 **Arrow art:** Blizzard's arrows (`Navigation-Tracked-Arrow`, `NPE_ArrowUp`, ...) all read as chevrons
-or triangles at card size. Questmark draws its own (`tools/make_arrows.py` -> `Media/Arrows/*.tga`):
+or triangles at card size. Questmarker draws its own (`tools/make_arrows.py` -> `Media/Arrows/*.tga`):
 arrow (default), dart, thin; plus the minimap arrow and Blizzard's chevron. Setting "Arrow style";
 `/qm arrows` previews them.
 

@@ -2,7 +2,7 @@
 
 Nov 14, 2026 · @Hunter Graves
 
-Revised Nov 14, 2026 with the pre-build research in [docs/research/](research/README.md). Decisions taken: license GPL-3.0-or-later; forever-db (LibForeverData) as quest database and first-pass hint source, bundled inside Questmark's folder; Blizzard tracker hidden with an `OnShow` re-hide hook; Questmark works alongside Questie, replacing only its quest tracker and leaving map pins, available quests and tooltips to Questie.
+Revised Nov 14, 2026 with the pre-build research in [docs/research/](research/README.md). Decisions taken: license GPL-3.0-or-later; forever-db (LibForeverData) as quest database and first-pass hint source, bundled inside Questmarker's folder; Blizzard tracker hidden with an `OnShow` re-hide hook; Questmarker works alongside Questie, replacing only its quest tracker and leaving map pins, available quests and tooltips to Questie.
 
 ## Overview
 
@@ -159,7 +159,7 @@ Small features that remove common questing friction.
 
 ## Replacing Questie, the tracker, and the quest log
 
-**Decided:** Questmark works alongside Questie. It replaces Blizzard's objective tracker and Questie's tracker; Questie keeps map and minimap pins, available quests and unit tooltips. When Questie's tracker is enabled, Questmark tells the player once how to turn it off; it never changes Questie's settings itself. The "From Questie" list below is kept for reference only and is out of scope. Quest log replacement (phase 11) stays a later phase.
+**Decided:** Questmarker works alongside Questie. It replaces Blizzard's objective tracker and Questie's tracker; Questie keeps map and minimap pins, available quests and unit tooltips. When Questie's tracker is enabled, Questmarker tells the player once how to turn it off; it never changes Questie's settings itself. The "From Questie" list below is kept for reference only and is out of scope. Quest log replacement (phase 11) stays a later phase.
 
 **From Questie** (out of scope while Questie runs alongside)
 
@@ -181,7 +181,7 @@ Small features that remove common questing friction.
 
 **General**
 
-- **Quest database:** decided: forever-db through the `LibForeverData` library at runtime (~3.6 MiB memory, decodes records on first read), as a dependency or embedded. Bake in only Questmark's own data: hints, category overrides, background-objective clusters, the dungeon-quest index. QuestieDB is an optional fallback, never baked in.
+- **Quest database:** decided: forever-db through the `LibForeverData` library at runtime (~3.6 MiB memory, decodes records on first read), as a dependency or embedded. Bake in only Questmarker's own data: hints, category overrides, background-objective clusters, the dungeon-quest index. QuestieDB is an optional fallback, never baked in.
 - **Profiles and settings** shared across characters.
 - **Localization:** UI and game strings can come from the client; hint data starts English-only.
 
@@ -193,8 +193,8 @@ Forever runs on the modern client, so retail-style APIs apply, and the Midnight 
 - **API reference:** Claude Code's API knowledge is out of date. Ground it in Blizzard's current UI source (the `Gethe/wow-ui-source` mirror, `forever` branch) and Ketho's WoW API annotations. `python tools/lint.py` checks every call against both; it must pass.
 - **Position:** map position and facing work outdoors; both return nothing inside instances. `UnitPosition` + `GetPlayerFacing` (TomTom's approach on Forever).
 - **Combat:** don't rebuild or re-sort frames during combat; queue changes until combat ends. Avoids taint errors.
-- **Blizzard tracker:** hide it rather than modify it. A one-time `Hide()` does not stick (Blizzard re-shows it when it has content), so hide it and add an `OnShow` post-hook (`HookScript`) that hides it again, deferring to `PLAYER_REGEN_ENABLED` if the frame is protected in combat. Never call Blizzard's tracker update functions. Hiding it also hides quest auto-complete popups and the scenario UI; Questmark must cover those later.
-- **No user scripts:** Forever disables `/dump`, `/run` and `/script` (silently). Debugging goes through Questmark's own slash commands.
+- **Blizzard tracker:** hide it rather than modify it. A one-time `Hide()` does not stick (Blizzard re-shows it when it has content), so hide it and add an `OnShow` post-hook (`HookScript`) that hides it again, deferring to `PLAYER_REGEN_ENABLED` if the frame is protected in combat. Never call Blizzard's tracker update functions. Hiding it also hides quest auto-complete popups and the scenario UI; Questmarker must cover those later.
+- **No user scripts:** Forever disables `/dump`, `/run` and `/script` (silently). Debugging goes through Questmarker's own slash commands.
 - **Testing:** must happen in-game. Use `/reload` loops and BugSack + !BugGrabber to capture Lua errors and paste them back to Claude Code.
 
 ## Existing landscape
@@ -203,7 +203,7 @@ Several Forever quest addons already ship arrows and trackers, and Polestar's fo
 
 | Addon | Overlap |
 | --- | --- |
-| [Polestar Guides](https://github.com/fitzforge/polestar) | Largest Forever guide (~290K downloads): route guide, terrain-aware arrow, dungeon journal. Publishes forever-db, which Questmark builds on |
+| [Polestar Guides](https://github.com/fitzforge/polestar) | Largest Forever guide (~290K downloads): route guide, terrain-aware arrow, dungeon journal. Publishes forever-db, which Questmarker builds on |
 | [Questie (Forever bundle)](https://epiccarry.com/blogs/?p=44611) | Map pins, tracker, quest database; ~80 hint sentences shown only on map icons |
 | [ForeverQuest](https://www.curseforge.com/wow/addons/foreverquest) | Questie-style tracker, map markers, minimap guidance |
 | [Dungeon Quests Forever](https://www.curseforge.com/wow/addons/dungeon-quests-forever) | Step-by-step dungeon quests with arrow and auto-tracking. Closest overlap with Dungeon mode |
@@ -225,7 +225,7 @@ Build in this order; each phase is usable on its own.
 7. **Hint data:** data format and loader first, then the build-time pipeline (separate repo folder, not shipped): forever-db tips triaged first, then quests the confusion detector flags.
 8. **In-game learning:** where collector, confusion detector, note button, export string.
 
-**Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). ~~10. Questie replacement~~ (dropped: Questmark runs alongside Questie). 11. Quest log replacement window.
+**Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). ~~10. Questie replacement~~ (dropped: Questmarker runs alongside Questie). 11. Quest log replacement window.
 
 ## Open questions
 
@@ -238,7 +238,7 @@ Resolved by the research:
 
 Still open:
 
-- Name for the addon (working name: Questmark).
+- Name for the addon (working name: Questmarker).
 - ~~Phases 10–11: build, or coexist with a pin addon?~~ Coexist with Questie; phase 10 dropped.
 - ~~Event order of `QUEST_TURNED_IN` vs `QUEST_REMOVED`?~~ Designed out: a removal is resolved one frame later as a turn-in if `QUEST_TURNED_IN` arrived for it or `C_QuestLog.IsQuestFlaggedCompleted` is true, otherwise an abandon. Works in either order.
-- ~~LibForeverData: dependency or embedded?~~ Bundled in Questmark's folder.
+- ~~LibForeverData: dependency or embedded?~~ Bundled in Questmarker's folder.

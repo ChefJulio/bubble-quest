@@ -2,7 +2,7 @@ local ADDON_NAME, ns = ...
 
 -- Two dispatchers:
 --   ns.Events: game events, through one hidden frame.
---   ns.Bus:    Questmark's own events ("QuestAdded", ...). Later phases subscribe here rather than
+--   ns.Bus:    Questmarker's own events ("QuestAdded", ...). Later phases subscribe here rather than
 --              to game events, so the quest log is read in exactly one place.
 -- A handler that errors is reported (BugSack) without stopping the other handlers.
 
@@ -25,7 +25,7 @@ local SHOWN_EVENTS = {
   ZONE_CHANGED_NEW_AREA = true,
 }
 
--- Questmark events /qm events doesn't print (they fire every few steps while moving).
+-- Questmarker events /qm events doesn't print (they fire every few steps while moving).
 local QUIET_BUS_EVENTS = {
   LearnedChanged = true,
 }

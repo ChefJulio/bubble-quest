@@ -1,11 +1,11 @@
 ## Interface: 16001
-## Title: Questmark
+## Title: Questmarker
 ## Notes: Quest cards with what to do, where to go, and a hint for confusing steps
 ## Author: ChefJulio
 ## Version: 0.1.0
 ## Category: Quests
-## SavedVariables: QuestmarkDB
-## SavedVariablesPerCharacter: QuestmarkCharDB
+## SavedVariables: QuestmarkerDB
+## SavedVariablesPerCharacter: QuestmarkerCharDB
 
 # LibForeverData (bundled, see THIRD-PARTY-NOTICES); the newest copy loaded by any addon wins.
 Libs\LibForeverData\LuaChunks.lua
