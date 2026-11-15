@@ -81,6 +81,62 @@ local function placement(quest)
   return ns.Categories:Mode(category), category
 end
 
+-- Sort modes (setting "Sort quests by"). Smart is the spec's order. `fixed` modes sort by a key that
+-- doesn't depend on position, so moving never changes them (the movement re-sort still runs, and
+-- finds the same order).
+local function byLevel(a, b)
+  if (a.level or 0) ~= (b.level or 0) then
+    return (a.level or 0) < (b.level or 0)
+  end
+  return (a.order or 0) < (b.order or 0)
+end
+local function byLogOrder(a, b)
+  return (a.order or 0) < (b.order or 0)
+end
+
+Tracking.SORT_MODES = {
+  { key = "smart", label = "Smart" },
+  { key = "distance", label = "Distance" },
+  { key = "turnins", label = "Turn-ins first" },
+  { key = "level", label = "Level", fixed = byLevel },
+  { key = "log", label = "Quest log order", fixed = byLogOrder },
+}
+
+local function sortMode()
+  local key = ns.DB.profile.cards.sortMode
+  for _, mode in ipairs(Tracking.SORT_MODES) do
+    if mode.key == key then
+      return mode
+    end
+  end
+  return Tracking.SORT_MODES[1]
+end
+
+-- A zone quest's tier (1 top .. 3) in a mode; `here`: you're in its area, `d`: its distance or nil.
+local function tierFor(mode, quest, here, d)
+  if mode.key == "smart" then
+    if here then
+      return 1
+    elseif quest.readyForTurnIn and d ~= nil and d <= NEAR_TURNIN_YARDS then
+      return 2
+    end
+    return 3
+  elseif mode.key == "turnins" then
+    if quest.readyForTurnIn then
+      return 1
+    end
+    return here and 2 or 3
+  end
+  return 3  -- distance and the fixed modes: one list
+end
+
+---Forget the current order and sort again from scratch (sort mode changed: hysteresis would
+---otherwise keep much of the old mode's order).
+function Tracking:ResetOrder()
+  wipe(self.rank)
+  ns.Bus:Fire("TrackingResortWanted")
+end
+
 -- Re-sort this zone's quests (rule 4: called only on events).
 function Tracking:Resort()
   ns.Zone:Update()
@@ -93,9 +149,11 @@ function Tracking:Resort()
   --   4. with nearestAnywhere, quests outside the zone that have a distance (same continent): only
   --      used to fill free card slots (rule 5), after every zone quest.
   -- Each tier sorted by distance with hysteresis. Re-sorts happen only on events (100 yd moves), so
-  -- crossing a tier line doesn't make cards jump.
+  -- crossing a tier line doesn't make cards jump. Those are the Smart mode's tiers; other modes
+  -- (SORT_MODES) put zone quests in tiers 1-3 their own way, or in a fixed order.
   local distance, tiers = {}, { {}, {}, {}, {} }
   local nearestAnywhere = ns.DB.profile.cards.nearestAnywhere
+  local mode = sortMode()
   wipe(self.tier)
   for questID, quest in pairs(ns.QuestLog.quests) do
     local shown = placement(quest) == "show"
@@ -113,20 +171,20 @@ function Tracking:Resort()
       -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
       local d = here and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
       distance[questID] = d
-      local tier = 3
-      if here then
-        tier = 1
-      elseif quest.readyForTurnIn and d ~= nil and d <= NEAR_TURNIN_YARDS then
-        tier = 2
-      end
+      local tier = tierFor(mode, quest, here, d)
       self.tier[questID] = tier
       table.insert(tiers[tier], quest)
     end
   end
 
-  -- Settle against the previous order (hysteresis needs it), then replace it.
-  for _, list in ipairs(tiers) do
-    settle(list, distance, self.rank)
+  -- Settle against the previous order (hysteresis needs it), then replace it. Fixed-order modes
+  -- sort zone tiers by their key instead; tier 4 (nearest outside quests) is always by distance.
+  for i, list in ipairs(tiers) do
+    if mode.fixed and i < 4 then
+      table.sort(list, mode.fixed)
+    else
+      settle(list, distance, self.rank)
+    end
   end
   wipe(self.rank)
   local position = 0

@@ -63,12 +63,48 @@ function Schema:Entries()
       set = function(p, v) p.cards.cap = v; ns.Stack:Request(false, true) end,
     },
     {
+      kind = "dropdown", id = "QUESTMARKER_SORT_MODE", column = 1, default = "smart",
+      label = "Sort quests by",
+      tooltip = "Smart: quests whose area you're in, then turn-ins near you, then by distance. "
+        .. "Distance: nearest first. Turn-ins first: ready quests on top, then Smart. "
+        .. "Level and Quest log: a fixed order that doesn't change as you move.",
+      options = function()
+        local list = {}
+        for _, mode in ipairs(ns.Tracking.SORT_MODES) do
+          list[#list + 1] = { mode.key, mode.label }
+        end
+        return list
+      end,
+      get = function(p) return p.cards.sortMode end,
+      set = function(p, v) p.cards.sortMode = v; ns.Tracking:ResetOrder() end,
+    },
+    {
       kind = "checkbox", id = "QUESTMARKER_NEAREST_ANYWHERE", column = 1, default = false,
       label = "Always show nearest quests",
       tooltip = "When this zone has fewer quests than the card limit, fill the free cards with your "
         .. "nearest quests elsewhere on this continent, so the tracker is never empty.",
       get = function(p) return p.cards.nearestAnywhere end,
       set = function(p, v) p.cards.nearestAnywhere = v; ns.Bus:Fire("TrackingResortWanted") end,
+    },
+
+    { kind = "section", label = "Automation", column = 1 },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT", column = 1, default = false,
+      label = "Accept quests automatically",
+      tooltip = "Accepts quests when an NPC offers them, and picks them from the NPC's dialogue. "
+        .. "Hold Shift while talking to the NPC to do it yourself. Stands aside while Leatrix Plus's "
+        .. "quest automation is on.",
+      get = function(p) return p.automation.accept end,
+      set = function(p, v) p.automation.accept = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_AUTO_TURN_IN", column = 1, default = false,
+      label = "Turn in quests automatically",
+      tooltip = "Turns in completed quests when you talk to the NPC. Never picks between rewards (you "
+        .. "choose when there's more than one) and never pays gold or currency. Hold Shift to do it "
+        .. "yourself. Stands aside while Leatrix Plus's quest automation is on.",
+      get = function(p) return p.automation.turnIn end,
+      set = function(p, v) p.automation.turnIn = v end,
     },
 
     { kind = "section", label = "Look", column = 1 },

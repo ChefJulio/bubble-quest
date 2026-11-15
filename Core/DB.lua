@@ -28,11 +28,16 @@ local PROFILE_DEFAULTS = {
     opacity = 25,  -- background panel opacity, percent
     clickOpensMap = true,  -- left-clicking a card highlights the quest and opens the map at it
     nearestAnywhere = false,  -- free card slots take the nearest quests outside this zone
+    sortMode = "smart",  -- key in Tracking.SORT_MODES
     arrowStyle = "classic",  -- key in Card.ARROW_STYLES
     arrowColorByDistance = true,  -- green close -> red far; off = gold
     progressBar = true,           -- thin progress bar under each card
     hints = true,                 -- "Tip:" lines for quests with a known tricky step
     -- position = { point, relativePoint, x, y } once the player has moved the stack
+  },
+  automation = {
+    accept = false,  -- accept quests (and pick them from NPC gossip) automatically
+    turnIn = false,  -- turn in completed quests (only with 0 or 1 reward to choose)
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {

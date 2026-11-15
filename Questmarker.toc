@@ -34,6 +34,7 @@ Quests\Navigation.lua
 Quests\Nearby.lua
 Quests\Mouseover.lua
 Quests\Tracking.lua
+Quests\Automation.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua
 UI\Pool.lua
