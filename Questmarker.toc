@@ -5,6 +5,10 @@
 ## Version: @project-version@
 ## Category: Quests
 ## X-Curse-Project-ID: 1806606
+## IconTexture: Interface\AddOns\Questmarker\Media\Icon
+## AddonCompartmentFunc: Questmarker_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: Questmarker_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: Questmarker_OnAddonCompartmentLeave
 ## SavedVariables: QuestmarkerDB
 ## SavedVariablesPerCharacter: QuestmarkerCharDB
 
@@ -49,5 +53,6 @@ UI\SettingsSchema.lua
 UI\Settings.lua
 UI\SettingsWindow.lua
 UI\CopyWindow.lua
+UI\Compartment.lua
 Slash.lua
 Init.lua

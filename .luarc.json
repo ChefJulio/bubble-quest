@@ -29,7 +29,10 @@
     "QuestmarkerCharDB",
     "LibForeverData",
     "SLASH_QUESTMARKER1",
-    "SLASH_QUESTMARKER2"
+    "SLASH_QUESTMARKER2",
+    "Questmarker_OnAddonCompartmentClick",
+    "Questmarker_OnAddonCompartmentEnter",
+    "Questmarker_OnAddonCompartmentLeave"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {
