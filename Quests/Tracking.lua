@@ -7,9 +7,10 @@ local ADDON_NAME, ns = ...
 --   2. Other quests are chosen by zone and sorted by distance to their map marker.
 --   3. Quests whose area you're in go first, then ready turn-ins within NEAR_TURNIN_YARDS; farther
 --      turn-ins sort by distance like the rest.
---   4. The order changes only on events: QuestLogChanged, a zone change, or moving more than
---      MOVE_YARDS since the last sort. Never on a timer by itself, never in combat (the stack
---      defers). Hysteresis: neighbours swap only when the lower one is HYSTERESIS times closer.
+--   4. The order changes only on events: QuestLogChanged, a zone change, moving more than
+--      MOVE_YARDS since the last sort, or a zone quest the last sort didn't rank (HasUnranked).
+--      Never on a timer by itself, never in combat (the stack defers). Hysteresis: neighbours swap
+--      only when the lower one is HYSTERESIS times closer.
 --   5. At most profile.cards.cap zone cards; the rest behind "+ N more here". With "Always show
 --      nearest quests" (cards.nearestAnywhere), free slots take the nearest quests outside the zone
 --      (same continent, by distance, ranked after every zone quest); the rest stay in Elsewhere.
@@ -138,6 +139,21 @@ function Tracking:Resort()
 
   local x, y = ns.Zone:PlayerPosition()
   self.sortedAt = x and { mapID = ns.Zone.mapID, x = x, y = y } or nil
+end
+
+---Is a quest in this zone missing from the last sort? Then the order is stale: a re-sort event like
+---any other in rule 4. Happens when a quest joins the zone between sorts: a just-accepted quest whose
+---map marker arrives after the QuestLogChanged sort (QUEST_POI_UPDATE), a subzone change, an unpin or
+---unhide. Without this it sat at the bottom until the next 100 yd move (seen in review).
+---Zone quests only: with nearestAnywhere, outside quests without a distance are never ranked.
+---@return boolean
+function Tracking:HasUnranked()
+  for questID, quest in pairs(ns.QuestLog.quests) do
+    if not self.rank[questID] and placement(quest) == "show" and ns.Zone:IsInZone(quest) then
+      return true
+    end
+  end
+  return false
 end
 
 -- The view ---------------------------------------------------------------------------------------

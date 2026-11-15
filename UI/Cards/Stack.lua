@@ -242,7 +242,7 @@ end
 -- Re-sort (rule 4) and layout, applying the combat rule. Player actions lay out at once; anything
 -- else waits for the end of combat, and a pending re-sort never runs in combat.
 function Stack:Flush()
-  if self.resortPending then
+  if self.resortPending or ns.Tracking:HasUnranked() then
     self.resortPending = false
     ns.Tracking:Resort()
   end
