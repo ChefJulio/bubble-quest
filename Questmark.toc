@@ -27,6 +27,7 @@ Quests\QuestLog.lua
 Quests\Categories.lua
 Quests\Zone.lua
 Quests\DoLine.lua
+Quests\Navigation.lua
 Quests\Tracking.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua

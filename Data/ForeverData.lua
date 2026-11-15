@@ -102,6 +102,79 @@ function ForeverData:ItemSources(questID, itemName)
   return nil
 end
 
+-- Spawn points (phase 5 arrows) -------------------------------------------------------------------
+
+-- forever-db objective kind -> the record kind its target is.
+local TARGET_KIND = { kill = "npc", talk = "npc", object = "object", item = "item" }
+
+local function addSpawns(lib, kind, id, points)
+  for _, point in ipairs(lib.Spawns(kind, id)) do
+    points[#points + 1] = point
+  end
+end
+
+local pointCache = {}  -- [questID .. ":" .. text] = points or false
+
+---Spawn points (world yards: { map, x, y }) of whatever an objective needs: the creature to kill or
+---talk to, the object to use, or the creatures/objects an item comes from. Matched by name: the
+---objective's text contains the target's name ("Kobold Vermin slain" -> Kobold Vermin).
+---@param questID number
+---@param text string the objective's text
+---@return table? points, nil when forever-db has none
+function ForeverData:ObjectivePoints(questID, text)
+  local key = questID .. ":" .. text
+  if pointCache[key] ~= nil then
+    return pointCache[key] or nil
+  end
+  local lib, record = library(), self:Quest(questID)
+  local points = {}
+  if lib and record then
+    for _, objective in ipairs(record.objectives or {}) do
+      local kind = TARGET_KIND[objective.kind]
+      local name = kind and objective.target and lib.Name(kind, objective.target)
+      if name and text:find(name, 1, true) then
+        if kind == "item" then
+          local item = lib.Get("item", objective.target)
+          for _, source in ipairs(item and item.sources or {}) do
+            if source.kind == "npc" or source.kind == "object" then
+              addSpawns(lib, source.kind, source.id, points)
+            end
+          end
+        else
+          addSpawns(lib, kind, objective.target, points)
+        end
+        break
+      end
+    end
+  end
+  pointCache[key] = #points > 0 and points or false
+  return pointCache[key] or nil
+end
+
+---Spawn points of whoever takes the quest in.
+---@param questID number
+---@return table?
+function ForeverData:TurnInPoints(questID)
+  local key = questID .. ":turnin"
+  if pointCache[key] ~= nil then
+    return pointCache[key] or nil
+  end
+  local lib, record = library(), self:Quest(questID)
+  local finisher = record and record.finish and record.finish[1]
+  local points = {}
+  if lib and finisher and (finisher.kind == "npc" or finisher.kind == "object") then
+    addSpawns(lib, finisher.kind, finisher.id, points)
+  end
+  pointCache[key] = #points > 0 and points or false
+  return pointCache[key] or nil
+end
+
+---The in-game map (uiMapID) a world point lies on, or nil.
+function ForeverData:UiMapOf(map, x, y)
+  local lib = library()
+  return lib and (lib.ToUiMap(map, x, y))
+end
+
 ---The quest's area (zone or subzone) name, from its AreaTable id.
 ---@param questID number
 ---@return string?

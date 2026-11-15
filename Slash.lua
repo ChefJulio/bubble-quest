@@ -144,6 +144,45 @@ commands.map = {
   end,
 }
 
+-- Phase 5 verification: are the world-coordinate axes right? Prints the player's position and
+-- facing, and for each card its target, bearing and distance, with the raw numbers side by side.
+commands.where = {
+  help = "your world position and every card's arrow target (copy window)",
+  run = function()
+    local lines = {}
+    local north, west, instanceMap = ns.Navigation:PlayerPosition()
+    local facing = GetPlayerFacing()
+    lines[#lines + 1] = ("Player: UnitPosition = %s, %s on map %s; facing = %s rad (0 = north, counter-clockwise)")
+      :format(tostring(north), tostring(west), tostring(instanceMap), tostring(facing))
+    lines[#lines + 1] = ("Zone map %s (%s), continent map %s"):format(tostring(ns.Zone.mapID), tostring(ns.Zone.name),
+      tostring(ns.Zone.continentID))
+    for questID in pairs(ns.Stack.visible) do
+      local quest = ns.QuestLog:Get(questID)
+      if quest then
+        local targets = ns.Navigation.targets[questID]
+        local nav = ns.Navigation:Compute(quest)
+        lines[#lines + 1] = ("Quest %d %s: %d target points (%s)"):format(questID, tostring(quest.title),
+          targets and #targets.points or 0, targets and (targets.spawnBased and "spawns" or "marker") or "none")
+        local last = ns.Navigation.current[questID]
+        if nav and last then
+          lines[#lines + 1] = ("  target %.1f, %.1f -> %.0f yd, arrow %.2f rad (%.0f deg left of facing)%s%s"):format(
+            last.x, last.y, nav.distance or -1, nav.angle or 0, math.deg(nav.angle or 0) % 360,
+            nav.inArea and ", IN AREA" or "", nav.zone and (", zone " .. nav.zone) or "")
+        elseif nav then
+          lines[#lines + 1] = ("  no target on this map; zone %s"):format(tostring(nav.zone))
+        end
+        local marker = ns.Zone.markers[questID]
+        if marker and ns.Zone.continentID then
+          local m, world = C_Map.GetWorldPosFromMapPos(ns.Zone.continentID, CreateVector2D(marker.x, marker.y))
+          lines[#lines + 1] = ("  marker: continent %.3f, %.3f -> world %s, %s on map %s"):format(marker.x, marker.y,
+            world and ("%.1f"):format(world.x) or "?", world and ("%.1f"):format(world.y) or "?", tostring(m))
+        end
+      end
+    end
+    ns.CopyWindow:Show("Questmark: where", lines)
+  end,
+}
+
 commands.memory = {
   help = "Questmark's memory use, including the bundled quest data",
   run = function()

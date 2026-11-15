@@ -81,7 +81,8 @@ function Tracking:Resort()
   local distance, ready, rest = {}, {}, {}
   for questID, quest in pairs(ns.QuestLog.quests) do
     if placement(quest) == "show" and ns.Zone:IsInZone(quest) then
-      distance[questID] = ns.Zone:DistanceTo(questID)
+      -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
+      distance[questID] = ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
       local list = quest.readyForTurnIn and ready or rest
       list[#list + 1] = quest
     end

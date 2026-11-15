@@ -434,6 +434,10 @@ function Stack:Create()
       if quest then
         ns.Menu:OpenForCard(card.frame, quest)
       end
+    end, function(questID)
+      if ns.DB.profile.cards.clickOpensMap then
+        ns.Navigation:ShowOnMap(questID)
+      end
     end)
   end, function(card)
     card.questID = nil

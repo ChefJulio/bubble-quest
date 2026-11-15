@@ -1,15 +1,22 @@
 local ADDON_NAME, ns = ...
 
--- One quest card: a title line ([level] Title (tag)   [-]) and one row per objective, or a single
--- "Ready to turn in" line. Cards are pooled by the stack; SetQuest fills one in and returns its
--- height. Plain frames only (no secure templates), so updating them in combat is safe.
+-- One quest card: a title line ([level] Title (tag)   arrow distance  [-]) and one row per
+-- objective, or a single turn-in line. Cards are pooled by the stack; SetQuest fills one in and
+-- returns its height. Plain frames only (no secure templates), so updating them in combat is safe.
+--
+-- Arrow (phase 5): Blizzard's navigation arrow, rotated to the target; inside the objective's area
+-- it becomes a green diamond (a different shape, not just colour) and that objective's row lights up.
 
 local WIDTH = 250
 local TITLE_HEIGHT = 16
 local ROW_INDENT = 14
 local COUNTER_WIDTH = 44
 local ROW_GAP = 1
+local NAV_WIDTH = 74     -- arrow + "1234 yd" / zone name, left of the collapse button
+local ARROW_SIZE = 14
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready"
+local ARROW_ATLAS = "Navigation-Tracked-Arrow"   -- SuperTrackedFrame.xml:14
+local IN_AREA_ATLAS = "Navigation-Tracked-Icon"
 
 local Card = {}
 Card.__index = Card
@@ -18,6 +25,11 @@ Card.WIDTH = WIDTH
 
 local function createRow(card)
   local row = CreateFrame("Frame", nil, card.frame)
+  row.highlight = row:CreateTexture(nil, "BACKGROUND")
+  row.highlight:SetPoint("TOPLEFT", -2, 1)
+  row.highlight:SetPoint("BOTTOMRIGHT", 2, -1)
+  row.highlight:SetColorTexture(0.2, 1, 0.2, 0.15)
+  row.highlight:Hide()
   row.check = row:CreateTexture(nil, "ARTWORK")
   row.check:SetTexture(CHECK_TEXTURE)
   row.check:SetSize(12, 12)
@@ -36,23 +48,45 @@ end
 
 ---@param onToggleCollapse fun(questID: number)
 ---@param onMenu fun(card: table, questID: number) right-click
-function Card.Create(parent, onToggleCollapse, onMenu)
+---@param onClick fun(questID: number) left-click
+function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   local self = setmetatable({ rows = {} }, Card)
   local frame = CreateFrame("Frame", nil, parent)
   frame:SetWidth(WIDTH)
   frame:EnableMouse(true)
   frame:SetScript("OnMouseUp", function(_, button)
-    if button == "RightButton" and self.questID then
+    if not self.questID or not frame:IsMouseOver() then
+      return
+    end
+    if button == "RightButton" then
       onMenu(self, self.questID)
+    elseif button == "LeftButton" then
+      onClick(self.questID)
     end
   end)
   self.frame = frame
 
   self.title = frame:CreateFontString(nil, "ARTWORK", "ObjectiveTrackerHeaderFont")
   self.title:SetPoint("TOPLEFT", 0, 0)
-  self.title:SetWidth(WIDTH - 20)
+  self.title:SetWidth(WIDTH - 20 - NAV_WIDTH)
   self.title:SetJustifyH("LEFT")
   self.title:SetWordWrap(false)
+
+  -- Arrow / in-area diamond and the distance or zone name, right-aligned before the toggle.
+  self.navText = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlightSmall")
+  self.navText:SetPoint("TOPRIGHT", -20, -2)
+  self.navText:SetJustifyH("RIGHT")
+  self.arrow = frame:CreateTexture(nil, "ARTWORK")
+  self.arrow:SetAtlas(ARROW_ATLAS)
+  self.arrow:SetSize(ARROW_SIZE, ARROW_SIZE)
+  self.arrow:SetPoint("RIGHT", self.navText, "LEFT", -3, 0)
+  self.arrow:Hide()
+  self.inArea = frame:CreateTexture(nil, "ARTWORK")
+  self.inArea:SetAtlas(IN_AREA_ATLAS)
+  self.inArea:SetSize(ARROW_SIZE, ARROW_SIZE)
+  self.inArea:SetPoint("RIGHT", self.navText, "LEFT", -3, 0)
+  self.inArea:SetVertexColor(0.2, 1, 0.2)
+  self.inArea:Hide()
 
   local toggle = CreateFrame("Button", nil, frame)
   toggle:SetSize(16, TITLE_HEIGHT)
@@ -123,7 +157,10 @@ function Card:SetQuest(quest, collapsed, options)
 
   for _, row in ipairs(self.rows) do
     row:Hide()
+    row.highlight:Hide()
   end
+  self.highlighted = nil
+  self:SetNavigation(nil)  -- the driver fills it in on its next tick
 
   local y = TITLE_HEIGHT + 2
   for i = 1, self.rowCount do
@@ -147,6 +184,36 @@ function Card:SetQuest(quest, collapsed, options)
 
   self.frame:SetHeight(y)
   return y
+end
+
+---Show the arrow state from ns.Navigation:Compute (nil = nothing to show). Called 10 times a
+---second, so it only touches what changed.
+---@param nav table?
+function Card:SetNavigation(nav)
+  local text, arrow, inArea, highlight = "", false, false, nil
+  if nav then
+    if nav.inArea then
+      inArea, text, highlight = true, "here", nav.objective
+    else
+      arrow = nav.angle ~= nil
+      text = nav.zone or (nav.distance and ("%d yd"):format(nav.distance)) or ""
+    end
+  end
+  if text ~= self.lastNavText then
+    self.navText:SetText(text)
+    self.lastNavText = text
+  end
+  self.arrow:SetShown(arrow)
+  if arrow and nav then
+    self.arrow:SetRotation(nav.angle)
+  end
+  self.inArea:SetShown(inArea)
+  if highlight ~= self.highlighted then
+    for i, row in ipairs(self.rows) do
+      row.highlight:SetShown(i == highlight)
+    end
+    self.highlighted = highlight
+  end
 end
 
 ---Update texts in place (same rows, same layout). Used for progress, including in combat.

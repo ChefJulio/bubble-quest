@@ -15,6 +15,8 @@ local Zone = {
   name = nil,        -- its name
   inZone = {},       -- [questID] = { x, y }: its marker on the player's zone map (map fractions)
   questZone = {},    -- [questID] = zone name, from the continent query
+  continentID = nil, -- the player's continent map
+  markers = {},      -- [questID] = { x, y } on the continent map (for world positions, phase 5)
 }
 ns.Zone = Zone
 
@@ -47,11 +49,14 @@ function Zone:Update()
   self.mapID = zoneInfo and zoneInfo.mapID
   self.name = zoneInfo and zoneInfo.name
 
+  self.continentID = continentID
   wipe(self.inZone)
   wipe(self.questZone)
+  wipe(self.markers)
   if continentID then
     for _, poi in ipairs(C_QuestLog.GetQuestsOnMap(continentID) or {}) do
       self.questZone[poi.questID] = mapName(poi.mapID)
+      self.markers[poi.questID] = { x = poi.x, y = poi.y }
     end
   end
   if self.mapID then
@@ -107,6 +112,13 @@ function Zone:DistanceTo(questID)
     return nil
   end
   return self:Yards(px, py, marker.x, marker.y)
+end
+
+---Name of a uiMap (cached).
+---@param mapID number
+---@return string?
+function Zone:MapName(mapID)
+  return mapName(mapID)
 end
 
 ---Heading for a quest in the Elsewhere group.

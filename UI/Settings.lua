@@ -45,6 +45,13 @@ function SettingsPanel:Register()
       ns.Stack:ApplyLock()
     end)
 
+  addCheckbox(category, "QUESTMARK_CLICK_OPENS_MAP", "Click a card to show its quest on the map",
+    "Left-clicking a card makes it your tracked quest (map highlight and in-world beacon) and opens "
+    .. "the map at it. Out of combat only.",
+    true,
+    function(profile) return profile.cards.clickOpensMap end,
+    function(profile, value) profile.cards.clickOpensMap = value end)
+
   local capSetting = Settings.RegisterProxySetting(category, "QUESTMARK_CARD_CAP", Settings.VarType.Number,
     "Cards shown for this zone", 5,
     function() return ns.DB.profile.cards.cap end,

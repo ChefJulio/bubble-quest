@@ -70,14 +70,25 @@ target minus facing = the arrow's rotation.
   hysteresis.
 - `/qm where` debug command.
 
-## Open questions
+## Clicking a card (decided in review)
 
-1. **Focus:** the spec says "clicking a card makes it the focused quest (big arrow)" but also "no
-   large standalone arrow". Proposal: clicking a card focuses it by setting Blizzard's own waypoint
-   (the in-world beacon and map pin) on its target, instead of a big arrow of ours. One click, the
-   game's native navigation, no extra UI. Optional setting, off = clicking does nothing.
-2. **Update rate:** 10 per second is smooth for walking and cheap. Fine, or do you want it
-   smoother (20)?
+The spec's "focused quest (big arrow)" conflicts with its "no large standalone arrow". Decided:
+left-clicking a card **highlights the quest and opens the map to it**:
+
+1. `C_SuperTrack.SetSuperTrackedQuestID(questID)`: makes it the game's tracked quest (map highlight,
+   in-world beacon). Unrestricted [Read: apiguard].
+2. `QuestMapFrame_OpenToQuestDetails(questID)`: Blizzard's own "open the quest log on the map at this
+   quest" [Read: Mainline/QuestMapFrame.lua:1179-1183]. It opens the map through
+   `WorldMapFrame:HandleUserActionOpenQuestLog`, the normal player path, not the restricted
+   `C_Map.OpenWorldMap` [Read: Blizzard_WorldMap.lua:1421-1427]. Loads on Forever: Forever is a
+   mainline variant (`QuestMapFrameUtils` is loaded for mainline *excluding camelot*, replaced by a
+   camelot version [Read: Blizzard_UIPanels_Game.toc:177-178]).
+
+Out of combat only (a click in combat does nothing): calling Blizzard UI code from an addon can
+taint it, which only bites when that code later meets a protected action in combat. Test step 7
+checks for that. A setting turns the click off.
+
+Update rate: 10 per second (agreed).
 
 ## In-game test (after build)
 
@@ -87,3 +98,5 @@ target minus facing = the arrow's rotation.
 4. Two packs of mobs at similar distances: no flip-flopping.
 5. A quest whose turn-in is in another zone: the zone name shows.
 6. Enter a building/instance: arrows disappear, no errors.
+7. Click a card: the map opens at that quest, highlighted. Close it, then fight something: no
+   "action blocked" errors in BugSack.
