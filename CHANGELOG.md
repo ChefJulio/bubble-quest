@@ -8,8 +8,8 @@
   fit. Right-click the corner for the default size
 - Quests you can pick up, on the world map and minimap (needs QuestieDB, now a required dependency on
   CurseForge; Questie itself isn't needed): a "!" at each quest giver (blue: repeatable), hover for its
-  quests. Quests started by a drop (like Furlbrow's Deed) show the droppers' area in faint grey with
-  the item's icon, and say what to loot. Low-level quests and drop quests each have a toggle
+  quests. Quests started by a drop (like Furlbrow's Deed) get a smaller bronze "!" where the mobs are;
+  hover it to see their area and what to loot. Low-level quests and drop quests each have a toggle
 - Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides
   you to the spot
 - In a group, hovering quest areas on the map or minimap shows your party's progress on that quest too
