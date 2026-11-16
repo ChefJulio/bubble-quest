@@ -13,11 +13,14 @@ local ADDON_NAME, ns = ...
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
 local MARKER_SIZE = 14       -- the turn-in "?", pixels
-local DOT_SIZE = 6           -- guide dots, pixels
-local DOT_SPACING = 12       -- pixels between guide dots
-local DOT_SPEED = 14         -- pixels a second the dots drift toward the target
+-- Pixels, not yards: a minimap is small (140 px across for 233 yd each way in review, 0.3 px a yard),
+-- so "too close for a line" is the arrows' "here" (yards, Navigation), never a pixel threshold.
+local DOT_SIZE = 5           -- guide dots
+local DOT_SPACING = 8        -- between guide dots
+local DOT_SPEED = 10         -- a second, the dots' drift toward the target
 local DOT_ALPHA = 0.9
-local PLAYER_GAP = 10        -- no dots this close to the centre (the player's arrow)
+local PLAYER_GAP = 7         -- no dots this close to the centre (the player's arrow)
+local HOVER_MIN = 6          -- a circle's hover radius at least this, however far out the minimap zooms
 local TARGET_SECONDS = 0.1   -- how often the guide's target is worked out again (the arrows' rate)
 local HOVER_SECONDS = 0.05   -- how often the hover is checked while the cursor is on the minimap
 local ROUND_MASK = "Interface/CharacterFrame/TempPortraitAlphaMask"
@@ -172,7 +175,8 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
   local reach = half + size / 2  -- a circle partly inside still shows its inside part
   local hits = MinimapAreas.hits
   wipe(hits)
-  MinimapAreas.radius = size / 2 * 0.7  -- the circle's visible core, as on the world map
+  -- The whole circle: on the minimap they're small (the world map's 70% core was too fiddly in review).
+  MinimapAreas.radius = math.max(size / 2, HOVER_MIN)
   for _, p in ipairs(MinimapAreas.points) do
     if p.map == instanceMap then
       local x, y = project(p.x - north, p.y - west, cos, sin, scale)
@@ -207,8 +211,8 @@ local function drawGuide(north, west, instanceMap, cos, sin, scale, half, square
   end
   local x, y = project(target.x - north, target.y - west, cos, sin, scale)
   local length = math.sqrt(x * x + y * y)
-  if length <= PLAYER_GAP + DOT_SPACING then
-    return  -- right next to it
+  if length <= PLAYER_GAP then
+    return  -- under the player's arrow
   end
   -- Stop at the target, or at the edge when it's off the minimap.
   local edge = square and half / math.max(math.abs(x), math.abs(y)) * length or half
@@ -219,7 +223,7 @@ local function drawGuide(north, west, instanceMap, cos, sin, scale, half, square
   for d = PLAYER_GAP + offset, stop, DOT_SPACING do
     local dot = acquire(dots, "dots", DOT_TEXTURE, "OVERLAY")
     -- Fade in from the player, so the line starts softly.
-    local fade = math.min(1, (d - PLAYER_GAP) / (2 * DOT_SPACING))
+    local fade = math.min(1, (d - PLAYER_GAP) / DOT_SPACING)
     dot:SetVertexColor(color[1], color[2], color[3], DOT_ALPHA * fade)
     place(dot, dx * d, dy * d, DOT_SIZE)
   end
@@ -280,6 +284,7 @@ local function update(_, delta)
       drawGuide(north, west, instanceMap, cos, sin, scale, half, square, delta)
     end
   end
+  MinimapAreas.dotsDrawn = used.dots  -- for /qm minimap (hideUnused resets the count)
   hideUnused(blobs, "blobs")
   hideUnused(markers, "markers")
   hideUnused(dots, "dots")
@@ -332,7 +337,7 @@ function MinimapAreas:Diagnose()
     tostring(ns.MapAreas.version), #self.hits, self.radius or 0)
   add("Guide: quest %s, point %s, dots drawn %d", tostring(guide.questID),
     guide.point and ("%.1f, %.1f map %s"):format(guide.point.x, guide.point.y, tostring(guide.point.map)) or "none",
-    used.dots)
+    self.dotsDrawn or 0)
   for _, questID in ipairs(candidates()) do
     local quest = ns.QuestLog:Get(questID)
     local keys = {}
@@ -347,8 +352,14 @@ function MinimapAreas:Diagnose()
   local cx, cy = GetCursorPosition()
   local scale = layer:GetEffectiveScale()
   local mx, my = layer:GetCenter()
-  add("Mouse over minimap: %s; cursor from centre %.1f, %.1f px", tostring(Minimap:IsMouseOver()), cx / scale - mx,
-    cy / scale - my)
+  local px, py = cx / scale - mx, cy / scale - my
+  local nearest
+  for _, hit in ipairs(self.hits) do
+    local d = math.sqrt((hit.x - px) ^ 2 + (hit.y - py) ^ 2)
+    nearest = nearest and math.min(nearest, d) or d
+  end
+  add("Mouse over minimap: %s; cursor from centre %.1f, %.1f px; nearest circle %s px away",
+    tostring(Minimap:IsMouseOver()), px, py, nearest and ("%.1f"):format(nearest) or "-")
   local owner = GameTooltip:GetOwner()
   add("GameTooltip: shown=%s owner=%s (ours: %s)", tostring(GameTooltip:IsShown()),
     owner and tostring(owner:GetDebugName()) or "none", tostring(owner == layer))
