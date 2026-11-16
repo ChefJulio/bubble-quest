@@ -16,7 +16,7 @@ agreed), **skip** (not worth it, or the client already does it).
 | Custom quest frame icons (gossip/quest window: available, complete, repeatable, trivial) | planned | Small |
 | Map button | planned | Part 2's map menu |
 | Minimap button, addon compartment | have | Compartment entry (no minimap button, by choice) |
-| Map coordinates, minimap coordinates, decimal precision | planned | Small; TomTom also does it |
+| Map coordinates, minimap coordinates, decimal precision | have (client) | Forever's world map shows player and cursor coordinates itself (WorldMapCoordsPanelTemplate); minimap coordinates: candidate |
 | Which available quests (XP-granting only, all low level, N levels below, a level range) | planned | Part 2: Questie's default plus a "Trivial quests" toggle; the other modes are a candidate |
 
 ## Tooltips
