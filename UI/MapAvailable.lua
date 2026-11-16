@@ -6,17 +6,21 @@ local ADDON_NAME, ns = ...
 --   - Quest givers (NPCs, objects): Blizzard's "!" (QuestNormal, the atlas its own map uses for quest
 --     offers, Blizzard_SharedMapDataProviders/QuestOfferDataProvider.lua:3), blue for daily/repeatable,
 --     grey for trivial (only with the "Trivial quests" setting). One per spawn, close spawns merged.
---   - Quests started by a drop (decided in review: honest, not a "!" on every mob): the droppers' area
---     in a faint grey, and at each cluster's centre the item's own icon with a small "!". The tooltip
---     says what to do: "Loot Westfall Deed from Defias Thug, ... to start this quest".
+--   - Quests started by a drop (decided in review: honest, not a "!" on every mob; then, from the first
+--     look: one uniform, quieter icon, no standing areas): a smaller bronze "!" at the centre of each
+--     droppers' cluster, close ones merged into one. Hovering it shows the droppers' area and says what
+--     to do: "Loot Westfall Deed from Defias Thug, ... to start this quest".
 --
 -- Same approach as the quest areas: our own mouse-disabled frame on the map canvas, hover worked out
 -- from the cursor; when an icon is under it, its tooltip wins over the areas' (MapAreas yields).
 
-local ICON_SIZE = 20          -- pixels at 100% (setting map.iconSize), whatever the zoom
-local DROP_ICON_SIZE = 18
-local DROP_TINT, DROP_ALPHA = { 0.8, 0.8, 0.8 }, 0.14
-local MERGE_PIXELS = 8        -- one giver's spawns closer than this on screen share one icon
+local ICON_SIZE = 16          -- pixels at 100% (setting map.iconSize), whatever the zoom (20 was big)
+local DROP_ICON_SIZE = 12
+local DROP_TINT = { 1, 0.7, 0.35 }  -- bronze, over the desaturated "!"
+local DROP_ICON_ALPHA = 0.85
+local DROP_AREA_ALPHA = 0.18  -- the droppers' area, shown while its icon is hovered
+local MERGE_PIXELS = 8        -- a giver's spawns closer than this on screen share one icon
+local DROP_MERGE_PIXELS = 14  -- drop icons closer than this share one (their tooltip lists them all)
 local FRAME_LEVEL = 2006      -- just above the quest areas (2005), under Questie's icons (2016+)
 local HOVER_SECONDS = 0.05
 local ATLAS_NORMAL, ATLAS_REPEATABLE = "QuestNormal", "UI-QuestPoiRecurring-QuestBang"
@@ -25,7 +29,7 @@ local FALLBACK_TEXTURE = "Interface/GossipFrame/AvailableQuestIcon"
 local MapAvailable = {
   entries = {},     -- what to draw, built from Available's givers and the settings (Entries)
   builtFor = nil,   -- Available.version .. settings, the entries were built for
-  hits = {},        -- world map: { x, y, radius (canvas pixels), entry }
+  hits = {},        -- world map: { x, y, radius (canvas pixels), base (icon size), entries }
   icons = {},       -- world map icon textures in use, for resizing on zoom
   hovering = false,
 }
@@ -40,9 +44,7 @@ function MapAvailable:Enabled()
   return map ~= nil and map.available == true and ns.Available.records ~= nil
 end
 
--- Entries -----------------------------------------------------------------------------------------
--- Per giver, the quests to show (trivial ones only with the setting), how it looks, and where:
--- spawns for NPCs and objects; for items, the droppers' clusters (Quests/Areas.lua) and their centres.
+-- Art ---------------------------------------------------------------------------------------------
 
 local hasAtlas = {}
 local function atlasOr(atlas)
@@ -52,17 +54,32 @@ local function atlasOr(atlas)
   return hasAtlas[atlas] and atlas or nil
 end
 
----Sets a texture to a giver's "!": blue when every quest it offers repeats, grey when all are trivial.
-function MapAvailable.SetGiverArt(texture, entry)
-  local atlas = atlasOr(entry.repeatable and ATLAS_REPEATABLE or ATLAS_NORMAL) or atlasOr(ATLAS_NORMAL)
+local function setBang(texture, atlas)
+  atlas = atlasOr(atlas) or atlasOr(ATLAS_NORMAL)
   if atlas then
     texture:SetAtlas(atlas)
   else
     texture:SetTexture(FALLBACK_TEXTURE)
   end
-  texture:SetDesaturated(entry.trivial)
-  texture:SetVertexColor(1, 1, 1, entry.trivial and 0.75 or 1)
 end
+
+---Sets a texture to an entry's "!": a giver's is yellow (blue when every quest repeats, grey when all
+---are trivial); a drop's is the uniform bronze one.
+function MapAvailable.SetArt(texture, entry)
+  if entry.giver.kind == "item" then
+    setBang(texture, ATLAS_NORMAL)
+    texture:SetDesaturated(true)
+    texture:SetVertexColor(DROP_TINT[1], DROP_TINT[2], DROP_TINT[3], DROP_ICON_ALPHA)
+  else
+    setBang(texture, entry.repeatable and ATLAS_REPEATABLE or ATLAS_NORMAL)
+    texture:SetDesaturated(entry.trivial)
+    texture:SetVertexColor(1, 1, 1, entry.trivial and 0.75 or 1)
+  end
+end
+
+-- Entries -----------------------------------------------------------------------------------------
+-- Per giver, the quests to show (trivial ones only with the setting), how it looks, and where:
+-- spawns for NPCs and objects; for items, the droppers' clusters (Quests/Areas.lua) and their centres.
 
 local function clusterCentres(points)
   local clusters = {}
@@ -103,7 +120,6 @@ function MapAvailable:Entries()
       local entry = { giver = giver, quests = quests, trivial = allTrivial, repeatable = allRepeatable }
       if giver.kind == "item" then
         entry.clusters = clusterCentres(giver.points)
-        entry.icon = C_Item.GetItemIconByID(giver.id)
       end
       self.entries[#self.entries + 1] = entry
     end
@@ -119,19 +135,17 @@ local function droppersText(itemID)
   local text = dropperNames[itemID]
   if not text then
     local names, seen = {}, {}
-    for _, npcID in ipairs(ns.QuestieData.Get("ItemDB", "npcDrops", itemID) or {}) do
-      local name = ns.QuestieData.Get("NpcDB", "name", npcID)
+    local function addName(name)
       if name and not seen[name] then
         seen[name] = true
         names[#names + 1] = name
       end
     end
+    for _, npcID in ipairs(ns.QuestieData.Get("ItemDB", "npcDrops", itemID) or {}) do
+      addName(ns.QuestieData.Get("NpcDB", "name", npcID))
+    end
     for _, objectID in ipairs(ns.QuestieData.Get("ItemDB", "objectDrops", itemID) or {}) do
-      local name = ns.QuestieData.Get("ObjectDB", "name", objectID)
-      if name and not seen[name] then
-        seen[name] = true
-        names[#names + 1] = name
-      end
+      addName(ns.QuestieData.Get("ObjectDB", "name", objectID))
     end
     local shown = {}
     for i = 1, math.min(3, #names) do
@@ -175,10 +189,30 @@ function MapAvailable.FillTooltip(tooltip, entries)
   tooltip:Show()
 end
 
+---Entries under a point, each once (hits carry a list: merged icons).
+---@return table[]? entries
+function MapAvailable.Under(hits, x, y)
+  local found, seen = {}, {}
+  for _, hit in ipairs(hits) do
+    local dx, dy = hit.x - x, hit.y - y
+    if dx * dx + dy * dy <= hit.radius * hit.radius then
+      for _, entry in ipairs(hit.entries) do
+        if not seen[entry] then
+          seen[entry] = true
+          found[#found + 1] = entry
+        end
+      end
+    end
+  end
+  return #found > 0 and found or nil
+end
+
 -- World map ---------------------------------------------------------------------------------------
 
 local layer, iconPool, blobPool
 local vector
+local dropAreas = {}  -- [entry] = { blob textures }, hidden until its icon is hovered
+local shownAreas = {} -- entries whose area is showing
 
 local function iconSize(base, canvas)
   return base * ns.MapAreas.iconScale() * UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
@@ -194,20 +228,27 @@ local function mapPos(p, mapID, width, height)
   return nil
 end
 
-local function sizeIcon(icon, size)
-  icon:SetSize(size, size)
-  icon.bang:SetSize(size * 0.6, size * 0.6)
-end
-
-local function placeIcon(canvas, x, y, base, setArt)
+local function placeIcon(canvas, x, y, entry, base)
   local icon = iconPool:Acquire()
-  setArt(icon)
+  MapAvailable.SetArt(icon, entry)
   icon.base = base
   local size = iconSize(base, canvas)
-  sizeIcon(icon, size)
+  icon:SetSize(size, size)
   icon:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   MapAvailable.icons[#MapAvailable.icons + 1] = icon
-  return size
+  local hit = { x = x, y = y, radius = size / 2, base = base, entries = { entry } }
+  MapAvailable.hits[#MapAvailable.hits + 1] = hit
+  return hit
+end
+
+-- A drop icon near one already placed joins it (one icon, both in its tooltip).
+local function nearDropHit(hits, x, y)
+  for _, hit in ipairs(hits) do
+    if hit.drop and (hit.x - x) ^ 2 + (hit.y - y) ^ 2 < DROP_MERGE_PIXELS * DROP_MERGE_PIXELS then
+      return hit
+    end
+  end
+  return nil
 end
 
 function MapAvailable:Redraw()
@@ -219,6 +260,8 @@ function MapAvailable:Redraw()
   blobPool:ReleaseAll()
   wipe(self.hits)
   wipe(self.icons)
+  wipe(dropAreas)
+  wipe(shownAreas)
   local canvas = map:GetCanvas()
   local mapID = map:GetMapID()
   local width, height = canvas:GetSize()
@@ -235,23 +278,25 @@ function MapAvailable:Redraw()
       for _, cluster in ipairs(entry.clusters) do
         local cx, cy = mapPos(cluster.centre, mapID, width, height)
         if cx then
+          local hit = nearDropHit(self.hits, cx, cy)
+          if hit then
+            hit.entries[#hit.entries + 1] = entry
+          else
+            placeIcon(canvas, cx, cy, entry, DROP_ICON_SIZE).drop = true
+          end
+          -- Its area, hidden until hovered.
+          local blobs = dropAreas[entry] or {}
+          dropAreas[entry] = blobs
           for _, p in ipairs(cluster.points) do
             local x, y = mapPos(p, mapID, width, height)
             if x and blobSize > 0 then
               local blob = blobPool:Acquire()
               blob:SetSize(blobSize, blobSize)
               blob:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
-              self.hits[#self.hits + 1] = { x = x, y = y, radius = blobSize / 2 * 0.7, entry = entry }
+              blob:Hide()
+              blobs[#blobs + 1] = blob
             end
           end
-          local size = placeIcon(canvas, cx, cy, DROP_ICON_SIZE, function(icon)
-            icon:SetTexture(entry.icon or FALLBACK_TEXTURE)
-            icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-            icon:SetDesaturated(entry.trivial)
-            icon:SetVertexColor(1, 1, 1, 1)
-            icon.bang:Show()
-          end)
-          self.hits[#self.hits + 1] = { x = cx, y = cy, radius = size / 2, entry = entry, base = DROP_ICON_SIZE }
         end
       end
     else
@@ -268,12 +313,7 @@ function MapAvailable:Redraw()
           end
           if not near then
             placed[#placed + 1] = { x, y }
-            local size = placeIcon(canvas, x, y, ICON_SIZE, function(icon)
-              MapAvailable.SetGiverArt(icon, entry)
-              icon:SetTexCoord(0, 1, 0, 1)
-              icon.bang:Hide()
-            end)
-            self.hits[#self.hits + 1] = { x = x, y = y, radius = size / 2, entry = entry, base = ICON_SIZE }
+            placeIcon(canvas, x, y, entry, ICON_SIZE)
           end
         end
       end
@@ -284,27 +324,38 @@ end
 -- Zooming scales the canvas: keep the icons' size on screen (cheaper than a redraw every frame).
 local function resizeIcons(canvas)
   for _, icon in ipairs(MapAvailable.icons) do
-    sizeIcon(icon, iconSize(icon.base, canvas))
+    local size = iconSize(icon.base, canvas)
+    icon:SetSize(size, size)
   end
   for _, hit in ipairs(MapAvailable.hits) do
-    if hit.base then
-      hit.radius = iconSize(hit.base, canvas) / 2
-    end
+    hit.radius = iconSize(hit.base, canvas) / 2
   end
 end
 
----Entries under a point, icons first (an icon over its own area counts once).
----@return table[]? entries
-function MapAvailable.Under(hits, x, y)
-  local found, seen = {}, {}
-  for _, hit in ipairs(hits) do
-    local dx, dy = hit.x - x, hit.y - y
-    if dx * dx + dy * dy <= hit.radius * hit.radius and not seen[hit.entry] then
-      seen[hit.entry] = true
-      found[#found + 1] = hit.entry
+-- The areas of the hovered drop icons, and only those.
+local function showDropAreas(entries)
+  local want = {}
+  for _, entry in ipairs(entries or {}) do
+    if dropAreas[entry] then
+      want[entry] = true
     end
   end
-  return #found > 0 and found or nil
+  for entry in pairs(shownAreas) do
+    if not want[entry] then
+      for _, blob in ipairs(dropAreas[entry] or {}) do
+        blob:Hide()
+      end
+      shownAreas[entry] = nil
+    end
+  end
+  for entry in pairs(want) do
+    if not shownAreas[entry] then
+      for _, blob in ipairs(dropAreas[entry]) do
+        blob:Show()
+      end
+      shownAreas[entry] = true
+    end
+  end
 end
 
 local hoverElapsed = 0
@@ -322,6 +373,7 @@ local function updateHover(map, delta)
       found = MapAvailable.Under(MapAvailable.hits, nx * width, ny * height)
     end
   end
+  showDropAreas(found)
   if found then
     local tooltip = ns.Tooltips:Take(layer, "ANCHOR_CURSOR")  -- nil while Ctrl hides ours
     if tooltip then
@@ -346,28 +398,13 @@ local function createLayer()
   layer:SetAllPoints(canvas)
   layer:EnableMouse(false)
   layer:SetFrameLevel(FRAME_LEVEL)
-  ---@class QuestmarkerMapIcon: Texture
-  ---@field bang Texture the small "!" on an item's icon
-  ---@field base number size at 100%
   iconPool = ns.CreatePool(function()
-    local icon = layer:CreateTexture(nil, "OVERLAY") --[[@as QuestmarkerMapIcon]]
-    icon.bang = layer:CreateTexture(nil, "OVERLAY", nil, 1)  -- the small "!" on an item's icon
-    local atlas = atlasOr(ATLAS_NORMAL)
-    if atlas then
-      icon.bang:SetAtlas(atlas)
-    else
-      icon.bang:SetTexture(FALLBACK_TEXTURE)
-    end
-    icon.bang:SetPoint("CENTER", icon, "TOPRIGHT", -2, -2)
-    icon.bang:Hide()
-    return icon
-  end, function(icon)
-    icon.bang:Hide()
+    return layer:CreateTexture(nil, "OVERLAY")
   end)
   blobPool = ns.CreatePool(function()
     local blob = layer:CreateTexture(nil, "ARTWORK")
     blob:SetTexture(ns.MapAreas.BLOB_TEXTURE)
-    blob:SetVertexColor(DROP_TINT[1], DROP_TINT[2], DROP_TINT[3], DROP_ALPHA)
+    blob:SetVertexColor(1, 1, 1, DROP_AREA_ALPHA)
     return blob
   end)
   layer:SetScript("OnUpdate", function(_, delta)
@@ -387,6 +424,7 @@ local function createLayer()
       GameTooltip:Hide()
     end
     MapAvailable.hovering = false
+    showDropAreas(nil)
   end)
 end
 

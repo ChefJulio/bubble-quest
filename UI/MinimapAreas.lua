@@ -56,8 +56,8 @@ end
 -- Textures ----------------------------------------------------------------------------------------
 
 local layer, mask
-local blobs, markers, dots, givers, dropBlobs = {}, {}, {}, {}, {}
-local used = { blobs = 0, markers = 0, dots = 0, givers = 0, dropBlobs = 0 }
+local blobs, markers, dots, givers = {}, {}, {}, {}
+local used = { blobs = 0, markers = 0, dots = 0, givers = 0 }
 
 local function acquire(pool, kind, texture, drawLayer)
   used[kind] = used[kind] + 1
@@ -116,11 +116,10 @@ local function project(north, west, cos, sin, scale)
 end
 
 -- Available quests (UI/MapAvailable.lua's entries) ----------------------------------------------------
--- Quest givers' "!" at their spawns; quests from drops as the droppers' faint grey area with the item's
--- icon at each cluster's centre. Rebuilt when the entries are.
+-- Quest givers' "!" at their spawns; quests from drops as the uniform bronze "!" at each droppers'
+-- cluster centre (no areas here: the minimap is small). Rebuilt when the entries are.
 
-local GIVER_SIZE, DROP_ICON_SIZE = 14, 13  -- pixels at 100% (setting map.iconSize)
-local DROP_TINT, DROP_ALPHA = 0.8, 0.16
+local GIVER_SIZE, DROP_ICON_SIZE = 12, 9  -- pixels at 100% (setting map.iconSize)
 local giverPoints, giversBuiltFor = {}, nil
 MinimapAreas.giverHits = {}
 
@@ -129,9 +128,6 @@ local function rebuildGivers()
   for _, entry in ipairs(ns.MapAvailable:Entries()) do
     if entry.giver.kind == "item" then
       for _, cluster in ipairs(entry.clusters) do
-        for _, p in ipairs(cluster.points) do
-          giverPoints[#giverPoints + 1] = { x = p.x, y = p.y, map = p.map, entry = entry, blob = true }
-        end
         local c = cluster.centre
         giverPoints[#giverPoints + 1] = { x = c.x, y = c.y, map = c.map, entry = entry, drop = true }
       end
@@ -145,7 +141,7 @@ local function rebuildGivers()
 end
 
 -- A giver icon, its art set only when what it shows changes (several looks share one pool).
-local function acquireGiver(entry, drop)
+local function acquireGiver(entry)
   used.givers = used.givers + 1
   local t = givers[used.givers]
   if not t then
@@ -153,18 +149,11 @@ local function acquireGiver(entry, drop)
     t:AddMaskTexture(mask)
     givers[used.givers] = t
   end
-  local art = drop and ("i" .. tostring(entry.icon)) or ((entry.repeatable and "r" or "n") .. (entry.trivial and "t" or ""))
+  local art = entry.giver.kind == "item" and "drop"
+    or ((entry.repeatable and "r" or "n") .. (entry.trivial and "t" or ""))
   if t.art ~= art then
     t.art = art
-    if drop then
-      t:SetTexture(entry.icon or "Interface/GossipFrame/AvailableQuestIcon")
-      t:SetTexCoord(0.08, 0.92, 0.08, 0.92)
-      t:SetDesaturated(false)
-      t:SetVertexColor(1, 1, 1, 1)
-    else
-      t:SetTexCoord(0, 1, 0, 1)
-      ns.MapAvailable.SetGiverArt(t, entry)
-    end
+    ns.MapAvailable.SetArt(t, entry)
   end
   t:Show()
   return t
@@ -173,8 +162,7 @@ end
 local function drawGivers(north, west, instanceMap, cos, sin, scale, half, square)
   local hits = MinimapAreas.giverHits
   local iconScale = ns.MapAreas.iconScale()
-  local blobSize = 2 * ns.MapAreas.blobYards() * scale
-  local reach = half + blobSize / 2
+  local reach = half + GIVER_SIZE * iconScale / 2
   for _, p in ipairs(giverPoints) do
     if p.map == instanceMap then
       local x, y = project(p.x - north, p.y - west, cos, sin, scale)
@@ -185,16 +173,9 @@ local function drawGivers(north, west, instanceMap, cos, sin, scale, half, squar
         inside = x * x + y * y <= reach * reach
       end
       if inside then
-        if p.blob then
-          local blob = acquire(dropBlobs, "dropBlobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
-          blob:SetVertexColor(DROP_TINT, DROP_TINT, DROP_TINT, DROP_ALPHA)
-          place(blob, x, y, blobSize)
-          hits[#hits + 1] = { x = x, y = y, radius = math.max(blobSize / 2, HOVER_MIN), entry = p.entry }
-        else
-          local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
-          place(acquireGiver(p.entry, p.drop), x, y, size)
-          hits[#hits + 1] = { x = x, y = y, radius = math.max(size / 2, HOVER_MIN), entry = p.entry }
-        end
+        local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
+        place(acquireGiver(p.entry), x, y, size)
+        hits[#hits + 1] = { x = x, y = y, radius = math.max(size / 2, HOVER_MIN), entries = { p.entry } }
       end
     end
   end
@@ -400,7 +381,6 @@ local function update(_, delta)
   hideUnused(markers, "markers")
   hideUnused(dots, "dots")
   hideUnused(givers, "givers")
-  hideUnused(dropBlobs, "dropBlobs")
   updateHover(delta)
 end
 
