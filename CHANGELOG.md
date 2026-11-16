@@ -10,6 +10,8 @@
   CurseForge; Questie itself isn't needed): a "!" at each quest giver (blue: repeatable), hover for its
   quests. Quests started by a drop (like Furlbrow's Deed) get a smaller bronze "!" where the mobs are;
   hover it to see their area and what to loot. Low-level quests and drop quests each have a toggle
+- Talking to a quest giver corrects the map: a "!" for a quest they don't actually offer you goes away
+  (it comes back after a level-up, a turn-in or the daily reset)
 - A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
   for a menu of what Questmarker shows on the maps
 - Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides

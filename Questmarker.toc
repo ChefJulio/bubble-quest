@@ -41,6 +41,7 @@ Quests\DoLine.lua
 Quests\Areas.lua
 Quests\Navigation.lua
 Quests\Available.lua
+Quests\Offers.lua
 Quests\Nearby.lua
 Quests\Mouseover.lua
 Quests\Tracking.lua

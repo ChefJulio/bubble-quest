@@ -88,6 +88,7 @@ local CHAR_DEFAULTS = {
   groups = {},  -- [category] = true: that category's separate group is expanded
   notices = {},    -- [noticeKey] = true, one-time messages already shown
   removedWatches = {},  -- [questID] = true: Blizzard quest watches we removed to hide its tracker
+  notOffered = {},  -- ["npc"|"object" .. id] = { [questID] = expiry time }: a giver left it out (Quests/Offers.lua)
 }
 
 local MIGRATIONS = {

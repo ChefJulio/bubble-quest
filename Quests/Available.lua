@@ -15,9 +15,9 @@ local ADDON_NAME, ns = ...
 -- Questie's blacklist (not in QuestieDB) comes in through Data/QuestieHidden.lua, extracted at build
 -- time (tools/extract_questie_hidden.py; review: Darkmoon, Lunar Festival, Season of Discovery books
 -- and removed quests showed without it).
--- Stopgaps (recorded in the design doc): holiday quests are always hidden (no event awareness yet);
--- correcting from what an NPC actually offers when you talk to them is part 2b. Without QuestieDB
--- nothing shows (LibForeverData fallback: later).
+-- What givers actually offer when you talk to them corrects this as you play (Quests/Offers.lua).
+-- Stopgaps (recorded in the design doc): holiday quests are always hidden (no event awareness yet).
+-- Without QuestieDB nothing shows (LibForeverData fallback: later).
 
 local BUILD_PER_FRAME = 200
 local KEYS = {
@@ -347,13 +347,16 @@ function Available:Refresh()
   for _, r in pairs(self.records) do
     local shown, trivial = levelCheck(r, playerLevel, trivialRange)
     if shown and doable(r) then
+      -- A giver that left it out when you talked to it doesn't get its "!" (Quests/Offers.lua).
       for _, npcID in ipairs(r.npcs or {}) do
-        if friendly(npcID) then
+        if friendly(npcID) and not ns.Offers:NotOffered("npc", npcID, r.questID) then
           addGiver(byKey, "npc", npcID, r, trivial)
         end
       end
       for _, objectID in ipairs(r.objects or {}) do
-        addGiver(byKey, "object", objectID, r, trivial)
+        if not ns.Offers:NotOffered("object", objectID, r.questID) then
+          addGiver(byKey, "object", objectID, r, trivial)
+        end
       end
       for _, itemID in ipairs(r.items or {}) do
         if C_Item.GetItemCount(itemID) == 0 then  -- in your bags: use it, nothing to find

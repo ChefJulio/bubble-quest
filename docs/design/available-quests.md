@@ -45,7 +45,8 @@ lacks):
    breadcrumbs hidden once their target is done or active.
 6. Skill and reputation requirements met; dailies: once per day.
 7. A quest the NPC didn't offer when you talked to them (gossip/greeting lists what's really offered):
-   hidden until the daily reset, as Questie does. This also corrects our own mistakes as you play.
+   that giver's "!" for it hidden until the daily reset, a level-up or any turn-in (Quests/Offers.lua).
+   Questie does it for dailies only; here for every quest, as it corrects our own mistakes as you play.
 
 Recomputed on QUEST_LOG_UPDATE batches (accepted, completed, abandoned), level-up, skill and
 reputation changes; never per frame. Built per zone in a coroutine, a few hundred quests per frame,
