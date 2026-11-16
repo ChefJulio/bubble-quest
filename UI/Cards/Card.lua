@@ -217,10 +217,12 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
     local quest = self.questID and ns.QuestLog:Get(self.questID)
     if quest then
       ns.QuestTooltip:Show(frame, quest)
+      ns.MapAreas:SetCardHover(quest.questID)  -- its areas glow on the world map (UI/MapAreas.lua)
     end
   end)
   frame:SetScript("OnLeave", function()
     ns.QuestTooltip:Hide()
+    ns.MapAreas:SetCardHover(nil)
   end)
   frame:SetScript("OnMouseUp", function(_, button)
     if not self.questID or not frame:IsMouseOver() then

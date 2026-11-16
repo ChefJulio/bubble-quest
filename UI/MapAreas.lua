@@ -22,9 +22,7 @@ local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer 
 -- map). A frame buffer per quest (to merge circles into one even shape) rendered the colours almost
 -- black inside the world map's own frame buffer (seen in review), so it's not used.
 local BLOB_ALPHA = 0.4  -- review: 0.22 was too faint
--- While hovering: the hovered objectives' circles everywhere on the map light up, the rest dim
--- (review: "highlight the areas of that specific objective").
-local HIGHLIGHT_ALPHA = 0.75
+-- While something is highlighted (see Highlights), the other circles dim to this.
 local DIMMED_ALPHA = 0.12
 local HOVER_SECONDS = 0.05  -- how often the hover is checked while the map is open
 local FRAME_LEVEL = 2005     -- under Questie's map lines (2015) and icons (2016+)
@@ -253,14 +251,30 @@ local function showTooltip(owner, found)
   GameTooltip:Show()
 end
 
--- Light up every circle of the hovered objectives and dim the rest; nil `found` restores all.
--- Only re-tints when the hovered set changes.
+-- Highlights (review): what's lit up, most direct first: the circles under the cursor (those
+-- objectives), else a hovered card (its whole quest), else the quest open in the quest log's details
+-- (its whole quest). Lit circles glow, pulsing between GLOW_LOW and GLOW_HIGH every GLOW_SECONDS; the
+-- rest dim. `target` is { [questID] = { [objective index | "turnin" | "*" (all)] = true } }.
+
+local GLOW_LOW, GLOW_HIGH, GLOW_SECONDS = 0.45, 0.9, 1.4
+
+-- The quest whose details the quest log shows (a plain read of Blizzard's frame), or nil.
+local function detailsQuest()
+  local questMap = rawget(_G, "QuestMapFrame")
+  local details = questMap and questMap.DetailsFrame
+  if details and details:IsVisible() and type(details.questID) == "number" then
+    return details.questID
+  end
+  return nil
+end
+
 local highlightKey
-local function highlight(found)
+local lit = {}  -- the circles currently glowing
+local function highlight(target)
   local key = ""
-  if found then
+  if target then
     local parts = {}
-    for questID, objectives in pairs(found) do
+    for questID, objectives in pairs(target) do
       for objective in pairs(objectives) do
         parts[#parts + 1] = questID .. ":" .. tostring(objective)
       end
@@ -272,12 +286,31 @@ local function highlight(found)
     return
   end
   highlightKey = key
+  wipe(lit)
   for _, hit in ipairs(MapAreas.hits) do
     local alpha = BLOB_ALPHA
-    if found then
-      local objectives = found[hit.questID]
-      alpha = objectives and objectives[hit.objective or "turnin"] and HIGHLIGHT_ALPHA or DIMMED_ALPHA
+    if target then
+      local objectives = target[hit.questID]
+      if objectives and (objectives["*"] or objectives[hit.objective or "turnin"]) then
+        lit[#lit + 1] = hit
+        alpha = GLOW_HIGH
+      else
+        alpha = DIMMED_ALPHA
+      end
     end
+    local c = hit.color
+    hit.texture:SetVertexColor(c[1], c[2], c[3], alpha)
+  end
+end
+
+-- The glow: lit circles pulse (every frame while something is lit).
+local function glow()
+  if #lit == 0 then
+    return
+  end
+  local wave = (math.sin(GetTime() * 2 * math.pi / GLOW_SECONDS) + 1) / 2
+  local alpha = GLOW_LOW + (GLOW_HIGH - GLOW_LOW) * wave
+  for _, hit in ipairs(lit) do
     local c = hit.color
     hit.texture:SetVertexColor(c[1], c[2], c[3], alpha)
   end
@@ -286,10 +319,18 @@ end
 -- A redraw makes new circles at the normal alpha: forget the last highlight.
 MapAreas.highlightReset = function()
   highlightKey = nil
+  wipe(lit)
+end
+
+---A card is hovered (its quest lights up on the map), or nil when the cursor leaves it.
+---@param questID number?
+function MapAreas:SetCardHover(questID)
+  self.cardHover = questID
 end
 
 local hoverElapsed, hovering = 0, false
 local function updateHover(layer, map, delta)
+  glow()
   hoverElapsed = hoverElapsed + delta
   if hoverElapsed < HOVER_SECONDS then
     return
@@ -306,15 +347,20 @@ local function updateHover(layer, map, delta)
   local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
   if found and not tooltipBusy then
     showTooltip(layer, found)
-    highlight(found)
     hovering = true
   elseif hovering and not found then
     if GameTooltip:GetOwner() == layer then
       GameTooltip:Hide()
     end
-    highlight(nil)
     hovering = false
   end
+  -- What to light up: cursor, else hovered card, else the quest log's open quest.
+  local target = found and not tooltipBusy and found or nil
+  local questID = not target and (MapAreas.cardHover or detailsQuest()) or nil
+  if questID then
+    target = { [questID] = { ["*"] = true } }
+  end
+  highlight(target)
 end
 
 -- The layer -----------------------------------------------------------------------------------------
