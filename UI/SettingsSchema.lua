@@ -17,6 +17,11 @@ local ADDON_NAME, ns = ...
 --   row         entries sharing a row name sit on one line; the first one's rowLabel leads the line,
 --               checkboxes show their `short` label, dropdowns are `width` wide
 --   enabledWhen(profile) -> false greys the control out (e.g. automation options while it's all off)
+--   kind "status": a label, a live status (status() -> text, color) and a button (action, actionLabel,
+--               actionEnabled() -> boolean); windowOnly, as it isn't a setting
+-- Both UIs:
+--   onlyIf() -> false leaves the entry out (checked when the UI is built, e.g. Questie not installed)
+--   windowOnly  not in Blizzard's panel
 --
 -- List order is the order in Blizzard's panel, and per column in Questmarker's window.
 
@@ -25,6 +30,10 @@ ns.SettingsSchema = Schema
 
 local function percent(value)
   return ("%d%%"):format(value)
+end
+
+local function questieInstalled()
+  return ns.Questie:Installed()
 end
 
 -- Any automation on: its override-key options only matter then.
@@ -141,6 +150,27 @@ function Schema:Entries()
       format = percent,
       get = function(p) return p.cards.opacity end,
       set = function(p, v) p.cards.opacity = v; ns.Stack:ApplyBackground() end,
+    },
+
+    -- Only with Questie installed: its tracker's state, and Questie's own switch to turn it off.
+    { kind = "section", label = "Questie", column = 1, windowOnly = true, onlyIf = questieInstalled },
+    {
+      kind = "status", id = "QUESTMARKER_QUESTIE_TRACKER", column = 1, windowOnly = true, onlyIf = questieInstalled,
+      label = "Questie's tracker",
+      tooltip = "Questmarker replaces Questie's quest tracker (Questie keeps its map, tooltips and the rest). "
+        .. "Turn off runs Questie's own switch, which reloads your UI. Not in combat.",
+      status = function()
+        local enabled = ns.Questie:TrackerEnabled()
+        if enabled == true then
+          return "On", ORANGE_FONT_COLOR
+        elseif enabled == false then
+          return "Off", GREEN_FONT_COLOR
+        end
+        return "Unknown", GRAY_FONT_COLOR
+      end,
+      actionLabel = "Turn off",
+      actionEnabled = function() return ns.Questie:TrackerEnabled() ~= false end,
+      action = function() ns.Questie:TurnOffTracker() end,
     },
 
     { kind = "section", label = "Quest categories", column = 2 },

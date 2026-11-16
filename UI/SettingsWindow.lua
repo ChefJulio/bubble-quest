@@ -204,6 +204,26 @@ function builders.dropdown(parent, entry, x, y)
   end
 end
 
+-- A label, a live status and a button on one row (e.g. Questie's tracker: "On  [Turn off]").
+function builders.status(parent, entry, x, y)
+  hoverArea(parent, x, y, COLUMN_WIDTH, INLINE_HEIGHT, entry.label, entry.tooltip)
+  inlineLabel(parent, entry, x, y)
+  local state = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
+  state:SetPoint("LEFT", parent, "TOPLEFT", x + INLINE_LABEL_WIDTH, y - INLINE_HEIGHT / 2)
+  local action = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+  action:SetText(entry.actionLabel)
+  action:SetSize(90, 22)
+  action:SetPoint("RIGHT", parent, "TOPLEFT", x + COLUMN_WIDTH, y - INLINE_HEIGHT / 2)
+  action:SetScript("OnClick", function() entry.action() end)
+  tooltip(action, entry.label, entry.tooltip)
+  return INLINE_HEIGHT, function()
+    local text, color = entry.status()
+    state:SetText(text)
+    state:SetTextColor((color or HIGHLIGHT_FONT_COLOR):GetRGB())
+    action:SetEnabled(entry.actionEnabled == nil or entry.actionEnabled())
+  end
+end
+
 -- Entries sharing a `row`, left to right on one line: the first one's rowLabel, then each control
 -- (checkboxes with their short label, dropdowns `width` wide). Greys the row label with the first.
 local function buildRow(parent, members, x, y)
@@ -368,7 +388,9 @@ local function create()
     local x = PAD + (column - 1) * (COLUMN_WIDTH + PAD * 2)
     local height, refresh = 0, nil
     local group = entry.grid and ("grid:" .. entry.grid) or entry.row and ("row:" .. entry.row)
-    if group then
+    if entry.onlyIf and not entry.onlyIf() then
+      -- left out (e.g. the Questie section without Questie)
+    elseif group then
       if not groupsBuilt[group] then
         groupsBuilt[group] = true
         if entry.grid then

@@ -16,6 +16,9 @@ ns.Settings = QuestmarkerSettings
 local VAR_TYPE = { checkbox = "Boolean", slider = "Number", dropdown = "String" }
 
 local function register(category, layout, entry)
+  if entry.windowOnly or (entry.onlyIf and not entry.onlyIf()) then
+    return  -- Questmarker's window only (e.g. the Questie status row: not a setting)
+  end
   if entry.kind == "section" then
     layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(entry.label))
     return
