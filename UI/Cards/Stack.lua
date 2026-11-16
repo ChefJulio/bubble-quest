@@ -42,6 +42,7 @@ end
 local Stack = {
   container = nil,  ---@type Frame?
   visible = {},     -- [questID] = card currently on screen
+  order = {},       -- questIDs of the cards on screen, top to bottom
   resortPending = false,
 }
 ns.Stack = Stack
@@ -70,6 +71,7 @@ local function placeCard(quest, options)
   local card = cardPool:Acquire()
   card.frame:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
   Stack.visible[quest.questID] = card
+  Stack.order[#Stack.order + 1] = quest.questID  -- top to bottom (the minimap guide's "top card")
   card.ready = quest.readyForTurnIn
   cursor.y = cursor.y + card:SetQuest(quest, ns.DB.char.collapsed[quest.questID] == true, options)
   cursor.any = true
@@ -157,6 +159,7 @@ function Stack:Layout()
   linePool:ReleaseAll()
   dividerPool:ReleaseAll()
   wipe(self.visible)
+  wipe(self.order)
   updateHeader()
 
   local char = ns.DB.char

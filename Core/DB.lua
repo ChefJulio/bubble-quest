@@ -49,7 +49,11 @@ local PROFILE_DEFAULTS = {
   },
   questieData = true,  -- use Questie's location data for arrows when it's installed
   map = {
-    areas = true,  -- quest areas on the world map (prototype), one colour per quest on the cards
+    areas = true,         -- quest areas on the world map, one colour per quest on the cards
+    minimapAreas = true,  -- the same areas on the minimap
+    guide = true,         -- a faint dotted line on the minimap to the guided quest's target
+    opacity = 40,         -- each area circle's opacity, percent
+    size = 30,            -- each area circle's radius, yards
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {

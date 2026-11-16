@@ -13,6 +13,13 @@
 - Quests with several objectives: each unfinished objective gets its own arrow and distance, as their
   areas can be far apart; the tooltip shows each one's distance and direction too ("180 yd NE")
 
+- Quest areas on the world map: where each tracked quest's objectives are, shaded in one colour per
+  quest (matched by a strip on its card), with a "?" at the turn-in of ready quests. Hover an area for
+  what's there; hovering a card, one of its objectives, or a quest in the quest log lights its areas up
+- The same areas on the minimap, plus a faint dotted guide line toward the quest you're hovering, your
+  first pinned quest, or else the top card
+- Map settings: area opacity and size, minimap areas and the guide line, each with its own toggle
+
 ## Fixes
 
 - Arrows skipped nearby groups of a mob that lives all over a zone (one dense starting-area patch made

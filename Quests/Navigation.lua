@@ -27,7 +27,7 @@ local MAX_LEARNED_WEIGHT = 3
 
 local Navigation = {
   targets = {},  -- [questID] = { areas = { kept areas }, byObjective = { [index] = all areas }, spawnBased }
-  current = {},  -- [questID] = { id, x, y } the area and point the arrow pointed at last
+  current = {},  -- [questID] = { id, map, x, y } the area and point the arrow pointed at last
 }
 ns.Navigation = Navigation
 
@@ -321,7 +321,7 @@ function Navigation:ComputeTarget(quest)
       end
     end
   end
-  self.current[quest.questID] = { id = area.id, x = point.x, y = point.y }
+  self.current[quest.questID] = { id = area.id, map = instanceMap, x = point.x, y = point.y }
 
   local nav = { distance = distance, objective = area.objective }
   nav.inArea = not area.marker and distance <= hereYards(area)

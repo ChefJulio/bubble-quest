@@ -302,10 +302,41 @@ function Schema:Entries()
       kind = "checkbox", id = "QUESTMARKER_MAP_AREAS", column = 2, default = true,
       label = "Show quest areas on the world map",
       tooltip = "Shades where each card's objectives are on the world map, one colour per quest, matched by "
-        .. "a strip on its card. With Questie, untick its Icons > Objectives to hide its dots and keep "
-        .. "just the areas. (Prototype.)",
+        .. "a strip on its card; ready quests get a \"?\" at their turn-in. With Questie, untick its "
+        .. "Icons > Objectives to hide its dots and keep just the areas.",
       get = function(p) return p.map.areas end,
       set = function(p, v) p.map.areas = v; ns.MapAreas:MarkDirty(); ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MINIMAP_AREAS", column = 2, default = true,
+      label = "Show quest areas on the minimap",
+      tooltip = "The same coloured areas around you on the minimap.",
+      get = function(p) return p.map.minimapAreas end,
+      set = function(p, v) p.map.minimapAreas = v end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MINIMAP_GUIDE", column = 2, default = true,
+      label = "Guide line on the minimap",
+      tooltip = "A faint dotted line from you toward the nearest area of one quest: the card you're hovering, "
+        .. "else your first pinned quest, else the top card.",
+      get = function(p) return p.map.guide end,
+      set = function(p, v) p.map.guide = v end,
+    },
+    {
+      kind = "slider", id = "QUESTMARKER_MAP_OPACITY", column = 2, default = 40, min = 10, max = 80, step = 5,
+      label = "Area opacity",
+      tooltip = "How strong each area circle is; where spawns overlap, colour builds up.",
+      format = percent,
+      get = function(p) return p.map.opacity end,
+      set = function(p, v) p.map.opacity = v; ns.MapAreas:MarkDirty() end,
+    },
+    {
+      kind = "slider", id = "QUESTMARKER_MAP_SIZE", column = 2, default = 30, min = 15, max = 60, step = 5,
+      label = "Area circle size",
+      tooltip = "The radius of the soft circle around each spawn point, in yards.",
+      format = function(v) return ("%d yd"):format(v) end,
+      get = function(p) return p.map.size end,
+      set = function(p, v) p.map.size = v; ns.MapAreas:MarkDirty() end,
     },
 
     { kind = "section", label = "Arrows", column = 2 },
