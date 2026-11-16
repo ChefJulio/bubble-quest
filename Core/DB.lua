@@ -75,6 +75,9 @@ local CHAR_DEFAULTS = {
   overflow = {
     expanded = false,  -- "+ N more here" opened
   },
+  turnins = {
+    expanded = true,   -- the "Ready to turn in" section is open
+  },
   hidden = {
     expanded = false,
   },

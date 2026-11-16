@@ -310,16 +310,23 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.timer:SetJustifyH("LEFT")
   self.timer:Hide()
 
+  -- Collapse / expand: the same button art as the tracker header's minimize button (Blizzard's quest
+  -- tracker buttons), smaller; a bare "-" didn't read as a button (review).
   local toggle = CreateFrame("Button", nil, frame)
-  toggle:SetSize(16, TITLE_HEIGHT)
-  toggle:SetPoint("TOPRIGHT", 0, 0)
-  toggle.label = toggle:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
-  toggle.label:SetPoint("CENTER")
+  toggle:SetSize(14, 15)
+  toggle:SetPoint("TOPRIGHT", 0, -1)
+  toggle:SetHighlightAtlas("ui-questtrackerbutton-yellow-highlight", "ADD")
   toggle:SetScript("OnClick", function()
     if self.questID then
       onToggleCollapse(self.questID)
     end
   end)
+  toggle:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(toggle, "ANCHOR_LEFT")
+    GameTooltip:SetText(self.collapsed and "Show this quest's objectives" or "Collapse to the title", 1, 1, 1)
+    GameTooltip:Show()
+  end)
+  toggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
   self.toggle = toggle
   return self
 end
@@ -417,7 +424,10 @@ function Card:SetQuest(quest, collapsed, options)
   end
   self.rowCount = Card.RowCount(quest, collapsed)
   self.title:SetText(titleText(quest, options))
-  self.toggle.label:SetText(collapsed and "+" or "-")
+  self.collapsed = collapsed
+  local atlas = collapsed and "ui-questtrackerbutton-expand-all" or "ui-questtrackerbutton-collapse-all"
+  self.toggle:SetNormalAtlas(atlas)
+  self.toggle:SetPushedAtlas(atlas .. "-pressed")
 
   for _, row in ipairs(self.rows) do
     row:Hide()

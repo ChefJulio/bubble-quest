@@ -5,27 +5,32 @@ local ADDON_NAME, ns = ...
 --
 --   1. Pinned quests always show, in pin order, wherever they are; not counted in the cap.
 --   2. Other quests are chosen by zone and sorted by distance to their map marker.
---   3. Quests whose area you're in go first, then ready turn-ins within NEAR_TURNIN_YARDS; farther
---      turn-ins sort by distance like the rest.
+--   3. Quests whose area you're in go first. Ready quests get their own section, "Ready to turn in"
+--      (review: you're either at a hub handing in or out doing objectives; mixing the two put a
+--      turn-in above the quest being done). It goes above this zone's cards when you're at a hub
+--      (Tracking.turninsFirst: the nearest turn-in clearly closer than the nearest objective), below
+--      them otherwise.
 --   4. The order changes only on events: QuestLogChanged, a zone change, moving more than
 --      MOVE_YARDS since the last sort, or a zone quest the last sort didn't rank (HasUnranked).
 --      Never on a timer by itself, never in combat (the stack defers). Hysteresis: neighbours swap
---      only when the lower one is HYSTERESIS times closer.
+--      only when the lower one is HYSTERESIS times closer; the turn-in section flips the same way.
 --   5. At most profile.cards.cap zone cards; the rest behind "+ N more here". With "Always show
 --      nearest quests" (cards.nearestAnywhere), free slots take the nearest quests outside the zone
 --      (same continent, by distance, ranked after every zone quest); the rest stay in Elsewhere.
+--      With a height set (resize grip), the stack fills that height instead of counting (UI/Cards/
+--      Stack.lua); View then hands over every candidate in order.
 --   6. Ignored quests are hidden until unhidden.
 -- Categories (phase 4): a category set to "separate" gets its own group (all its quests, any zone);
 -- "hide" removes its quests. Pinned quests show whatever their category.
 
 local MOVE_YARDS = 100
-local NEAR_TURNIN_YARDS = 250
 local HYSTERESIS = 0.8  -- swap only when at least 20% closer
 local MOVE_CHECK_SECONDS = 1
 
 local Tracking = {
   rank = {},           -- [questID] = position in the last sorted order (this zone's quests)
-  tier = {},           -- [questID] = 1 in the area, 2 ready turn-in nearby, 3 the rest (last sort)
+  tier = {},           -- [questID] = 1 in the area, 2 the rest, 3 nearest outside, "turnin" (last sort)
+  turninsFirst = false,  -- rule 3: the turn-in section goes above this zone's cards (at a hub)
   sortedAt = nil,      -- { mapID, x, y } where the last sort happened
 }
 ns.Tracking = Tracking
@@ -94,10 +99,10 @@ local function byLogOrder(a, b)
   return (a.order or 0) < (b.order or 0)
 end
 
+-- ("Turn-ins first" went when ready quests got their own section; a saved "turnins" reads as Smart.)
 Tracking.SORT_MODES = {
   { key = "smart", label = "Smart" },
   { key = "distance", label = "Distance" },
-  { key = "turnins", label = "Turn-ins first" },
   { key = "level", label = "Level", fixed = byLevel },
   { key = "log", label = "Quest log order", fixed = byLogOrder },
 }
@@ -109,29 +114,32 @@ local function sortMode()
       return mode
     end
   end
+  -- A mode that no longer exists ("turnins"): Smart, saved, so the settings dropdown shows it too.
+  ns.DB.profile.cards.sortMode = Tracking.SORT_MODES[1].key
   return Tracking.SORT_MODES[1]
 end
 
--- A zone quest's tier (1 top .. 3) in a mode; `here`: you're in its area, `d`: its distance or nil.
--- A quest with a running timer goes on top in the distance-based modes (it's urgent: review).
-local function tierFor(mode, quest, here, d)
-  if (mode.key == "smart" or mode.key == "turnins") and ns.Card.TimerEnd(quest.questID) then
+-- An active zone quest's tier (1 top, 2) in a mode; `here`: you're in its area. Smart puts a quest
+-- with a running timer (it's urgent: review) or whose area you're in on top.
+local function tierFor(mode, quest, here)
+  if mode.key == "smart" and (here or ns.Card.TimerEnd(quest.questID)) then
     return 1
   end
-  if mode.key == "smart" then
-    if here then
-      return 1
-    elseif quest.readyForTurnIn and d ~= nil and d <= NEAR_TURNIN_YARDS then
-      return 2
-    end
-    return 3
-  elseif mode.key == "turnins" then
-    if quest.readyForTurnIn then
-      return 1
-    end
-    return here and 2 or 3
+  return 2  -- distance and the fixed modes: one list
+end
+
+-- Rule 3's hub test, with hysteresis: flip only when the other side is clearly closer.
+local function turninsFirst(was, nearestTurnin, nearestActive)
+  if not nearestTurnin then
+    return false
   end
-  return 3  -- distance and the fixed modes: one list
+  if not nearestActive then
+    return true
+  end
+  if was then
+    return not (nearestActive < nearestTurnin * HYSTERESIS)
+  end
+  return nearestTurnin < nearestActive * HYSTERESIS
 end
 
 ---Forget the current order and sort again from scratch (sort mode changed: hysteresis would
@@ -146,45 +154,50 @@ function Tracking:Resort()
   ns.Zone:Update()
   -- Tiers, top first (decided in review):
   --   1. in the area right now (nameplate, or within the in-area radius of a spawn): the quest
-  --      you're doing outranks one you'd walk to;
-  --   2. rule 3, "turn-ins near you": ready and within NEAR_TURNIN_YARDS (in-zone alone put a turn-in
-  --      700 yards away on top; a 213 yd turn-in above the quest being done was also wrong);
-  --   3. everything else.
-  --   4. with nearestAnywhere, quests outside the zone that have a distance (same continent): only
-  --      used to fill free card slots (rule 5), after every zone quest.
+  --      you're doing outranks one you'd walk to; or a running timer (urgent);
+  --   2. everything else active in the zone;
+  --   3. with nearestAnywhere, active quests outside the zone that have a distance (same continent):
+  --      only used to fill free card slots (rule 5), after every zone quest;
+  --   4. ready to turn in (rule 3's own section): in the zone, or with nearestAnywhere anywhere on the
+  --      continent; always by distance.
   -- Each tier sorted by distance with hysteresis. Re-sorts happen only on events (100 yd moves), so
   -- crossing a tier line doesn't make cards jump. Those are the Smart mode's tiers; other modes
-  -- (SORT_MODES) put zone quests in tiers 1-3 their own way, or in a fixed order.
+  -- (SORT_MODES) put zone quests in tiers 1-2 their own way, or in a fixed order.
   local distance, tiers = {}, { {}, {}, {}, {} }
   local nearestAnywhere = ns.DB.profile.cards.nearestAnywhere
   local mode = sortMode()
+  local nearestTurnin, nearestActive
   wipe(self.tier)
   for questID, quest in pairs(ns.QuestLog.quests) do
     local shown = placement(quest) == "show"
     local inZone = shown and ns.Zone:IsInZone(quest)
-    if shown and not inZone and nearestAnywhere then
-      local d = ns.Navigation:Distance(quest)
-      if d then
-        distance[questID] = d
-        self.tier[questID] = 4
-        table.insert(tiers[4], quest)
+    local d, tier
+    if inZone then
+      local here = not quest.readyForTurnIn and ns.Navigation:InArea(quest)
+      -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
+      d = here and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
+      tier = quest.readyForTurnIn and 4 or tierFor(mode, quest, here)
+    elseif shown and nearestAnywhere then
+      d = ns.Navigation:Distance(quest)
+      tier = d and (quest.readyForTurnIn and 4 or 3)
+    end
+    if tier then
+      distance[questID] = d
+      self.tier[questID] = tier == 4 and "turnin" or tier
+      table.insert(tiers[tier], quest)
+      if d and tier == 4 then
+        nearestTurnin = math.min(nearestTurnin or d, d)
+      elseif d and tier < 3 then
+        nearestActive = math.min(nearestActive or d, d)
       end
     end
-    if inZone then
-      local here = ns.Navigation:InArea(quest)
-      -- Nearest target from the arrows (spawn points or marker), else the zone-map marker.
-      local d = here and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
-      distance[questID] = d
-      local tier = tierFor(mode, quest, here, d)
-      self.tier[questID] = tier
-      table.insert(tiers[tier], quest)
-    end
   end
+  self.turninsFirst = turninsFirst(self.turninsFirst, nearestTurnin, nearestActive)
 
   -- Settle against the previous order (hysteresis needs it), then replace it. Fixed-order modes
-  -- sort zone tiers by their key instead; tier 4 (nearest outside quests) is always by distance.
+  -- sort the zone's active tiers by their key instead; tiers 3 and 4 are always by distance.
   for i, list in ipairs(tiers) do
-    if mode.fixed and i < 4 then
+    if mode.fixed and i < 3 then
       table.sort(list, mode.fixed)
     else
       settle(list, distance, self.rank)
@@ -222,12 +235,15 @@ end
 
 ---What the stack should draw. Uses the order from the last Resort; quests it hasn't ranked yet
 ---(just pinned off, just unhidden) go after the ranked ones until the next re-sort.
----@return table view { pinned, zone, overflow, groups, elsewhere, hidden }: lists of quests;
----groups is a list of { category, label, quests } in Categories.ORDER
+---@return table view { pinned, turnins, turninsFirst, here, near, groups, elsewhere, hidden }: lists of
+---quests (here: this zone's active quests in order, near: nearestAnywhere's candidates; split by
+---Fill); groups is a list of { category, label, quests } in Categories.ORDER
 function Tracking:View()
   ns.Zone:Update()
   local char = ns.DB.char
-  local view = { pinned = {}, zone = {}, overflow = {}, groups = {}, elsewhere = {}, hidden = {} }
+  local view = {
+    pinned = {}, turnins = {}, turninsFirst = self.turninsFirst, groups = {}, elsewhere = {}, hidden = {},
+  }
   local here, byCategory = {}, {}
   for _, quest in pairs(ns.QuestLog.quests) do
     local where, category = placement(quest)
@@ -240,6 +256,8 @@ function Tracking:View()
       table.insert(byCategory[category], quest)
     elseif where == "hide" then
       -- category hidden in settings: not shown
+    elseif quest.readyForTurnIn and (self.tier[quest.questID] == "turnin" or ns.Zone:IsInZone(quest)) then
+      table.insert(view.turnins, quest)
     elseif ns.Zone:IsInZone(quest) then
       here[#here + 1] = quest
     else
@@ -259,34 +277,57 @@ function Tracking:View()
   local rank = self.rank
   -- The rank already orders by tier; quests not ranked yet (just unpinned or unhidden) go after the
   -- ranked ones until the next re-sort.
-  table.sort(here, function(a, b)
+  local function byRank(a, b)
     local ra, rb = rank[a.questID], rank[b.questID]
     if ra and rb then return ra < rb end
     if ra or rb then return ra ~= nil end
     return (a.order or 0) < (b.order or 0)
-  end)
+  end
+  table.sort(here, byRank)
+  table.sort(view.turnins, byRank)
   table.sort(view.hidden, function(a, b) return (a.title or "") < (b.title or "") end)
 
-  local cap = ns.DB.profile.cards.cap
-  for i, quest in ipairs(here) do
-    table.insert(i <= cap and view.zone or view.overflow, quest)
-  end
-
-  -- Rule 5, nearestAnywhere: free slots take the nearest ranked quests from Elsewhere (only tier 4
-  -- quests are ranked there, and only while the setting is on).
-  local free = cap - #view.zone
-  if free > 0 and ns.DB.profile.cards.nearestAnywhere then
-    local near, rest = {}, {}
+  view.here = here
+  -- Rule 5, nearestAnywhere: candidates for free slots, the nearest ranked quests from Elsewhere (only
+  -- tier 3 quests are ranked there, and only while the setting is on).
+  view.near = {}
+  if ns.DB.profile.cards.nearestAnywhere then
+    local rest = {}
     for _, quest in ipairs(view.elsewhere) do
-      table.insert(rank[quest.questID] and near or rest, quest)
+      table.insert(rank[quest.questID] and view.near or rest, quest)
     end
-    table.sort(near, function(a, b) return rank[a.questID] < rank[b.questID] end)
-    for i, quest in ipairs(near) do
-      table.insert(i <= free and view.zone or rest, quest)
-    end
+    table.sort(view.near, function(a, b) return rank[a.questID] < rank[b.questID] end)
     view.elsewhere = rest
   end
   return view
+end
+
+---Rule 5: the zone's cards, in order, while they fit; the rest behind "+ N more here"; then free room
+---goes to the nearest outside quests (nearestAnywhere), the rest of which stay in Elsewhere. `place`
+---places one card if it fits (by count, or by height with one set: the stack decides) and says so.
+---Once one doesn't fit, nothing after it is placed, so the order stays the order.
+---@param view table from View
+---@param place fun(quest: table, index: number): boolean
+---@return table[] overflow quests behind "+ N more here"
+function Tracking:Fill(view, place)
+  local overflow, placed = {}, 0
+  for _, quest in ipairs(view.here) do
+    if #overflow == 0 and place(quest, placed + 1) then
+      placed = placed + 1
+    else
+      overflow[#overflow + 1] = quest
+    end
+  end
+  local full = #overflow > 0
+  for _, quest in ipairs(view.near) do
+    full = full or not place(quest, placed + 1)
+    if full then
+      table.insert(view.elsewhere, quest)
+    else
+      placed = placed + 1
+    end
+  end
+  return overflow
 end
 
 -- Player actions -----------------------------------------------------------------------------------

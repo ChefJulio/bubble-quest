@@ -78,8 +78,10 @@ function Schema:Entries()
     {
       kind = "slider", id = "QUESTMARKER_CARD_CAP", column = 1, default = 5, min = 1, max = 15, step = 1,
       label = "Cards for this zone",
-      tooltip = "How many of this zone's quests get a card before the rest go behind \"+ N more here\". "
-        .. "Pinned quests always show and don't count.",
+      tooltip = "How many of this zone's quests get a card before the rest go behind \"N more here\". "
+        .. "Pinned quests always show and don't count. Greyed out once you've set the tracker's height "
+        .. "with its resize grip: the cards then fill that height (right-click the grip to go back).",
+      enabledWhen = function(p) return (p.cards.maxHeight or 0) == 0 end,
       format = tostring,
       get = function(p) return p.cards.cap end,
       set = function(p, v) p.cards.cap = v; ns.Stack:Request(false, true) end,
@@ -87,9 +89,10 @@ function Schema:Entries()
     {
       kind = "dropdown", id = "QUESTMARKER_SORT_MODE", column = 1, default = "smart",
       label = "Sort quests by",
-      tooltip = "Smart: quests whose area you're in, then turn-ins near you, then by distance. "
-        .. "Distance: nearest first. Turn-ins first: ready quests on top, then Smart. "
-        .. "Level and Quest log: a fixed order that doesn't change as you move.",
+      tooltip = "Smart: quests whose area you're in (or with a timer running) first, then by distance. "
+        .. "Distance: nearest first. Level and Quest log: a fixed order that doesn't change as you move. "
+        .. "Ready quests always have their own section, on top when you're nearer a turn-in than an "
+        .. "objective.",
       options = function()
         local list = {}
         for _, mode in ipairs(ns.Tracking.SORT_MODES) do

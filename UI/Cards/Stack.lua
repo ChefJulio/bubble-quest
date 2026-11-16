@@ -1,8 +1,9 @@
 local ADDON_NAME, ns = ...
 
 -- The card stack: a header row, then what ns.Tracking:View() says to show:
---   pinned cards, this zone's cards (capped), "+ N more here", one group per separated category
---   ("+ Camping (2)"), "Elsewhere (N)", "Hidden (N)".
+--   pinned cards, "Ready to turn in" (here at a hub), this zone's cards (capped, or filling the height
+--   set), "N more here", "Ready to turn in" (here when out questing), one section per separated
+--   category ("Camping (2)"), "Elsewhere (N)", "Hidden (N)".
 -- Tracking decides order and membership; this file only draws.
 --
 -- When things change (spec: nothing jumps around):
@@ -19,6 +20,7 @@ local DEFAULT_POSITION = { "TOPRIGHT", "TOPRIGHT", -60, -230 }
 local PAD = 6                -- inner padding of the panel
 local HEADER_HEIGHT = 22
 local LINE_HEIGHT = 16
+local SECTION_HEIGHT = 18    -- a section header (placeSection)
 local HALF_GAP = 5           -- space above and below a divider
 local BUTTON_SIZE_X, BUTTON_SIZE_Y = 18, 19  -- Blizzard's tracker header buttons
 local DIVIDER_ALPHA = { card = 0.08, section = 0.2 }
@@ -47,7 +49,7 @@ local Stack = {
 }
 ns.Stack = Stack
 
-local cardPool, headingPool, linePool, dividerPool
+local cardPool, headingPool, linePool, sectionPool, dividerPool
 
 -- Drawing ----------------------------------------------------------------------------------------
 
@@ -66,16 +68,25 @@ local function separate(kind)
   cursor.y = cursor.y + HALF_GAP
 end
 
-local function placeCard(quest, options)
-  separate("card")
+---Places a card, or with `limit` (a height set with the resize grip) only if it ends by that y.
+---@return boolean placed
+local function placeCard(quest, options, limit)
   local card = cardPool:Acquire()
+  local height = card:SetQuest(quest, ns.DB.char.collapsed[quest.questID] == true, options)
+  local gap = cursor.any and 2 * HALF_GAP or 0
+  if limit and cursor.y + gap + height > limit then
+    cardPool:Release(card)
+    return false
+  end
+  separate("card")
   card.frame:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
   Stack.visible[quest.questID] = card
   Stack.order[#Stack.order + 1] = quest.questID  -- top to bottom (the minimap guide's "top card")
   card.ready = quest.readyForTurnIn
-  cursor.y = cursor.y + card:SetQuest(quest, ns.DB.char.collapsed[quest.questID] == true, options)
+  cursor.y = cursor.y + height
   cursor.any = true
   ns.ItemButtons:Attach(card, quest, Stack.container)  -- refused in combat; the queued layout adds it
+  return true
 end
 
 local function placeHeading(text)
@@ -100,6 +111,32 @@ local function placeLine(text, onClick, kind, indent)
   line.label:SetText(text)
   line.onClick = onClick
   cursor.y = cursor.y + LINE_HEIGHT
+  cursor.any = true
+end
+
+---A section header (review: "Elsewhere" and "Camping" didn't read as headers): a band across the
+---card width, a chevron showing open or closed, the name in gold and the count in grey. `minor`: the
+---"N more here" toggle, which continues the zone's list rather than starting a section: no band.
+---@param onClick fun()
+local function placeSection(label, count, expanded, onClick, minor)
+  separate("section")
+  local section = sectionPool:Acquire()
+  section:SetWidth(ns.Card.WIDTH)
+  section:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
+  section.band:SetShown(not minor)
+  if section.fallback then
+    section.fallback:SetText(expanded and "-" or "+")
+  else
+    section.chevron:SetAtlas(expanded and "campaign_headericon_open" or "campaign_headericon_closed")
+  end
+  section.label:SetText(count and ("%s |cff999999(%d)|r"):format(label, count) or label)
+  if minor then
+    section.label:SetTextColor(0.75, 0.75, 0.75)
+  else
+    section.label:SetTextColor(1, 0.82, 0)
+  end
+  section.onClick = onClick
+  cursor.y = cursor.y + SECTION_HEIGHT
   cursor.any = true
 end
 
@@ -157,6 +194,7 @@ function Stack:Layout()
   cardPool:ReleaseAll()
   headingPool:ReleaseAll()
   linePool:ReleaseAll()
+  sectionPool:ReleaseAll()
   dividerPool:ReleaseAll()
   wipe(self.visible)
   wipe(self.order)
@@ -178,28 +216,66 @@ function Stack:Layout()
     local elsewhere = not ns.Zone:IsInZone(quest) and ns.Zone:NameFor(quest) or nil
     placeCard(quest, { pinned = true, zone = elsewhere })
   end
-  for _, quest in ipairs(view.zone) do
-    placeCard(quest)
-  end
 
-  if #view.overflow > 0 then
-    if char.overflow.expanded then
-      for _, quest in ipairs(view.overflow) do
+  -- Ready to turn in (Tracking rule 3): above this zone's cards at a hub, below them when out
+  -- questing. Open unless the player closed it.
+  local function placeTurnins()
+    if #view.turnins == 0 then
+      return
+    end
+    local expanded = char.turnins.expanded
+    placeSection("Ready to turn in", #view.turnins, expanded, toggleGroup(char.turnins))
+    if expanded then
+      for _, quest in ipairs(view.turnins) do
         placeCard(quest)
       end
-      placeLine("- Show fewer", toggleGroup(char.overflow), "section")
-    else
-      placeLine(("+ %d more here"):format(#view.overflow), toggleGroup(char.overflow), "section")
     end
+  end
+  if view.turninsFirst then
+    placeTurnins()
+  end
+
+  -- This zone's cards (Tracking rule 5): by count, or with a height set (resize grip) as many as fit
+  -- above the section headers that follow, so those stay in view (an opened section below scrolls).
+  local cards = ns.DB.profile.cards
+  local place
+  if (cards.maxHeight or 0) > 0 then
+    local below = #view.groups + (#view.elsewhere > 0 and 1 or 0) + (#view.hidden > 0 and 1 or 0)
+      + (#view.here > 0 and 1 or 0)  -- room for "N more here", in case
+      + ((not view.turninsFirst and #view.turnins > 0) and 1 or 0)
+    local limit = self:MaxScrollHeight() - below * (SECTION_HEIGHT + 2 * HALF_GAP)
+    place = function(quest)
+      return placeCard(quest, nil, limit)
+    end
+  else
+    place = function(quest, index)
+      return index <= cards.cap and placeCard(quest)
+    end
+  end
+  local overflow = ns.Tracking:Fill(view, place)
+
+  if #overflow > 0 then
+    if char.overflow.expanded then
+      for _, quest in ipairs(overflow) do
+        placeCard(quest)
+      end
+      placeSection("Show fewer", nil, true, toggleGroup(char.overflow), true)
+    else
+      placeSection(("%d more here"):format(#overflow), nil, false, toggleGroup(char.overflow), true)
+    end
+  end
+
+  if not view.turninsFirst then
+    placeTurnins()
   end
 
   for _, group in ipairs(view.groups) do
     local category = group.category
     local expanded = char.groups[category] == true
-    placeLine(("%s %s (%d)"):format(expanded and "-" or "+", group.label, #group.quests), function()
+    placeSection(group.label, #group.quests, expanded, function()
       char.groups[category] = not expanded or nil
       Stack:Request(false, true)
-    end, "section")
+    end)
     if expanded then
       for _, quest in ipairs(group.quests) do
         placeCard(quest)
@@ -209,8 +285,7 @@ function Stack:Layout()
 
   if #view.elsewhere > 0 then
     local expanded = char.elsewhere.expanded
-    placeLine(("%s Elsewhere (%d)"):format(expanded and "-" or "+", #view.elsewhere), toggleGroup(char.elsewhere),
-      "section")
+    placeSection("Elsewhere", #view.elsewhere, expanded, toggleGroup(char.elsewhere))
     if expanded then
       local byZone, zones = {}, {}
       for _, quest in ipairs(view.elsewhere) do
@@ -234,7 +309,7 @@ function Stack:Layout()
 
   if #view.hidden > 0 then
     local expanded = char.hidden.expanded
-    placeLine(("%s Hidden (%d)"):format(expanded and "-" or "+", #view.hidden), toggleGroup(char.hidden), "section")
+    placeSection("Hidden", #view.hidden, expanded, toggleGroup(char.hidden))
     if expanded then
       for _, quest in ipairs(view.hidden) do
         placeLine(quest.title or "?", function(line)
@@ -281,10 +356,10 @@ function Stack:ApplyWidth()
 end
 
 -- Resize grip (review: "the lock button allows corner dragging"): bottom-right corner, shown while the
--- cards are unlocked. Dragging sets the card width and the most the panel may grow (cards.maxHeight);
--- the panel still shrinks to its contents. While dragging, the panel shows its full height, so you see
--- what you set. Not in combat: quest item buttons are secure and anchored to the cards. Right-click
--- resets both.
+-- cards are unlocked. Dragging sets the card width and the panel's height (cards.maxHeight): this
+-- zone's cards fill it instead of counting to "Cards for this zone" (review). While unlocked the panel
+-- is exactly that height; locked, it shrinks to its contents. Not in combat: quest item buttons are
+-- secure and anchored to the cards. Right-click resets both (back to counting).
 
 local RESIZE_STEP_SECONDS = 0.05
 
@@ -360,8 +435,11 @@ function Stack:Fit()
     return
   end
   local view = math.min(content, self:MaxScrollHeight())
-  if self.resizing then
-    view = self:MaxScrollHeight()  -- while dragging, show the full height being set
+  local cards = ns.DB.profile.cards
+  if self.resizing or (not cards.locked and (cards.maxHeight or 0) > 0) then
+    -- While dragging, and while unlocked, the panel is exactly the height set (review); locked, it
+    -- shrinks to its contents.
+    view = self:MaxScrollHeight()
   end
   self.scroll:SetHeight(view)
   self.container:SetHeight(HEADER_HEIGHT + PAD + view + PAD)
@@ -463,6 +541,9 @@ function Stack:ApplyLock()
   end
   if self.grip then
     self.grip:SetShown(not ns.DB.profile.cards.locked)
+  end
+  if self.body then
+    self:Fit()  -- unlocked shows the full height set; locked shrinks to the contents
   end
 end
 
@@ -663,8 +744,8 @@ function Stack:Create()
   grip:SetScript("OnEnter", function()
     GameTooltip:SetOwner(grip, "ANCHOR_RIGHT")
     GameTooltip:SetText("Resize", 1, 1, 1)
-    GameTooltip:AddLine("Drag to set the width and the most the cards may grow. Right-click: default size. "
-      .. "Lock the cards to hide this.", nil, nil, nil, true)
+    GameTooltip:AddLine("Drag to set the width and height; this zone's cards fill it. Locked, the panel "
+      .. "shrinks to fit. Right-click: default size. Lock the cards to hide this.", nil, nil, nil, true)
     GameTooltip:Show()
   end)
   grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
@@ -708,6 +789,38 @@ function Stack:Create()
     return line
   end, function(line)
     line.onClick = nil
+  end)
+
+  -- Section headers (placeSection). Blizzard's campaign header chevrons, as the Statistics frame uses
+  -- them on Forever; a +/- if the client lacks them.
+  local chevronOpen, chevronClosed = firstAtlas("campaign_headericon_open"), firstAtlas("campaign_headericon_closed")
+  sectionPool = ns.CreatePool(function()
+    local section = CreateFrame("Button", nil, body)
+    section:SetHeight(SECTION_HEIGHT)
+    section:RegisterForClicks("LeftButtonUp")
+    section.band = section:CreateTexture(nil, "BACKGROUND")
+    section.band:SetAllPoints()
+    section.band:SetColorTexture(0, 0, 0, 0.35)
+    local highlight = section:CreateTexture(nil, "HIGHLIGHT")
+    highlight:SetAllPoints()
+    highlight:SetColorTexture(1, 1, 1, 0.06)
+    section.chevron = section:CreateTexture(nil, "ARTWORK")
+    section.chevron:SetSize(12, 12)
+    section.chevron:SetPoint("LEFT", 3, 0)
+    if not (chevronOpen and chevronClosed) then
+      section.fallback = section:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+      section.fallback:SetPoint("CENTER", section.chevron)
+    end
+    section.label = section:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+    section.label:SetPoint("LEFT", section.chevron, "RIGHT", 4, 0)
+    section:SetScript("OnClick", function(self)
+      if self.onClick then
+        self.onClick()
+      end
+    end)
+    return section
+  end, function(section)
+    section.onClick = nil
   end)
 
   dividerPool = ns.CreatePool(function()

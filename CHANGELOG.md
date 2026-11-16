@@ -1,7 +1,13 @@
 ## What's new
 
-- Resize the tracker: unlock it and drag the bottom-right corner to set the width and the most it may
-  grow (right-click the corner for the default size)
+- Ready quests get their own "Ready to turn in" section: on top when you're nearer a turn-in than an
+  objective (at a hub), under this zone's quests when you're out questing. The "Turn-ins first" sort
+  mode is gone (the section does its job)
+- Resize the tracker: unlock it and drag the bottom-right corner. This zone's cards fill the height
+  you set (instead of "Cards for this zone"); unlocked the panel stays that size, locked it shrinks to
+  fit. Right-click the corner for the default size
+- Clearer section headers (Ready to turn in, Camping, Elsewhere, ...) with an open/closed arrow, and a
+  proper collapse button on each card
 - In a group, cards show "+2" when party members don't have that quest and could take it (hover for
   who, click to share). It leaves out who can't: too low level, wrong class or race, and, when they run
   Questmarker too, already completed, an earlier quest missing, or a full quest log
