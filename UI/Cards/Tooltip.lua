@@ -201,6 +201,12 @@ local function sortTexts(member, objectives)
   end
 end
 
+-- A member's status line meaning "done": the game draws "Ready for turn-in" in green ("Not on quest"
+-- is grey). By colour, so it works in every language.
+local function isReadyStatus(color)
+  return color ~= nil and color.g > 0.7 and color.r < 0.5 and color.b < 0.5
+end
+
 local function addRow(name, cells)
   GameTooltip:AddDoubleLine(name, table.concat(cells, "   "), 1, 1, 1, 1, 1, 1)
 end
@@ -226,7 +232,14 @@ local function addGroupedProgress(quest, members)
   end
   for _, member in ipairs(members) do
     local cells = {}
-    if #member.counts == 0 and member.status then
+    if #member.counts == 0 and member.status and isReadyStatus(member.statusColor) then
+      -- Done (the game's green "Ready for turn-in"): full bars with the totals, like your own row
+      -- (review: one said 1/1, the other "Ready for turn-in").
+      for i, objective in ipairs(quest.objectives) do
+        local total = (objective.required and objective.required > 0) and objective.required or nil
+        cells[i] = barAndCount(total, total, true)
+      end
+    elseif #member.counts == 0 and member.status then
       -- No counts, just a status (e.g. "Ready for turn-in"): that's the row.
       cells[1] = colorize(member.status, member.statusColor)
     else
