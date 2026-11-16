@@ -185,8 +185,21 @@ local function acquireGroup(layer, n)
   return group
 end
 
+-- One "?" per spot (review: two showed, a little apart): the same turn-in from two sources a few yards
+-- apart, or two quests handed in to one NPC. Positions placed this redraw, x1, y1, x2, y2, ...
+local placedMarkers = {}
+
 -- A ready quest's turn-in: Blizzard's "?" over the quest's coloured circle, a fixed size on screen.
 local function placeMarker(group, canvas, x, y)
+  local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
+  local limit = TURNIN_SIZE * iconScale() * scale * 0.75
+  for i = 1, #placedMarkers, 2 do
+    if math.abs(placedMarkers[i] - x) < limit and math.abs(placedMarkers[i + 1] - y) < limit then
+      return
+    end
+  end
+  placedMarkers[#placedMarkers + 1] = x
+  placedMarkers[#placedMarkers + 1] = y
   group.markersUsed = group.markersUsed + 1
   local marker = group.markers[group.markersUsed]
   if not marker then
@@ -276,6 +289,7 @@ function MapAreas:Redraw()
   local size = 2 * blobYards() / worldWidth * width
   vector = vector or CreateVector2D(0, 0)
   wipe(self.hits)
+  wipe(placedMarkers)
   self.highlightReset()  -- new circles start untinted by any hover
   self.blobSize = size
   self.radius = size / 2 * 0.7  -- the circle's visible core (its edge fades out)

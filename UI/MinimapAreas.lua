@@ -239,12 +239,27 @@ local guide = { elapsed = TARGET_SECONDS }  -- questID, point: refreshed every T
 
 -- Drawing -----------------------------------------------------------------------------------------
 
+-- One "?" per spot (review: two showed, a little apart): the same turn-in from two sources a few yards
+-- apart, or two quests handed in to one NPC.
+local placedMarkers, markerSize = {}, 0  -- x1, y1, x2, y2, ... this frame
+local function markerNear(x, y)
+  local limit = markerSize * 0.75
+  for i = 1, #placedMarkers, 2 do
+    if math.abs(placedMarkers[i] - x) < limit and math.abs(placedMarkers[i + 1] - y) < limit then
+      return true
+    end
+  end
+  return false
+end
+
 local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square)
   local size = 2 * ns.MapAreas.blobYards() * scale
   local alpha = ns.MapAreas.blobAlpha()
   local reach = half + size / 2  -- a circle partly inside still shows its inside part
   local hits = MinimapAreas.hits
   wipe(hits)
+  wipe(placedMarkers)
+  markerSize = MARKER_SIZE * ns.MapAreas.iconScale()
   -- The whole circle: on the minimap they're small (the world map's 70% core was too fiddly in review).
   MinimapAreas.radius = math.max(size / 2, HOVER_MIN)
   for _, p in ipairs(MinimapAreas.points) do
@@ -260,9 +275,10 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
         local blob = acquire(blobs, "blobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
-        if not p.objective then
-          place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y,
-            MARKER_SIZE * ns.MapAreas.iconScale())
+        if not p.objective and not markerNear(x, y) then
+          place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
+          placedMarkers[#placedMarkers + 1] = x
+          placedMarkers[#placedMarkers + 1] = y
         end
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
       end
