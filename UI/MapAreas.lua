@@ -89,6 +89,17 @@ local function readable(value)
   return value ~= nil and not issecretvalue(value)
 end
 
+-- The quest whose details the quest log shows (a plain read of Blizzard's frame), or nil. Its areas
+-- are drawn even when it isn't on the cards, and glow (review).
+local function detailsQuest()
+  local questMap = rawget(_G, "QuestMapFrame")
+  local details = questMap and questMap.DetailsFrame
+  if details and details:IsVisible() and type(details.questID) == "number" then
+    return details.questID
+  end
+  return nil
+end
+
 local function acquireGroup(layer, n)
   local group = MapAreas.groups[n]
   if not group then
@@ -154,7 +165,8 @@ function MapAreas:Redraw()
   local mapID = map:GetMapID()
   local canvas = map:GetCanvas()
   local width, height = canvas:GetSize()
-  self.drawnFor = { mapID = mapID, width = width, height = height }
+  local details = detailsQuest()
+  self.drawnFor = { mapID = mapID, width = width, height = height, details = details }
   self.dirty = false
   if not self:Enabled() or not mapID or not width or width == 0 then
     return
@@ -169,8 +181,17 @@ function MapAreas:Redraw()
   self.highlightReset()  -- new circles start untinted by any hover
   self.radius = size / 2 * 0.7  -- the circle's visible core (its edge fades out)
 
-  local n = 0
+  -- The cards' quests, plus the quest open in the quest log's details when it isn't on them.
+  local quests = {}
   for questID in pairs(ns.Stack.visible) do
+    quests[questID] = true
+  end
+  if details then
+    quests[details] = true
+  end
+
+  local n = 0
+  for questID in pairs(quests) do
     local quest = ns.QuestLog:Get(questID)
     if quest then
       n = n + 1
@@ -257,16 +278,6 @@ end
 -- rest dim. `target` is { [questID] = { [objective index | "turnin" | "*" (all)] = true } }.
 
 local GLOW_LOW, GLOW_HIGH, GLOW_SECONDS = 0.45, 0.9, 1.4
-
--- The quest whose details the quest log shows (a plain read of Blizzard's frame), or nil.
-local function detailsQuest()
-  local questMap = rawget(_G, "QuestMapFrame")
-  local details = questMap and questMap.DetailsFrame
-  if details and details:IsVisible() and type(details.questID) == "number" then
-    return details.questID
-  end
-  return nil
-end
 
 local highlightKey
 local lit = {}  -- the circles currently glowing
@@ -380,7 +391,8 @@ local function createLayer()
   layer:SetScript("OnUpdate", function(_, delta)
     local drawn = MapAreas.drawnFor
     local width = canvas:GetWidth()
-    if MapAreas.dirty or not drawn or drawn.mapID ~= map:GetMapID() or drawn.width ~= width then
+    if MapAreas.dirty or not drawn or drawn.mapID ~= map:GetMapID() or drawn.width ~= width
+        or drawn.details ~= detailsQuest() then
       MapAreas:Redraw()
     end
     updateHover(layer, map, delta)
