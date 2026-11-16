@@ -22,6 +22,10 @@ local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer 
 -- map). A frame buffer per quest (to merge circles into one even shape) rendered the colours almost
 -- black inside the world map's own frame buffer (seen in review), so it's not used.
 local BLOB_ALPHA = 0.4  -- review: 0.22 was too faint
+-- While hovering: the hovered objectives' circles everywhere on the map light up, the rest dim
+-- (review: "highlight the areas of that specific objective").
+local HIGHLIGHT_ALPHA = 0.75
+local DIMMED_ALPHA = 0.12
 local HOVER_SECONDS = 0.05  -- how often the hover is checked while the map is open
 local FRAME_LEVEL = 2005     -- under Questie's map lines (2015) and icons (2016+)
 
@@ -114,6 +118,7 @@ local function placeBlob(group, canvas, x, y, size, color)
   texture:ClearAllPoints()
   texture:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   texture:Show()
+  return texture
 end
 
 local function finishGroup(group)
@@ -163,6 +168,7 @@ function MapAreas:Redraw()
   local size = 2 * BLOB_YARDS / worldWidth * width
   vector = vector or CreateVector2D(0, 0)
   wipe(self.hits)
+  self.highlightReset()  -- new circles start untinted by any hover
   self.radius = size / 2 * 0.7  -- the circle's visible core (its edge fades out)
 
   local n = 0
@@ -183,8 +189,10 @@ function MapAreas:Redraw()
           local _, pos = C_Map.GetMapPosFromWorldPos(p.map, vector, mapID)
           if pos and pos.x >= 0 and pos.x <= 1 and pos.y >= 0 and pos.y <= 1 then
             local x, y = pos.x * width, pos.y * height
-            placeBlob(group, canvas, x, y, size, color)
-            self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, objective = entry.objective }
+            local texture = placeBlob(group, canvas, x, y, size, color)
+            self.hits[#self.hits + 1] = {
+              x = x, y = y, questID = questID, objective = entry.objective, texture = texture, color = color,
+            }
           end
         end
       end
@@ -245,6 +253,41 @@ local function showTooltip(owner, found)
   GameTooltip:Show()
 end
 
+-- Light up every circle of the hovered objectives and dim the rest; nil `found` restores all.
+-- Only re-tints when the hovered set changes.
+local highlightKey
+local function highlight(found)
+  local key = ""
+  if found then
+    local parts = {}
+    for questID, objectives in pairs(found) do
+      for objective in pairs(objectives) do
+        parts[#parts + 1] = questID .. ":" .. tostring(objective)
+      end
+    end
+    table.sort(parts)
+    key = table.concat(parts, ",")
+  end
+  if key == highlightKey then
+    return
+  end
+  highlightKey = key
+  for _, hit in ipairs(MapAreas.hits) do
+    local alpha = BLOB_ALPHA
+    if found then
+      local objectives = found[hit.questID]
+      alpha = objectives and objectives[hit.objective or "turnin"] and HIGHLIGHT_ALPHA or DIMMED_ALPHA
+    end
+    local c = hit.color
+    hit.texture:SetVertexColor(c[1], c[2], c[3], alpha)
+  end
+end
+
+-- A redraw makes new circles at the normal alpha: forget the last highlight.
+MapAreas.highlightReset = function()
+  highlightKey = nil
+end
+
 local hoverElapsed, hovering = 0, false
 local function updateHover(layer, map, delta)
   hoverElapsed = hoverElapsed + delta
@@ -263,9 +306,13 @@ local function updateHover(layer, map, delta)
   local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
   if found and not tooltipBusy then
     showTooltip(layer, found)
+    highlight(found)
     hovering = true
-  elseif hovering and GameTooltip:GetOwner() == layer and not found then
-    GameTooltip:Hide()
+  elseif hovering and not found then
+    if GameTooltip:GetOwner() == layer then
+      GameTooltip:Hide()
+    end
+    highlight(nil)
     hovering = false
   end
 end
@@ -296,6 +343,7 @@ local function createLayer()
     if hovering and GameTooltip:GetOwner() == layer then
       GameTooltip:Hide()
     end
+    highlight(nil)
     hovering = false
   end)
   MapAreas.layer = layer
