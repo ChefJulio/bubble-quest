@@ -189,6 +189,15 @@ end
 -- apart, or two quests handed in to one NPC. Positions placed this redraw, x1, y1, x2, y2, ...
 local placedMarkers = {}
 
+---Does the game draw its own "?" for this ready quest? It does, on the world map and the minimap, for
+---quests it has a marker for (C_QuestLog.GetQuestsOnMap on the continent, Quests/Zone.lua). Ours then
+---only doubled it, a few yards off (review); the coloured circle stays.
+---@param questID number
+---@return boolean
+function MapAreas.GameMarksTurnIn(questID)
+  return ns.Zone.markers[questID] ~= nil
+end
+
 -- A ready quest's turn-in: Blizzard's "?" over the quest's coloured circle, a fixed size on screen.
 local function placeMarker(group, canvas, x, y)
   local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
@@ -317,7 +326,7 @@ function MapAreas:Redraw()
         if pos and pos.x >= 0 and pos.x <= 1 and pos.y >= 0 and pos.y <= 1 then
           local x, y = pos.x * width, pos.y * height
           local texture = placeBlob(group, canvas, x, y, size, color)
-          if not entry.objective then
+          if not entry.objective and not MapAreas.GameMarksTurnIn(questID) then
             placeMarker(group, canvas, x, y)
           end
           self.hits[#self.hits + 1] = {

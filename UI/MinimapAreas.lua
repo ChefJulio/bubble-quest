@@ -275,7 +275,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
         local blob = acquire(blobs, "blobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
-        if not p.objective and not markerNear(x, y) then
+        if not p.objective and not ns.MapAreas.GameMarksTurnIn(p.questID) and not markerNear(x, y) then
           place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
           placedMarkers[#placedMarkers + 1] = x
           placedMarkers[#placedMarkers + 1] = y
