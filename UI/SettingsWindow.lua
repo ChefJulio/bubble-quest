@@ -12,7 +12,7 @@ local ADDON_NAME, ns = ...
 -- Every control reads its value from the profile when the window opens or a setting changes
 -- (SettingChanged); `refreshing` stops those refreshes from counting as the player's changes.
 
-local COLUMN_WIDTH = 300
+local COLUMN_WIDTH = 320  -- fits "Show: Name Level Arrow Distance" on one row
 local PAD = 18
 local HEADER_HEIGHT = 30
 local SECTION_HEIGHT = 30
@@ -241,7 +241,7 @@ local function buildRow(parent, members, x, y)
   for _, entry in ipairs(members) do
     if entry.kind == "checkbox" then
       local box, refresh = checkbox(parent, entry, cursor, y - (INLINE_HEIGHT - 24) / 2, entry.short)
-      cursor = cursor + 24 + box.Text:GetStringWidth() + 14
+      cursor = cursor + 24 + box.Text:GetStringWidth() + 10
       refreshes[#refreshes + 1] = refresh
     elseif entry.kind == "dropdown" then
       local width = entry.width or 90

@@ -201,13 +201,30 @@ function Card:ClearAllPoints() self.frame:ClearAllPoints() end
 local PIN_MARKUP = "|A:Waypoint-MapPin-Tracked:14:14|a "
 
 ---@param options table? { pinned = bool, zone = string? (shown for pinned quests elsewhere) }
+-- The title line's parts follow the card settings ("Show: Name, Level"); the pin and zone always show.
 local function titleText(quest, options)
-  local color = GetQuestDifficultyColor(quest.level or 0)
-  local level = ("|cff%02x%02x%02x[%d]|r"):format(color.r * 255, color.g * 255, color.b * 255, quest.level or 0)
-  local tag = quest.tagName and (" |cff999999(" .. quest.tagName .. ")|r") or ""
-  local pin = options and options.pinned and PIN_MARKUP or ""
-  local zone = options and options.zone and (" |cff999999- " .. options.zone .. "|r") or ""
-  return ("%s%s %s%s%s"):format(pin, level, quest.title or "?", tag, zone)
+  local show = ns.DB.profile.cards.show
+  local parts = {}
+  if options and options.pinned then
+    parts[#parts + 1] = PIN_MARKUP
+  end
+  if show.level then
+    local color = GetQuestDifficultyColor(quest.level or 0)
+    parts[#parts + 1] = ("|cff%02x%02x%02x[%d]|r "):format(color.r * 255, color.g * 255, color.b * 255, quest.level or 0)
+  end
+  if show.name then
+    parts[#parts + 1] = (quest.title or "?") .. (quest.tagName and (" |cff999999(" .. quest.tagName .. ")|r") or "")
+  end
+  if options and options.zone then
+    parts[#parts + 1] = " |cff999999- " .. options.zone .. "|r"
+  end
+  return table.concat(parts)
+end
+
+-- Ready quests keep their finished objectives above the turn-in line (setting, default on: review,
+-- "I lose track of which quest it was").
+local function keepDone(quest)
+  return quest.readyForTurnIn and ns.DB.profile.cards.keepDone and #quest.objectives > 0
 end
 
 -- How many rows the card shows for this quest; the stack compares it to decide whether a change
@@ -217,7 +234,7 @@ function Card.RowCount(quest, collapsed)
     return 0
   end
   if quest.readyForTurnIn then
-    return 1
+    return keepDone(quest) and #quest.objectives + 1 or 1
   end
   return #quest.objectives
 end
@@ -262,14 +279,15 @@ function Card:SetQuest(quest, collapsed, options)
   for i = 1, self.rowCount do
     local row = self.rows[i] or createRow(self)
     self.rows[i] = row
-    if quest.readyForTurnIn then
+    if quest.readyForTurnIn and i == self.rowCount then
+      -- The turn-in line: last, below any kept objectives.
       local turnIn = ns.ForeverData:TurnInName(quest.questID)
       setRow(row, turnIn and ("Turn in to " .. turnIn) or "Ready to turn in", nil, false)
       row.text:SetTextColor(0.2, 1, 0.2)
     else
       local objective = quest.objectives[i]
       local text, counter = ns.DoLine:For(objective, quest.questID)
-      setRow(row, text, counter, objective.finished)
+      setRow(row, text, counter, objective.finished or quest.readyForTurnIn)
     end
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -y)
@@ -322,6 +340,14 @@ function Card:SetNavigation(nav)
       arrow = nav.angle ~= nil
       text = nav.zone or (nav.distance and ("%d yd"):format(nav.distance)) or ""
     end
+  end
+  -- Card settings: "Arrow" is the arrow and the in-area marker; "Distance" the text beside them.
+  local show = ns.DB.profile.cards.show
+  if not show.arrow then
+    arrow, inArea = false, false
+  end
+  if not show.distance then
+    text = ""
   end
   local icon = arrow or inArea
   if text ~= self.lastNavText or icon ~= self.lastNavIcon then
@@ -434,14 +460,16 @@ end
 function Card:UpdateInPlace(quest)
   self:UpdateBar(quest)
   self.title:SetText(titleText(quest, self.options))
-  if quest.readyForTurnIn then
+  if quest.readyForTurnIn and not keepDone(quest) then
     return
   end
-  for i = 1, self.rowCount do
+  -- Objective rows (on a ready card, all but the last, the turn-in line).
+  local objectiveRows = quest.readyForTurnIn and self.rowCount - 1 or self.rowCount
+  for i = 1, objectiveRows do
     local objective = quest.objectives[i]
     if objective then
       local text, counter = ns.DoLine:For(objective, quest.questID)
-      setRow(self.rows[i], text, counter, objective.finished)
+      setRow(self.rows[i], text, counter, objective.finished or quest.readyForTurnIn)
     end
   end
 end

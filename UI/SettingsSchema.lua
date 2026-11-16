@@ -109,7 +109,48 @@ function Schema:Entries()
       set = function(p, v) p.cards.nearestAnywhere = v; ns.Bus:Fire("TrackingResortWanted") end,
     },
 
-    { kind = "section", label = "Look", column = 1 },
+    -- What a card shows (review: a card layout editor). The four "Show" toggles share one row in
+    -- Questmarker's window; Blizzard's panel lists them with their full labels.
+    { kind = "section", label = "Cards", column = 1 },
+    {
+      kind = "checkbox", id = "QUESTMARKER_SHOW_NAME", column = 1, default = true,
+      row = "show", rowLabel = "Show:", short = "Name",
+      label = "Show quest names on cards",
+      get = function(p) return p.cards.show.name end,
+      set = function(p, v) p.cards.show.name = v; ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_SHOW_LEVEL", column = 1, default = true,
+      row = "show", short = "Level",
+      label = "Show quest levels on cards",
+      get = function(p) return p.cards.show.level end,
+      set = function(p, v) p.cards.show.level = v; ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_SHOW_ARROW", column = 1, default = true,
+      row = "show", short = "Arrow",
+      label = "Show arrows on cards",
+      tooltip = "The direction arrow, and the green marker when you're in the area.",
+      get = function(p) return p.cards.show.arrow end,
+      set = function(p, v) p.cards.show.arrow = v; ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_SHOW_DISTANCE", column = 1, default = true,
+      row = "show", short = "Distance",
+      label = "Show distances on cards",
+      tooltip = "The yards, zone name or \"here\" next to the arrow.",
+      get = function(p) return p.cards.show.distance end,
+      set = function(p, v) p.cards.show.distance = v; ns.Stack:Request(false, true) end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_KEEP_DONE", column = 1, default = true,
+      label = "Keep finished objectives on ready quests",
+      tooltip = "When a quest is ready to turn in, its card keeps showing the objectives you finished "
+        .. "(greyed, with their counts) above the turn-in line, so you can still tell which quest it is. "
+        .. "Off: only the turn-in line.",
+      get = function(p) return p.cards.keepDone end,
+      set = function(p, v) p.cards.keepDone = v; ns.Stack:Request(false, true) end,
+    },
     {
       kind = "checkbox", id = "QUESTMARKER_PROGRESS_BAR", column = 1, default = true,
       label = "Progress bar under each quest",
@@ -118,6 +159,16 @@ function Schema:Entries()
       get = function(p) return p.cards.progressBar end,
       set = function(p, v) p.cards.progressBar = v; ns.Stack:Request(false, true) end,
     },
+    {
+      kind = "checkbox", id = "QUESTMARKER_HINTS", column = 1, default = true,
+      label = "Show hints for tricky steps",
+      tooltip = "A \"Tip:\" line under quests that have a step players often get stuck on (timers, hidden "
+        .. "spawns, items to use or keep). Only some quests have one.",
+      get = function(p) return p.cards.hints end,
+      set = function(p, v) p.cards.hints = v; ns.Stack:Request(false, true) end,
+    },
+
+    { kind = "section", label = "Look", column = 1 },
     {
       kind = "dropdown", id = "QUESTMARKER_FONT", column = 1, default = "default",
       label = "Font",
@@ -135,14 +186,6 @@ function Schema:Entries()
       format = percent,
       get = function(p) return p.font.scale end,
       set = function(p, v) p.font.scale = v; ns.Fonts:Apply() end,
-    },
-    {
-      kind = "checkbox", id = "QUESTMARKER_HINTS", column = 1, default = true,
-      label = "Show hints for tricky steps",
-      tooltip = "A \"Tip:\" line under quests that have a step players often get stuck on (timers, hidden "
-        .. "spawns, items to use or keep). Only some quests have one.",
-      get = function(p) return p.cards.hints end,
-      set = function(p, v) p.cards.hints = v; ns.Stack:Request(false, true) end,
     },
     {
       kind = "slider", id = "QUESTMARKER_BACKGROUND_OPACITY", column = 1, default = 25, min = 0, max = 100, step = 5,

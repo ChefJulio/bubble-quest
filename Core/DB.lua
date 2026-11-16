@@ -33,6 +33,8 @@ local PROFILE_DEFAULTS = {
     arrowColorByDistance = true,  -- green close -> red far; off = gold
     progressBar = true,           -- thin progress bar under each card
     hints = true,                 -- "Tip:" lines for quests with a known tricky step
+    show = { name = true, level = true, arrow = true, distance = true },  -- card elements shown
+    keepDone = true,  -- ready quests keep their finished objectives (greyed) above the turn-in line
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
   automation = {
