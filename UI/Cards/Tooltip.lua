@@ -36,24 +36,14 @@ local function sourcesText(questID, objective)
     return nil
   end
   local name = ns.QuestLog.ObjectiveName(objective)
-  -- At most MAX_TOOLTIP_SOURCES names, nearest first, then "+N more" (all 20 was a wall of text).
-  local sources = ns.ForeverData:ItemSources(questID, name, MAX_TOOLTIP_SOURCES)
-  local names, kind, more
-  if sources then
-    names, kind, more = sources.names, sources.kind, sources.more
-  else
-    names, kind = ns.Learned:Sources(questID, name)
-    more = names and math.max(0, #names - MAX_TOOLTIP_SOURCES) or 0
-    if more > 0 then
-      names = { unpack(names, 1, MAX_TOOLTIP_SOURCES) }
-    end
-  end
-  if not names or #names == 0 then
+  local sources = ns.DoLine.ItemSources(questID, name)
+  if not sources or #sources.names == 0 then
     return nil
   end
-  local verb = kind == "object" and "Gathered from" or "Dropped by"
-  local text = ("%s %s"):format(verb, table.concat(names, ", "))
-  return more > 0 and ("%s +%d more"):format(text, more) or text
+  -- Grouped when they share a word ("any Stonesplinter"), else at most MAX_TOOLTIP_SOURCES names,
+  -- nearest first, then "+N" (all 20 was a wall of text).
+  local verb = sources.kind == "object" and "Gathered from" or "Dropped by"
+  return ("%s %s"):format(verb, ns.DoLine.SourcesText(sources.names, sources.more, MAX_TOOLTIP_SOURCES))
 end
 
 -- Mini bars ----------------------------------------------------------------------------------------

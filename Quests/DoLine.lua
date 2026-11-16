@@ -16,25 +16,78 @@ local ENGLISH = GetLocale() == "enUS" or GetLocale() == "enGB"
 -- forever-db's names are English, so this runs on English clients only.
 local SOURCE_VERBS = { npc = "Loot", object = "Gather", item = "Open" }
 
-local MAX_LEARNED_NAMES = 2
+local MAX_SHOWN_NAMES = 2
+local ALL_NAMES = 99         -- ask for every source: grouping needs them all
+local GROUP_SHARE = 0.6      -- a word shared by at least this share of the sources names the group
+local GROUP_MIN = 3          -- ... and by at least this many
 
--- Creatures and objects seen in play whose tooltips list this objective (Data/Learned.lua), for items
--- forever-db has no sources for (e.g. Stolen Book: Kobold Worker and Kobold Vermin; Gnomeregan
--- Archival Data: Snowdrift).
-local function learnedSources(questID, itemName)
+---All known sources of an item objective: forever-db's, else learned in play (Data/Learned.lua: e.g.
+---Stolen Book from Kobold Worker and Kobold Vermin; Gnomeregan Archival Data from Snowdrift).
+---@param questID number
+---@param itemName string
+---@return table? sources { kind, names = every name (nearest first), more = beyond those }
+function DoLine.ItemSources(questID, itemName)
+  local sources = ns.ForeverData:ItemSources(questID, itemName, ALL_NAMES)
+  if sources then
+    return sources
+  end
   local names, kind = ns.Learned:Sources(questID, itemName)
-  if not names then
+  return names and { kind = kind, names = names, more = 0 } or nil
+end
+
+---A group name for many sources sharing a word (review: "kill boars, not every boar"): the first word
+---(a tribe, "Stonesplinter Trogg, Stonesplinter Seer, ...") or the last (a kind, "Mountain Boar, Elder
+---Mountain Boar, ..."), when at least GROUP_SHARE of the names (and GROUP_MIN) have it. Returns
+---"any Stonesplinter" and how many names it doesn't cover, or nil.
+---@param names string[]
+---@return string? group
+---@return number? leftovers
+function DoLine.GroupName(names)
+  if #names < GROUP_MIN then
     return nil
   end
-  local shown = {}
-  for i = 1, math.min(#names, MAX_LEARNED_NAMES) do
-    shown[i] = names[i]
+  local counts = { first = {}, last = {} }
+  for _, name in ipairs(names) do
+    local first, last = name:match("^(%S+)%s"), name:match("%s(%S+)$")
+    if first then counts.first[first] = (counts.first[first] or 0) + 1 end
+    if last then counts.last[last] = (counts.last[last] or 0) + 1 end
   end
-  return { kind = kind, names = shown, more = #names - #shown }
+  local bestWord, bestCount = nil, 0
+  for _, which in ipairs({ "first", "last" }) do
+    for word, count in pairs(counts[which]) do
+      if count > bestCount then
+        bestWord, bestCount = word, count
+      end
+    end
+  end
+  if not bestWord or bestCount < GROUP_MIN or bestCount < #names * GROUP_SHARE then
+    return nil
+  end
+  return "any " .. bestWord, #names - bestCount
+end
+
+---"any Stonesplinter +1", or the first `shown` names "A, B +7": how to name an objective's sources.
+---@param names string[] every source name
+---@param more number sources beyond `names`
+---@param shown number how many names to list when they don't group
+---@return string
+function DoLine.SourcesText(names, more, shown)
+  local group, leftovers = DoLine.GroupName(names)
+  if group then
+    local rest = leftovers + more
+    return rest > 0 and ("%s +%d"):format(group, rest) or group
+  end
+  local list = {}
+  for i = 1, math.min(#names, shown) do
+    list[i] = names[i]
+  end
+  local rest = #names - #list + more
+  local text = table.concat(list, ", ")
+  return rest > 0 and ("%s +%d"):format(text, rest) or text
 end
 
 local function collectLine(questID, itemName)
-  local sources = questID and (ns.ForeverData:ItemSources(questID, itemName) or learnedSources(questID, itemName))
+  local sources = questID and DoLine.ItemSources(questID, itemName)
   if not sources or #sources.names == 0 then
     return "Collect " .. itemName
   end
@@ -49,10 +102,7 @@ local function collectLine(questID, itemName)
   if #names == 0 then
     return ("%s %s"):format(SOURCE_VERBS[sources.kind] or "Collect", itemName)
   end
-  local from = table.concat(names, ", ")
-  if sources.more > 0 then
-    from = ("%s +%d"):format(from, sources.more)
-  end
+  local from = DoLine.SourcesText(names, sources.more, MAX_SHOWN_NAMES)
   if sources.kind == "item" then
     return ("Open %s for %s"):format(from, itemName)
   end

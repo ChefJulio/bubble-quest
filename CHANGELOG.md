@@ -14,6 +14,8 @@
 - Ready quests keep their finished objectives (greyed, with counts) above the turn-in line, so you can
   still tell which quest it is (setting "Keep finished objectives on ready quests", on by default)
 - Card layout settings: show or hide the quest name, level, arrow and distance
+- Items dropped by many similar mobs name the group: "Loot Trogg Stone Tooth from any Stonesplinter"
+  instead of listing a dozen mobs
 
 ## Fixes
 
