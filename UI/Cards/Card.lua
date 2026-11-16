@@ -286,6 +286,14 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   party:Hide()
   self.party = party
 
+  -- The quest's map colour (UI/MapAreas.lua), a thin strip down the card's left edge, linking the card
+  -- to its areas on the world map.
+  self.colorStrip = frame:CreateTexture(nil, "ARTWORK")
+  self.colorStrip:SetPoint("TOPLEFT", -5, 0)
+  self.colorStrip:SetPoint("BOTTOMLEFT", -5, 0)
+  self.colorStrip:SetWidth(2)
+  self.colorStrip:Hide()
+
   -- The card's progress bar (the whole quest); objective rows get their own when they need one.
   self.bar = createBar(frame)
 
@@ -377,6 +385,14 @@ function Card:SetQuest(quest, collapsed, options)
   -- The width may have changed since this card was last filled (resize grip).
   self.frame:SetWidth(WIDTH)
   self.lastNavText = nil  -- so SetNavigation re-fits the title to the current width
+
+  if ns.MapAreas:Enabled() then
+    local color = ns.MapAreas:ColorFor(quest.questID)
+    self.colorStrip:SetColorTexture(color[1], color[2], color[3], 0.9)
+    self.colorStrip:Show()
+  else
+    self.colorStrip:Hide()
+  end
 
   -- Party members who lack the quest (only when it can be shared).
   if C_QuestLog.IsPushableQuest(quest.questID) then

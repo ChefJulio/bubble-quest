@@ -53,6 +53,7 @@ UI\Cards\Menu.lua
 UI\Cards\Tooltip.lua
 UI\Cards\ItemButtons.lua
 UI\Cards\Stack.lua
+UI\MapAreas.lua
 UI\SettingsSchema.lua
 UI\Settings.lua
 UI\SettingsWindow.lua

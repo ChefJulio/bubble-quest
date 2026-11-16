@@ -48,6 +48,9 @@ local PROFILE_DEFAULTS = {
     requireKey = false,    -- false: holding the key pauses automation; true: only automate while held
   },
   questieData = true,  -- use Questie's location data for arrows when it's installed
+  map = {
+    areas = true,  -- quest areas on the world map (prototype), one colour per quest on the cards
+  },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {
     face = "default",  -- a LibSharedMedia font name, or "default" (the game's)

@@ -245,6 +245,7 @@ function Stack:Layout()
   self.headerDivider:SetShown(y > 0)
   self.body:SetHeight(math.max(y, 1))
   self:Fit()
+  ns.MapAreas:MarkDirty()  -- the quests on the cards may have changed: the map's areas follow
 end
 
 -- Scrolling ----------------------------------------------------------------------------------------

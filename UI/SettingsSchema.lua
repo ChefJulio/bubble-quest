@@ -297,6 +297,17 @@ function Schema:Entries()
       set = function(p, v) p.automation.requireKey = v end,
     },
 
+    { kind = "section", label = "Map", column = 2 },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MAP_AREAS", column = 2, default = true,
+      label = "Show quest areas on the world map",
+      tooltip = "Shades where each card's objectives are on the world map, one colour per quest, matched by "
+        .. "a strip on its card. With Questie, untick its Icons > Objectives to hide its dots and keep "
+        .. "just the areas. (Prototype.)",
+      get = function(p) return p.map.areas end,
+      set = function(p, v) p.map.areas = v; ns.MapAreas:MarkDirty(); ns.Stack:Request(false, true) end,
+    },
+
     { kind = "section", label = "Arrows", column = 2 },
     {
       kind = "dropdown", id = "QUESTMARKER_ARROW_STYLE", column = 2, default = "classic",
