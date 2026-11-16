@@ -12,8 +12,8 @@ agreed), **skip** (not worth it, or the client already does it).
 | --- | --- | --- |
 | Show party members' tracked quest objectives (Questie-to-Questie comms) | have | Party progress from the server (cards, map, minimap tooltips); works without the addon on their side |
 | Announce quest updates in party chat (accepted, abandoned, objective done, completed, item starts a quest, incomplete breadcrumb), to yourself, ShutUp | planned | Off by default (review: "I hate them"; some players like them); per-type toggles |
-| Instant quest text | candidate | Check first whether Forever's client has its own option |
-| Custom quest frame icons (gossip/quest window: available, complete, repeatable, trivial) | candidate | Small |
+| Instant quest text | planned | Check first whether Forever's client has its own option |
+| Custom quest frame icons (gossip/quest window: available, complete, repeatable, trivial) | planned | Small |
 | Map button | planned | Part 2's map menu |
 | Minimap button, addon compartment | have | Compartment entry (no minimap button, by choice) |
 | Map coordinates, minimap coordinates, decimal precision | planned | Small; TomTom also does it |
@@ -71,7 +71,7 @@ agreed), **skip** (not worth it, or the client already does it).
 | Questie | Status | Questmarker / notes |
 | --- | --- | --- |
 | Quest objective icon on nameplates (position, scale) | planned | Roadmap 3 |
-| Same on the target frame | candidate | With the nameplate work |
+| Same on the target frame | planned | With the nameplate work |
 
 ## Advanced and other
 
