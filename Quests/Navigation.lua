@@ -242,11 +242,11 @@ end
 
 local COMPASS = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" }  -- counter-clockwise from north
 
----Where one objective is, on its own (the tooltip lists every objective's: review, "the areas are in
----different places"). Nil when unknown or finished.
+---Where one objective is, on its own (review: "the areas are in different places"): each objective
+---row's arrow and the tooltip's per-objective distances. Nil when unknown.
 ---@param quest table
 ---@param index number objective index
----@return table? { distance, compass, inArea } or { zone } on another map
+---@return table? { distance, compass, angle?, inArea } or { zone } on another map
 function Navigation:ObjectiveNav(quest, index)
   local areas = targetsFor(quest).byObjective[index]
   local north, west, instanceMap = self:PlayerPosition()
@@ -270,11 +270,14 @@ function Navigation:ObjectiveNav(quest, index)
     end
     return nil
   end
-  -- Bearing counter-clockwise from north, as the arrow's; the eighth of the compass it falls in.
-  local degrees = math.deg(math.atan2(bestPoint.y - west, bestPoint.x - north)) % 360
+  -- Bearing counter-clockwise from north, as the arrow's; the eighth of the compass it falls in; and
+  -- the angle for an arrow (bearing minus facing), as the card's.
+  local bearing = math.atan2(bestPoint.y - west, bestPoint.x - north)
+  local facing = GetPlayerFacing()
   return {
     distance = bestDistance,
-    compass = COMPASS[math.floor((degrees + 22.5) / 45) % 8 + 1],
+    compass = COMPASS[math.floor((math.deg(bearing) % 360 + 22.5) / 45) % 8 + 1],
+    angle = facing and bearing - facing or nil,
     inArea = bestDistance <= hereYards(best),
   }
 end
@@ -358,6 +361,7 @@ driver:SetScript("OnUpdate", function(_, delta)
     local quest = ns.QuestLog:Get(questID)
     if quest then
       card:SetNavigation(Navigation:Compute(quest))
+      card:UpdateObjectiveNavigation(quest)
       card:UpdateTimer()
     end
   end

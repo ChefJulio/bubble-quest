@@ -18,6 +18,8 @@ local BAR_HEIGHT = 4     -- progress bar under the card
 local MAX_SEGMENTS = 20  -- more steps than this and segments get too thin to read: smooth bar
 local BAR_GAP = 3
 local BAR_WIDTH = WIDTH - ROW_INDENT
+local ROW_NAV_WIDTH = 56   -- an objective row's own arrow and distance ("888 yd")
+local ROW_ARROW_SIZE = 11
 local ARROW_SIZE = 16
 local CHECK_TEXTURE = "Interface\\RaidFrame\\ReadyCheck-Ready"
 local IN_AREA_ATLAS = "Navigation-Tracked-Icon"
@@ -170,13 +172,17 @@ local function createRow(card)
   row.check:SetTexture(CHECK_TEXTURE)
   row.check:SetSize(12, 12)
   row.check:SetPoint("TOPLEFT", 0, 0)
-  -- "The card's arrow points at this objective" (review): a small arrow in the card's style, turned
-  -- to point at the row, where the check mark goes on finished rows (a targeted row is unfinished).
-  row.target = row:CreateTexture(nil, "ARTWORK")
-  row.target:SetSize(10, 10)
-  row.target:SetPoint("TOPLEFT", 1, -1)
-  Card.PrepareRotatingTexture(row.target)
-  row.target:Hide()
+  -- Each unfinished objective of a quest with several gets its own arrow and distance, left of the
+  -- counter (review: "all separate objectives to have arrow/dist"; their areas can be far apart).
+  row.navText = row:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallHighlightFont")
+  row.navText:SetPoint("TOPRIGHT", -COUNTER_WIDTH, -1)
+  row.navText:SetJustifyH("RIGHT")
+  row.navText:SetWordWrap(false)
+  row.navArrow = row:CreateTexture(nil, "ARTWORK")
+  row.navArrow:SetSize(ROW_ARROW_SIZE, ROW_ARROW_SIZE)
+  row.navArrow:SetPoint("RIGHT", row.navText, "LEFT", -2, 0)  -- right next to the text, whatever its length
+  Card.PrepareRotatingTexture(row.navArrow)
+  row.navArrow:Hide()
   row.text = row:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
   row.text:SetPoint("TOPLEFT", ROW_INDENT, 0)
   row.text:SetWidth(WIDTH - ROW_INDENT - COUNTER_WIDTH)
@@ -335,17 +341,15 @@ function Card:SetQuest(quest, collapsed, options)
   for _, row in ipairs(self.rows) do
     row:Hide()
     row.highlight:Hide()
-    row.target:Hide()
+    row.navShown = false
+    row.navText:SetText("")
+    row.navArrow:Hide()
+    row.text:SetWidth(WIDTH - ROW_INDENT - COUNTER_WIDTH)
   end
-  self.highlighted, self.targeted = nil, nil
-  -- The target marker only means something with two or more objectives to choose between.
-  local unfinished = 0
-  for _, objective in ipairs(quest.objectives) do
-    if not objective.finished then
-      unfinished = unfinished + 1
-    end
-  end
-  self.markTarget = not quest.readyForTurnIn and not collapsed and unfinished >= 2
+  self.highlighted = nil
+  -- Per-objective arrows: quests with two or more objectives, not ready, not collapsed; each
+  -- unfinished objective's row (set below, filled by UpdateObjectiveNavigation every tick).
+  local rowNav = not quest.readyForTurnIn and not collapsed and #quest.objectives >= 2
   local style = ns.DB.profile.cards.arrowStyle
   if style ~= self.arrowStyle then
     self.arrowTintable = Card.ApplyArrowStyle(self.arrow, style)
@@ -384,6 +388,10 @@ function Card:SetQuest(quest, collapsed, options)
       row.text:SetTextColor(0.2, 1, 0.2)
     else
       local objective = quest.objectives[i]
+      row.navShown = rowNav and not objective.finished
+      if row.navShown then
+        row.text:SetWidth(WIDTH - ROW_INDENT - COUNTER_WIDTH - ROW_NAV_WIDTH)
+      end
       local text, counter = ns.DoLine:For(objective, quest.questID)
       setRow(row, text, counter, objective.finished or quest.readyForTurnIn)
       objectiveBar = barPerObjective
@@ -489,20 +497,58 @@ function Card:SetNavigation(nav)
     end
     self.highlighted = highlight
   end
-  -- Which objective the arrow is heading for (while it's an arrow: "here" highlights the row instead).
-  local targeted = arrow and self.markTarget and nav and nav.objective or nil
-  if targeted ~= self.targeted then
-    for i, row in ipairs(self.rows) do
-      local isTarget = i == targeted
-      if isTarget and row.targetStyle ~= self.arrowStyle then
-        Card.ApplyArrowStyle(row.target, self.arrowStyle)
-        row.target:SetRotation(-math.pi / 2)  -- the art points up; turned to point right, at the row
-        row.target:SetVertexColor(GOLD[1], GOLD[2], GOLD[3])
-        row.targetStyle = self.arrowStyle
+end
+
+---Each objective row's own arrow and distance (rows with navShown). Called 10 times a second with the
+---card's arrow; only touches what changed.
+---@param quest table
+function Card:UpdateObjectiveNavigation(quest)
+  local show = ns.DB.profile.cards.show
+  for i, row in ipairs(self.rows) do
+    if row.navShown then
+      local nav = ns.Navigation:ObjectiveNav(quest, i)
+      local text, arrow = "", false
+      if nav then
+        if nav.zone then
+          text = nav.zone
+        elseif nav.inArea then
+          text = "|cff33ff33here|r"
+        else
+          text = ("%d yd"):format(nav.distance)
+          arrow = nav.angle ~= nil
+        end
       end
-      row.target:SetShown(isTarget)
+      if not show.distance then
+        text = ""
+      end
+      arrow = arrow and show.arrow
+      if text ~= row.lastNavText then
+        -- Sized to the text (so the arrow sits right beside it), capped to the row's nav space so a
+        -- long zone name is cut instead of covering the objective.
+        row.navText:SetWidth(0)
+        row.navText:SetText(text)
+        local maxWidth = ROW_NAV_WIDTH - ROW_ARROW_SIZE - 2
+        if row.navText:GetStringWidth() > maxWidth then
+          row.navText:SetWidth(maxWidth)
+        end
+        row.lastNavText = text
+      end
+      if arrow and row.arrowStyle ~= self.arrowStyle then
+        row.arrowTintable = Card.ApplyArrowStyle(row.navArrow, self.arrowStyle)
+        row.arrowStyle = self.arrowStyle
+      end
+      row.navArrow:SetShown(arrow)
+      if arrow and nav then
+        row.navArrow:SetRotation(nav.angle)
+        if row.arrowTintable then
+          if ns.DB.profile.cards.arrowColorByDistance then
+            row.navArrow:SetVertexColor(distanceColor(nav.distance))
+          else
+            row.navArrow:SetVertexColor(GOLD[1], GOLD[2], GOLD[3])
+          end
+        end
+      end
     end
-    self.targeted = targeted
   end
 end
 
