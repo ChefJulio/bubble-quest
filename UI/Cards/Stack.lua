@@ -45,6 +45,7 @@ local Stack = {
   container = nil,  ---@type Frame?
   visible = {},     -- [questID] = card currently on screen
   order = {},       -- questIDs of the cards on screen, top to bottom
+  sections = {},    -- section headers laid out, top to bottom: { frame, y (in the body) }
   resortPending = false,
 }
 ns.Stack = Stack
@@ -136,6 +137,7 @@ local function placeSection(label, count, expanded, onClick, minor)
     section.label:SetTextColor(1, 0.82, 0)
   end
   section.onClick = onClick
+  Stack.sections[#Stack.sections + 1] = { frame = section, y = cursor.y }  -- for docking (Scrolling)
   cursor.y = cursor.y + SECTION_HEIGHT
   cursor.any = true
 end
@@ -198,6 +200,7 @@ function Stack:Layout()
   dividerPool:ReleaseAll()
   wipe(self.visible)
   wipe(self.order)
+  wipe(self.sections)
   updateHeader()
   self:UpdateGrip()
 
@@ -447,12 +450,28 @@ function Stack:Fit()
   self:ScrollTo(self.scroll:GetVerticalScroll())
 end
 
+-- Section headers never scroll out below (review: a collapsed "Hidden" with a forgotten quest sat out
+-- of view at the bottom): one that would is docked to the panel's bottom edge, stacked above the ones
+-- after it, on a solid backing over the cards; scrolling down, each slides up into its own place.
+function Stack:DockSections(offset)
+  local floor = offset + self.scroll:GetHeight()  -- the body's y at the visible bottom edge
+  for i = #self.sections, 1, -1 do
+    local s = self.sections[i]
+    local y = math.min(s.y, floor - SECTION_HEIGHT)
+    s.frame:ClearAllPoints()
+    s.frame:SetPoint("TOPLEFT", self.body, "TOPLEFT", 0, -y)
+    s.frame.backing:SetShown(y < s.y)
+    floor = y
+  end
+end
+
 ---@param offset number pixels from the top; clamped to the scrollable range
 function Stack:ScrollTo(offset)
   local scroll = self.scroll
   local range = math.max(0, self.body:GetHeight() - scroll:GetHeight())
   offset = math.max(0, math.min(offset, range))
   scroll:SetVerticalScroll(offset)
+  self:DockSections(offset)
 
   local thumb = self.thumb
   if range <= 0 then
@@ -812,7 +831,12 @@ function Stack:Create()
   sectionPool = ns.CreatePool(function()
     local section = CreateFrame("Button", nil, body)
     section:SetHeight(SECTION_HEIGHT)
+    section:SetFrameLevel(body:GetFrameLevel() + 20)  -- above the cards, for docking (Scrolling)
     section:RegisterForClicks("LeftButtonUp")
+    section.backing = section:CreateTexture(nil, "BACKGROUND", nil, -1)  -- shown while docked
+    section.backing:SetAllPoints()
+    section.backing:SetColorTexture(0.04, 0.04, 0.04, 0.95)
+    section.backing:Hide()
     section.band = section:CreateTexture(nil, "BACKGROUND")
     section.band:SetAllPoints()
     section.band:SetColorTexture(0, 0, 0, 0.35)

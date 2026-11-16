@@ -6,6 +6,9 @@
 - Resize the tracker: unlock it and drag the bottom-right corner. This zone's cards fill the height
   you set (instead of "Cards for this zone"); unlocked the panel stays that size, locked it shrinks to
   fit. Right-click the corner for the default size
+- In a group, hovering quest areas on the map or minimap shows your party's progress on that quest too
+- Section headers never scroll out of view: ones below dock at the bottom of the tracker, so a
+  collapsed "Hidden" or "Elsewhere" is always one click away
 - Hold Ctrl to hide Questmarker's tooltips (cards, map and minimap areas, buttons); let go to get the
   one under the cursor back
 - Clearer section headers (Ready to turn in, Camping, Elsewhere, ...) with an open/closed arrow, and a
