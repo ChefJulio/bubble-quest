@@ -70,9 +70,15 @@ local function collect(questID, name)
   if name then
     add(ns.QuestieData:ObjectivePoints(questID, name), "questie")
     add(ns.ForeverData:ObjectivePoints(questID, name), "forever-db")
-    add(ns.Learned:Points(questID, name), "learned", function(p)
-      return math.min(p.n or 1, MAX_LEARNED_WEIGHT)
-    end)
+    -- Spots learned in play fill gaps only: they're where the player stood (an object hovered from
+    -- afar, a nameplate in range), not where the target is. Review: one learned spot 29 yd off pulled
+    -- the arrow away from QuestieDB's real saw spawns 99 yd away. Saved either way; used when the
+    -- databases know nothing (e.g. Data Hoarders' Snowdrifts).
+    if #points == 0 then
+      add(ns.Learned:Points(questID, name), "learned", function(p)
+        return math.min(p.n or 1, MAX_LEARNED_WEIGHT)
+      end)
+    end
   else
     add(ns.QuestieData:TurnInPoints(questID), "questie")
     add(ns.ForeverData:TurnInPoints(questID), "forever-db")
