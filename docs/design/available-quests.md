@@ -18,9 +18,13 @@ a drop. Toggled from a map button with a Questie-style menu.
 | LibForeverData (bundled) | Always (fallback) | Starters (npc/object/item), levels, side, race/class, prerequisites (all/any, breadcrumb), repeatable, item drop chances. No exclusiveTo, chains, skill, reputation, daily/weekly |
 | Client | Always | Completed quests (`C_QuestLog.GetAllCompletedQuestIDs`, `IsQuestFlaggedCompleted`), trivial range (`GetTrivialRange`), quests in the log. `C_QuestLine.GetAvailableQuestLines(uiMap)` returns quest-giver positions per map (Blizzard's own map uses it) but may not cover classic quests: probe in game first (`/qm offers`) |
 
-Hidden/blacklisted quests (event, removed, unobtainable) are Questie-internal, not in QuestieDB. Without
-them some dead quests would show: read Questie's list when present (guarded, internal), and keep our
-own small blacklist for what review finds.
+Hidden/blacklisted quests (event, removed, unobtainable) are Questie-internal, not in QuestieDB.
+Done: tools/extract_questie_hidden.py evaluates Questie's QuestieQuestBlacklist.lua for Forever (Era
+rules) into Data/QuestieHidden.lua (hidden, or map-only), plus its Scourge Invasion and AQ War Effort
+lists; re-run when Questie updates it.
+
+Stopgap, remaining: holiday quests (zoneOrSort holiday categories) are always hidden. Questie shows
+them while the event runs (QuestieEvent's dates); event awareness is still to do.
 
 Forever race masks use bits 32-33 (Skyborne): test with arithmetic, `(mask % (2 * bit)) >= bit`, not
 `bit.band` (truncates to 32 bits). QuestieDB's `startedBy` is sparse (`{[3] = {1972}}`): index 1-3,

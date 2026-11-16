@@ -12,16 +12,27 @@ local ADDON_NAME, ns = ...
 --      (dropped by mobs: "Furlbrow's Deed"), the droppers' spawns, kept apart so the map can show them
 --      honestly (decided in review).
 --
--- Stopgaps (recorded in the design doc): Questie's hidden/blacklisted quests (event, removed) aren't
--- in QuestieDB, so a dead quest can show; correcting from what an NPC actually offers when you talk
--- to them is part 2b. Without QuestieDB nothing shows (LibForeverData fallback: later).
+-- Questie's blacklist (not in QuestieDB) comes in through Data/QuestieHidden.lua, extracted at build
+-- time (tools/extract_questie_hidden.py; review: Darkmoon, Lunar Festival, Season of Discovery books
+-- and removed quests showed without it).
+-- Stopgaps (recorded in the design doc): holiday quests are always hidden (no event awareness yet);
+-- correcting from what an NPC actually offers when you talk to them is part 2b. Without QuestieDB
+-- nothing shows (LibForeverData fallback: later).
 
 local BUILD_PER_FRAME = 200
 local KEYS = {
   "name", "startedBy", "requiredLevel", "questLevel", "requiredRaces", "requiredClasses", "preQuestGroup",
   "preQuestSingle", "exclusiveTo", "requiredSkill", "requiredMinRep", "requiredMaxRep", "nextQuestInChain",
   "questFlags", "specialFlags", "parentQuest", "breadcrumbForQuestId", "breadcrumbs", "requiredSpell",
-  "requiredMaxLevel", "availableUntilCompleted", "availableStartingWith", "disabledByQuest",
+  "requiredMaxLevel", "availableUntilCompleted", "availableStartingWith", "disabledByQuest", "zoneOrSort",
+}
+-- Holiday and world-event quest categories (zoneOrSort, QuestieDB corrections/enum/quests.lua): hidden,
+-- as their events aren't running most of the time. Stopgap: Questie shows them while the event is on
+-- (QuestieEvent's dates); event awareness is recorded in docs/design/available-quests.md.
+local EVENT_SORTS = {
+  [-404] = true, [-402] = true, [-378] = true, [-376] = true, [-375] = true, [-374] = true, [-370] = true,
+  [-369] = true, [-366] = true, [-364] = true, [-41] = true, [-22] = true, [-21] = true, [-368] = true,
+  [-365] = true, [-241] = true,
 }
 local FLAG_DAILY, FLAG_WEEKLY = 4096, 32768  -- questFlags (QuestieDB corrections/enum/quests.lua)
 local SPECIAL_REPEATABLE = 1                   -- specialFlags
@@ -79,7 +90,9 @@ local function build()
       local npcs, objects, items = startedBy and list(startedBy[1]), startedBy and list(startedBy[2]),
         startedBy and list(startedBy[3])
       -- Starters are sparse ({[3] = {1972}}): each index on its own, never ipairs over startedBy.
-      if (npcs or objects or items) and (not raceFlag or hasBit(v[5], raceFlag))
+      -- Questie's own list hides what isn't takeable or shouldn't be on the map (Data/QuestieHidden.lua).
+      if (npcs or objects or items) and not ns.QuestieHidden[questID] and not EVENT_SORTS[v[24] or 0]
+          and (not raceFlag or hasBit(v[5], raceFlag))
           and (not classFlag or hasBit(v[6], classFlag)) then
         records[questID] = {
           questID = questID, name = v[1], requiredLevel = v[3], level = v[4], preGroup = list(v[7]),

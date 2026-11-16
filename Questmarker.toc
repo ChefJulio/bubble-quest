@@ -31,6 +31,7 @@ Data\ForeverData.lua
 Data\CategoryOverrides.lua
 Data\Learned.lua
 Data\QuestieData.lua
+Data\QuestieHidden.lua
 Data\Hints.lua
 Quests\QuestLog.lua
 Quests\Categories.lua
