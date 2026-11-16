@@ -211,12 +211,39 @@ local function addRow(name, cells)
   GameTooltip:AddDoubleLine(name, table.concat(cells, "   "), 1, 1, 1, 1, 1, 1)
 end
 
+-- Where an unfinished objective is, for the right of its line: "180 yd NE", "here", or a zone name
+-- (review: a quest's objectives can be in different places; the card's arrow shows only the nearest).
+local function whereText(quest, index)
+  local objective = quest.objectives[index]
+  if quest.readyForTurnIn or not objective or objective.finished then
+    return nil
+  end
+  local nav = ns.Navigation:ObjectiveNav(quest, index)
+  if not nav then
+    return nil
+  end
+  if nav.zone then
+    return nav.zone
+  end
+  return nav.inArea and "here" or ("%d yd %s"):format(nav.distance, nav.compass)
+end
+
+-- An objective line, with where it is on the right when known.
+local function addObjective(quest, index, text, color)
+  local where = whereText(quest, index)
+  if where then
+    GameTooltip:AddDoubleLine(text, where, color[1], color[2], color[3], 0.8, 0.8, 0.8)
+  else
+    add(text, color, true)
+  end
+end
+
 -- Grouped: objective names once, then a uniform row per player (you first), then leftovers.
 local function addGroupedProgress(quest, members)
   local done = quest.readyForTurnIn
-  for _, objective in ipairs(quest.objectives) do
+  for i, objective in ipairs(quest.objectives) do
     local c = (objective.finished or done) and GRAY or WHITE
-    add("- " .. ns.QuestLog.ObjectiveName(objective), c, true)
+    addObjective(quest, i, "- " .. ns.QuestLog.ObjectiveName(objective), c)
   end
 
   local mine = {}
@@ -289,8 +316,8 @@ function QuestTooltip:Show(owner, quest)
   if members then
     addGroupedProgress(quest, members)
   else
-    for _, objective in ipairs(quest.objectives) do
-      add("- " .. (objective.text or "?"), (objective.finished or quest.readyForTurnIn) and GRAY or WHITE, true)
+    for i, objective in ipairs(quest.objectives) do
+      addObjective(quest, i, "- " .. (objective.text or "?"), (objective.finished or quest.readyForTurnIn) and GRAY or WHITE)
     end
   end
   if quest.readyForTurnIn then

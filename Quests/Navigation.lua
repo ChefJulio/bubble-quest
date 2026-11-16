@@ -240,6 +240,45 @@ function Navigation:InArea(quest)
   return false
 end
 
+local COMPASS = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" }  -- counter-clockwise from north
+
+---Where one objective is, on its own (the tooltip lists every objective's: review, "the areas are in
+---different places"). Nil when unknown or finished.
+---@param quest table
+---@param index number objective index
+---@return table? { distance, compass, inArea } or { zone } on another map
+function Navigation:ObjectiveNav(quest, index)
+  local areas = targetsFor(quest).byObjective[index]
+  local north, west, instanceMap = self:PlayerPosition()
+  if not areas or not north then
+    return nil
+  end
+  local best, bestPoint, bestDistance
+  for _, area in ipairs(areas) do
+    if area.kept then
+      local point, d = ns.Areas:Nearest(area, instanceMap, north, west, bestDistance)
+      if point and (not bestDistance or d < bestDistance) then
+        best, bestPoint, bestDistance = area, point, d
+      end
+    end
+  end
+  if not best then
+    for _, area in ipairs(areas) do
+      if area.kept then
+        return { zone = zoneNameOf(area.points[1], quest.questID) }
+      end
+    end
+    return nil
+  end
+  -- Bearing counter-clockwise from north, as the arrow's; the eighth of the compass it falls in.
+  local degrees = math.deg(math.atan2(bestPoint.y - west, bestPoint.x - north)) % 360
+  return {
+    distance = bestDistance,
+    compass = COMPASS[math.floor((degrees + 22.5) / 45) % 8 + 1],
+    inArea = bestDistance <= hereYards(best),
+  }
+end
+
 ---Everything a card's arrow needs, or nil (no position, no target).
 ---@param quest table
 ---@return table? nav { distance, angle?, inArea, objective?, zone? }

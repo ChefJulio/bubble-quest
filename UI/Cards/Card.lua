@@ -170,6 +170,13 @@ local function createRow(card)
   row.check:SetTexture(CHECK_TEXTURE)
   row.check:SetSize(12, 12)
   row.check:SetPoint("TOPLEFT", 0, 0)
+  -- "The card's arrow points at this objective" (review): a small arrow in the card's style, turned
+  -- to point at the row, where the check mark goes on finished rows (a targeted row is unfinished).
+  row.target = row:CreateTexture(nil, "ARTWORK")
+  row.target:SetSize(10, 10)
+  row.target:SetPoint("TOPLEFT", 1, -1)
+  Card.PrepareRotatingTexture(row.target)
+  row.target:Hide()
   row.text = row:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
   row.text:SetPoint("TOPLEFT", ROW_INDENT, 0)
   row.text:SetWidth(WIDTH - ROW_INDENT - COUNTER_WIDTH)
@@ -328,8 +335,17 @@ function Card:SetQuest(quest, collapsed, options)
   for _, row in ipairs(self.rows) do
     row:Hide()
     row.highlight:Hide()
+    row.target:Hide()
   end
-  self.highlighted = nil
+  self.highlighted, self.targeted = nil, nil
+  -- The target marker only means something with two or more objectives to choose between.
+  local unfinished = 0
+  for _, objective in ipairs(quest.objectives) do
+    if not objective.finished then
+      unfinished = unfinished + 1
+    end
+  end
+  self.markTarget = not quest.readyForTurnIn and not collapsed and unfinished >= 2
   local style = ns.DB.profile.cards.arrowStyle
   if style ~= self.arrowStyle then
     self.arrowTintable = Card.ApplyArrowStyle(self.arrow, style)
@@ -472,6 +488,21 @@ function Card:SetNavigation(nav)
       row.highlight:SetShown(i == highlight)
     end
     self.highlighted = highlight
+  end
+  -- Which objective the arrow is heading for (while it's an arrow: "here" highlights the row instead).
+  local targeted = arrow and self.markTarget and nav and nav.objective or nil
+  if targeted ~= self.targeted then
+    for i, row in ipairs(self.rows) do
+      local isTarget = i == targeted
+      if isTarget and row.targetStyle ~= self.arrowStyle then
+        Card.ApplyArrowStyle(row.target, self.arrowStyle)
+        row.target:SetRotation(-math.pi / 2)  -- the art points up; turned to point right, at the row
+        row.target:SetVertexColor(GOLD[1], GOLD[2], GOLD[3])
+        row.targetStyle = self.arrowStyle
+      end
+      row.target:SetShown(isTarget)
+    end
+    self.targeted = targeted
   end
 end
 
