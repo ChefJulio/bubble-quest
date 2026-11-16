@@ -7,9 +7,8 @@ local ADDON_NAME, ns = ...
 --
 -- What it draws: for every quest on the cards, the kept areas of its unfinished objectives (or its
 -- turn-in when ready), the same areas the arrows use (Quests/Navigation.lua). Each spawn point gets a
--- soft round texture (Media/Map/blob.tga); a quest's textures sit in one frame buffer, so overlaps
--- merge into one evenly see-through shape instead of darkening. One colour per quest, matched by a
--- strip on its card.
+-- soft round texture (Media/Map/blob.tga), faint on its own, so overlaps build up colour where spawns
+-- are dense. One colour per quest, matched by a strip on its card.
 --
 -- How (from what installed addons do safely on Forever): our own mouse-disabled frame on the map
 -- canvas (WorldMapFrame:GetCanvas()), like Questie's patrol lines; no data provider, no Blizzard pin
@@ -19,7 +18,10 @@ local ADDON_NAME, ns = ...
 local BLOB_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\blob"
 local BLOB_YARDS = 30        -- radius of one spawn's soft circle
 local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer textures)
-local QUEST_ALPHA = 0.45     -- each quest's merged shape
+-- Each circle's own opacity: overlaps build up colour, so dense spawn areas read stronger (a heat
+-- map). A frame buffer per quest (to merge circles into one even shape) rendered the colours almost
+-- black inside the world map's own frame buffer (seen in review), so it's not used.
+local BLOB_ALPHA = 0.22
 local FRAME_LEVEL = 2005     -- under Questie's map lines (2015) and icons (2016+)
 
 -- Eight hues that stay distinct on the map's parchment and from each other.
@@ -84,10 +86,6 @@ local function acquireGroup(layer, n)
     group = CreateFrame("Frame", nil, layer)
     group:SetAllPoints(layer)
     group:EnableMouse(false)
-    -- One buffer per quest: its overlapping circles merge into one shape at one alpha.
-    if group.SetIsFrameBuffer then
-      group:SetIsFrameBuffer(true)
-    end
     group.textures = {}
     MapAreas.groups[n] = group
   end
@@ -104,7 +102,7 @@ local function placeBlob(group, canvas, x, y, size, color)
     texture:SetTexture(BLOB_TEXTURE)
     group.textures[group.used] = texture
   end
-  texture:SetVertexColor(color[1], color[2], color[3], 1)
+  texture:SetVertexColor(color[1], color[2], color[3], BLOB_ALPHA)
   texture:SetSize(size, size)
   texture:ClearAllPoints()
   texture:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
@@ -162,7 +160,6 @@ function MapAreas:Redraw()
     if quest then
       n = n + 1
       local group = acquireGroup(layer, n)
-      group:SetAlpha(QUEST_ALPHA)
       local color = self:ColorFor(questID)
       local seen = {}
       for _, p in ipairs(questPoints(quest)) do
