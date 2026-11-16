@@ -74,7 +74,8 @@ local function get(dbName, field, id)
   return ok and value or nil
 end
 
-local function addSpawnList(spawnList, points)
+-- kind: "npc", "object" or "explore" (navigation's "here" distance depends on it).
+local function addSpawnList(spawnList, points, kind)
   if type(spawnList) ~= "table" then
     return
   end
@@ -86,7 +87,7 @@ local function addSpawnList(spawnList, points)
         if type(x) == "number" and type(y) == "number" and x >= 0 and y >= 0 then
           local instanceMap, world = C_Map.GetWorldPosFromMapPos(uiMap, CreateVector2D(x / 100, y / 100))
           if world then
-            points[#points + 1] = { map = instanceMap, x = world.x, y = world.y }
+            points[#points + 1] = { map = instanceMap, x = world.x, y = world.y, kind = kind }
           end
         end
       end
@@ -95,7 +96,7 @@ local function addSpawnList(spawnList, points)
 end
 
 local function addEntitySpawns(dbName, id, points)
-  addSpawnList(get(dbName, "spawns", id), points)
+  addSpawnList(get(dbName, "spawns", id), points, dbName == "ObjectDB" and "object" or "npc")
 end
 
 -- Does Questie's name for a target match our objective's name? Either contains the other, as the
@@ -161,7 +162,7 @@ function QuestieData:ObjectivePoints(questID, objectiveName)
     -- Exploration ("Scout through ..."): the trigger's area.
     local trigger = get("QuestDB", "triggerEnd", questID)
     if type(trigger) == "table" and matches(objectiveName, trigger[1]) then
-      addSpawnList(trigger[2], points)
+      addSpawnList(trigger[2], points, "explore")
     end
   end)
 end

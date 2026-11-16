@@ -229,8 +229,9 @@ commands.areas = {
         local parts = {}
         for source, count in pairs(sources) do parts[#parts + 1] = source .. " " .. count end
         local _, d = ns.Areas:Nearest(area, instanceMap, north or 0, west or 0)
-        lines[#lines + 1] = ("  %s weight %.0f, %d points (%s), %s%s"):format(area.kept and "KEPT   " or "ignored",
-          area.weight, #area.points, table.concat(parts, ", "), d and ("%.0f yd"):format(d) or "other map",
+        lines[#lines + 1] = ("  %s %s, weight %.0f, %d points (%s), %s%s"):format(
+          area.kept and "KEPT   " or "ignored", tostring(area.kind), area.weight, #area.points, table.concat(parts, ", "),
+          d and ("%.0f yd"):format(d) or "other map",
           current and current.id == area.id and "  <- ARROW" or "")
       end
     end

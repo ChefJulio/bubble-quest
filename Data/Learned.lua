@@ -86,7 +86,8 @@ end
 ---Record the player's position for an objective, unless a known spot is near.
 ---@param questID number
 ---@param objectiveName string
-function Learned:Record(questID, objectiveName)
+---@param kind string? "npc" (a nameplate) or "object" (a mouseover); navigation's "here" uses it
+function Learned:Record(questID, objectiveName, kind)
   local north, west, map = ns.Navigation:PlayerPosition()
   if not north then
     return
@@ -110,6 +111,8 @@ function Learned:Record(questID, objectiveName)
       return
     end
   end
-  points[#points + 1] = { map = map, x = math.floor(north * 2 + 0.5) / 2, y = math.floor(west * 2 + 0.5) / 2 }
+  points[#points + 1] = {
+    map = map, x = math.floor(north * 2 + 0.5) / 2, y = math.floor(west * 2 + 0.5) / 2, kind = kind,
+  }
   ns.Bus:Fire("LearnedChanged", questID)
 end

@@ -32,7 +32,7 @@ local function merge(points)
     if existing then
       existing.weight = math.max(existing.weight, weight)
     else
-      local copy = { map = p.map, x = p.x, y = p.y, weight = weight, source = p.source }
+      local copy = { map = p.map, x = p.x, y = p.y, weight = weight, source = p.source, kind = p.kind }
       byCell[key] = copy
       merged[#merged + 1] = copy
     end

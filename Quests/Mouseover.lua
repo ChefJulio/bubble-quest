@@ -54,7 +54,7 @@ local function onObjectTooltip(tooltip, data)
     elseif quest and readable(line.leftText) then
       for _, name in ipairs(matching(quest, line.leftText)) do
         ns.Learned:RecordSource(quest.questID, name, objectName, "object")
-        ns.Learned:Record(quest.questID, name)
+        ns.Learned:Record(quest.questID, name, "object")
       end
     end
   end

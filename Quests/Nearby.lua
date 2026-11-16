@@ -92,7 +92,7 @@ end
 local function learn(found, creatureName)
   for questID, objectives in pairs(found) do
     for name in pairs(objectives) do
-      ns.Learned:Record(questID, name)
+      ns.Learned:Record(questID, name, "npc")
       if creatureName then
         ns.Learned:RecordSource(questID, name, creatureName)
       end

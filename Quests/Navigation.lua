@@ -11,13 +11,17 @@ local ADDON_NAME, ns = ...
 --      (a stray spawn far from the camp).
 --   3. The arrow points at the nearest edge (nearest point) of the nearest kept area, any objective.
 --      Hysteresis: switch areas only when another is SWITCH_RATIO closer.
---   4. "Here": within IN_AREA_YARDS of a kept, spawn-based area, or an objective mob's nameplate up.
+--   4. "Here": within HERE_YARDS of a kept, spawn-based area, by what it is (an area takes the kind
+--      most of its points have), or an objective mob's nameplate up.
 --   5. Nothing known: the client's quest marker (GetQuestsOnMap) as one point; never claims "here".
 -- Positions are world yards on the instance map (0 Eastern Kingdoms, 1 Kalimdor, ...), so distances
 -- work across zones. Axes (north, west) verified in game with /qm where.
 
 local TICK_SECONDS = 0.1   -- 10 updates a second (agreed in review)
-local IN_AREA_YARDS = 40   -- tune in testing
+-- "Here" distance by what the area is (decided in review): a turn-in you must be at (not 5: location
+-- data is often a few yards off the NPC, who may wander); an object you must be near; a place; mobs,
+-- which roam (their nameplates confirm it too).
+local HERE_YARDS = { turnin = 10, object = 20, explore = 30, npc = 40 }
 local SWITCH_RATIO = 0.8   -- switch area only when another is at least 20% closer
 local MAX_LEARNED_WEIGHT = 3
 
@@ -58,7 +62,9 @@ local function collect(questID, name)
   local points = {}
   local function add(list, source, weightOf)
     for _, p in ipairs(list or {}) do
-      points[#points + 1] = { map = p.map, x = p.x, y = p.y, source = source, weight = weightOf and weightOf(p) or 1 }
+      points[#points + 1] = {
+        map = p.map, x = p.x, y = p.y, source = source, kind = p.kind or "npc", weight = weightOf and weightOf(p) or 1,
+      }
     end
   end
   if name then
@@ -72,6 +78,18 @@ local function collect(questID, name)
     add(ns.ForeverData:TurnInPoints(questID), "forever-db")
   end
   return points
+end
+
+-- What an area is: the kind most of its points have ("npc", "object", "explore").
+local function mainKind(area)
+  local counts, best = {}, "npc"
+  for _, p in ipairs(area.points) do
+    counts[p.kind] = (counts[p.kind] or 0) + 1
+    if counts[p.kind] > (counts[best] or 0) then
+      best = p.kind
+    end
+  end
+  return best
 end
 
 -- An area's identity across rebuilds, for hysteresis: objective and corner.
@@ -90,6 +108,7 @@ local function buildTargets(quest)
     for _, area in ipairs(areas) do
       area.objective = objectiveIndex
       area.id = areaID(area)
+      area.kind = objectiveIndex and mainKind(area) or "turnin"
       if area.kept then
         targets.areas[#targets.areas + 1] = area
         targets.spawnBased = true
@@ -196,20 +215,29 @@ local function nearbyObjective(quest)
   return nil
 end
 
+local function hereYards(area)
+  return HERE_YARDS[area.kind] or HERE_YARDS.npc
+end
+
 ---Is the player in one of the quest's objective areas right now: a creature for it on the nameplates,
----or within IN_AREA_YARDS of a kept area's point (not a marker: one point can't tell).
----Defined after nearbyObjective, a local it needs.
+---or within its "here" distance (HERE_YARDS, by kind) of a kept area's point (not a marker: one point
+---can't tell). Defined after nearbyObjective, a local it needs.
 ---@param quest table
 ---@return boolean
 function Navigation:InArea(quest)
   if nearbyObjective(quest) then
     return true
   end
-  if not targetsFor(quest).spawnBased then
+  local north, west, instanceMap = self:PlayerPosition()
+  if not north then
     return false
   end
-  local distance = self:Distance(quest)
-  return distance ~= nil and distance <= IN_AREA_YARDS
+  for _, area in ipairs(targetsFor(quest).areas) do
+    if not area.marker and ns.Areas:Nearest(area, instanceMap, north, west, hereYards(area)) then
+      return true
+    end
+  end
+  return false
 end
 
 ---Everything a card's arrow needs, or nil (no position, no target).
@@ -254,7 +282,7 @@ function Navigation:ComputeTarget(quest)
   self.current[quest.questID] = { id = area.id, x = point.x, y = point.y }
 
   local nav = { distance = distance, objective = area.objective }
-  nav.inArea = not area.marker and distance <= IN_AREA_YARDS
+  nav.inArea = not area.marker and distance <= hereYards(area)
   local facing = GetPlayerFacing()
   if facing then
     -- Bearing counter-clockwise from north (towards west), minus where the player faces.

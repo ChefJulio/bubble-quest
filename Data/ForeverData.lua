@@ -148,9 +148,11 @@ end
 -- forever-db objective kind -> the record kind its target is.
 local TARGET_KIND = { kill = "npc", talk = "npc", object = "object", item = "item" }
 
+-- Copies (the library's own tables stay untouched), tagged with what they are: "npc" or "object"
+-- (navigation's "here" distance depends on it).
 local function addSpawns(lib, kind, id, points)
   for _, point in ipairs(lib.Spawns(kind, id)) do
-    points[#points + 1] = point
+    points[#points + 1] = { map = point.map, x = point.x, y = point.y, kind = kind }
   end
 end
 

@@ -43,8 +43,16 @@ progress, sources or learned data change.
 nearest by distance to the area's nearest point; the arrow aims at that point (the area's near edge).
 Hysteresis as in card sorting: switch only when another area is at least 20% closer.
 
-**Here**: within 40 yards of a point of a kept, spawn-based area, or a nameplate of an objective mob up
-(Quests/Nearby.lua, now a confirmation rather than the main mechanism).
+**Here**: near a point of a kept, spawn-based area, or a nameplate of an objective mob up
+(Quests/Nearby.lua, now a confirmation rather than the main mechanism). How near depends on what the
+area is (every point carries its kind; an area takes the kind most of its points have):
+
+| Kind | Here within | Why |
+|---|---|---|
+| turn-in | 10 yd | you must be at it; not 5, as location data is often a few yards off the NPC |
+| object (gather, use) | 20 yd | objects don't move: near one |
+| exploration | 30 yd | a place, not a thing |
+| npc (kill, loot) | 40 yd | mobs roam; nameplates confirm it too |
 
 **Debug**: `/qm areas <questID>` lists each objective's areas: weight, distance, kept or ignored, which
 is targeted.
