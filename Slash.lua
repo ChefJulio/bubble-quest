@@ -190,6 +190,54 @@ commands.where = {
   end,
 }
 
+-- Available quests (Quests/Available.lua): the nearest givers and what they offer, to check the
+-- engine against the game before anything is drawn from it.
+commands.available = {
+  help = "quests you can pick up nearby, and who offers them (copy window)",
+  run = function()
+    local A = ns.Available
+    local lines = {}
+    local count = 0
+    for _ in pairs(A.records or {}) do
+      count = count + 1
+    end
+    lines[#lines + 1] = ("QuestieDB: %s; index: %s (%d quests this character could take); %d givers now")
+      :format(ns.QuestieData:Installed() and "yes" or "NO", A.records and "built" or (A.building and "building" or "not built"),
+        count, #A.givers)
+    local north, west, instanceMap = ns.Navigation:PlayerPosition()
+    if not north then
+      lines[#lines + 1] = "No position (instance?)"
+      ns.CopyWindow:Show("Questmarker: available", lines)
+      return
+    end
+    local near = {}
+    for _, giver in ipairs(A.givers) do
+      local best
+      for _, p in ipairs(giver.points) do
+        if p.map == instanceMap then
+          local d = math.sqrt((p.x - north) ^ 2 + (p.y - west) ^ 2)
+          best = best and math.min(best, d) or d
+        end
+      end
+      if best then
+        near[#near + 1] = { giver = giver, distance = best }
+      end
+    end
+    table.sort(near, function(a, b) return a.distance < b.distance end)
+    for i = 1, math.min(25, #near) do
+      local giver, d = near[i].giver, near[i].distance
+      lines[#lines + 1] = ("%4d yd  %s %d %s (%d spawns)"):format(d, giver.kind, giver.id, tostring(giver.name),
+        #giver.points)
+      for _, q in ipairs(giver.quests) do
+        local r = q.record
+        lines[#lines + 1] = ("          [%s] %d %s%s%s"):format(tostring(r.level), r.questID, tostring(r.name),
+          q.trivial and "  (trivial)" or "", A.Repeatable(r) and "  (repeatable)" or "")
+      end
+    end
+    ns.CopyWindow:Show("Questmarker: available", lines)
+  end,
+}
+
 -- Minimap areas and guide line (UI/MinimapAreas.lua): what the layer sees, for when nothing shows.
 -- Type it, rest the cursor on a minimap circle, then press Enter: the hover is checked too.
 commands.minimap = {

@@ -191,6 +191,20 @@ function QuestieData:TurnInPoints(questID)
   end)
 end
 
+-- Shared with the available-quest index (Quests/Available.lua).
+QuestieData.Library = library
+QuestieData.Get = get
+
+---Every spawn of an NPC ("npc") or object ("object") in world yards, cached; nil when none known.
+---@param kind string
+---@param id number
+---@return table? points { { map, x, y, kind } }
+function QuestieData:EntityPoints(kind, id)
+  return cached(kind .. "#" .. id, function(points)
+    addEntitySpawns(kind == "object" and "ObjectDB" or "NpcDB", id, points)
+  end)
+end
+
 function QuestieData:Reset()
   wipe(self.cache)
   ns.Bus:Fire("LocationsChanged")

@@ -39,6 +39,7 @@ Quests\Zone.lua
 Quests\DoLine.lua
 Quests\Areas.lua
 Quests\Navigation.lua
+Quests\Available.lua
 Quests\Nearby.lua
 Quests\Mouseover.lua
 Quests\Tracking.lua
