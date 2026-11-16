@@ -32,7 +32,8 @@
     "SLASH_QUESTMARKER2",
     "Questmarker_OnAddonCompartmentClick",
     "Questmarker_OnAddonCompartmentEnter",
-    "Questmarker_OnAddonCompartmentLeave"
+    "Questmarker_OnAddonCompartmentLeave",
+    "QuestmarkerMinimapTooltip"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {

@@ -230,10 +230,14 @@ local function drawGuide(north, west, instanceMap, cos, sin, scale, half, square
 end
 
 -- Hover -------------------------------------------------------------------------------------------
--- As on the world map: worked out from the cursor (the circles take no mouse), the same tooltip, and
--- out of the way when another tooltip is up (a minimap blip, a Questie icon).
+-- As on the world map: worked out from the cursor (the circles take no mouse), the same content. In our
+-- own tooltip, not GameTooltip: while the cursor is on the minimap, Blizzard's Minimap_OnUpdate takes
+-- GameTooltip every frame for the blips under it (SetMinimapMouseover, Blizzard_Minimap/Mainline/
+-- Minimap.lua:279), hiding it when there are none, so ours never lasted a frame (seen in review). When a
+-- blip's tooltip is up too, ours hangs under it instead of covering it.
 
-local hoverElapsed, hovering = 0, false
+local tooltip  -- created with the layer
+local hoverElapsed = 0
 local function updateHover(delta)
   hoverElapsed = hoverElapsed + delta
   if hoverElapsed < HOVER_SECONDS then
@@ -247,16 +251,18 @@ local function updateHover(delta)
     local mx, my = layer:GetCenter()
     found = ns.MapAreas.Under(MinimapAreas.hits, MinimapAreas.radius, cx / scale - mx, cy / scale - my)
   end
-  local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
-  if found and not tooltipBusy then
-    ns.MapAreas.ShowTooltip(layer, found)
-    hovering = true
-  elseif hovering and not found then
-    if GameTooltip:GetOwner() == layer then
-      GameTooltip:Hide()
-    end
-    hovering = false
+  if not found then
+    tooltip:Hide()
+    return
   end
+  if GameTooltip:IsShown() then
+    tooltip:SetOwner(layer, "ANCHOR_NONE")
+    tooltip:ClearAllPoints()
+    tooltip:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, -2)
+  else
+    tooltip:SetOwner(layer, "ANCHOR_CURSOR")
+  end
+  ns.MapAreas.FillTooltip(tooltip, found)
 end
 
 local function update(_, delta)
@@ -303,12 +309,8 @@ local function create()
   mask:SetAllPoints(layer)
   -- Every frame while the minimap shows: it moves (and may turn) every frame.
   layer:SetScript("OnUpdate", update)
-  layer:SetScript("OnHide", function()
-    if hovering and GameTooltip:GetOwner() == layer then
-      GameTooltip:Hide()
-    end
-    hovering = false
-  end)
+  tooltip = CreateFrame("GameTooltip", "QuestmarkerMinimapTooltip", UIParent, "GameTooltipTemplate")
+  layer:SetScript("OnHide", function() tooltip:Hide() end)
 end
 
 ns.Events:On("PLAYER_LOGIN", create)
@@ -360,8 +362,7 @@ function MinimapAreas:Diagnose()
   end
   add("Mouse over minimap: %s; cursor from centre %.1f, %.1f px; nearest circle %s px away",
     tostring(Minimap:IsMouseOver()), px, py, nearest and ("%.1f"):format(nearest) or "-")
-  local owner = GameTooltip:GetOwner()
-  add("GameTooltip: shown=%s owner=%s (ours: %s)", tostring(GameTooltip:IsShown()),
-    owner and tostring(owner:GetDebugName()) or "none", tostring(owner == layer))
+  add("Our tooltip: shown=%s; GameTooltip (blips): shown=%s", tostring(tooltip:IsShown()),
+    tostring(GameTooltip:IsShown()))
   return lines
 end

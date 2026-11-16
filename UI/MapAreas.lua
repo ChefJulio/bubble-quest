@@ -344,36 +344,42 @@ end
 
 -- One tooltip for everything under the cursor, laid out like Questie's (review): per quest, "[7] Title"
 -- in its map colour with a status on the right, then the objectives there, indented, with counts.
--- Also the minimap's.
-function MapAreas.ShowTooltip(owner, found)
-  GameTooltip:SetOwner(owner, "ANCHOR_CURSOR")
-  GameTooltip:ClearLines()
+-- Fills `tooltip` (already owned and anchored by the caller): the minimap uses its own tooltip.
+---@param tooltip table a GameTooltip
+---@param found table from MapAreas.Under
+function MapAreas.FillTooltip(tooltip, found)
+  tooltip:ClearLines()
   local first = true
   for _, questID in ipairs(inCardOrder(found)) do
     local objectives = found[questID]
     local quest = ns.QuestLog:Get(questID)
     if quest then
       if not first then
-        GameTooltip:AddLine(" ")
+        tooltip:AddLine(" ")
       end
       first = false
       local color = MapAreas:ColorFor(questID)
       local status = quest.readyForTurnIn and "(Ready to turn in)" or ""
-      GameTooltip:AddDoubleLine(("[%d] %s"):format(quest.level or 0, quest.title or "?"), status,
+      tooltip:AddDoubleLine(("[%d] %s"):format(quest.level or 0, quest.title or "?"), status,
         color[1], color[2], color[3], 1, 0.82, 0)
       if objectives.turnin then
         local turnIn = ns.ForeverData:TurnInName(questID)
-        GameTooltip:AddLine("  " .. (turnIn and ("Turn in to " .. turnIn) or "Turn in"), 0.2, 1, 0.2)
+        tooltip:AddLine("  " .. (turnIn and ("Turn in to " .. turnIn) or "Turn in"), 0.2, 1, 0.2)
       end
       for index, objective in ipairs(quest.objectives) do
         if objectives[index] then
           local text, counter = ns.DoLine:For(objective, questID)
-          GameTooltip:AddDoubleLine("  " .. text, counter or "", 1, 1, 1, 1, 1, 1)
+          tooltip:AddDoubleLine("  " .. text, counter or "", 1, 1, 1, 1, 1, 1)
         end
       end
     end
   end
-  GameTooltip:Show()
+  tooltip:Show()
+end
+
+local function showTooltip(owner, found)
+  GameTooltip:SetOwner(owner, "ANCHOR_CURSOR")
+  MapAreas.FillTooltip(GameTooltip, found)
 end
 
 -- Highlights (review): what's lit up, most direct first: the circles under the cursor (those
@@ -466,7 +472,7 @@ local function updateHover(layer, map, delta)
   end
   local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
   if found and not tooltipBusy then
-    MapAreas.ShowTooltip(layer, found)
+    showTooltip(layer, found)
     hovering = true
   elseif hovering and not found then
     if GameTooltip:GetOwner() == layer then
