@@ -1,7 +1,7 @@
 ## What's new
 
-- Right-click a card: "Share in quest log" opens the quest's details with Blizzard's Share button
-  (addons can't share quests directly on Forever)
+- Right-click a card: "Share quest" shares it with your party; clicked in combat, it's sent when
+  combat ends (the game doesn't let addons share in combat)
 
 ## Fixes
 

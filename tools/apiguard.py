@@ -250,18 +250,25 @@ class ApiDb:
   blizzard_globals: set[str] = field(default_factory=set)
 
 
-# Protected functions the generated docs don't list, each seen blocked in game. They feed the same
-# checks as documented ones, including the Blizzard-wrapper index (so QuestUtil.ShareQuest is caught).
-# Add one only with in-game evidence (BugSack ADDON_ACTION_BLOCKED), and say where it was seen.
-OBSERVED_PROTECTED = {
-  # ADDON_ACTION_BLOCKED from the card menu's Share quest, via QuestUtil.ShareQuest (Forever 1.60.1).
-  "QuestLogPushQuest": "Forever 1.60.1.70938, card menu Share quest",
+# Restrictions the generated docs don't list, each with evidence. They feed the same checks as
+# documented ones, including the Blizzard-wrapper index (so QuestUtil.ShareQuest is caught).
+#   "protected": addon calls always blocked (an error)
+#   "combat":    blocked in combat only (a warning: acknowledge with the combat guard)
+# Add one only with evidence (BugSack ADDON_ACTION_BLOCKED, Blizzard's patch notes), and say which.
+OBSERVED_RESTRICTED = {
+  # ADDON_ACTION_BLOCKED from the card menu's share (Forever 1.60.1), first taken as "protected".
+  # Patch 12.0.0 API notes (Beta 7): "restricted while in combat"; Pretty Wide Quest Log on Forever
+  # (issue #38): blocked for addon code during combat, even on a click; works out of combat.
+  "QuestLogPushQuest": "combat",
 }
 
 
 def add_observed(db: "ApiDb") -> None:
-  for name in OBSERVED_PROTECTED:
-    db.globals[name] = ApiEntry(name=name, system="observed in game", protected=True)
+  for name, kind in OBSERVED_RESTRICTED.items():
+    if kind == "protected":
+      db.globals[name] = ApiEntry(name=name, system="observed", protected=True)
+    else:
+      db.globals[name] = ApiEntry(name=name, system="observed", flags=["RestrictedInCombat (observed)"])
 
 
 def load_docs(docs_dir: Path) -> ApiDb:
@@ -614,7 +621,8 @@ def run(docs_dir: Path, targets: list[Path], method_sources: list[Path] | None =
   if wrapper_source is not None:
     ui_dir, cache, key = wrapper_source
     # The observed list changes what counts as restricted, so it's part of the cache key.
-    db.wrappers = load_wrapper_index(ui_dir, db, cache, key + "|" + ",".join(sorted(OBSERVED_PROTECTED)))
+    observed = ",".join(f"{name}={kind}" for name, kind in sorted(OBSERVED_RESTRICTED.items()))
+    db.wrappers = load_wrapper_index(ui_dir, db, cache, key + "|" + observed)
     db.blizzard_globals = load_blizzard_globals(ui_dir, cache.with_name("blizzard-globals.json"), key)
   files = iter_source_files(targets, exclude)
   if method_sources is not None:
