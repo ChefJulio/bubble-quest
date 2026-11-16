@@ -236,6 +236,11 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   -- The card's progress bar (the whole quest); objective rows get their own when they need one.
   self.bar = createBar(frame)
 
+  -- Timed quests: "Time left 2:12" under the title (review: Iverron's Antidote's timer was missing).
+  self.timer = frame:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+  self.timer:SetJustifyH("LEFT")
+  self.timer:Hide()
+
   local toggle = CreateFrame("Button", nil, frame)
   toggle:SetSize(16, TITLE_HEIGHT)
   toggle:SetPoint("TOPRIGHT", 0, 0)
@@ -338,6 +343,20 @@ function Card:SetQuest(quest, collapsed, options)
   local barPerObjective = showBar and not collapsed and not quest.readyForTurnIn and #quest.objectives >= 2
 
   local y = TITLE_HEIGHT + 2
+
+  -- A running quest timer, first under the title, collapsed cards included (it's urgent).
+  self.timerEnd = Card.TimerEnd(quest.questID)
+  self.timerShown = nil
+  if self.timerEnd then
+    self.timer:ClearAllPoints()
+    self.timer:SetPoint("TOPLEFT", self.frame, "TOPLEFT", ROW_INDENT, -y)
+    self.timer:Show()
+    self:UpdateTimer()
+    y = y + self.timer:GetStringHeight() + ROW_GAP
+  else
+    self.timer:Hide()
+  end
+
   for i = 1, self.rowCount do
     local row = self.rows[i] or createRow(self)
     self.rows[i] = row
@@ -493,6 +512,44 @@ local function steps(quest)
     return nil
   end
   return done, total
+end
+
+---When a quest's timer runs out (GetTime() scale), or nil when it has no running timer. The same
+---call Blizzard's tracker uses for its timer bar (Blizzard_QuestObjectiveTracker.lua:372-374).
+---@param questID number
+---@return number?
+function Card.TimerEnd(questID)
+  local total, elapsed = C_QuestLog.GetTimeAllowed(questID)
+  if type(total) ~= "number" or type(elapsed) ~= "number" or issecretvalue(total) or issecretvalue(elapsed)
+      or total <= 0 or elapsed >= total then
+    return nil
+  end
+  return GetTime() + (total - elapsed)
+end
+
+---Refresh the countdown text (called on every navigation tick; only changes once a second).
+function Card:UpdateTimer()
+  if not self.timerEnd then
+    return
+  end
+  local left = math.max(0, math.ceil(self.timerEnd - GetTime()))
+  if left == self.timerShown then
+    return
+  end
+  self.timerShown = left
+  if left == 0 then
+    self.timer:SetText("Time's up")
+    self.timer:SetTextColor(1, 0.2, 0.2)
+    return
+  end
+  self.timer:SetText(("Time left %d:%02d"):format(math.floor(left / 60), left % 60))
+  if left <= 20 then
+    self.timer:SetTextColor(1, 0.2, 0.2)
+  elseif left <= 60 then
+    self.timer:SetTextColor(1, 0.55, 0.1)
+  else
+    self.timer:SetTextColor(1, 0.85, 0.2)
+  end
 end
 
 ---Update the bars: the card's (one quest-wide bar), or each objective row's.

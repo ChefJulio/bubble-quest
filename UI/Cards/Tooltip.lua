@@ -278,6 +278,11 @@ function QuestTooltip:Show(owner, quest)
     facts[#facts + 1] = quest.tagName
   end
   add(table.concat(facts, "  -  "), GRAY)
+  local timerEnd = ns.Card.TimerEnd(questID)
+  if timerEnd then
+    local left = math.max(0, math.ceil(timerEnd - GetTime()))
+    add(("Time left %d:%02d"):format(math.floor(left / 60), left % 60), { 1, 0.55, 0.1 })
+  end
 
   -- Objectives show on ready quests too (greyed, done), so the tooltip still says what the quest was.
   local members = #quest.objectives > 0 and partyMembers(questID)

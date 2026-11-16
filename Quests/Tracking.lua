@@ -113,7 +113,11 @@ local function sortMode()
 end
 
 -- A zone quest's tier (1 top .. 3) in a mode; `here`: you're in its area, `d`: its distance or nil.
+-- A quest with a running timer goes on top in the distance-based modes (it's urgent: review).
 local function tierFor(mode, quest, here, d)
+  if (mode.key == "smart" or mode.key == "turnins") and ns.Card.TimerEnd(quest.questID) then
+    return 1
+  end
   if mode.key == "smart" then
     if here then
       return 1

@@ -319,6 +319,7 @@ driver:SetScript("OnUpdate", function(_, delta)
     local quest = ns.QuestLog:Get(questID)
     if quest then
       card:SetNavigation(Navigation:Compute(quest))
+      card:UpdateTimer()
     end
   end
 end)
