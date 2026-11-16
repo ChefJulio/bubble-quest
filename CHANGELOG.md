@@ -2,7 +2,9 @@
 
 - Resize the tracker: unlock it and drag the bottom-right corner to set the width and the most it may
   grow (right-click the corner for the default size)
-- In a group, cards show "+2" when party members don't have that quest (hover for who, click to share)
+- In a group, cards show "+2" when party members don't have that quest and could take it (hover for
+  who, click to share). It leaves out who can't: too low level, wrong class or race, and, when they run
+  Questmarker too, already completed, an earlier quest missing, or a full quest log
 - "Share next" in the tracker's header: shares the next quest in this zone someone lacks, and skips
   straight on when nobody can take it (already done, not eligible, ...)
 

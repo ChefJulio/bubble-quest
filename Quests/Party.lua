@@ -36,6 +36,8 @@ local REPLIES = {
 
 local Party = {
   refused = {},    -- [name] = { [questID] = reply key }: lasting refusals this session
+  remote = {},     -- [name] = { [questID] = "ok" | reason }: answers from their Questmarker
+  asking = {},     -- [questID] = true: to ask in the next query
   patterns = nil,  -- { { pattern, outcome, key, named } }
   chain = { tried = {} },  -- Share next: quests already offered this round; pending share
 }
@@ -65,22 +67,97 @@ function Party:Members()
   return members
 end
 
----Names of party members who don't have the quest and haven't refused it for good this session.
+-- Eligibility (review, researched: no API reveals another player's completed quests, quest log or
+-- reputation; Party Sync is off on Forever). Three layers, first answer wins:
+--   1. Pre-check, anyone: their level, class, race and faction against the quest's requirements
+--      (forever-db; Questie's max level). Party members' class and race are readable (secret only
+--      for units outside the party: SecretPredicatesDocumentation.lua:130-133).
+--   2. Ask their Questmarker (when they run it): it answers for its own player (completed, earlier
+--      quest missing, log full) over addon messages. See "Questmarker to Questmarker" below.
+--   3. Share replies: lasting refusals from a share this session (Party.refused).
+local REASONS = {
+  low = "too low level", high = "too high level", class = "wrong class", race = "wrong race",
+  faction = "other faction", done = "already completed", pre = "needs an earlier quest",
+  full = "quest log full", onq = "already has it",
+  ALREADY_DONE = "already completed", CLASS = "wrong class", RACE = "wrong race",
+  HIGH_LEVEL = "too high level", LOW_LEVEL = "too low level", PREREQUISITE = "needs an earlier quest",
+  INVALID = "not eligible", ONQUEST = "already has it", LOG_FULL = "quest log full",
+}
+
+-- A quest's requirements from forever-db (client masks: bit n-1 for race/class n, 0 = any; side 1
+-- Alliance, 2 Horde), plus Questie's maximum level when it has one.
+local function requirements(questID)
+  local record = ns.ForeverData:Quest(questID)
+  local req = {
+    minLevel = record and record.minLevel, races = record and record.races or 0,
+    classes = record and record.classes or 0, side = record and record.side or 0,
+  }
+  local questDB = rawget(_G, "QuestDB")
+  if ns.QuestieData:Available() and type(questDB) == "table" and type(questDB.requiredMaxLevel) == "function" then
+    local ok, maxLevel = pcall(questDB.requiredMaxLevel, questID)
+    req.maxLevel = ok and type(maxLevel) == "number" and maxLevel > 0 and maxLevel or nil
+  end
+  return req
+end
+
+local function hasBit(mask, id)
+  return mask == 0 or (type(id) == "number" and bit.band(mask, bit.lshift(1, id - 1)) ~= 0)
+end
+
+-- Layer 1: a reason this member obviously can't take the quest, or nil.
+local function precheck(unit, req)
+  local level = UnitLevel(unit)
+  if readable(level) and level > 0 then
+    if req.minLevel and level < req.minLevel then return "low" end
+    if req.maxLevel and level > req.maxLevel then return "high" end
+  end
+  -- apiguard: allow party units are readable (secret only outside the party); secrets skipped anyway
+  local _, _, classID = UnitClass(unit)
+  if readable(classID) and not hasBit(req.classes, classID) then return "class" end
+  -- apiguard: allow party units are readable (secret only outside the party); secrets skipped anyway
+  local _, _, raceID = UnitRace(unit)
+  if readable(raceID) and not hasBit(req.races, raceID) then return "race" end
+  local faction = UnitFactionGroup(unit)
+  if readable(faction) and ((req.side == 1 and faction ~= "Alliance") or (req.side == 2 and faction ~= "Horde")) then
+    return "faction"
+  end
+  return nil
+end
+
+---Party members without the quest, split into who can take it and who can't (with why).
+---@param questID number
+---@return string[] can
+---@return table[] cannot { { name, reason } }
+function Party:Status(questID)
+  local can, cannot = {}, {}
+  if not IsInGroup() then
+    return can, cannot
+  end
+  local req = requirements(questID)
+  for _, member in ipairs(self:Members()) do
+    local onQuest = C_QuestLog.IsUnitOnQuest(member.unit, questID)
+    if readable(onQuest) and not onQuest then
+      local remote = self.remote[member.name] and self.remote[member.name][questID]
+      local refused = self.refused[member.name] and self.refused[member.name][questID]
+      local reason = precheck(member.unit, req) or (remote ~= "ok" and remote) or refused
+      if reason then
+        cannot[#cannot + 1] = { name = member.name, reason = REASONS[reason] or "not eligible" }
+      else
+        can[#can + 1] = member.name
+        if remote == nil then
+          self:Ask(questID)
+        end
+      end
+    end
+  end
+  return can, cannot
+end
+
+---Names of party members who don't have the quest and could take it, as far as we know.
 ---@param questID number
 ---@return string[]
 function Party:Missing(questID)
-  local missing = {}
-  if not IsInGroup() then
-    return missing
-  end
-  for _, member in ipairs(self:Members()) do
-    local onQuest = C_QuestLog.IsUnitOnQuest(member.unit, questID)
-    local refused = self.refused[member.name] and self.refused[member.name][questID]
-    if readable(onQuest) and not onQuest and not refused then
-      missing[#missing + 1] = member.name
-    end
-  end
-  return missing
+  return (self:Status(questID))
 end
 
 ---Can the quest be offered to anyone right now (shareable, someone lacks it)?
@@ -225,12 +302,147 @@ ns.Events:On("CHAT_MSG_SYSTEM", function(message)
   end
 end)
 
--- The card's "+N" follows the party: who's in it, and their quest logs.
+-- Questmarker to Questmarker ---------------------------------------------------------------------------
+-- The only way to know a party member's completed quests, prerequisites or log space before sharing
+-- (review, researched): ask their Questmarker, which answers for its own player. Party channel, prefix
+-- "Questmarker":
+--   "Q1:123,456"         which of these can you take? (debounced: one query for everything unknown)
+--   "A1:123=ok,456=done" the answer, to the whole party (every Questmarker learns it)
+-- Codes: ok, done (completed), pre (an earlier quest missing, per forever-db), full (log full), onq.
+-- Members without Questmarker never answer; layers 1 and 3 still apply to them. Addon messages are
+-- refused during chat lockdown (InChatMessagingLockdown: restricted content); nothing is sent then.
+
+local PREFIX = "Questmarker"
+local ASK_DELAY = 1  -- seconds to gather quests into one query
+local MAX_MESSAGE = 240
+
+local function send(text)
+  if C_ChatInfo.InChatMessagingLockdown() or not IsInGroup() then
+    return
+  end
+  -- apiguard: allow arguments are our own plain strings (never secret); not sent during chat lockdown
+  C_ChatInfo.SendAddonMessage(PREFIX, text, IsInRaid() and "RAID" or "PARTY")
+end
+
+-- Send a list in as many messages as it takes ("Q1:" + ids, each under the size limit).
+local function sendList(head, items)
+  local line = head
+  for _, item in ipairs(items) do
+    local piece = (line == head and "" or ",") .. item
+    if #line + #piece > MAX_MESSAGE then
+      send(line)
+      line, piece = head, item
+    end
+    line = line .. piece
+  end
+  if line ~= head then
+    send(line)
+  end
+end
+
+local askTimer
+---Ask the party's Questmarkers about a quest (gathered into one query shortly after).
+---@param questID number
+function Party:Ask(questID)
+  if self.asking[questID] ~= nil then
+    return
+  end
+  self.asking[questID] = true
+  if not askTimer then
+    askTimer = C_Timer.NewTimer(ASK_DELAY, function()
+      askTimer = nil
+      local ids = {}
+      for id, pending in pairs(Party.asking) do
+        if pending then
+          ids[#ids + 1] = tostring(id)
+          Party.asking[id] = false  -- asked; asked again only after their log changes
+        end
+      end
+      sendList("Q1:", ids)
+    end)
+  end
+end
+
+-- Our own answer for one quest.
+local function ownAnswer(questID)
+  if C_QuestLog.IsQuestFlaggedCompleted(questID) then
+    return "done"
+  end
+  if C_QuestLog.GetLogIndexForQuestID(questID) then
+    return "onq"
+  end
+  local record = ns.ForeverData:Quest(questID)
+  if record then
+    for _, pre in ipairs(record.preQuestGroup or {}) do
+      if not C_QuestLog.IsQuestFlaggedCompleted(pre) then
+        return "pre"
+      end
+    end
+    local any = record.preQuestSingle
+    if any and #any > 0 then
+      local met = false
+      for _, pre in ipairs(any) do
+        met = met or C_QuestLog.IsQuestFlaggedCompleted(pre)
+      end
+      if not met then
+        return "pre"
+      end
+    end
+  end
+  local _, numQuests = C_QuestLog.GetNumQuestLogEntries()
+  if numQuests >= C_QuestLog.GetMaxNumQuestsCanAccept() then
+    return "full"
+  end
+  return "ok"
+end
+
+local function baseName(name)
+  return (name:match("^([^%-]+)")) or name
+end
+
+ns.Events:On("CHAT_MSG_ADDON", function(prefix, text, _, sender)
+  if prefix ~= PREFIX or not readable(text) or not readable(sender) then
+    return
+  end
+  -- apiguard: allow our own name, to skip our own messages (readable checked)
+  local me = UnitName("player")
+  local from = baseName(sender)
+  if from == me then
+    return
+  end
+  local kind, body = text:match("^(%a)1:(.*)$")
+  if kind == "Q" then
+    local answers = {}
+    for id in body:gmatch("%d+") do
+      answers[#answers + 1] = id .. "=" .. ownAnswer(tonumber(id))
+    end
+    sendList("A1:", answers)
+  elseif kind == "A" then
+    Party.remote[from] = Party.remote[from] or {}
+    for id, code in body:gmatch("(%d+)=(%a+)") do
+      Party.remote[from][tonumber(id)] = code
+    end
+    ns.Stack:Request(false)  -- the cards' "+N" follow
+  end
+end)
+
+ns.Events:On("PLAYER_LOGIN", function()
+  C_ChatInfo.RegisterAddonMessagePrefix(PREFIX)
+end)
+
+-- The card's "+N" follows the party: who's in it, and their quest logs. A member's log changing (they
+-- accepted, finished or dropped a quest) makes their answers stale: forget them and ask again.
 ns.Events:On("GROUP_ROSTER_UPDATE", function()
   ns.Stack:Request(false)
 end)
 ns.Events:On("UNIT_QUEST_LOG_CHANGED", function(unit)
   if type(unit) == "string" and unit:find("^party") then
+    -- apiguard: allow names: secret ones are skipped (readable)
+    local name = UnitName(unit)
+    if readable(name) then
+      Party.remote[name] = nil
+    end
+    wipe(Party.asking)
     ns.Stack:Request(false)
   end
 end)

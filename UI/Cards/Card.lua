@@ -270,9 +270,14 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   end)
   party:SetScript("OnEnter", function()
     GameTooltip:SetOwner(party, "ANCHOR_LEFT")
-    GameTooltip:SetText("Don't have this quest", 1, 1, 1)
+    GameTooltip:SetText("Could take this quest", 1, 1, 1)
     for _, name in ipairs(self.partyMissing or {}) do
       GameTooltip:AddLine(name, 0.4, 0.8, 1)
+    end
+    -- Members without it who can't take it, and why (Quests/Party.lua: level, class, their
+    -- Questmarker's answer, or a share's reply).
+    for _, entry in ipairs(self.partyCannot or {}) do
+      GameTooltip:AddDoubleLine(entry.name, entry.reason, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6)
     end
     GameTooltip:AddLine("Click to share it.", 0.8, 0.8, 0.8)
     GameTooltip:Show()
@@ -374,7 +379,11 @@ function Card:SetQuest(quest, collapsed, options)
   self.lastNavText = nil  -- so SetNavigation re-fits the title to the current width
 
   -- Party members who lack the quest (only when it can be shared).
-  self.partyMissing = C_QuestLog.IsPushableQuest(quest.questID) and ns.Party:Missing(quest.questID) or {}
+  if C_QuestLog.IsPushableQuest(quest.questID) then
+    self.partyMissing, self.partyCannot = ns.Party:Status(quest.questID)
+  else
+    self.partyMissing, self.partyCannot = {}, {}
+  end
   if #self.partyMissing > 0 then
     self.party.label:SetText("+" .. #self.partyMissing)
     self.party:SetWidth(self.party.label:GetStringWidth() + 6)
