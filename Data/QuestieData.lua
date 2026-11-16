@@ -35,7 +35,27 @@ local function library()
   return type(lib) == "table" and lib or nil
 end
 
--- QuestieDB's area -> uiMap table, found once (false: not available).
+-- QuestieDB publishes its zone tables as Lua source ("[[return { ... }]]",
+-- QuestieDB/support/Forever/Zones/areaIdToUiMapId.lua), which Questie's ZoneDB compiles at startup
+-- (Questie/Database/Zones/zoneDB.lua:73-90). A table is taken as is.
+local function decodeTable(value)
+  if type(value) == "table" then
+    return value
+  end
+  if type(value) ~= "string" then
+    return nil
+  end
+  local chunk = loadstring(value)
+  local ok, result = false, nil
+  if chunk then
+    ok, result = pcall(chunk)
+  end
+  return ok and type(result) == "table" and result or nil
+end
+
+-- QuestieDB's area -> uiMap table, built once as Questie's ZoneDB does: the table, then its
+-- overrides on top (0 = not displayed). False: not available. (Review: read as a table only, the
+-- source string was missed and no quest giver had a position.)
 local areaToUiMap
 local function uiMapOf(areaId)
   if areaToUiMap == nil then
@@ -44,12 +64,17 @@ local function uiMapOf(areaId)
     if lib and type(lib.Support) == "table" and type(lib.Support.Get) == "function" then
       ok, zone = pcall(lib.Support.Get, "ZoneDB")
     end
-    local private = ok and type(zone) == "table" and zone.private
-    areaToUiMap = type(private) == "table" and type(private.areaIdToUiMapId) == "table" and private.areaIdToUiMapId
-      or false
+    local private = ok and type(zone) == "table" and type(zone.private) == "table" and zone.private or {}
+    local base = decodeTable(private.areaIdToUiMapId)
+    if base then
+      for id, uiMap in pairs(decodeTable(private.areaIdToUiMapIdOverride) or {}) do
+        base[id] = uiMap
+      end
+    end
+    areaToUiMap = base or false
   end
   local uiMap = areaToUiMap and areaToUiMap[areaId]
-  return type(uiMap) == "number" and uiMap or nil
+  return type(uiMap) == "number" and uiMap > 0 and uiMap or nil
 end
 
 ---Installed with a compatible contract (whatever the setting says).
@@ -189,6 +214,17 @@ function QuestieData:TurnInPoints(questID)
       end
     end
   end)
+end
+
+---How many areas QuestieDB's zone table maps (for /qm available); 0 when it couldn't be read.
+---@return number
+function QuestieData:ZoneCount()
+  uiMapOf(0)  -- builds the table on first use
+  local n = 0
+  for _ in pairs(areaToUiMap or {}) do
+    n = n + 1
+  end
+  return n
 end
 
 -- Shared with the available-quest index (Quests/Available.lua).

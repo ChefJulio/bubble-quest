@@ -201,9 +201,9 @@ commands.available = {
     for _ in pairs(A.records or {}) do
       count = count + 1
     end
-    lines[#lines + 1] = ("QuestieDB: %s; index: %s (%d quests this character could take); %d givers now")
-      :format(ns.QuestieData:Installed() and "yes" or "NO", A.records and "built" or (A.building and "building" or "not built"),
-        count, #A.givers)
+    lines[#lines + 1] = ("QuestieDB: %s (zone table: %d areas); index: %s (%d quests this character could take); "
+      .. "%d givers now"):format(ns.QuestieData:Installed() and "yes" or "NO", ns.QuestieData:ZoneCount(),
+        A.records and "built" or (A.building and "building" or "not built"), count, #A.givers)
     local north, west, instanceMap = ns.Navigation:PlayerPosition()
     if not north then
       lines[#lines + 1] = "No position (instance?)"
