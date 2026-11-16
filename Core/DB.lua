@@ -35,6 +35,8 @@ local PROFILE_DEFAULTS = {
     hints = true,                 -- "Tip:" lines for quests with a known tricky step
     show = { name = true, level = true, arrow = true, distance = true },  -- card elements shown
     keepDone = true,  -- ready quests keep their finished objectives (greyed) above the turn-in line
+    width = 250,      -- card width (resize grip while unlocked)
+    maxHeight = 0,    -- most the cards' scroll area may grow; 0 = down to the screen's bottom
     -- position = { point, relativePoint, x, y } once the player has moved the stack
   },
   automation = {

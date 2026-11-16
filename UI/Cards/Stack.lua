@@ -23,6 +23,8 @@ local HALF_GAP = 5           -- space above and below a divider
 local BUTTON_SIZE_X, BUTTON_SIZE_Y = 18, 19  -- Blizzard's tracker header buttons
 local DIVIDER_ALPHA = { card = 0.08, section = 0.2 }
 local BOTTOM_MARGIN = 12     -- the panel stops this far above the screen's bottom edge, then scrolls
+local DEFAULT_WIDTH, MIN_WIDTH, MAX_WIDTH = 250, 200, 450  -- card width (resize grip)
+local MIN_SCROLL_HEIGHT = 48 -- the resize grip can't make the scroll area smaller than this
 local SCROLL_STEP = 40       -- pixels per mouse wheel notch
 
 -- The first atlas the client has, from candidates seen in Forever's UI source. Atlases referenced
@@ -91,6 +93,7 @@ local function placeLine(text, onClick, kind, indent)
     separate(kind)
   end
   local line = linePool:Acquire()
+  line:SetWidth(ns.Card.WIDTH - (indent or 0))  -- the width can change (resize grip)
   line:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", indent or 0, -cursor.y)
   line.label:SetText(text)
   line.onClick = onClick
@@ -146,6 +149,7 @@ function Stack:Layout()
     return
   end
   ns.ItemButtons:ReleaseAll()
+  self:ApplyWidth()
   cardPool:ReleaseAll()
   headingPool:ReleaseAll()
   linePool:ReleaseAll()
@@ -250,13 +254,94 @@ end
 -- a button is hidden while its card is scrolled out of view. They're secure, so that happens out of
 -- combat only, and while any is up, scrolling in combat is paused (scrolling would move them).
 
--- Height the scroll area may use: from the panel's top down to BOTTOM_MARGIN above the screen.
+-- Height the scroll area may use: from the panel's top down to BOTTOM_MARGIN above the screen, and no
+-- more than the height set with the resize grip (cards.maxHeight; 0 = no limit of its own).
 function Stack:MaxScrollHeight()
   local top = self.container:GetTop()
-  if not top then
-    return math.huge
+  local room = top and math.max(MIN_SCROLL_HEIGHT, top - HEADER_HEIGHT - 2 * PAD - BOTTOM_MARGIN) or math.huge
+  local cap = ns.DB.profile.cards.maxHeight or 0
+  return cap > 0 and math.min(room, cap) or room
+end
+
+-- Width ------------------------------------------------------------------------------------------
+
+---The card width from the profile, to every part that depends on it.
+function Stack:ApplyWidth()
+  local width = ns.DB.profile.cards.width or ns.Card.WIDTH
+  ns.Card.SetWidth(width)
+  self.container:SetWidth(width + 2 * PAD)
+  self.scroll:SetWidth(width)
+  self.body:SetWidth(width)
+end
+
+-- Resize grip (review: "the lock button allows corner dragging"): bottom-right corner, shown while the
+-- cards are unlocked. Dragging sets the card width and the most the panel may grow (cards.maxHeight);
+-- the panel still shrinks to its contents. While dragging, the panel shows its full height, so you see
+-- what you set. Not in combat: quest item buttons are secure and anchored to the cards. Right-click
+-- resets both.
+
+local RESIZE_STEP_SECONDS = 0.05
+
+local function cursorPosition()
+  local x, y = GetCursorPosition()
+  local scale = UIParent:GetEffectiveScale()
+  return x / scale, y / scale
+end
+
+function Stack:StartResize()
+  if InCombatLockdown() then
+    return
   end
-  return math.max(LINE_HEIGHT * 3, top - HEADER_HEIGHT - 2 * PAD - BOTTOM_MARGIN)
+  -- Grow right and down: pin the top-left corner first (a default position is anchored top-right).
+  ns.DB.profile.cards.position = self:AnchorTopLeft() or ns.DB.profile.cards.position
+  local x, y = cursorPosition()
+  self.resizing = {
+    x = x, y = y,
+    width = ns.DB.profile.cards.width,
+    height = self.scroll:GetHeight(),
+    elapsed = 0,
+  }
+  self.grip:SetScript("OnUpdate", function(_, delta)
+    local r = self.resizing
+    r.elapsed = r.elapsed + delta
+    if r.elapsed >= RESIZE_STEP_SECONDS then
+      r.elapsed = 0
+      self:ResizeTo()
+    end
+  end)
+end
+
+function Stack:ResizeTo()
+  local r = self.resizing
+  if not r or InCombatLockdown() then
+    return
+  end
+  local x, y = cursorPosition()
+  local cards = ns.DB.profile.cards
+  local width = math.floor(math.max(MIN_WIDTH, math.min(MAX_WIDTH, r.width + (x - r.x))) + 0.5)
+  local height = math.floor(math.max(MIN_SCROLL_HEIGHT, r.height + (r.y - y)) + 0.5)
+  if width ~= cards.width or height ~= cards.maxHeight then
+    cards.width, cards.maxHeight = width, height
+    self:Layout()
+  end
+end
+
+function Stack:StopResize()
+  if not self.resizing then
+    return
+  end
+  self:ResizeTo()
+  self.resizing = nil
+  self.grip:SetScript("OnUpdate", nil)
+  self:Layout()  -- back to fitting the contents
+end
+
+function Stack:ResetSize()
+  if InCombatLockdown() then
+    return
+  end
+  ns.DB.profile.cards.width, ns.DB.profile.cards.maxHeight = DEFAULT_WIDTH, 0
+  self:Layout()
 end
 
 -- Size the panel to its contents (capped), keep the scroll offset in range, update the thumb.
@@ -269,6 +354,9 @@ function Stack:Fit()
     return
   end
   local view = math.min(content, self:MaxScrollHeight())
+  if self.resizing then
+    view = self:MaxScrollHeight()  -- while dragging, show the full height being set
+  end
   self.scroll:SetHeight(view)
   self.container:SetHeight(HEADER_HEIGHT + PAD + view + PAD)
   self:ScrollTo(self.scroll:GetVerticalScroll())
@@ -366,6 +454,9 @@ end
 function Stack:ApplyLock()
   if self.header then
     updateHeader()
+  end
+  if self.grip then
+    self.grip:SetShown(not ns.DB.profile.cards.locked)
   end
 end
 
@@ -519,6 +610,37 @@ function Stack:Create()
   self.thumb:SetColorTexture(1, 1, 1, 0.3)
   self.thumb:Hide()
 
+  -- The resize grip (see Width): Blizzard's chat-frame corner art.
+  local grip = CreateFrame("Button", nil, container)
+  grip:SetSize(16, 16)
+  grip:SetPoint("BOTTOMRIGHT", -1, 1)
+  grip:SetFrameLevel(container:GetFrameLevel() + 10)
+  grip:SetNormalTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Up")
+  grip:SetHighlightTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Highlight")
+  grip:SetPushedTexture("Interface\\ChatFrame\\UI-ChatIM-SizeGrabber-Down")
+  grip:RegisterForClicks("RightButtonUp")
+  grip:SetScript("OnMouseDown", function(_, button)
+    if button == "LeftButton" then
+      Stack:StartResize()
+    end
+  end)
+  grip:SetScript("OnMouseUp", function(_, button)
+    if button == "LeftButton" then
+      Stack:StopResize()
+    end
+  end)
+  grip:SetScript("OnClick", function() Stack:ResetSize() end)  -- right-click
+  grip:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(grip, "ANCHOR_RIGHT")
+    GameTooltip:SetText("Resize", 1, 1, 1)
+    GameTooltip:AddLine("Drag to set the width and the most the cards may grow. Right-click: default size. "
+      .. "Lock the cards to hide this.", nil, nil, nil, true)
+    GameTooltip:Show()
+  end)
+  grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  grip:Hide()
+  self.grip = grip
+
   cardPool = ns.CreatePool(function()
     return ns.Card.Create(body, function(questID)
       ns.Tracking:ToggleCollapsed(questID)
@@ -565,6 +687,7 @@ function Stack:Create()
   end)
 
   self:ApplyPosition()
+  self:ApplyLock()  -- the resize grip shows while unlocked
 end
 
 -- Events -------------------------------------------------------------------------------------------

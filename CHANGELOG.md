@@ -1,5 +1,8 @@
 ## What's new
 
+- Resize the tracker: unlock it and drag the bottom-right corner to set the width and the most it may
+  grow (right-click the corner for the default size)
+
 - Timed quests show a countdown under the title ("Time left 2:12": orange under a minute, red under
   20 seconds) and in the tooltip, and go to the top of the tracker while the timer runs
 - Quests with several objectives: each unfinished objective gets its own arrow and distance, as their

@@ -29,6 +29,15 @@ Card.__index = Card
 ns.Card = Card
 Card.WIDTH = WIDTH
 
+---Set the card width (the tracker's resize grip: review). Locals are shared by every function here,
+---so cards pick it up on their next SetQuest; the stack calls this before each layout.
+---@param width number
+function Card.SetWidth(width)
+  WIDTH = width
+  BAR_WIDTH = width - ROW_INDENT
+  Card.WIDTH = width
+end
+
 -- Arrow art (setting cards.arrowStyle). Every style points up unrotated; the angle maths relies on
 -- it. Blizzard's own arrows all read as chevrons or triangles at card size (compared in game), so
 -- the default is our own drawing (tools/make_arrows.py -> Media/Arrows). /qm arrows previews them.
@@ -139,6 +148,7 @@ end
 ---@param segments number? steps to mark, nil for a smooth bar
 ---@param complete boolean green (done) instead of gold
 local function setBar(bar, fraction, segments, complete)
+  bar:SetWidth(BAR_WIDTH)  -- the card width can change (resize grip)
   setSegments(bar, segments)
   bar.fill:SetWidth(math.max(1, BAR_WIDTH * fraction))
   bar.fill:SetShown(fraction > 0)
@@ -334,6 +344,9 @@ end
 function Card:SetQuest(quest, collapsed, options)
   self.questID = quest.questID
   self.options = options
+  -- The width may have changed since this card was last filled (resize grip).
+  self.frame:SetWidth(WIDTH)
+  self.lastNavText = nil  -- so SetNavigation re-fits the title to the current width
   self.rowCount = Card.RowCount(quest, collapsed)
   self.title:SetText(titleText(quest, options))
   self.toggle.label:SetText(collapsed and "+" or "-")
