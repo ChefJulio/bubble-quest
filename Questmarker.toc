@@ -47,6 +47,7 @@ Quests\Party.lua
 Blizzard\Tracker.lua
 Compat\Questie.lua
 UI\Pool.lua
+UI\Tooltips.lua
 UI\Fonts.lua
 UI\Cards\Card.lua
 UI\Cards\Menu.lua

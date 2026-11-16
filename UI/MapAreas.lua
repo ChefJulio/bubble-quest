@@ -377,9 +377,13 @@ function MapAreas.FillTooltip(tooltip, found)
   tooltip:Show()
 end
 
+-- Nil while Ctrl hides our tooltips (UI/Tooltips.lua); the hover check shows it again after.
 local function showTooltip(owner, found)
-  GameTooltip:SetOwner(owner, "ANCHOR_CURSOR")
-  MapAreas.FillTooltip(GameTooltip, found)
+  local tooltip = ns.Tooltips:Take(owner, "ANCHOR_CURSOR")
+  if tooltip then
+    MapAreas.FillTooltip(tooltip, found)
+  end
+  return tooltip ~= nil
 end
 
 -- Highlights (review): what's lit up, most direct first: the circles under the cursor (those
@@ -472,8 +476,7 @@ local function updateHover(layer, map, delta)
   end
   local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
   if found and not tooltipBusy then
-    showTooltip(layer, found)
-    hovering = true
+    hovering = showTooltip(layer, found)
   elseif hovering and not found then
     if GameTooltip:GetOwner() == layer then
       GameTooltip:Hide()

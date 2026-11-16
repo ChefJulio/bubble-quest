@@ -276,8 +276,10 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
       ns.Party:Push(self.questID)
     end
   end)
-  party:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(party, "ANCHOR_LEFT")
+  local function partyTooltip()
+    if not ns.Tooltips:Take(party, "ANCHOR_LEFT", partyTooltip) then
+      return
+    end
     GameTooltip:SetText("Could take this quest", 1, 1, 1)
     for _, name in ipairs(self.partyMissing or {}) do
       GameTooltip:AddLine(name, 0.4, 0.8, 1)
@@ -289,7 +291,8 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
     end
     GameTooltip:AddLine("Click to share it.", 0.8, 0.8, 0.8)
     GameTooltip:Show()
-  end)
+  end
+  party:SetScript("OnEnter", partyTooltip)
   party:SetScript("OnLeave", function() GameTooltip:Hide() end)
   party:Hide()
   self.party = party
@@ -321,11 +324,13 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
       onToggleCollapse(self.questID)
     end
   end)
-  toggle:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(toggle, "ANCHOR_LEFT")
-    GameTooltip:SetText(self.collapsed and "Show this quest's objectives" or "Collapse to the title", 1, 1, 1)
-    GameTooltip:Show()
-  end)
+  local function toggleTooltip()
+    if ns.Tooltips:Take(toggle, "ANCHOR_LEFT", toggleTooltip) then
+      GameTooltip:SetText(self.collapsed and "Show this quest's objectives" or "Collapse to the title", 1, 1, 1)
+      GameTooltip:Show()
+    end
+  end
+  toggle:SetScript("OnEnter", toggleTooltip)
   toggle:SetScript("OnLeave", function() GameTooltip:Hide() end)
   self.toggle = toggle
   return self

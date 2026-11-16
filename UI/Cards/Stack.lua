@@ -199,6 +199,7 @@ function Stack:Layout()
   wipe(self.visible)
   wipe(self.order)
   updateHeader()
+  self:UpdateGrip()
 
   local char = ns.DB.char
   if char.minimized then
@@ -370,7 +371,7 @@ local function cursorPosition()
 end
 
 function Stack:StartResize()
-  if InCombatLockdown() then
+  if InCombatLockdown() or ns.DB.char.minimized then
     return
   end
   -- Grow right and down: pin the top-left corner first (a default position is anchored top-right).
@@ -535,13 +536,19 @@ function Stack:ApplyPosition()
   end
 end
 
+-- The resize grip shows while unlocked, but not while minimized: the panel is then just the header,
+-- and the grip covered its buttons (review; a press on it also started a resize from that 1 px height).
+function Stack:UpdateGrip()
+  if self.grip then
+    self.grip:SetShown(not ns.DB.profile.cards.locked and not ns.DB.char.minimized)
+  end
+end
+
 function Stack:ApplyLock()
   if self.header then
     updateHeader()
   end
-  if self.grip then
-    self.grip:SetShown(not ns.DB.profile.cards.locked)
-  end
+  self:UpdateGrip()
   if self.body then
     self:Fit()  -- unlocked shows the full height set; locked shrinks to the contents
   end
@@ -578,11 +585,13 @@ local function headerButton(parent, tooltip, onClick)
   button:SetSize(BUTTON_SIZE_X, BUTTON_SIZE_Y)
   button:SetHighlightAtlas("ui-questtrackerbutton-yellow-highlight", "ADD")
   button:SetScript("OnClick", onClick)
-  button:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-    GameTooltip:SetText(tooltip(), 1, 1, 1, 1, true)
-    GameTooltip:Show()
-  end)
+  local function show()
+    if ns.Tooltips:Take(button, "ANCHOR_LEFT", show) then
+      GameTooltip:SetText(tooltip(), 1, 1, 1, 1, true)
+      GameTooltip:Show()
+    end
+  end
+  button:SetScript("OnEnter", show)
   button:SetScript("OnLeave", function()
     GameTooltip:Hide()
   end)
@@ -669,14 +678,17 @@ local function createHeader(container)
   share:SetPoint("RIGHT", header.count, "LEFT", -8, 0)
   share:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
   share:SetScript("OnClick", function() ns.Party:ShareNext() end)
-  share:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(share, "ANCHOR_LEFT")
+  local function shareTooltip()
+    if not ns.Tooltips:Take(share, "ANCHOR_LEFT", shareTooltip) then
+      return
+    end
     GameTooltip:SetText("Share next", 1, 1, 1)
     GameTooltip:AddLine("Shares the next quest in this zone that someone in your party doesn't have. If "
       .. "nobody can take it (already done, not eligible, log full ...), it moves straight on to the next. "
       .. "Click again for the one after.", nil, nil, nil, true)
     GameTooltip:Show()
-  end)
+  end
+  share:SetScript("OnEnter", shareTooltip)
   share:SetScript("OnLeave", function() GameTooltip:Hide() end)
   share:Hide()
   header.share = share
@@ -741,13 +753,16 @@ function Stack:Create()
     end
   end)
   grip:SetScript("OnClick", function() Stack:ResetSize() end)  -- right-click
-  grip:SetScript("OnEnter", function()
-    GameTooltip:SetOwner(grip, "ANCHOR_RIGHT")
+  local function gripTooltip()
+    if not ns.Tooltips:Take(grip, "ANCHOR_RIGHT", gripTooltip) then
+      return
+    end
     GameTooltip:SetText("Resize", 1, 1, 1)
     GameTooltip:AddLine("Drag to set the width and height; this zone's cards fill it. Locked, the panel "
       .. "shrinks to fit. Right-click: default size. Lock the cards to hide this.", nil, nil, nil, true)
     GameTooltip:Show()
-  end)
+  end
+  grip:SetScript("OnEnter", gripTooltip)
   grip:SetScript("OnLeave", function() GameTooltip:Hide() end)
   grip:Hide()
   self.grip = grip

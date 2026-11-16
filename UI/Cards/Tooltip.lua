@@ -295,7 +295,9 @@ end
 ---@param quest table
 function QuestTooltip:Show(owner, quest)
   local questID = quest.questID
-  GameTooltip:SetOwner(owner, "ANCHOR_LEFT")
+  if not ns.Tooltips:Take(owner, "ANCHOR_LEFT", function() self:Show(owner, quest) end) then
+    return  -- Ctrl is held (UI/Tooltips.lua)
+  end
   local color = GetQuestDifficultyColor(quest.level or 0)
   GameTooltip:SetText(quest.title or "?", color.r, color.g, color.b)
 

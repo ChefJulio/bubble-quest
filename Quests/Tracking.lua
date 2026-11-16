@@ -369,15 +369,64 @@ ns.Bus:On("QuestRemoved", function(questID)
   Tracking.rank[questID] = nil
 end)
 
--- Rule 4's movement trigger. Only looks: it asks for a re-sort when the player has moved far
--- enough, like any other event; the re-sort itself is deferred out of combat by the stack.
+---Is the last sort's order clearly wrong where you stand now? A card clearly closer (HYSTERESIS) than
+---the one above it in its tier, a quest whose area you entered or left (Smart's tier 1), or the
+---turn-in section on the wrong side (rule 3). Review: a quest 218 yd away stayed above one at 167 yd
+---(and the guide line followed it) because the player hadn't walked MOVE_YARDS since the last sort.
+---The same hysteresis as the sort, so this never asks for a re-sort that wouldn't change anything.
+---@return boolean
+function Tracking:OrderStale()
+  local mode = sortMode()
+  local lists, distance = {}, {}
+  local nearestTurnin, nearestActive
+  for questID, tier in pairs(self.tier) do
+    local quest = ns.QuestLog:Get(questID)
+    if quest then
+      local here = tier ~= "turnin" and tier ~= 3 and ns.Navigation:InArea(quest)
+      if mode.key == "smart" and tier ~= "turnin" and tier ~= 3
+          and (tier == 1) ~= (here or ns.Card.TimerEnd(questID) ~= nil) then
+        return true  -- entered or left its area
+      end
+      -- Exactly Resort's distances (its marker fallback in the zone), or it would ask forever.
+      local d = here and 0 or ns.Navigation:Distance(quest)
+        or (ns.Zone:IsInZone(quest) and ns.Zone:DistanceTo(questID) or nil)
+      distance[questID] = d
+      if d and tier == "turnin" then
+        nearestTurnin = math.min(nearestTurnin or d, d)
+      elseif d and tier ~= 3 then
+        nearestActive = math.min(nearestActive or d, d)
+      end
+      if not (mode.fixed and (tier == 1 or tier == 2)) then
+        lists[tier] = lists[tier] or {}
+        table.insert(lists[tier], quest)
+      end
+    end
+  end
+  if turninsFirst(self.turninsFirst, nearestTurnin, nearestActive) ~= self.turninsFirst then
+    return true
+  end
+  local rank = self.rank
+  for _, list in pairs(lists) do
+    table.sort(list, function(a, b) return (rank[a.questID] or 0) < (rank[b.questID] or 0) end)
+    for i = 1, #list - 1 do
+      if clearlyCloser(list[i + 1], list[i], distance) then
+        return true
+      end
+    end
+  end
+  return false
+end
+
+-- Rule 4's movement triggers. Only look: they ask for a re-sort like any other event; the re-sort
+-- itself is deferred out of combat by the stack. Moving MOVE_YARDS since the last sort, or the order
+-- now clearly wrong (OrderStale).
 local function checkMovement()
   local from = Tracking.sortedAt
   if not from or from.mapID ~= ns.Zone.mapID then
     return
   end
   local x, y = ns.Zone:PlayerPosition()
-  if x and ns.Zone:Yards(from.x, from.y, x, y) > MOVE_YARDS then
+  if x and (ns.Zone:Yards(from.x, from.y, x, y) > MOVE_YARDS or Tracking:OrderStale()) then
     Tracking.sortedAt = nil  -- ask once; the next Resort records a new position
     ns.Bus:Fire("TrackingResortWanted")
   end

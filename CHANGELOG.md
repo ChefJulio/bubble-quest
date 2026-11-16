@@ -6,6 +6,8 @@
 - Resize the tracker: unlock it and drag the bottom-right corner. This zone's cards fill the height
   you set (instead of "Cards for this zone"); unlocked the panel stays that size, locked it shrinks to
   fit. Right-click the corner for the default size
+- Hold Ctrl to hide Questmarker's tooltips (cards, map and minimap areas, buttons); let go to get the
+  one under the cursor back
 - Clearer section headers (Ready to turn in, Camping, Elsewhere, ...) with an open/closed arrow, and a
   proper collapse button on each card
 - In a group, cards show "+2" when party members don't have that quest and could take it (hover for
@@ -27,6 +29,11 @@
 - Map settings: area opacity and size, minimap areas and the guide line, each with its own toggle
 
 ## Fixes
+
+- The card order could stay wrong until you'd walked 100 yards (a quest 218 yd away above one at
+  167 yd); it now re-sorts as soon as a card is clearly closer than the one above it
+- The resize corner is hidden while the tracker is minimized (it covered the header's buttons, and
+  pressing it shrank the tracker to almost nothing)
 
 - Arrows skipped nearby groups of a mob that lives all over a zone (one dense starting-area patch made
   every normal group look too small to count); only lone strays of 1-2 spawns are ignored now

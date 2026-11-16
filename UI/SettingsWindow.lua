@@ -39,7 +39,9 @@ ns.SettingsWindow = Window
 -- frame takes no mouse input itself, its bar and stepper buttons do. Each row also gets a hover area
 -- under its controls (hoverArea), so its label shows the tooltip too.
 local function showTooltip(owner, title, text)
-  GameTooltip:SetOwner(owner, "ANCHOR_RIGHT")
+  if not ns.Tooltips:Take(owner, "ANCHOR_RIGHT", function() showTooltip(owner, title, text) end) then
+    return
+  end
   GameTooltip:SetText(title, 1, 1, 1)
   if text then
     GameTooltip:AddLine(text, nil, nil, nil, true)

@@ -72,13 +72,13 @@ local function create(parent)
   button.count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormal")
   button.count:SetPoint("BOTTOMRIGHT", -1, 1)
 
-  button:SetScript("OnEnter", function(self)
-    if self.link then
-      GameTooltip:SetOwner(self, "ANCHOR_LEFT")
-      GameTooltip:SetHyperlink(self.link)
+  local function itemTooltip()
+    if button.link and ns.Tooltips:Take(button, "ANCHOR_LEFT", itemTooltip) then
+      GameTooltip:SetHyperlink(button.link)
       GameTooltip:Show()
     end
-  end)
+  end
+  button:SetScript("OnEnter", itemTooltip)
   button:SetScript("OnLeave", function() GameTooltip:Hide() end)
   return button
 end

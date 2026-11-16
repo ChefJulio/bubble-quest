@@ -251,16 +251,15 @@ local function updateHover(delta)
     local mx, my = layer:GetCenter()
     found = ns.MapAreas.Under(MinimapAreas.hits, MinimapAreas.radius, cx / scale - mx, cy / scale - my)
   end
-  if not found then
+  if not found or ns.Tooltips:Suppressed() then  -- Ctrl hides our tooltips (UI/Tooltips.lua)
     tooltip:Hide()
     return
   end
-  if GameTooltip:IsShown() then
-    tooltip:SetOwner(layer, "ANCHOR_NONE")
+  local blip = GameTooltip:IsShown()
+  ns.Tooltips:Take(layer, blip and "ANCHOR_NONE" or "ANCHOR_CURSOR", nil, tooltip)
+  if blip then
     tooltip:ClearAllPoints()
     tooltip:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, -2)
-  else
-    tooltip:SetOwner(layer, "ANCHOR_CURSOR")
   end
   ns.MapAreas.FillTooltip(tooltip, found)
 end

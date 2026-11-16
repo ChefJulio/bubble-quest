@@ -19,8 +19,12 @@ function Questmarker_OnAddonCompartmentClick(_, button)
   end
 end
 
-function Questmarker_OnAddonCompartmentEnter(_, menuButton)
-  GameTooltip:SetOwner(menuButton, "ANCHOR_LEFT")
+function Questmarker_OnAddonCompartmentEnter(addon, menuButton)
+  if not ns.Tooltips:Take(menuButton, "ANCHOR_LEFT", function()
+    Questmarker_OnAddonCompartmentEnter(addon, menuButton)
+  end) then
+    return
+  end
   GameTooltip:SetText("Questmarker", 1, 1, 1)
   GameTooltip:AddLine("Left-click: settings", 0.8, 0.8, 0.8)
   GameTooltip:AddLine(ns.DB.char.minimized and "Right-click: show the cards" or "Right-click: minimize the cards",
