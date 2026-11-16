@@ -17,8 +17,9 @@ local ADDON_NAME, ns = ...
 --   row         entries sharing a row name sit on one line; the first one's rowLabel leads the line,
 --               checkboxes show their `short` label, dropdowns are `width` wide
 --   enabledWhen(profile) -> false greys the control out (e.g. automation options while it's all off)
---   kind "status": a label, a live status (status() -> text, color) and a button (action, actionLabel,
---               actionEnabled() -> boolean); windowOnly, as it isn't a setting
+--   kind "status": a label, a live status (status() -> text, color) and a button made by
+--               button(parent) (shown only while actionEnabled() -> true); windowOnly, as it isn't a
+--               setting
 -- Both UIs:
 --   onlyIf() -> false leaves the entry out (checked when the UI is built, e.g. Questie not installed)
 --   windowOnly  not in Blizzard's panel
@@ -168,9 +169,9 @@ function Schema:Entries()
         end
         return "Unknown", GRAY_FONT_COLOR
       end,
-      actionLabel = "Turn off",
+      -- A secure "/reload" button (Compat/Questie.lua): addons can't reload the UI themselves.
+      button = function(parent) return ns.Questie:CreateTurnOffButton(parent, "Turn off") end,
       actionEnabled = function() return ns.Questie:TrackerEnabled() ~= false end,
-      action = function() ns.Questie:TurnOffTracker() end,
     },
 
     { kind = "section", label = "Quest categories", column = 2 },

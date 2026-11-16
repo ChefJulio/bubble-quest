@@ -5,13 +5,15 @@ local ADDON_NAME, ns = ...
 -- own small window: Blizzard's StaticPopup system taints when addons define dialogs) and a status
 -- row in the settings window (UI/SettingsSchema.lua). Asked for in review: make it easy.
 --
--- Turning it off runs QuestieTracker:Disable(), what Questie's own "Enable Tracker" checkbox runs
--- (Questie/Modules/Options/TrackerTab/QuestieOptionsTracker.lua:105-111): it clears the setting,
--- cleans up its tracker and reloads the UI (QuestieTracker.lua:576-584). Only on the player's click,
--- and not in combat (a reload then would be refused, and Questie's checkbox is disabled in combat too).
--- If a Questie update moves that function, the button opens Questie's options instead
--- (QuestieOptions:ToggleConfigWindow, QuestieOptions.lua:103) with a chat hint. Every step is guarded:
--- a renamed field means "fallback", never an error.
+-- Turning it off: Questie's own switch, QuestieTracker:Disable() (QuestieTracker.lua:576-584), clears
+-- the setting and then calls ReloadUI, which Forever blocks for addon code: "AddOn 'Questie' tried to
+-- call the protected function 'Reload()'" (BugSack, when we called it). So the button is a secure
+-- macro button running "/reload" (SECURE_ACTIONS.macro -> C_Macro.RunMacroText, SecureTemplates.lua:450:
+-- Blizzard's code runs the reload on the player's click), and its PreClick first turns Questie's
+-- setting off (Questie.db.profile.trackerEnabled, the field Disable() clears; the rest of Disable is
+-- frame-position cleanup a reload resets anyway). If that field can't be found (a Questie update),
+-- PreClick cancels the reload and opens Questie's options (QuestieOptions:ToggleConfigWindow,
+-- QuestieOptions.lua:103) with a chat hint instead. Every step is guarded: never an error.
 
 local NEVER = "questie-tracker-never"   -- char notice: "Don't ask again"
 local PROMPT_DELAY = 5                  -- seconds after login: Questie finishes setting up first
@@ -58,18 +60,41 @@ local function openQuestieOptions()
   ns.Debug:Print("In Questie's options, untick Tracker > Enable Tracker.")
 end
 
----Turn Questie's tracker off with Questie's own switch (reloads the UI). Out of combat only.
-function Questie:TurnOffTracker()
-  if InCombatLockdown() then
-    ns.Debug:Print("Leave combat first: turning off Questie's tracker reloads the UI.")
-    return
+-- Turn Questie's tracker setting off. Returns false if the setting can't be found.
+local function setTrackerOff()
+  local questie = questieGlobal()
+  local profile = questie and questie.db and questie.db.profile
+  if type(profile) ~= "table" or type(profile.trackerEnabled) ~= "boolean" then
+    return false
   end
-  local tracker = importModule("QuestieTracker")
-  if tracker and type(tracker.Disable) == "function" then
-    tracker:Disable()  -- reloads the UI
-  else
-    openQuestieOptions()
-  end
+  profile.trackerEnabled = false
+  return true
+end
+
+---A button that turns Questie's tracker off and reloads the UI (see the header: a secure "/reload"
+---macro, the setting changed in PreClick). Create out of combat.
+---@param parent table
+---@param text string
+---@return table
+function Questie:CreateTurnOffButton(parent, text)
+  -- apiguard: allow created out of combat (prompt at login, settings window); only its macro runs later
+  local button = CreateFrame("Button", nil, parent, "SecureActionButtonTemplate, UIPanelButtonTemplate")
+  button:SetText(text)
+  button:RegisterForClicks("AnyUp", "AnyDown")  -- either ActionButtonUseKeyDown setting
+  button:SetAttribute("type", "macro")
+  button:SetAttribute("macrotext", "/reload")
+  button:SetScript("PreClick", function(btn)
+    if not setTrackerOff() and not InCombatLockdown() then
+      btn:SetAttribute("type", nil)  -- no reload: nothing changed
+      openQuestieOptions()
+    end
+  end)
+  button:SetScript("PostClick", function(btn)
+    if not InCombatLockdown() then
+      btn:SetAttribute("type", "macro")
+    end
+  end)
+  return button
 end
 
 -- The prompt -----------------------------------------------------------------------------------------
@@ -111,11 +136,10 @@ local function createPrompt()
   text:SetJustifyH("LEFT")
   text:SetText("Questmarker replaces it. Turn Questie's tracker off? Your UI reloads.")
 
-  local off = button(frame, "Turn it off", function()
-    frame:Hide()
-    Questie:TurnOffTracker()
-  end)
+  local off = Questie:CreateTurnOffButton(frame, "Turn it off")
+  off:SetSize(math.max(96, off:GetFontString():GetStringWidth() + 24), 22)
   off:SetPoint("BOTTOMLEFT", 14, 12)
+  off:HookScript("PostClick", function() frame:Hide() end)  -- the fallback path doesn't reload
   local later = button(frame, "Not now", function() frame:Hide() end)
   later:SetPoint("LEFT", off, "RIGHT", 8, 0)
   local never = button(frame, "Don't ask again", function()

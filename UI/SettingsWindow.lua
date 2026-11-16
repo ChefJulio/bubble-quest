@@ -210,17 +210,19 @@ function builders.status(parent, entry, x, y)
   inlineLabel(parent, entry, x, y)
   local state = parent:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
   state:SetPoint("LEFT", parent, "TOPLEFT", x + INLINE_LABEL_WIDTH, y - INLINE_HEIGHT / 2)
-  local action = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
-  action:SetText(entry.actionLabel)
+  -- The entry makes its button (it may be secure: Questie's is a "/reload" macro button). Secure
+  -- buttons can't be shown, hidden or disabled in combat, so that waits for the next refresh.
+  local action = entry.button(parent)
   action:SetSize(90, 22)
   action:SetPoint("RIGHT", parent, "TOPLEFT", x + COLUMN_WIDTH, y - INLINE_HEIGHT / 2)
-  action:SetScript("OnClick", function() entry.action() end)
   tooltip(action, entry.label, entry.tooltip)
   return INLINE_HEIGHT, function()
     local text, color = entry.status()
     state:SetText(text)
     state:SetTextColor((color or HIGHLIGHT_FONT_COLOR):GetRGB())
-    action:SetEnabled(entry.actionEnabled == nil or entry.actionEnabled())
+    if not InCombatLockdown() then
+      action:SetShown(entry.actionEnabled == nil or entry.actionEnabled())
+    end
   end
 end
 

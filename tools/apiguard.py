@@ -260,15 +260,26 @@ OBSERVED_RESTRICTED = {
   # Patch 12.0.0 API notes (Beta 7): "restricted while in combat"; Pretty Wide Quest Log on Forever
   # (issue #38): blocked for addon code during combat, even on a click; works out of combat.
   "QuestLogPushQuest": "combat",
+  # ADDON_ACTION_BLOCKED "AddOn 'Questie' tried to call the protected function 'Reload()'" (Forever
+  # 1.60.1, Questie's QuestieTracker:Disable called from our button); the docs list it unflagged.
+  # ReloadUI (Blizzard Lua) wraps it, so the wrapper check catches that too. Reload with a secure
+  # "/reload" macro button instead (Compat/Questie.lua).
+  "C_UI.Reload": "protected",
 }
 
 
 def add_observed(db: "ApiDb") -> None:
-  for name, kind in OBSERVED_RESTRICTED.items():
+  """Names are globals ("QuestLogPushQuest") or namespaced ("C_UI.Reload")."""
+  for full, kind in OBSERVED_RESTRICTED.items():
+    ns_name, _, name = full.rpartition(".")
     if kind == "protected":
-      db.globals[name] = ApiEntry(name=name, system="observed", protected=True)
+      entry = ApiEntry(name=name, system="observed", protected=True)
     else:
-      db.globals[name] = ApiEntry(name=name, system="observed", flags=["RestrictedInCombat (observed)"])
+      entry = ApiEntry(name=name, system="observed", flags=["RestrictedInCombat (observed)"])
+    if ns_name:
+      db.namespaces.setdefault(ns_name, {})[name] = entry
+    else:
+      db.globals[name] = entry
 
 
 def load_docs(docs_dir: Path) -> ApiDb:
