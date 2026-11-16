@@ -6,6 +6,12 @@
 - Resize the tracker: unlock it and drag the bottom-right corner. This zone's cards fill the height
   you set (instead of "Cards for this zone"); unlocked the panel stays that size, locked it shrinks to
   fit. Right-click the corner for the default size
+- Quests you can pick up, on the world map and minimap (needs QuestieDB, now a required dependency on
+  CurseForge; Questie itself isn't needed): a "!" at each quest giver (blue: repeatable), hover for its
+  quests. Quests started by a drop (like Furlbrow's Deed) show the droppers' area in faint grey with
+  the item's icon, and say what to loot. Low-level quests and drop quests each have a toggle
+- Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides
+  you to the spot
 - In a group, hovering quest areas on the map or minimap shows your party's progress on that quest too
 - Section headers never scroll out of view: ones below dock at the bottom of the tracker, so a
   collapsed "Hidden" or "Elsewhere" is always one click away
@@ -32,6 +38,9 @@
 - Map settings: area opacity and size, minimap areas and the guide line, each with its own toggle
 
 ## Fixes
+
+- A spot learned in play (where you stood when hovering an object) could pull an arrow away from the
+  real spawn; learned spots now only fill in where the databases know nothing
 
 - The card order could stay wrong until you'd walked 100 yards (a quest 218 yd away above one at
   167 yd); it now re-sorts as soon as a card is clearly closer than the one above it

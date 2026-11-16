@@ -349,10 +349,35 @@ function Schema:Entries()
     {
       kind = "slider", id = "QUESTMARKER_MAP_ICON_SIZE", column = 2, default = 100, min = 50, max = 200, step = 10,
       label = "Icon size",
-      tooltip = "Size of the \"?\" at ready quests' turn-ins, on the world map and the minimap.",
+      tooltip = "Size of the \"?\" at turn-ins and the \"!\" at quest givers, on the world map and the minimap.",
       format = percent,
       get = function(p) return p.map.iconSize end,
-      set = function(p, v) p.map.iconSize = v; ns.MapAreas:MarkDirty() end,
+      set = function(p, v) p.map.iconSize = v; ns.MapAreas:MarkDirty(); ns.MapAvailable:MarkDirty() end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE", column = 2, default = true,
+      label = "Show quests you can pick up",
+      tooltip = "A \"!\" at every quest giver with a quest for you (blue: repeatable), on the world map and the "
+        .. "minimap. Needs QuestieDB.",
+      get = function(p) return p.map.available end,
+      set = function(p, v) p.map.available = v; ns.MapAvailable:MarkDirty() end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE_TRIVIAL", column = 2, default = false,
+      enabledWhen = function(p) return p.map.available end,
+      label = "Include low-level quests",
+      tooltip = "Also grey quests, far below your level (little or no experience).",
+      get = function(p) return p.map.availableTrivial end,
+      set = function(p, v) p.map.availableTrivial = v; ns.MapAvailable:MarkDirty() end,
+    },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE_DROPS", column = 2, default = true,
+      enabledWhen = function(p) return p.map.available end,
+      label = "Include quests started by a drop",
+      tooltip = "Quests that start from an item mobs drop (like Furlbrow's Deed): the mobs' area in faint grey, "
+        .. "with the item's icon. Hidden once the item is in your bags.",
+      get = function(p) return p.map.availableDrops end,
+      set = function(p, v) p.map.availableDrops = v; ns.MapAvailable:MarkDirty() end,
     },
 
     { kind = "section", label = "Arrows", column = 2 },

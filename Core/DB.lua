@@ -54,7 +54,10 @@ local PROFILE_DEFAULTS = {
     guide = true,         -- a faint dotted line on the minimap to the guided quest's target
     opacity = 40,         -- each area circle's opacity, percent
     size = 30,            -- each area circle's radius, yards
-    iconSize = 100,       -- the turn-in "?" on the maps, percent
+    iconSize = 100,       -- the "?" and "!" icons on the maps, percent
+    available = true,     -- quests you can pick up, on the world map and minimap
+    availableTrivial = false,  -- also grey (trivial) ones
+    availableDrops = true,     -- also quests started by a dropped item (their droppers' area)
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {

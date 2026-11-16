@@ -56,8 +56,8 @@ end
 -- Textures ----------------------------------------------------------------------------------------
 
 local layer, mask
-local blobs, markers, dots = {}, {}, {}
-local used = { blobs = 0, markers = 0, dots = 0 }
+local blobs, markers, dots, givers, dropBlobs = {}, {}, {}, {}, {}
+local used = { blobs = 0, markers = 0, dots = 0, givers = 0, dropBlobs = 0 }
 
 local function acquire(pool, kind, texture, drawLayer)
   used[kind] = used[kind] + 1
@@ -104,6 +104,97 @@ local function rebuild()
         MinimapAreas.points[#MinimapAreas.points + 1] = {
           x = p.x, y = p.y, map = p.map, color = color, questID = questID, objective = entry.objective,
         }
+      end
+    end
+  end
+end
+
+-- World offset (yards north, yards west of the player) to minimap pixels from its centre.
+local function project(north, west, cos, sin, scale)
+  local x, y = -west * scale, north * scale  -- north up, east right
+  return x * cos + y * sin, -x * sin + y * cos
+end
+
+-- Available quests (UI/MapAvailable.lua's entries) ----------------------------------------------------
+-- Quest givers' "!" at their spawns; quests from drops as the droppers' faint grey area with the item's
+-- icon at each cluster's centre. Rebuilt when the entries are.
+
+local GIVER_SIZE, DROP_ICON_SIZE = 14, 13  -- pixels at 100% (setting map.iconSize)
+local DROP_TINT, DROP_ALPHA = 0.8, 0.16
+local giverPoints, giversBuiltFor = {}, nil
+MinimapAreas.giverHits = {}
+
+local function rebuildGivers()
+  wipe(giverPoints)
+  for _, entry in ipairs(ns.MapAvailable:Entries()) do
+    if entry.giver.kind == "item" then
+      for _, cluster in ipairs(entry.clusters) do
+        for _, p in ipairs(cluster.points) do
+          giverPoints[#giverPoints + 1] = { x = p.x, y = p.y, map = p.map, entry = entry, blob = true }
+        end
+        local c = cluster.centre
+        giverPoints[#giverPoints + 1] = { x = c.x, y = c.y, map = c.map, entry = entry, drop = true }
+      end
+    else
+      for _, p in ipairs(entry.giver.points) do
+        giverPoints[#giverPoints + 1] = { x = p.x, y = p.y, map = p.map, entry = entry }
+      end
+    end
+  end
+  giversBuiltFor = ns.MapAvailable.builtFor
+end
+
+-- A giver icon, its art set only when what it shows changes (several looks share one pool).
+local function acquireGiver(entry, drop)
+  used.givers = used.givers + 1
+  local t = givers[used.givers]
+  if not t then
+    t = layer:CreateTexture(nil, "OVERLAY", nil, 2)
+    t:AddMaskTexture(mask)
+    givers[used.givers] = t
+  end
+  local art = drop and ("i" .. tostring(entry.icon)) or ((entry.repeatable and "r" or "n") .. (entry.trivial and "t" or ""))
+  if t.art ~= art then
+    t.art = art
+    if drop then
+      t:SetTexture(entry.icon or "Interface/GossipFrame/AvailableQuestIcon")
+      t:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+      t:SetDesaturated(false)
+      t:SetVertexColor(1, 1, 1, 1)
+    else
+      t:SetTexCoord(0, 1, 0, 1)
+      ns.MapAvailable.SetGiverArt(t, entry)
+    end
+  end
+  t:Show()
+  return t
+end
+
+local function drawGivers(north, west, instanceMap, cos, sin, scale, half, square)
+  local hits = MinimapAreas.giverHits
+  local iconScale = ns.MapAreas.iconScale()
+  local blobSize = 2 * ns.MapAreas.blobYards() * scale
+  local reach = half + blobSize / 2
+  for _, p in ipairs(giverPoints) do
+    if p.map == instanceMap then
+      local x, y = project(p.x - north, p.y - west, cos, sin, scale)
+      local inside
+      if square then
+        inside = math.abs(x) <= reach and math.abs(y) <= reach
+      else
+        inside = x * x + y * y <= reach * reach
+      end
+      if inside then
+        if p.blob then
+          local blob = acquire(dropBlobs, "dropBlobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
+          blob:SetVertexColor(DROP_TINT, DROP_TINT, DROP_TINT, DROP_ALPHA)
+          place(blob, x, y, blobSize)
+          hits[#hits + 1] = { x = x, y = y, radius = math.max(blobSize / 2, HOVER_MIN), entry = p.entry }
+        else
+          local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
+          place(acquireGiver(p.entry, p.drop), x, y, size)
+          hits[#hits + 1] = { x = x, y = y, radius = math.max(size / 2, HOVER_MIN), entry = p.entry }
+        end
       end
     end
   end
@@ -166,12 +257,6 @@ end
 local guide = { elapsed = TARGET_SECONDS }  -- questID, point: refreshed every TARGET_SECONDS
 
 -- Drawing -----------------------------------------------------------------------------------------
-
--- World offset (yards north, yards west of the player) to minimap pixels from its centre.
-local function project(north, west, cos, sin, scale)
-  local x, y = -west * scale, north * scale  -- north up, east right
-  return x * cos + y * sin, -x * sin + y * cos
-end
 
 local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square)
   local size = 2 * ns.MapAreas.blobYards() * scale
@@ -249,14 +334,17 @@ local function updateHover(delta)
     return
   end
   hoverElapsed = 0
-  local found
-  if Minimap:IsMouseOver() and #MinimapAreas.hits > 0 then
+  -- A quest giver under the cursor first (its icon sits on top), else the quest areas.
+  local found, offers
+  if Minimap:IsMouseOver() and (#MinimapAreas.hits > 0 or #MinimapAreas.giverHits > 0) then
     local cx, cy = GetCursorPosition()
     local scale = layer:GetEffectiveScale()
     local mx, my = layer:GetCenter()
-    found = ns.MapAreas.Under(MinimapAreas.hits, MinimapAreas.radius, cx / scale - mx, cy / scale - my)
+    local x, y = cx / scale - mx, cy / scale - my
+    offers = ns.MapAvailable.Under(MinimapAreas.giverHits, x, y)
+    found = not offers and ns.MapAreas.Under(MinimapAreas.hits, MinimapAreas.radius, x, y) or nil
   end
-  if not found or ns.Tooltips:Suppressed() then  -- Ctrl hides our tooltips (UI/Tooltips.lua)
+  if not (found or offers) or ns.Tooltips:Suppressed() then  -- Ctrl hides our tooltips (UI/Tooltips.lua)
     tooltip:Hide()
     return
   end
@@ -266,15 +354,21 @@ local function updateHover(delta)
     tooltip:ClearAllPoints()
     tooltip:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, -2)
   end
-  ns.MapAreas.FillTooltip(tooltip, found)
+  if offers then
+    ns.MapAvailable.FillTooltip(tooltip, offers)
+  else
+    ns.MapAreas.FillTooltip(tooltip, found)
+  end
 end
 
 local function update(_, delta)
   local map = settings()
   local showAreas, showGuide = map and map.minimapAreas, map and map.guide
+  local showGivers = ns.MapAvailable:Enabled()
   local north, west, instanceMap = ns.Navigation:PlayerPosition()
   wipe(MinimapAreas.hits)
-  if north and (showAreas or showGuide) then
+  wipe(MinimapAreas.giverHits)
+  if north and (showAreas or showGuide or showGivers) then
     if showAreas and MinimapAreas.version ~= ns.MapAreas.version then
       rebuild()
     end
@@ -290,6 +384,13 @@ local function update(_, delta)
     if showAreas then
       drawAreas(north, west, instanceMap, cos, sin, scale, half, square)
     end
+    if showGivers then
+      ns.MapAvailable:Entries()
+      if giversBuiltFor ~= ns.MapAvailable.builtFor then
+        rebuildGivers()
+      end
+      drawGivers(north, west, instanceMap, cos, sin, scale, half, square)
+    end
     if showGuide then
       drawGuide(north, west, instanceMap, cos, sin, scale, half, square, delta)
     end
@@ -298,6 +399,8 @@ local function update(_, delta)
   hideUnused(blobs, "blobs")
   hideUnused(markers, "markers")
   hideUnused(dots, "dots")
+  hideUnused(givers, "givers")
+  hideUnused(dropBlobs, "dropBlobs")
   updateHover(delta)
 end
 
