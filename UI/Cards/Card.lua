@@ -256,6 +256,31 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.inArea:SetVertexColor(0.2, 1, 0.2)
   self.inArea:Hide()
 
+  -- "+2": party members who don't have this quest (review); click shares it. Placed left of the arrow
+  -- and distance by SetNavigation, which fits the title around both.
+  local party = CreateFrame("Button", nil, frame)
+  party:SetHeight(TITLE_HEIGHT)
+  party.label = party:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
+  party.label:SetPoint("CENTER")
+  party.label:SetTextColor(0.4, 0.8, 1)
+  party:SetScript("OnClick", function()
+    if self.questID then
+      ns.Party:Push(self.questID)
+    end
+  end)
+  party:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(party, "ANCHOR_LEFT")
+    GameTooltip:SetText("Don't have this quest", 1, 1, 1)
+    for _, name in ipairs(self.partyMissing or {}) do
+      GameTooltip:AddLine(name, 0.4, 0.8, 1)
+    end
+    GameTooltip:AddLine("Click to share it.", 0.8, 0.8, 0.8)
+    GameTooltip:Show()
+  end)
+  party:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  party:Hide()
+  self.party = party
+
   -- The card's progress bar (the whole quest); objective rows get their own when they need one.
   self.bar = createBar(frame)
 
@@ -347,6 +372,16 @@ function Card:SetQuest(quest, collapsed, options)
   -- The width may have changed since this card was last filled (resize grip).
   self.frame:SetWidth(WIDTH)
   self.lastNavText = nil  -- so SetNavigation re-fits the title to the current width
+
+  -- Party members who lack the quest (only when it can be shared).
+  self.partyMissing = C_QuestLog.IsPushableQuest(quest.questID) and ns.Party:Missing(quest.questID) or {}
+  if #self.partyMissing > 0 then
+    self.party.label:SetText("+" .. #self.partyMissing)
+    self.party:SetWidth(self.party.label:GetStringWidth() + 6)
+    self.party:Show()
+  else
+    self.party:Hide()
+  end
   self.rowCount = Card.RowCount(quest, collapsed)
   self.title:SetText(titleText(quest, options))
   self.toggle.label:SetText(collapsed and "+" or "-")
@@ -490,7 +525,13 @@ function Card:SetNavigation(nav)
     self.lastNavText, self.lastNavIcon = text, icon
     -- The title gets whatever the arrow text doesn't need ("721 yd" is short, a zone name isn't).
     local navWidth = (text ~= "" and self.navText:GetStringWidth() + 6 or 0) + (icon and ARROW_SIZE + 3 or 0)
-    self.title:SetWidth(WIDTH - TOGGLE_WIDTH - navWidth)
+    local partyWidth = 0
+    if self.party:IsShown() then
+      self.party:ClearAllPoints()
+      self.party:SetPoint("TOPRIGHT", -(TOGGLE_WIDTH + navWidth), 0)
+      partyWidth = self.party:GetWidth() + 2
+    end
+    self.title:SetWidth(WIDTH - TOGGLE_WIDTH - navWidth - partyWidth)
   end
   self.arrow:SetShown(arrow)
   if arrow and nav then

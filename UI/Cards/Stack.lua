@@ -126,6 +126,8 @@ local function updateHeader()
   header.minimize:SetPushedAtlas(minimized and "ui-questtrackerbutton-expand-all-pressed"
     or "ui-questtrackerbutton-collapse-all-pressed")
 
+  header.share:SetShown(IsInGroup())
+
   local locked = ns.DB.profile.cards.locked
   header.lock:SetAlpha(locked and 1 or 0.4)
   if header.lock.fallback then
@@ -569,6 +571,30 @@ local function createHeader(container)
 
   header.count = header:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
   header.count:SetPoint("RIGHT", header.lock, "LEFT", -6, 0)
+
+  -- "Share next" (review): grouped only. Each click shares the next quest in this zone a party member
+  -- lacks; a share nobody can take goes straight on to the next (Quests/Party.lua).
+  local share = CreateFrame("Button", nil, header)
+  share:SetHeight(HEADER_HEIGHT)
+  share.label = share:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
+  share.label:SetPoint("CENTER")
+  share.label:SetText("Share next")
+  share.label:SetTextColor(0.4, 0.8, 1)
+  share:SetWidth(share.label:GetStringWidth() + 8)
+  share:SetPoint("RIGHT", header.count, "LEFT", -8, 0)
+  share:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
+  share:SetScript("OnClick", function() ns.Party:ShareNext() end)
+  share:SetScript("OnEnter", function()
+    GameTooltip:SetOwner(share, "ANCHOR_LEFT")
+    GameTooltip:SetText("Share next", 1, 1, 1)
+    GameTooltip:AddLine("Shares the next quest in this zone that someone in your party doesn't have. If "
+      .. "nobody can take it (already done, not eligible, log full ...), it moves straight on to the next. "
+      .. "Click again for the one after.", nil, nil, nil, true)
+    GameTooltip:Show()
+  end)
+  share:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  share:Hide()
+  header.share = share
 
   return header
 end
