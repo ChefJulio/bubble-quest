@@ -21,7 +21,8 @@ local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer 
 -- Each circle's own opacity: overlaps build up colour, so dense spawn areas read stronger (a heat
 -- map). A frame buffer per quest (to merge circles into one even shape) rendered the colours almost
 -- black inside the world map's own frame buffer (seen in review), so it's not used.
-local BLOB_ALPHA = 0.22
+local BLOB_ALPHA = 0.4  -- review: 0.22 was too faint
+local HOVER_SECONDS = 0.05  -- how often the hover is checked while the map is open
 local FRAME_LEVEL = 2005     -- under Questie's map lines (2015) and icons (2016+)
 
 -- Eight hues that stay distinct on the map's parchment and from each other.
@@ -39,6 +40,8 @@ local PALETTE = {
 local MapAreas = {
   colors = {},   -- [questID] = palette index, for the session (stays when cards re-sort)
   groups = {},   -- [n] = per-quest frame with its textures
+  hits = {},     -- every drawn circle: { x, y (canvas pixels), questID, objective (index or nil) }
+  radius = 0,    -- a circle's radius in canvas pixels, for the hover
   dirty = true,
 }
 ns.MapAreas = MapAreas
@@ -80,6 +83,10 @@ end
 
 local vector  -- reused for every conversion
 
+local function readable(value)
+  return value ~= nil and not issecretvalue(value)
+end
+
 local function acquireGroup(layer, n)
   local group = MapAreas.groups[n]
   if not group then
@@ -115,14 +122,16 @@ local function finishGroup(group)
   end
 end
 
--- Every kept area point of the quest's current targets (unfinished objectives, or the turn-in).
+-- Every kept area point of the quest's current targets (unfinished objectives, or the turn-in), with
+-- its objective index (nil: the turn-in).
 local function questPoints(quest)
   local points = {}
-  for _, areas in pairs(ns.Navigation:Targets(quest).byObjective) do
+  for key, areas in pairs(ns.Navigation:Targets(quest).byObjective) do
+    local objective = type(key) == "number" and key or nil
     for _, area in ipairs(areas) do
       if area.kept then
         for _, p in ipairs(area.points) do
-          points[#points + 1] = p
+          points[#points + 1] = { point = p, objective = objective }
         end
       end
     end
@@ -153,6 +162,8 @@ function MapAreas:Redraw()
   end
   local size = 2 * BLOB_YARDS / worldWidth * width
   vector = vector or CreateVector2D(0, 0)
+  wipe(self.hits)
+  self.radius = size / 2 * 0.7  -- the circle's visible core (its edge fades out)
 
   local n = 0
   for questID in pairs(ns.Stack.visible) do
@@ -162,19 +173,100 @@ function MapAreas:Redraw()
       local group = acquireGroup(layer, n)
       local color = self:ColorFor(questID)
       local seen = {}
-      for _, p in ipairs(questPoints(quest)) do
-        local key = p.map .. ":" .. math.floor(p.x / MERGE_YARDS) .. ":" .. math.floor(p.y / MERGE_YARDS)
+      for _, entry in ipairs(questPoints(quest)) do
+        local p = entry.point
+        local key = (entry.objective or "t") .. ":" .. p.map .. ":" .. math.floor(p.x / MERGE_YARDS) .. ":"
+          .. math.floor(p.y / MERGE_YARDS)
         if not seen[key] then
           seen[key] = true
           vector:SetXY(p.x, p.y)
           local _, pos = C_Map.GetMapPosFromWorldPos(p.map, vector, mapID)
           if pos and pos.x >= 0 and pos.x <= 1 and pos.y >= 0 and pos.y <= 1 then
-            placeBlob(group, canvas, pos.x * width, pos.y * height, size, color)
+            local x, y = pos.x * width, pos.y * height
+            placeBlob(group, canvas, x, y, size, color)
+            self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, objective = entry.objective }
           end
         end
       end
       finishGroup(group)
     end
+  end
+end
+
+-- Hover -----------------------------------------------------------------------------------------------
+-- The areas take no mouse (they'd block the map and its pins), so the hover is worked out from the
+-- cursor, as Questie does for its patrol lines: every quest and objective whose circles are under the
+-- cursor, in a tooltip like Questie's (review). It stays out of the way when another tooltip is up
+-- (a Questie icon, a map pin).
+
+-- Quests and objectives under the cursor: { [questID] = { [objective index or "turnin"] = true } }.
+local function under(x, y)
+  local found, any = {}, false
+  local r2 = MapAreas.radius * MapAreas.radius
+  for _, hit in ipairs(MapAreas.hits) do
+    local dx, dy = hit.x - x, hit.y - y
+    if dx * dx + dy * dy <= r2 then
+      found[hit.questID] = found[hit.questID] or {}
+      found[hit.questID][hit.objective or "turnin"] = true
+      any = true
+    end
+  end
+  return any and found or nil
+end
+
+local function showTooltip(owner, found)
+  GameTooltip:SetOwner(owner, "ANCHOR_CURSOR")
+  local first = true
+  for questID, objectives in pairs(found) do
+    local quest = ns.QuestLog:Get(questID)
+    if quest then
+      if not first then
+        GameTooltip:AddLine(" ")
+      end
+      local color = MapAreas:ColorFor(questID)
+      if first then
+        GameTooltip:SetText(quest.title or "?", color[1], color[2], color[3])
+      else
+        GameTooltip:AddLine(quest.title or "?", color[1], color[2], color[3])
+      end
+      first = false
+      if objectives.turnin then
+        local turnIn = ns.ForeverData:TurnInName(questID)
+        GameTooltip:AddLine(turnIn and ("Turn in to " .. turnIn) or "Turn in", 0.2, 1, 0.2)
+      end
+      for index, objective in ipairs(quest.objectives) do
+        if objectives[index] then
+          local text, counter = ns.DoLine:For(objective, questID)
+          GameTooltip:AddDoubleLine(text, counter or "", 1, 1, 1, 1, 1, 1)
+        end
+      end
+    end
+  end
+  GameTooltip:Show()
+end
+
+local hoverElapsed, hovering = 0, false
+local function updateHover(layer, map, delta)
+  hoverElapsed = hoverElapsed + delta
+  if hoverElapsed < HOVER_SECONDS then
+    return
+  end
+  hoverElapsed = 0
+  local found
+  if map:IsMouseOver() and #MapAreas.hits > 0 then
+    local nx, ny = map:GetNormalizedCursorPosition()
+    if readable(nx) and readable(ny) then
+      local width, height = map:GetCanvas():GetSize()
+      found = under(nx * width, ny * height)
+    end
+  end
+  local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
+  if found and not tooltipBusy then
+    showTooltip(layer, found)
+    hovering = true
+  elseif hovering and GameTooltip:GetOwner() == layer and not found then
+    GameTooltip:Hide()
+    hovering = false
   end
 end
 
@@ -192,12 +284,19 @@ local function createLayer()
   layer:SetFrameLevel(FRAME_LEVEL)
   -- Runs only while the map is shown (the layer is part of it): redraw when the zone shown, the
   -- canvas size or our data changed.
-  layer:SetScript("OnUpdate", function()
+  layer:SetScript("OnUpdate", function(_, delta)
     local drawn = MapAreas.drawnFor
     local width = canvas:GetWidth()
     if MapAreas.dirty or not drawn or drawn.mapID ~= map:GetMapID() or drawn.width ~= width then
       MapAreas:Redraw()
     end
+    updateHover(layer, map, delta)
+  end)
+  layer:SetScript("OnHide", function()
+    if hovering and GameTooltip:GetOwner() == layer then
+      GameTooltip:Hide()
+    end
+    hovering = false
   end)
   MapAreas.layer = layer
 end
