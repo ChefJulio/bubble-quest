@@ -21,11 +21,25 @@ function QuestmarkerMenu:OpenForCard(owner, quest)
     root:CreateButton("Hide", function() ns.Tracking:SetIgnored(questID, true) end)
     local collapsed = ns.DB.char.collapsed[questID]
     root:CreateButton(collapsed and "Expand" or "Collapse", function() ns.Tracking:ToggleCollapsed(questID) end)
-    -- No "Share quest": sharing (QuestLogPushQuest) is protected on Forever, blocked even through
-    -- Blizzard's QuestUtil.ShareQuest (ADDON_ACTION_BLOCKED in game). Opening the quest details for
-    -- Blizzard's Share button doesn't help either: the button reads the details frame's questID,
-    -- which our call would have written, so its click would be blocked too. Share from the quest log.
+    -- Sharing itself (QuestLogPushQuest) is protected on Forever, blocked even through Blizzard's
+    -- QuestUtil.ShareQuest (ADDON_ACTION_BLOCKED in game). So this opens the quest's details, where the
+    -- player clicks Blizzard's own Share button; that click works after we opened them (tested in game:
+    -- the details frame's questID, written by our call, didn't taint the Share click).
+    -- Greyed out when it couldn't share anyway, like the quest map's menu (QuestMapFrame.lua:2395-2400).
+    local share = root:CreateButton("Share in quest log", function() QuestmarkerMenu:OpenToShare(questID) end)
+    if not (IsInGroup() and C_QuestLog.IsPushableQuest(questID)) or InCombatLockdown() then
+      share:SetEnabled(false)
+    end
   end)
+end
+
+---Open the quest's details in the quest log (the Share button is there). Out of combat only: opening
+---Blizzard's UI from an addon can taint it, which only bites in combat.
+---@param questID number
+function QuestmarkerMenu:OpenToShare(questID)
+  if not InCombatLockdown() then
+    QuestMapFrame_OpenToQuestDetails(questID)
+  end
 end
 
 ---Menu for a quest in the Hidden group.
