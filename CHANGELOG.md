@@ -14,6 +14,9 @@
 - Ready quests keep their finished objectives (greyed, with counts) above the turn-in line, so you can
   still tell which quest it is (setting "Keep finished objectives on ready quests", on by default)
 - Card layout settings: show or hide the quest name, level, arrow and distance
+- Quests with two or more objectives get a progress bar under each objective instead of one combined
+  bar
+- Every quest with a usable item gets a tip (its "Use:" effect, or at least where the item is)
 - Items dropped by many similar mobs name the group: "Loot Trogg Stone Tooth from any Stonesplinter"
   instead of listing a dozen mobs
 

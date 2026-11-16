@@ -94,6 +94,71 @@ local function distanceColor(yards)
   return far[2], far[3], far[4]
 end
 
+-- Progress bars: a dark track and a fill whose width is the progress; segment marks when the progress
+-- is a small count. One under the card (the quest), or one under each objective (quests with two or
+-- more objectives: review, "a bar per objective, not grouped together").
+
+local function createBar(parent)
+  local bar = CreateFrame("Frame", nil, parent)
+  bar:SetSize(BAR_WIDTH, BAR_HEIGHT)
+  local track = bar:CreateTexture(nil, "BACKGROUND")
+  track:SetAllPoints()
+  track:SetColorTexture(1, 1, 1, 0.12)
+  bar.fill = bar:CreateTexture(nil, "ARTWORK")
+  bar.fill:SetPoint("TOPLEFT")
+  bar.fill:SetHeight(BAR_HEIGHT)
+  bar.dividers = {}
+  return bar
+end
+
+-- Thin dark gaps across the bar at each step boundary, so 7/10 reads as seven of ten segments.
+local function setSegments(bar, total)
+  local dividers = bar.dividers
+  for i = 1, math.max(#dividers, (total or 1) - 1) do
+    local divider = dividers[i]
+    if total and i < total then
+      if not divider then
+        divider = bar:CreateTexture(nil, "OVERLAY")
+        divider:SetColorTexture(0, 0, 0, 0.85)
+        PixelUtil.SetWidth(divider, 1, 1)
+        divider:SetHeight(BAR_HEIGHT)
+        dividers[i] = divider
+      end
+      divider:ClearAllPoints()
+      divider:SetPoint("TOPLEFT", bar, "TOPLEFT", BAR_WIDTH * i / total, 0)
+      divider:Show()
+    elseif divider then
+      divider:Hide()
+    end
+  end
+end
+
+---@param fraction number 0..1
+---@param segments number? steps to mark, nil for a smooth bar
+---@param complete boolean green (done) instead of gold
+local function setBar(bar, fraction, segments, complete)
+  setSegments(bar, segments)
+  bar.fill:SetWidth(math.max(1, BAR_WIDTH * fraction))
+  bar.fill:SetShown(fraction > 0)
+  if complete then
+    bar.fill:SetColorTexture(0.2, 0.85, 0.2, 0.9)
+  else
+    bar.fill:SetColorTexture(0.95, 0.75, 0.15, 0.9)
+  end
+end
+
+-- One objective's bar: its own count (segmented when 2..MAX_SEGMENTS), or full/empty without one.
+local function setObjectiveBar(bar, objective)
+  local required = objective.required or 0
+  if required > 0 then
+    local done = math.min(objective.fulfilled or 0, required)
+    local segments = required >= 2 and required <= MAX_SEGMENTS and required or nil
+    setBar(bar, done / required, segments, objective.finished or done >= required)
+  else
+    setBar(bar, objective.finished and 1 or 0, nil, objective.finished)
+  end
+end
+
 local function createRow(card)
   local row = CreateFrame("Frame", nil, card.frame)
   row.highlight = row:CreateTexture(nil, "BACKGROUND")
@@ -168,16 +233,8 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.inArea:SetVertexColor(0.2, 1, 0.2)
   self.inArea:Hide()
 
-  -- Progress bar: a dark track and a fill whose width is the progress.
-  local bar = CreateFrame("Frame", nil, frame)
-  bar:SetSize(BAR_WIDTH, BAR_HEIGHT)
-  local track = bar:CreateTexture(nil, "BACKGROUND")
-  track:SetAllPoints()
-  track:SetColorTexture(1, 1, 1, 0.12)
-  local fill = bar:CreateTexture(nil, "ARTWORK")
-  fill:SetPoint("TOPLEFT")
-  fill:SetHeight(BAR_HEIGHT)
-  self.bar, self.barFill, self.barDividers = bar, fill, {}
+  -- The card's progress bar (the whole quest); objective rows get their own when they need one.
+  self.bar = createBar(frame)
 
   local toggle = CreateFrame("Button", nil, frame)
   toggle:SetSize(16, TITLE_HEIGHT)
@@ -275,10 +332,16 @@ function Card:SetQuest(quest, collapsed, options)
   end
   self:SetNavigation(nil)  -- the driver fills it in on its next tick
 
+  -- Bars (setting, default on): with two or more objectives in progress, one under each objective
+  -- (review); otherwise one under the card. Collapsed and ready cards keep the single bar.
+  local showBar = ns.DB.profile.cards.progressBar
+  local barPerObjective = showBar and not collapsed and not quest.readyForTurnIn and #quest.objectives >= 2
+
   local y = TITLE_HEIGHT + 2
   for i = 1, self.rowCount do
     local row = self.rows[i] or createRow(self)
     self.rows[i] = row
+    local objectiveBar = false
     if quest.readyForTurnIn and i == self.rowCount then
       -- The turn-in line: last, below any kept objectives.
       local turnIn = ns.ForeverData:TurnInName(quest.questID)
@@ -288,12 +351,24 @@ function Card:SetQuest(quest, collapsed, options)
       local objective = quest.objectives[i]
       local text, counter = ns.DoLine:For(objective, quest.questID)
       setRow(row, text, counter, objective.finished or quest.readyForTurnIn)
+      objectiveBar = barPerObjective
     end
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -y)
-    row:SetSize(WIDTH, row.text:GetStringHeight())
+    local height = row.text:GetStringHeight()
+    if objectiveBar then
+      row.bar = row.bar or createBar(row)
+      row.bar:ClearAllPoints()
+      row.bar:SetPoint("TOPLEFT", row, "TOPLEFT", ROW_INDENT, -(height + BAR_GAP))
+      row.bar:Show()
+      setObjectiveBar(row.bar, quest.objectives[i])
+      height = height + BAR_GAP + BAR_HEIGHT
+    elseif row.bar then
+      row.bar:Hide()
+    end
+    row:SetSize(WIDTH, height)
     row:Show()
-    y = y + row.text:GetStringHeight() + ROW_GAP
+    y = y + height + ROW_GAP
   end
 
   -- Hint lines (phase 7): after the objectives, only for quests with a known tricky step; shown on
@@ -306,6 +381,9 @@ function Card:SetQuest(quest, collapsed, options)
     self.rows[i] = row
     setRow(row, "Tip: " .. hint, nil, false)
     row.text:SetTextColor(HINT_COLOR[1], HINT_COLOR[2], HINT_COLOR[3])
+    if row.bar then
+      row.bar:Hide()  -- rows are reused: this one may have been an objective with a bar
+    end
     row:ClearAllPoints()
     row:SetPoint("TOPLEFT", self.frame, "TOPLEFT", 0, -y)
     row:SetSize(WIDTH, row.text:GetStringHeight())
@@ -313,10 +391,11 @@ function Card:SetQuest(quest, collapsed, options)
     y = y + row.text:GetStringHeight() + ROW_GAP
   end
 
-  -- Progress bar under the card (setting, default on); shown on collapsed cards too, as a summary.
-  local showBar = ns.DB.profile.cards.progressBar
-  self.bar:SetShown(showBar)
-  if showBar then
+  -- Progress bar under the card, unless each objective has its own; shown on collapsed cards too, as a
+  -- summary.
+  local cardBar = showBar and not barPerObjective
+  self.bar:SetShown(cardBar)
+  if cardBar then
     y = y + BAR_GAP
     self.bar:ClearAllPoints()
     self.bar:SetPoint("TOPLEFT", self.frame, "TOPLEFT", ROW_INDENT, -y)
@@ -416,42 +495,17 @@ local function steps(quest)
   return done, total
 end
 
--- Thin dark gaps across the bar at each step boundary, so 7/10 reads as seven of ten segments.
-function Card:SetSegments(total)
-  local dividers = self.barDividers
-  for i = 1, math.max(#dividers, (total or 1) - 1) do
-    local divider = dividers[i]
-    if total and i < total then
-      if not divider then
-        divider = self.bar:CreateTexture(nil, "OVERLAY")
-        divider:SetColorTexture(0, 0, 0, 0.85)
-        PixelUtil.SetWidth(divider, 1, 1)
-        divider:SetHeight(BAR_HEIGHT)
-        dividers[i] = divider
-      end
-      divider:ClearAllPoints()
-      divider:SetPoint("TOPLEFT", self.bar, "TOPLEFT", BAR_WIDTH * i / total, 0)
-      divider:Show()
-    elseif divider then
-      divider:Hide()
-    end
-  end
-end
-
+---Update the bars: the card's (one quest-wide bar), or each objective row's.
 ---@param quest table
 function Card:UpdateBar(quest)
-  if not self.bar:IsShown() then
-    return
+  if self.bar:IsShown() then
+    local done, total = steps(quest)
+    setBar(self.bar, done and done / total or progressOf(quest), total, quest.readyForTurnIn)
   end
-  local done, total = steps(quest)
-  local progress = done and done / total or progressOf(quest)
-  self:SetSegments(total)
-  self.barFill:SetWidth(math.max(1, BAR_WIDTH * progress))
-  self.barFill:SetShown(progress > 0)
-  if quest.readyForTurnIn then
-    self.barFill:SetColorTexture(0.2, 0.85, 0.2, 0.9)
-  else
-    self.barFill:SetColorTexture(0.95, 0.75, 0.15, 0.9)
+  for i, row in ipairs(self.rows) do
+    if row.bar and row.bar:IsShown() and quest.objectives[i] then
+      setObjectiveBar(row.bar, quest.objectives[i])
+    end
   end
 end
 
