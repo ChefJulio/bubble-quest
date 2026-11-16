@@ -3,7 +3,10 @@ local ADDON_NAME, ns = ...
 -- Areas from location points (docs/design/navigation-areas.md). An objective's points (spawns from
 -- Questie and forever-db, learned sightings) become areas: occupied CELL_YARDS grid cells joined with
 -- their 8 neighbours, each connected group one area. Then the rule: ignore areas lighter than
--- MAIN_SHARE of the biggest one (a stray spawn far from the camp), keep the rest.
+-- MAIN_SHARE of the biggest one (a stray spawn far from the camp), keep the rest, and keep any area of
+-- at least REAL_WEIGHT spawns whatever the biggest: a mob spread over a whole zone has one dense patch
+-- (a starting area) next to which every normal group of 3-6 looked "tiny" and was ignored, so the arrow
+-- skipped nearby owls and spiders for distant ones (Zenn's Bidding, seen in review).
 --
 -- Points: { map, x, y, weight? } in world yards (weight 1 by default; learned spots carry their
 -- sighting count). The same spawn from two sources counts once: points within MERGE_YARDS merge,
@@ -12,6 +15,7 @@ local ADDON_NAME, ns = ...
 local CELL_YARDS = 50
 local MERGE_YARDS = 4
 local MAIN_SHARE = 0.25
+local REAL_WEIGHT = 3  -- an area this heavy is real on its own: only strays of 1-2 spawns are ignored
 
 local Areas = {}
 ns.Areas = Areas
@@ -92,7 +96,7 @@ function Areas:Build(points)
   table.sort(areas, function(a, b) return a.weight > b.weight end)
   local heaviest = areas[1] and areas[1].weight or 0
   for _, area in ipairs(areas) do
-    area.kept = area.weight >= heaviest * MAIN_SHARE
+    area.kept = area.weight >= heaviest * MAIN_SHARE or area.weight >= REAL_WEIGHT
   end
   return areas
 end

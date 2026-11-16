@@ -15,7 +15,10 @@ are within 40 yards of any one point".
 > biggest area. The arrow points at the nearest edge of the nearest remaining area.
 
 "Tiny" is relative: less than a quarter of the biggest area's weight. No tuning trade-off between
-density and distance.
+density and distance. Amended after play (Zenn's Bidding): an area of 3 or more spawns is never tiny.
+A mob spread over a whole zone has one dense patch (a starting area); next to it, every normal group
+of 3-6 came out under a quarter and was ignored, so the arrow skipped nearby groups. Only strays of 1-2
+spawns are ignored now.
 
 - A 25-spawn camp and one stray spawn: the stray is 4% of the camp, ignored.
 - A named mob with one spawn: the only area is the biggest, kept.
