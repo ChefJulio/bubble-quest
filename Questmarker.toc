@@ -9,6 +9,7 @@
 ## AddonCompartmentFunc: Questmarker_OnAddonCompartmentClick
 ## AddonCompartmentFuncOnEnter: Questmarker_OnAddonCompartmentEnter
 ## AddonCompartmentFuncOnLeave: Questmarker_OnAddonCompartmentLeave
+## OptionalDeps: Questie, QuestieDB
 ## SavedVariables: QuestmarkerDB
 ## SavedVariablesPerCharacter: QuestmarkerCharDB
 
@@ -29,12 +30,14 @@ Core\DB.lua
 Data\ForeverData.lua
 Data\CategoryOverrides.lua
 Data\Learned.lua
+Data\QuestieData.lua
 Data\Hints.lua
 Quests\QuestLog.lua
 Quests\Categories.lua
 Quests\Hints.lua
 Quests\Zone.lua
 Quests\DoLine.lua
+Quests\Areas.lua
 Quests\Navigation.lua
 Quests\Nearby.lua
 Quests\Mouseover.lua

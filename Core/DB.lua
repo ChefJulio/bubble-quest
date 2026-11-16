@@ -43,6 +43,7 @@ local PROFILE_DEFAULTS = {
     key = "SHIFT",         -- override key: "SHIFT" | "CTRL" | "ALT"
     requireKey = false,    -- false: holding the key pauses automation; true: only automate while held
   },
+  questieData = true,  -- use Questie's location data for arrows when it's installed
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {
     face = "default",  -- a LibSharedMedia font name, or "default" (the game's)

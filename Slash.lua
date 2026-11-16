@@ -166,10 +166,10 @@ commands.where = {
     for questID in pairs(ns.Stack.visible) do
       local quest = ns.QuestLog:Get(questID)
       if quest then
-        local targets = ns.Navigation.targets[questID]
+        local targets = ns.Navigation:Targets(quest)
         local nav = ns.Navigation:Compute(quest)
-        lines[#lines + 1] = ("Quest %d %s: %d target points (%s)"):format(questID, tostring(quest.title),
-          targets and #targets.points or 0, targets and (targets.spawnBased and "spawns" or "marker") or "none")
+        lines[#lines + 1] = ("Quest %d %s: %d kept areas (%s)"):format(questID, tostring(quest.title),
+          #targets.areas, targets.spawnBased and "spawns" or (#targets.areas > 0 and "marker" or "none"))
         local last = ns.Navigation.current[questID]
         if nav and last then
           lines[#lines + 1] = ("  target %.1f, %.1f -> %.0f yd, arrow %.2f rad (%.0f deg left of facing)%s%s"):format(
@@ -187,6 +187,58 @@ commands.where = {
       end
     end
     ns.CopyWindow:Show("Questmarker: where", lines)
+  end,
+}
+
+-- Navigation areas (docs/design/navigation-areas.md): every objective's areas, kept or ignored, and
+-- which the arrow targets. For tuning by eye.
+commands.areas = {
+  help = "<questID or title part>: a quest's navigation areas and the arrow's choice (copy window)",
+  run = function(arg)
+    local quest = ns.QuestLog:Get(tonumber(arg) or -1)
+    if not quest and arg ~= "" then
+      for _, q in pairs(ns.QuestLog.quests) do
+        if (q.title or ""):lower():find(arg:lower(), 1, true) then
+          quest = q
+          break
+        end
+      end
+    end
+    if not quest then
+      print("Usage: /qm areas <questID or part of the title>")
+      return
+    end
+    local north, west, instanceMap = ns.Navigation:PlayerPosition()
+    local targets = ns.Navigation:Targets(quest)
+    local nav = ns.Navigation:Compute(quest)
+    local current = ns.Navigation.current[quest.questID]
+    local lines = { ("Quest %d %s"):format(quest.questID, tostring(quest.title)) }
+    lines[#lines + 1] = ("Arrow: %s%s"):format(nav and nav.distance and ("%.0f yd"):format(nav.distance) or "-",
+      nav and nav.inArea and ", HERE" or "")
+    local keys = {}
+    for key in pairs(targets.byObjective) do keys[#keys + 1] = key end
+    table.sort(keys, function(a, b) return tostring(a) < tostring(b) end)
+    for _, key in ipairs(keys) do
+      local objective = type(key) == "number" and quest.objectives[key]
+      lines[#lines + 1] = ("Objective %s: %s"):format(tostring(key), objective and tostring(objective.text) or "turn-in")
+      for _, area in ipairs(targets.byObjective[key]) do
+        local sources = {}
+        for _, p in ipairs(area.points) do
+          sources[p.source or "?"] = (sources[p.source or "?"] or 0) + 1
+        end
+        local parts = {}
+        for source, count in pairs(sources) do parts[#parts + 1] = source .. " " .. count end
+        local _, d = ns.Areas:Nearest(area, instanceMap, north or 0, west or 0)
+        lines[#lines + 1] = ("  %s weight %.0f, %d points (%s), %s%s"):format(area.kept and "KEPT   " or "ignored",
+          area.weight, #area.points, table.concat(parts, ", "), d and ("%.0f yd"):format(d) or "other map",
+          current and current.id == area.id and "  <- ARROW" or "")
+      end
+    end
+    if targets.areas[1] and targets.areas[1].marker then
+      lines[#lines + 1] = "No location data: the map marker"
+    end
+    lines[#lines + 1] = ("Questie data: %s"):format(ns.QuestieData:Available() and "in use" or "not available")
+    ns.CopyWindow:Show("Questmarker: areas", lines)
   end,
 }
 

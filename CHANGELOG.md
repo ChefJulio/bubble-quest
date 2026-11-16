@@ -1,5 +1,10 @@
 ## What's new
 
+- Smarter arrows: an objective's spawns are grouped into areas, and the arrow points at the nearest
+  edge of the nearest real area, ignoring stray spawns far from where a mob really lives
+- With Questie installed, arrows also use Questie's spawn locations (setting: "Use Questie's location
+  data"), so many more quests get arrows
+
 - Right-click a card: "Share quest" shares it with your party; clicked in combat, it's sent when
   combat ends (the game doesn't let addons share in combat)
 

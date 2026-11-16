@@ -11,6 +11,7 @@ local ADDON_NAME, ns = ...
 
 local MIN_SPACING_YARDS = 25   -- don't record a spot closer than this to a known one
 local MAX_POINTS = 40          -- per objective
+local MAX_SIGHTINGS = 3        -- a spot's weight (sightings) stops growing here
 
 local Learned = {}
 ns.Learned = Learned
@@ -100,6 +101,12 @@ function Learned:Record(questID, objectiveName)
   for _, p in ipairs(points) do
     local dn, dw = p.x - north, p.y - west
     if p.map == map and dn * dn + dw * dw < MIN_SPACING_YARDS * MIN_SPACING_YARDS then
+      -- Seen here again: the spot counts for more, up to MAX_SIGHTINGS (navigation weighs areas by
+      -- it, so one stray sighting stays weak: docs/design/navigation-areas.md).
+      if (p.n or 1) < MAX_SIGHTINGS then
+        p.n = (p.n or 1) + 1
+        ns.Bus:Fire("LearnedChanged", questID)
+      end
       return
     end
   end

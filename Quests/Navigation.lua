@@ -1,26 +1,29 @@
 local ADDON_NAME, ns = ...
 
--- Arrows (spec, Navigation arrows; docs/design/phase-5.md). For every visible card: the nearest
--- target, its distance, the arrow's angle, and whether the player is inside the objective's area.
+-- Arrows (spec, Navigation arrows). For every visible card: the target, its distance, the arrow's
+-- angle, and whether the player is inside the objective's area. Areas, not points
+-- (docs/design/navigation-areas.md, replacing phase 5's nearest point):
 --
--- Targets, best first:
---   1. forever-db spawn points of what each unfinished objective needs (or of the turn-in NPC when
---      the quest is ready). The nearest spawn point is the nearest edge of the area (spec).
---   2. the client's quest marker (GetQuestsOnMap), converted to world yards. One point: never
---      claims "in the area".
+--   1. Each unfinished objective's locations, from every source: Questie (Data/QuestieData.lua, when
+--      installed), forever-db, and spots learned in play (weighted by sightings). The turn-in's when
+--      the quest is ready.
+--   2. Grouped into areas (Quests/Areas.lua); areas tiny next to the objective's biggest are ignored
+--      (a stray spawn far from the camp).
+--   3. The arrow points at the nearest edge (nearest point) of the nearest kept area, any objective.
+--      Hysteresis: switch areas only when another is SWITCH_RATIO closer.
+--   4. "Here": within IN_AREA_YARDS of a kept, spawn-based area, or an objective mob's nameplate up.
+--   5. Nothing known: the client's quest marker (GetQuestsOnMap) as one point; never claims "here".
 -- Positions are world yards on the instance map (0 Eastern Kingdoms, 1 Kalimdor, ...), so distances
--- work across zones. Hysteresis: the target switches only when the new one is SWITCH_RATIO closer.
---
--- [Assumes] axes: UnitPosition's first two values, GetWorldPosFromMapPos's x/y and forever-db's x/y
--- are all (north, west). /qm where prints them side by side to verify.
+-- work across zones. Axes (north, west) verified in game with /qm where.
 
 local TICK_SECONDS = 0.1   -- 10 updates a second (agreed in review)
 local IN_AREA_YARDS = 40   -- tune in testing
-local SWITCH_RATIO = 0.8   -- switch target only when at least 20% closer
+local SWITCH_RATIO = 0.8   -- switch area only when another is at least 20% closer
+local MAX_LEARNED_WEIGHT = 3
 
 local Navigation = {
-  targets = {},  -- [questID] = { points = { { map, x, y, objective } }, spawnBased = bool }
-  current = {},  -- [questID] = { map, x, y } the point the arrow pointed at last
+  targets = {},  -- [questID] = { areas = { kept areas }, byObjective = { [index] = all areas }, spawnBased }
+  current = {},  -- [questID] = { id, x, y } the area and point the arrow pointed at last
 }
 ns.Navigation = Navigation
 
@@ -50,34 +53,68 @@ end
 
 local objectiveName = ns.QuestLog.ObjectiveName
 
-local function buildTargets(quest)
-  local points, spawnBased = {}, false
-  local function add(list, objectiveIndex)
-    for _, p in ipairs(list) do
-      points[#points + 1] = { map = p.map, x = p.x, y = p.y, objective = objectiveIndex }
+-- Every source's points for one objective (or the turn-in: objective nil), tagged with their source.
+local function collect(questID, name)
+  local points = {}
+  local function add(list, source, weightOf)
+    for _, p in ipairs(list or {}) do
+      points[#points + 1] = { map = p.map, x = p.x, y = p.y, source = source, weight = weightOf and weightOf(p) or 1 }
     end
-    spawnBased = true
   end
-  if quest.readyForTurnIn then
-    local turnIn = ns.ForeverData:TurnInPoints(quest.questID)
-    if turnIn then add(turnIn, nil) end
+  if name then
+    add(ns.QuestieData:ObjectivePoints(questID, name), "questie")
+    add(ns.ForeverData:ObjectivePoints(questID, name), "forever-db")
+    add(ns.Learned:Points(questID, name), "learned", function(p)
+      return math.min(p.n or 1, MAX_LEARNED_WEIGHT)
+    end)
   else
-    for i, objective in ipairs(quest.objectives) do
-      if not objective.finished then
-        local name = objectiveName(objective)
-        -- forever-db first; spots learned in play (Data/Learned.lua) where it has nothing.
-        local found = ns.ForeverData:ObjectivePoints(quest.questID, name) or ns.Learned:Points(quest.questID, name)
-        if found then add(found, i) end
+    add(ns.QuestieData:TurnInPoints(questID), "questie")
+    add(ns.ForeverData:TurnInPoints(questID), "forever-db")
+  end
+  return points
+end
+
+-- An area's identity across rebuilds, for hysteresis: objective and corner.
+local function areaID(area)
+  return ("%s:%d:%d:%d"):format(tostring(area.objective), area.map, math.floor(area.minX), math.floor(area.minY))
+end
+
+local function buildTargets(quest)
+  local targets = { areas = {}, byObjective = {}, spawnBased = false }
+  local function addAreas(points, objectiveIndex)
+    if #points == 0 then
+      return
+    end
+    local areas = ns.Areas:Build(points)
+    targets.byObjective[objectiveIndex or "turnin"] = areas
+    for _, area in ipairs(areas) do
+      area.objective = objectiveIndex
+      area.id = areaID(area)
+      if area.kept then
+        targets.areas[#targets.areas + 1] = area
+        targets.spawnBased = true
       end
     end
   end
-  if #points == 0 then
-    local marker = markerPoint(quest.questID)
-    if marker then
-      points[1] = marker
+  if quest.readyForTurnIn then
+    addAreas(collect(quest.questID, nil), nil)
+  else
+    for i, objective in ipairs(quest.objectives) do
+      if not objective.finished then
+        addAreas(collect(quest.questID, objectiveName(objective)), i)
+      end
     end
   end
-  return { points = points, spawnBased = spawnBased }
+  if #targets.areas == 0 then
+    local marker = markerPoint(quest.questID)
+    if marker then
+      local area = { map = marker.map, points = { marker }, weight = 1, kept = true, marker = true,
+        minX = marker.x, maxX = marker.x, minY = marker.y, maxY = marker.y }
+      area.id = "marker"
+      targets.areas[1] = area
+    end
+  end
+  return targets
 end
 
 local function targetsFor(quest)
@@ -89,9 +126,23 @@ local function targetsFor(quest)
   return targets
 end
 
-local function yards(n1, w1, n2, w2)
-  local dn, dw = n2 - n1, w2 - w1
-  return math.sqrt(dn * dn + dw * dw)
+---The quest's areas, built on first use (for /qm areas).
+---@param quest table
+---@return table targets
+function Navigation:Targets(quest)
+  return targetsFor(quest)
+end
+
+-- The nearest kept area on this map, its nearest point and distance (no hysteresis).
+local function nearestArea(targets, north, west, instanceMap)
+  local best, bestPoint, bestDistance
+  for _, area in ipairs(targets.areas) do
+    local point, d = ns.Areas:Nearest(area, instanceMap, north, west, bestDistance)
+    if point and (not bestDistance or d < bestDistance) then
+      best, bestPoint, bestDistance = area, point, d
+    end
+  end
+  return best, bestPoint, bestDistance
 end
 
 -- The zone a target point is in, for the "other zone" label. The client decides whether it lies on
@@ -119,7 +170,7 @@ local function zoneNameOf(point, questID)
   return point.zone or nil
 end
 
----Distance to the nearest target, no hysteresis (for sorting). Nil when unknown or on another map.
+---Distance to the nearest kept area, no hysteresis (for sorting). Nil when unknown or on another map.
 ---@param quest table
 ---@return number?
 function Navigation:Distance(quest)
@@ -127,14 +178,8 @@ function Navigation:Distance(quest)
   if not north then
     return nil
   end
-  local best
-  for _, p in ipairs(targetsFor(quest).points) do
-    if p.map == instanceMap then
-      local d = yards(north, west, p.x, p.y)
-      if not best or d < best then best = d end
-    end
-  end
-  return best
+  local _, _, distance = nearestArea(targetsFor(quest), north, west, instanceMap)
+  return distance
 end
 
 -- A creature for one of the quest's unfinished objectives has its nameplate up (Quests/Nearby.lua):
@@ -152,7 +197,7 @@ local function nearbyObjective(quest)
 end
 
 ---Is the player in one of the quest's objective areas right now: a creature for it on the nameplates,
----or within IN_AREA_YARDS of one of its spawn/learned points (not a marker: one point can't tell).
+---or within IN_AREA_YARDS of a kept area's point (not a marker: one point can't tell).
 ---Defined after nearbyObjective, a local it needs.
 ---@param quest table
 ---@return boolean
@@ -186,37 +231,36 @@ function Navigation:ComputeTarget(quest)
     return nil
   end
   local targets = targetsFor(quest)
-  local best, bestDistance, current, currentDistance
+  local area, point, distance = nearestArea(targets, north, west, instanceMap)
+  if not area then
+    -- Target on another continent: name only, no arrow.
+    local first = targets.areas[1]
+    local p = first and first.points[1]
+    return p and { zone = zoneNameOf(p, quest.questID) } or nil
+  end
+  -- Hysteresis: stay with the last area unless this one is clearly closer.
   local last = self.current[quest.questID]
-  for _, p in ipairs(targets.points) do
-    if p.map == instanceMap then
-      local d = yards(north, west, p.x, p.y)
-      if not best or d < bestDistance then
-        best, bestDistance = p, d
-      end
-      if last and p.x == last.x and p.y == last.y then
-        current, currentDistance = p, d
+  if last and last.id ~= area.id then
+    for _, other in ipairs(targets.areas) do
+      if other.id == last.id then
+        local otherPoint, otherDistance = ns.Areas:Nearest(other, instanceMap, north, west)
+        if otherPoint and distance > otherDistance * SWITCH_RATIO then
+          area, point, distance = other, otherPoint, otherDistance
+        end
+        break
       end
     end
   end
-  if not best then
-    -- Target on another continent: name only, no arrow.
-    local p = targets.points[1]
-    return p and { zone = zoneNameOf(p, quest.questID) } or nil
-  end
-  if current and bestDistance > currentDistance * SWITCH_RATIO then
-    best, bestDistance = current, currentDistance
-  end
-  self.current[quest.questID] = { x = best.x, y = best.y }
+  self.current[quest.questID] = { id = area.id, x = point.x, y = point.y }
 
-  local nav = { distance = bestDistance, objective = best.objective }
-  nav.inArea = targets.spawnBased and bestDistance <= IN_AREA_YARDS
+  local nav = { distance = distance, objective = area.objective }
+  nav.inArea = not area.marker and distance <= IN_AREA_YARDS
   local facing = GetPlayerFacing()
   if facing then
     -- Bearing counter-clockwise from north (towards west), minus where the player faces.
-    nav.angle = math.atan2(best.y - west, best.x - north) - facing
+    nav.angle = math.atan2(point.y - west, point.x - north) - facing
   end
-  local zone = zoneNameOf(best, quest.questID)
+  local zone = zoneNameOf(point, quest.questID)
   if zone and zone ~= ns.Zone.name then
     nav.zone = zone
   end
@@ -265,6 +309,7 @@ local function forgetAll()
   wipe(Navigation.targets)
 end
 ns.Bus:On("QuestLogChanged", forgetAll)
+ns.Bus:On("LocationsChanged", forgetAll)  -- Questie became ready, or its setting changed
 for _, event in ipairs({ "ZONE_CHANGED_NEW_AREA", "QUEST_POI_UPDATE", "PLAYER_ENTERING_WORLD" }) do
   ns.Events:On(event, forgetAll)
 end

@@ -173,6 +173,14 @@ function Schema:Entries()
       button = function(parent) return ns.Questie:CreateTurnOffButton(parent, "Turn off") end,
       actionEnabled = function() return ns.Questie:TrackerEnabled() ~= false end,
     },
+    {
+      kind = "checkbox", id = "QUESTMARKER_QUESTIE_DATA", column = 1, default = true, onlyIf = questieInstalled,
+      label = "Use Questie's location data",
+      tooltip = "Arrows also use Questie's spawn locations for mobs, objects and turn-ins, read from your "
+        .. "Questie, so quests the bundled data doesn't cover get arrows too.",
+      get = function(p) return p.questieData end,
+      set = function(p, v) p.questieData = v; ns.QuestieData:Reset() end,
+    },
 
     { kind = "section", label = "Quest categories", column = 2 },
   }
