@@ -149,10 +149,12 @@ local function partyMembers(questID)
         local isName = isMemberName(text, roster) or isNameColor(line.leftColor)
           or (not knowNames and not line.leftColor and (not member or #member.counts > 0))
         if isName or not member then
-          member = { name = text, color = line.leftColor, counts = {} }
+          member = { name = text, color = line.leftColor, counts = {}, texts = {} }
           members[#members + 1] = member
         else
-          member.status, member.statusColor = text, line.leftColor
+          -- A status, or an objective without a counter ("Scout through the Jasperlode Mine"):
+          -- told apart when drawn, against the quest's objectives (addGroupedProgress).
+          member.texts[#member.texts + 1] = { text = text, color = line.leftColor }
         end
       end
     end
@@ -172,6 +174,41 @@ local function countFor(member, objectiveName)
     end
   end
   return nil
+end
+
+-- Finished, by the colour the game draws an objective line in: grey or green, not white.
+local function looksFinished(color)
+  if not color then
+    return false
+  end
+  local grey = math.abs(color.r - color.g) < 0.05 and math.abs(color.g - color.b) < 0.05 and color.r < 0.8
+  local green = color.g > 0.7 and color.r < 0.5 and color.b < 0.5
+  return grey or green
+end
+
+-- A member's lines without a counter: one naming one of our objectives is their progress on it (an
+-- objective with no counter, e.g. exploration: seen in review as plain "Scout through the Jasperlode
+-- Mine"), counted against our objective's total; any other line is their status ("Ready for turn-in").
+local function sortTexts(member, objectives)
+  for _, line in ipairs(member.texts) do
+    local matched
+    for _, objective in ipairs(objectives) do
+      local name = ns.QuestLog.ObjectiveName(objective)
+      if name ~= "" and (line.text == name or line.text:find(name, 1, true) or name:find(line.text, 1, true)) then
+        matched = objective
+        break
+      end
+    end
+    if matched then
+      local total = (matched.required and matched.required > 0) and matched.required or 1
+      member.counts[#member.counts + 1] = {
+        name = ns.QuestLog.ObjectiveName(matched), done = looksFinished(line.color) and total or 0, total = total,
+        used = false,
+      }
+    else
+      member.status, member.statusColor = line.text, line.color
+    end
+  end
 end
 
 local function addRow(name, cells)
@@ -194,6 +231,9 @@ local function addGroupedProgress(quest, members)
   end
   addRow("You", mine)
 
+  for _, member in ipairs(members) do
+    sortTexts(member, quest.objectives)
+  end
   for _, member in ipairs(members) do
     local cells = {}
     if #member.counts == 0 and member.status then
