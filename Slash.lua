@@ -190,6 +190,15 @@ commands.where = {
   end,
 }
 
+-- Minimap areas and guide line (UI/MinimapAreas.lua): what the layer sees, for when nothing shows.
+-- Type it, rest the cursor on a minimap circle, then press Enter: the hover is checked too.
+commands.minimap = {
+  help = "minimap areas, guide line and hover state (copy window)",
+  run = function()
+    ns.CopyWindow:Show("Questmarker: minimap", ns.MinimapAreas:Diagnose())
+  end,
+}
+
 -- Navigation areas (docs/design/navigation-areas.md): every objective's areas, kept or ignored, and
 -- which the arrow targets. For tuning by eye.
 commands.areas = {

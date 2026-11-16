@@ -104,22 +104,6 @@ end
 
 -- The guide ---------------------------------------------------------------------------------------
 
--- Its quest: hovered card, else first pinned, else top card.
-local function guidedQuest()
-  local hovered = ns.MapAreas.cardHover
-  if hovered and ns.Stack.visible[hovered] then
-    return hovered
-  end
-  local pins, best, bestOrder = ns.DB.char.pins, nil, nil
-  for _, questID in ipairs(ns.Stack.order) do
-    local order = pins[questID]
-    if order and (not bestOrder or order < bestOrder) then
-      best, bestOrder = questID, order
-    end
-  end
-  return best or ns.Stack.order[1]
-end
-
 -- Its target: the nearest of the quest's current objectives (or its turn-in) you aren't already in.
 -- Not the card's arrow target: that one is "here" while you're in an area (review: no line showed
 -- while killing one objective's mobs with the other's elsewhere).
@@ -136,6 +120,40 @@ local function guideTarget(questID)
     end
   end
   return best and best.point
+end
+
+-- Its quest: the hovered card (that one only: it's what you're asking about), else the pinned quests
+-- in pin order, then the cards top to bottom: the first with somewhere to go on this continent (a
+-- pinned "raise your skill" quest has nowhere, and shouldn't hide the line).
+local function candidates()
+  local pins = ns.DB.char.pins
+  local list = {}
+  for _, questID in ipairs(ns.Stack.order) do
+    if pins[questID] then
+      list[#list + 1] = questID
+    end
+  end
+  table.sort(list, function(a, b) return pins[a] < pins[b] end)
+  for _, questID in ipairs(ns.Stack.order) do
+    if not pins[questID] then
+      list[#list + 1] = questID
+    end
+  end
+  return list
+end
+
+local function pickGuide()
+  local hovered = ns.MapAreas.cardHover
+  if hovered and ns.Stack.visible[hovered] then
+    return hovered, guideTarget(hovered)
+  end
+  for _, questID in ipairs(candidates()) do
+    local point = guideTarget(questID)
+    if point then
+      return questID, point
+    end
+  end
+  return nil, nil
 end
 
 local guide = { elapsed = TARGET_SECONDS }  -- questID, point: refreshed every TARGET_SECONDS
@@ -181,8 +199,7 @@ local function drawGuide(north, west, instanceMap, cos, sin, scale, half, square
   guide.elapsed = guide.elapsed + delta
   if guide.elapsed >= TARGET_SECONDS then
     guide.elapsed = 0
-    guide.questID = guidedQuest()
-    guide.point = guide.questID and guideTarget(guide.questID)
+    guide.questID, guide.point = pickGuide()
   end
   local target = guide.point
   if not target or target.map ~= instanceMap then
@@ -290,3 +307,50 @@ local function create()
 end
 
 ns.Events:On("PLAYER_LOGIN", create)
+
+---For /qm minimap: what the minimap layer sees right now, one frame run under pcall so an error shows.
+---@return string[]
+function MinimapAreas:Diagnose()
+  local lines = {}
+  local function add(text, ...)
+    lines[#lines + 1] = text:format(...)
+  end
+  local map = settings()
+  add("Settings: areas=%s guide=%s", tostring(map and map.minimapAreas), tostring(map and map.guide))
+  add("Layer: %s, shown=%s visible=%s", layer and "created" or "MISSING", tostring(layer and layer:IsShown()),
+    tostring(layer and layer:IsVisible()))
+  if not layer then
+    return lines
+  end
+  local ok, err = pcall(update, layer, 0)
+  add("One frame: %s", ok and "ok" or ("ERROR " .. tostring(err)))
+  local north, west, instanceMap = ns.Navigation:PlayerPosition()
+  add("Player: %s, %s on map %s", tostring(north), tostring(west), tostring(instanceMap))
+  add("Minimap: width %.1f, view radius %s yd, square=%s, rotation %.2f", Minimap:GetWidth(),
+    tostring(C_Minimap.GetViewRadius()), tostring(isSquare()), rotation())
+  add("Points %d (version %s of %s), circles drawn %d, hover radius %.1f px", #self.points, tostring(self.version),
+    tostring(ns.MapAreas.version), #self.hits, self.radius or 0)
+  add("Guide: quest %s, point %s, dots drawn %d", tostring(guide.questID),
+    guide.point and ("%.1f, %.1f map %s"):format(guide.point.x, guide.point.y, tostring(guide.point.map)) or "none",
+    used.dots)
+  for _, questID in ipairs(candidates()) do
+    local quest = ns.QuestLog:Get(questID)
+    local keys = {}
+    for key in pairs(quest and ns.Navigation:Targets(quest).byObjective or {}) do
+      local nav = ns.Navigation:ObjectiveNav(quest, key)
+      keys[#keys + 1] = ("%s=%s"):format(tostring(key), not nav and "nil" or nav.zone and ("zone " .. nav.zone)
+        or ("%.0fyd%s"):format(nav.distance, nav.inArea and " here" or ""))
+    end
+    add("  candidate %d %s%s: %s", questID, quest and tostring(quest.title) or "?",
+      ns.DB.char.pins[questID] and " (pinned)" or "", #keys > 0 and table.concat(keys, ", ") or "no targets")
+  end
+  local cx, cy = GetCursorPosition()
+  local scale = layer:GetEffectiveScale()
+  local mx, my = layer:GetCenter()
+  add("Mouse over minimap: %s; cursor from centre %.1f, %.1f px", tostring(Minimap:IsMouseOver()), cx / scale - mx,
+    cy / scale - my)
+  local owner = GameTooltip:GetOwner()
+  add("GameTooltip: shown=%s owner=%s (ours: %s)", tostring(GameTooltip:IsShown()),
+    owner and tostring(owner:GetDebugName()) or "none", tostring(owner == layer))
+  return lines
+end
