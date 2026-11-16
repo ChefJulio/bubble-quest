@@ -111,6 +111,17 @@ local function isMemberName(text, roster)
   return roster[text] or roster[(text:match("^([^%-]+)%-") or "")] or false
 end
 
+-- The game draws member names in the normal gold (NORMAL_FONT_COLOR), statuses in green or grey and
+-- counts in white [seen in game: La Lunaa / Ready for turn-in / Not on quest]. A second test besides
+-- the roster, which can miss (hidden names, display names that differ).
+local function isNameColor(color)
+  if not color then
+    return false
+  end
+  local r, g, b = NORMAL_FONT_COLOR:GetRGB()
+  return math.abs(color.r - r) < 0.05 and math.abs(color.g - g) < 0.05 and math.abs(color.b - b) < 0.05
+end
+
 ---@param questID number
 ---@return table[]? members { name, color, status?, statusColor?, counts = { { name, done, total, used } } };
 ---  nil when solo
@@ -133,9 +144,10 @@ local function partyMembers(questID)
         }
       elseif not done then
         -- A name starts a member; any other line is the current member's status ("Ready for
-        -- turn-in"). Without readable roster names, fall back to: first such line after a member's
-        -- counts or at the start is a name.
-        local isName = knowNames and isMemberName(text, roster) or (not knowNames and (not member or #member.counts > 0))
+        -- turn-in", "Not on quest"). A name: in the roster, or in the name colour. With neither
+        -- readable, fall back to: the first such line at the start or after a member's counts.
+        local isName = isMemberName(text, roster) or isNameColor(line.leftColor)
+          or (not knowNames and not line.leftColor and (not member or #member.counts > 0))
         if isName or not member then
           member = { name = text, color = line.leftColor, counts = {} }
           members[#members + 1] = member
