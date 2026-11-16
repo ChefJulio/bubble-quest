@@ -31,7 +31,8 @@ local function blobAlpha()
   return (ns.DB.profile.map.opacity or 40) / 100
 end
 -- While something is highlighted (see Highlights), the other circles dim to this.
-local DIMMED_ALPHA = 0.12
+-- A share of their normal opacity (a fixed 0.12 was too dim in review), so it follows the setting.
+local DIMMED_SHARE = 0.6
 local HOVER_SECONDS = 0.05  -- how often the hover is checked while the map is open
 local FRAME_LEVEL = 2005     -- under Questie's map lines (2015) and icons (2016+)
 
@@ -299,11 +300,17 @@ end
 -- cursor, in a tooltip like Questie's (review). It stays out of the way when another tooltip is up
 -- (a Questie icon, a map pin).
 
--- Quests and objectives under the cursor: { [questID] = { [objective index or "turnin"] = true } }.
-local function under(x, y)
+---Quests and objectives under the cursor: { [questID] = { [objective index or "turnin"] = true } }, or
+---nil. `hits` are circles { x, y, questID, objective } in the same pixels as x, y. Also the minimap's.
+---@param hits table[]
+---@param radius number a circle's hoverable radius, pixels
+---@param x number
+---@param y number
+---@return table?
+function MapAreas.Under(hits, radius, x, y)
   local found, any = {}, false
-  local r2 = MapAreas.radius * MapAreas.radius
-  for _, hit in ipairs(MapAreas.hits) do
+  local r2 = radius * radius
+  for _, hit in ipairs(hits) do
     local dx, dy = hit.x - x, hit.y - y
     if dx * dx + dy * dy <= r2 then
       found[hit.questID] = found[hit.questID] or {}
@@ -337,7 +344,8 @@ end
 
 -- One tooltip for everything under the cursor, laid out like Questie's (review): per quest, "[7] Title"
 -- in its map colour with a status on the right, then the objectives there, indented, with counts.
-local function showTooltip(owner, found)
+-- Also the minimap's.
+function MapAreas.ShowTooltip(owner, found)
   GameTooltip:SetOwner(owner, "ANCHOR_CURSOR")
   GameTooltip:ClearLines()
   local first = true
@@ -404,7 +412,7 @@ local function highlight(target)
         lit[#lit + 1] = hit
         alpha, scale = GLOW_HIGH, GLOW_GROW
       else
-        alpha = DIMMED_ALPHA
+        alpha = alpha * DIMMED_SHARE
       end
     end
     local c = hit.color
@@ -453,12 +461,12 @@ local function updateHover(layer, map, delta)
     local nx, ny = map:GetNormalizedCursorPosition()
     if readable(nx) and readable(ny) then
       local width, height = map:GetCanvas():GetSize()
-      found = under(nx * width, ny * height)
+      found = MapAreas.Under(MapAreas.hits, MapAreas.radius, nx * width, ny * height)
     end
   end
   local tooltipBusy = GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer
   if found and not tooltipBusy then
-    showTooltip(layer, found)
+    MapAreas.ShowTooltip(layer, found)
     hovering = true
   elseif hovering and not found then
     if GameTooltip:GetOwner() == layer then

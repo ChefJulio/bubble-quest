@@ -246,7 +246,7 @@ local COMPASS = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" }  -- counter-clock
 ---row's arrow and the tooltip's per-objective distances. Nil when unknown.
 ---@param quest table
 ---@param index number objective index
----@return table? { distance, compass, angle?, inArea } or { zone } on another map
+---@return table? { distance, compass, angle?, inArea, point } or { zone } on another map
 function Navigation:ObjectiveNav(quest, index)
   local areas = targetsFor(quest).byObjective[index]
   local north, west, instanceMap = self:PlayerPosition()
@@ -279,6 +279,7 @@ function Navigation:ObjectiveNav(quest, index)
     compass = COMPASS[math.floor((math.deg(bearing) % 360 + 22.5) / 45) % 8 + 1],
     angle = facing and bearing - facing or nil,
     inArea = bestDistance <= hereYards(best),
+    point = { map = instanceMap, x = bestPoint.x, y = bestPoint.y },
   }
 end
 
