@@ -35,6 +35,12 @@ function DoLine.ItemSources(questID, itemName)
   return names and { kind = kind, names = names, more = 0 } or nil
 end
 
+-- STOPGAP (review, 2026-11-16: "that's lazy but ok", deferred): the group reads "any Stonesplinter"
+-- to avoid writing English plurals, and odd groupings ("any Young") would be fixed one by one.
+-- Remaining work, agreed but skipped for now: (1) real plurals with irregulars (wolf -> wolves,
+-- harpy -> harpies, -man -> -men): "from boars", "from Stonesplinters"; (2) head noun first: the last
+-- word wins when it qualifies, the first only for a shared tribe name; (3) an offline audit printing
+-- the grouping for every item objective in forever-db (and Questie), reviewed before shipping.
 ---A group name for many sources sharing a word (review: "kill boars, not every boar"): the first word
 ---(a tribe, "Stonesplinter Trogg, Stonesplinter Seer, ...") or the last (a kind, "Mountain Boar, Elder
 ---Mountain Boar, ..."), when at least GROUP_SHARE of the names (and GROUP_MIN) have it. Returns

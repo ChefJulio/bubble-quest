@@ -60,37 +60,58 @@ end
 
 -- 44 in Forever's docs (TooltipInfoSharedDocumentation.lua); newer than the WoW API annotations.
 local LINE_ON_USE = (Enum.TooltipDataLineType --[[@as table]]).ItemSpellTriggerOnUse
+-- The client's own "Use:" label, localized (GlobalStrings: "Use:", "Usar:", ...): a second way to
+-- find the line when it doesn't come typed (Banner of the Fallen showed no tip, seen in review).
+local USE_LABEL = rawget(_G, "ITEM_SPELL_TRIGGER_ONUSE")
 local ENGLISH = GetLocale() == "enUS" or GetLocale() == "enGB"
-local itemEffects = {}  -- [itemID] = effect text, or false (none)
+local itemEffects = {}  -- [itemID] = effect text; only found effects are kept (no "none" is cached)
+local waiting = {}      -- [itemID] = true: asked before its data loaded; redraw when it arrives
 
-local function itemEffect(itemID)
-  if itemEffects[itemID] ~= nil then
-    return itemEffects[itemID] or nil
+local function isUseLine(line, text)
+  if line.type == LINE_ON_USE then
+    return true
   end
-  local tooltip = C_TooltipInfo.GetItemByID(itemID)
-  local effect
-  for _, line in ipairs(tooltip and tooltip.lines or {}) do
-    local text = line.leftText
-    if line.type == LINE_ON_USE and type(text) == "string" and not issecretvalue(text) then
-      -- "Use: Causes nearby kobold tracks to appear on your map. (1 Sec Cooldown)"
-      -- Drop the label up to the first colon: ASCII, else the full-width one (CJK clients), matched as
-      -- a whole UTF-8 sequence so other multi-byte letters can't be mistaken for it.
-      local stripped, count = text:gsub("^.-:%s*", "", 1)
-      if count == 0 then
-        stripped = text:gsub("^.-\239\188\154%s*", "", 1)
-      end
-      effect = stripped:gsub("%s*%b()%s*$", "")  -- a trailing "(1 Sec Cooldown)"
-      break
-    end
-  end
-  -- Not cached until the item data has loaded: an empty answer is retried next time.
-  if tooltip and tooltip.lines and #tooltip.lines > 0 then
-    itemEffects[itemID] = effect or false
-  end
-  return effect
+  return type(USE_LABEL) == "string" and USE_LABEL ~= "" and text:sub(1, #USE_LABEL) == USE_LABEL
 end
 
----The hint for a quest's usable item, or nil.
+local function itemEffect(itemID)
+  if itemEffects[itemID] then
+    return itemEffects[itemID]
+  end
+  local tooltip = C_TooltipInfo.GetItemByID(itemID)
+  for _, line in ipairs(tooltip and tooltip.lines or {}) do
+    local text = line.leftText
+    if type(text) == "string" and not issecretvalue(text) and isUseLine(line, text) then
+      -- "Use: Causes nearby kobold tracks to appear on your map. (1 Sec Cooldown)"
+      -- Drop the label: the client's own, else up to the first colon, ASCII or the full-width one
+      -- (CJK clients), matched as a whole UTF-8 sequence so other multi-byte letters can't be
+      -- mistaken for it.
+      local stripped
+      if type(USE_LABEL) == "string" and text:sub(1, #USE_LABEL) == USE_LABEL then
+        stripped = text:sub(#USE_LABEL + 1):gsub("^%s*", "")
+      else
+        local count
+        stripped, count = text:gsub("^.-:%s*", "", 1)
+        if count == 0 then
+          stripped = text:gsub("^.-\239\188\154%s*", "", 1)
+        end
+      end
+      local effect = stripped:gsub("%s*%b()%s*$", "")  -- a trailing "(1 Sec Cooldown)"
+      if effect ~= "" then
+        itemEffects[itemID] = effect
+        return effect
+      end
+    end
+  end
+  -- Nothing yet: the item's data may still be loading (an early "no Use line" was cached for good
+  -- before, which is how a tip went missing). Asked again on every redraw, and the cards redraw
+  -- when the data arrives (GET_ITEM_INFO_RECEIVED below).
+  waiting[itemID] = true
+  return nil
+end
+
+---The hint for a quest's usable item, or nil. Every quest with a usable item gets one (review): its
+---effect from the item's "Use:" line, else at least where the item is.
 ---@param quest table
 ---@return string?
 function Hints:ItemHint(quest)
@@ -98,14 +119,25 @@ function Hints:ItemHint(quest)
   if not info then
     return nil
   end
-  local effect = itemEffect(info.itemID)
   local name = info.link:match("%[(.-)%]")
-  if not effect or effect == "" or not name then
+  if not name then
     return nil
+  end
+  local effect = itemEffect(info.itemID)
+  if not effect then
+    return ENGLISH and ("Use the %s: it's the button beside this card."):format(name) or name
   end
   effect = effect:gsub("^%u", string.lower):gsub("%.$", "")
   return ENGLISH and ("Use the %s: %s."):format(name, effect) or ("%s: %s."):format(name, effect)
 end
+
+-- An item we asked about has loaded: redraw the cards so its tip shows its effect.
+ns.Events:On("GET_ITEM_INFO_RECEIVED", function(itemID)
+  if waiting[itemID] then
+    waiting[itemID] = nil
+    ns.Stack:Request(false)
+  end
+end)
 
 ---All hints for a quest on its card: the item hint first, then the curated ones.
 ---@param quest table
