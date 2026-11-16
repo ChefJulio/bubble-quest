@@ -200,7 +200,10 @@ function Schema:Entries()
     },
 
     -- Only with Questie installed: its tracker's state, and Questie's own switch to turn it off.
-    { kind = "section", label = "Questie", column = 1, windowOnly = true, onlyIf = questieInstalled },
+    -- Questie's tracker state (with Questie), and QuestieDB's data (with QuestieDB, Questie or not).
+    { kind = "section", label = "Questie", column = 1, windowOnly = true, onlyIf = function()
+      return questieInstalled() or ns.QuestieData:Installed()
+    end },
     {
       kind = "status", id = "QUESTMARKER_QUESTIE_TRACKER", column = 1, windowOnly = true, onlyIf = questieInstalled,
       label = "Questie's tracker",
@@ -220,10 +223,12 @@ function Schema:Entries()
       actionEnabled = function() return ns.Questie:TrackerEnabled() ~= false end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_QUESTIE_DATA", column = 1, default = true, onlyIf = questieInstalled,
-      label = "Use Questie's location data",
-      tooltip = "Arrows also use Questie's spawn locations for mobs, objects and turn-ins, read from your "
-        .. "Questie, so quests the bundled data doesn't cover get arrows too.",
+      kind = "checkbox", id = "QUESTMARKER_QUESTIE_DATA", column = 1, default = true,
+      onlyIf = function() return ns.QuestieData:Installed() end,
+      label = "Use QuestieDB's location data",
+      tooltip = "Arrows and map areas also use QuestieDB's spawn locations for mobs, objects and turn-ins "
+        .. "(the database Questie reads; Questie itself isn't needed), so quests the bundled data doesn't "
+        .. "cover get them too.",
       get = function(p) return p.questieData end,
       set = function(p, v) p.questieData = v; ns.QuestieData:Reset() end,
     },

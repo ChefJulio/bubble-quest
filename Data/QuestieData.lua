@@ -1,20 +1,27 @@
 local ADDON_NAME, ns = ...
 
--- Questie's location data as a navigation source (docs/design/navigation-areas.md), read at runtime
--- from the player's own Questie install, never bundled. Through QuestieDB's public library, written
--- for other addons: "Another addon can read entity fields ... Questie is the first consumer, but
--- nothing here assumes it" (QuestieDB/src/api.lua:3-6), versioned by contract (RequireContract).
+-- QuestieDB's data (the database Questie reads, shipped as its own addon) as a navigation source
+-- (docs/design/navigation-areas.md), read at runtime from the player's install, never bundled.
+-- Through QuestieDB's public library, written for other addons: "Another addon can read entity
+-- fields ... Questie is the first consumer, but nothing here assumes it" (QuestieDB/src/api.lua:3-6),
+-- versioned by contract (RequireContract). Questie itself isn't needed (review, 2026-11-16:
+-- Questmarker is replacing Questie; docs/design/available-quests.md): QuestieDB applies its own
+-- corrections at load, so its data is usable as soon as it's loaded, and it publishes the area ->
+-- uiMap table Questie's ZoneDB reads. With Questie also running, its extra corrections land when it's
+-- ready (RegisterOnReady), and the cache is dropped then.
 --
 -- Shapes (QuestieDB/Types/General.t.lua): QuestDB.objectives(id) = { [1] creatures {npcId, text?},
 -- [2] objects {objectId, text?}, [3] items {itemId, text?}, [4] reputation, [5] kill credit
 -- {npcIds, rootNpcId, text?}, [6] spells }; triggerEnd(id) = { text, spawnList } (exploration);
 -- finishedBy(id) = { npcIds?, objectIds? }; spawn lists are { [areaId] = { {x, y, phase?}, ... } }
 -- with x/y in 0-100 percent of that zone's map, {-1, -1} meaning "inside an instance" (skipped).
--- Area IDs become uiMapIDs through Questie's ZoneDB:GetUiMapIdByAreaId (internal: guarded, a miss
--- skips the spawn), then world yards through C_Map.GetWorldPosFromMapPos, as the map marker is.
+-- Area IDs become uiMapIDs through QuestieDB's published ZoneDB table
+-- (LibQuestieDB.Support.Get("ZoneDB").private.areaIdToUiMapId, the table Questie's
+-- ZoneDB:GetUiMapIdByAreaId reads; a miss skips the spawn), then world yards through
+-- C_Map.GetWorldPosFromMapPos, as the map marker is.
 --
--- Used only when Questie is ready (Questie.API.isReady; RegisterOnReady fires LocationsChanged) and
--- the setting "Use Questie's location data" is on.
+-- Used when QuestieDB is loaded with a compatible contract and the setting "Use QuestieDB's location
+-- data" is on.
 
 local CONTRACT = 4
 
@@ -23,50 +30,47 @@ local QuestieData = {
 }
 ns.QuestieData = QuestieData
 
-local function questie()
-  local q = rawget(_G, "Questie")
-  return type(q) == "table" and q or nil
+local function library()
+  local lib = rawget(_G, "LibQuestieDB")
+  return type(lib) == "table" and lib or nil
 end
 
-local function db(name)
-  local t = rawget(_G, name)
-  return type(t) == "table" and t or nil
-end
-
-local zoneDB
+-- QuestieDB's area -> uiMap table, found once (false: not available).
+local areaToUiMap
 local function uiMapOf(areaId)
-  if zoneDB == nil then
-    local loader = rawget(_G, "QuestieLoader")
-    local ok, module = false, nil
-    if type(loader) == "table" and type(loader.ImportModule) == "function" then
-      ok, module = pcall(loader.ImportModule, loader, "ZoneDB")
+  if areaToUiMap == nil then
+    local lib = library()
+    local ok, zone = false, nil
+    if lib and type(lib.Support) == "table" and type(lib.Support.Get) == "function" then
+      ok, zone = pcall(lib.Support.Get, "ZoneDB")
     end
-    zoneDB = ok and type(module) == "table" and type(module.GetUiMapIdByAreaId) == "function" and module or false
+    local private = ok and type(zone) == "table" and zone.private
+    areaToUiMap = type(private) == "table" and type(private.areaIdToUiMapId) == "table" and private.areaIdToUiMapId
+      or false
   end
-  if not zoneDB then
-    return nil
-  end
-  local ok, uiMap = pcall(zoneDB.GetUiMapIdByAreaId, zoneDB, areaId)
-  return ok and type(uiMap) == "number" and uiMap or nil
+  local uiMap = areaToUiMap and areaToUiMap[areaId]
+  return type(uiMap) == "number" and uiMap or nil
 end
 
----Usable right now: installed, compatible, ready, and the setting on.
+---Installed with a compatible contract (whatever the setting says).
+---@return boolean
+function QuestieData:Installed()
+  local lib = library()
+  return lib ~= nil and type(lib.RequireContract) == "function" and lib.RequireContract(CONTRACT) == true
+end
+
+---Usable right now: installed, compatible, and the setting on.
 ---@return boolean
 function QuestieData:Available()
-  local lib, q = db("LibQuestieDB"), questie()
-  if not lib or not q or not (ns.DB.profile and ns.DB.profile.questieData) then
-    return false
-  end
-  if type(lib.RequireContract) ~= "function" or not lib.RequireContract(CONTRACT) then
-    return false
-  end
-  return type(q.API) == "table" and q.API.isReady == true
+  return ns.DB.profile ~= nil and ns.DB.profile.questieData == true and self:Installed()
 end
 
--- A QuestieDB getter, guarded.
+-- A QuestieDB getter, guarded. dbName: "QuestDB", "NpcDB", "ItemDB" or "ObjectDB" (the library's
+-- entities: LibQuestieDB.Quest, ...).
 local function get(dbName, field, id)
-  local t = db(dbName)
-  local fn = t and t[field]
+  local lib = library()
+  local t = lib and lib[dbName:sub(1, -3)]
+  local fn = type(t) == "table" and t[field]
   if type(fn) ~= "function" then
     return nil
   end
@@ -192,10 +196,10 @@ function QuestieData:Reset()
   ns.Bus:Fire("LocationsChanged")
 end
 
--- Questie becomes ready after its own startup; then our cached "nothing" answers are stale.
+-- With Questie also running: it adds its own corrections when ready, so cached answers are stale.
 ns.Events:On("PLAYER_LOGIN", function()
-  local q = questie()
-  local api = q and q.API
+  local q = rawget(_G, "Questie")
+  local api = type(q) == "table" and q.API
   if type(api) == "table" and type(api.RegisterOnReady) == "function" then
     pcall(api.RegisterOnReady, function() QuestieData:Reset() end)
   end
