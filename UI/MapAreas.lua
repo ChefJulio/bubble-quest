@@ -344,7 +344,10 @@ end
 
 -- One tooltip for everything under the cursor, laid out like Questie's (review): per quest, "[7] Title"
 -- in its map colour with a status on the right, then the objectives there, indented, with counts.
--- Fills `tooltip` (already owned and anchored by the caller): the minimap uses its own tooltip.
+-- Grouped (review), each objective's line is yours and the party members on the quest follow it,
+-- indented, with the card tooltip's mini bars (QuestTooltip:PartyRows); on a turn-in, who's ready.
+-- Members not on the quest are left out. Fills `tooltip` (already owned and anchored by the caller):
+-- the minimap uses its own tooltip.
 ---@param tooltip table a GameTooltip
 ---@param found table from MapAreas.Under
 function MapAreas.FillTooltip(tooltip, found)
@@ -362,14 +365,27 @@ function MapAreas.FillTooltip(tooltip, found)
       local status = quest.readyForTurnIn and "(Ready to turn in)" or ""
       tooltip:AddDoubleLine(("[%d] %s"):format(quest.level or 0, quest.title or "?"), status,
         color[1], color[2], color[3], 1, 0.82, 0)
+      local party = {}
+      for _, row in ipairs(ns.QuestTooltip:PartyRows(quest) or {}) do
+        if not row.status then  -- a row with only a status: "Not on quest"
+          party[#party + 1] = row
+        end
+      end
       if objectives.turnin then
         local turnIn = ns.ForeverData:TurnInName(questID)
         tooltip:AddLine("  " .. (turnIn and ("Turn in to " .. turnIn) or "Turn in"), 0.2, 1, 0.2)
+        for _, row in ipairs(party) do
+          tooltip:AddDoubleLine("    " .. row.name, row.ready and "Ready" or table.concat(row.cells, "  "),
+            1, 1, 1, row.ready and 0.2 or 1, 1, row.ready and 0.2 or 1)
+        end
       end
       for index, objective in ipairs(quest.objectives) do
         if objectives[index] then
           local text, counter = ns.DoLine:For(objective, questID)
           tooltip:AddDoubleLine("  " .. text, counter or "", 1, 1, 1, 1, 1, 1)
+          for _, row in ipairs(party) do
+            tooltip:AddDoubleLine("    " .. row.name, row.cells[index] or "-", 1, 1, 1, 1, 1, 1)
+          end
         end
       end
     end

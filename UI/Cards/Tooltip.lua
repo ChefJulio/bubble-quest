@@ -238,8 +238,72 @@ local function addObjective(quest, index, text, color)
   end
 end
 
+---Your own mini bar and count for one objective.
+---@return string
+local function myCell(quest, index)
+  local objective = quest.objectives[index]
+  local counted = objective.required and objective.required > 0
+  return barAndCount(counted and objective.fulfilled or nil, counted and objective.required or nil,
+    objective.finished or quest.readyForTurnIn)
+end
+
+local PARTY_CACHE_SECONDS = 1  -- the map tooltips refresh 20 times a second; the server's data, not
+local partyCache = {}          -- [questID] = { at, rows, leftovers }
+
+---The party's progress on a quest, ready to draw: one row per member, in the game's order. Shared by
+---the card tooltip and the map and minimap tooltips (UI/MapAreas.lua). Nil solo, or with no data.
+---@param quest table
+---@return table[]? rows { name (coloured), cells = { [objective index] = bar and count, or "-" },
+---  ready (the game's green "Ready for turn-in"), status (coloured, a row with no counts) }
+---@return string[]? leftovers counts that matched none of our objectives, as given
+function QuestTooltip:PartyRows(quest)
+  local cached = partyCache[quest.questID]
+  if cached and GetTime() - cached.at < PARTY_CACHE_SECONDS then
+    return cached.rows, cached.leftovers
+  end
+  local members = partyMembers(quest.questID)
+  local rows, leftovers
+  if members then
+    rows, leftovers = {}, {}
+    for _, member in ipairs(members) do
+      sortTexts(member, quest.objectives)
+    end
+    for _, member in ipairs(members) do
+      local row = { name = colorize(member.name, member.color), cells = {} }
+      if #member.counts == 0 and member.status and isReadyStatus(member.statusColor) then
+        -- Done (the game's green "Ready for turn-in"): full bars with the totals, like your own row
+        -- (review: one said 1/1, the other "Ready for turn-in").
+        row.ready = true
+        for i, objective in ipairs(quest.objectives) do
+          local total = (objective.required and objective.required > 0) and objective.required or nil
+          row.cells[i] = barAndCount(total, total, true)
+        end
+      elseif #member.counts == 0 and member.status then
+        -- No counts, just a status (e.g. "Not on quest"): that's the row.
+        row.status = colorize(member.status, member.statusColor)
+      else
+        for i, objective in ipairs(quest.objectives) do
+          local count = countFor(member, ns.QuestLog.ObjectiveName(objective))
+          row.cells[i] = count and barAndCount(count.done, count.total) or "-"
+        end
+      end
+      rows[#rows + 1] = row
+    end
+    for _, member in ipairs(members) do
+      for _, count in ipairs(member.counts) do
+        if not count.used then
+          leftovers[#leftovers + 1] = ("%s: %d/%d %s"):format(colorize(member.name, member.color), count.done,
+            count.total, count.name)
+        end
+      end
+    end
+  end
+  partyCache[quest.questID] = { at = GetTime(), rows = rows, leftovers = leftovers }
+  return rows, leftovers
+end
+
 -- Grouped: objective names once, then a uniform row per player (you first), then leftovers.
-local function addGroupedProgress(quest, members)
+local function addGroupedProgress(quest, rows, leftovers)
   local done = quest.readyForTurnIn
   for i, objective in ipairs(quest.objectives) do
     local c = (objective.finished or done) and GRAY or WHITE
@@ -247,45 +311,17 @@ local function addGroupedProgress(quest, members)
   end
 
   local mine = {}
-  for i, objective in ipairs(quest.objectives) do
-    local finished = objective.finished or done
-    mine[i] = barAndCount(objective.required and objective.required > 0 and objective.fulfilled or nil,
-      objective.required and objective.required > 0 and objective.required or nil, finished)
+  for i in ipairs(quest.objectives) do
+    mine[i] = myCell(quest, i)
   end
   addRow("You", mine)
 
-  for _, member in ipairs(members) do
-    sortTexts(member, quest.objectives)
+  for _, row in ipairs(rows) do
+    addRow(row.name, row.status and { row.status } or row.cells)
   end
-  for _, member in ipairs(members) do
-    local cells = {}
-    if #member.counts == 0 and member.status and isReadyStatus(member.statusColor) then
-      -- Done (the game's green "Ready for turn-in"): full bars with the totals, like your own row
-      -- (review: one said 1/1, the other "Ready for turn-in").
-      for i, objective in ipairs(quest.objectives) do
-        local total = (objective.required and objective.required > 0) and objective.required or nil
-        cells[i] = barAndCount(total, total, true)
-      end
-    elseif #member.counts == 0 and member.status then
-      -- No counts, just a status (e.g. "Ready for turn-in"): that's the row.
-      cells[1] = colorize(member.status, member.statusColor)
-    else
-      for i, objective in ipairs(quest.objectives) do
-        local count = countFor(member, ns.QuestLog.ObjectiveName(objective))
-        cells[i] = count and barAndCount(count.done, count.total) or "-"
-      end
-    end
-    addRow(colorize(member.name, member.color), cells)
-  end
-
   -- Counts that matched none of our objectives (wording differs): listed as given.
-  for _, member in ipairs(members) do
-    for _, count in ipairs(member.counts) do
-      if not count.used then
-        add(("%s: %d/%d %s"):format(colorize(member.name, member.color), count.done, count.total, count.name),
-          WHITE, true)
-      end
-    end
+  for _, text in ipairs(leftovers) do
+    add(text, WHITE, true)
   end
 end
 
@@ -314,9 +350,12 @@ function QuestTooltip:Show(owner, quest)
   end
 
   -- Objectives show on ready quests too (greyed, done), so the tooltip still says what the quest was.
-  local members = #quest.objectives > 0 and partyMembers(questID)
-  if members then
-    addGroupedProgress(quest, members)
+  local rows, leftovers
+  if #quest.objectives > 0 then
+    rows, leftovers = self:PartyRows(quest)
+  end
+  if rows then
+    addGroupedProgress(quest, rows, leftovers)
   else
     for i, objective in ipairs(quest.objectives) do
       addObjective(quest, i, "- " .. (objective.text or "?"), (objective.finished or quest.readyForTurnIn) and GRAY or WHITE)
