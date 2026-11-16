@@ -333,10 +333,12 @@ MapAreas.highlightReset = function()
   wipe(lit)
 end
 
----A card is hovered (its quest lights up on the map), or nil when the cursor leaves it.
+---A card is hovered (its quest lights up on the map), or nil when the cursor leaves it. `objective`:
+---the objective row under the cursor (an index, or "turnin"): only that objective lights up.
 ---@param questID number?
-function MapAreas:SetCardHover(questID)
-  self.cardHover = questID
+---@param objective number|string|nil
+function MapAreas:SetCardHover(questID, objective)
+  self.cardHover, self.cardHoverObjective = questID, objective
 end
 
 local hoverElapsed, hovering = 0, false
@@ -367,9 +369,11 @@ local function updateHover(layer, map, delta)
   end
   -- What to light up: cursor, else hovered card, else the quest log's open quest.
   local target = found and not tooltipBusy and found or nil
-  local questID = not target and (MapAreas.cardHover or detailsQuest()) or nil
-  if questID then
-    target = { [questID] = { ["*"] = true } }
+  if not target and MapAreas.cardHover then
+    target = { [MapAreas.cardHover] = { [MapAreas.cardHoverObjective or "*"] = true } }
+  elseif not target then
+    local questID = detailsQuest()
+    target = questID and { [questID] = { ["*"] = true } } or nil
   end
   highlight(target)
 end

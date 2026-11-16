@@ -217,11 +217,17 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
     local quest = self.questID and ns.QuestLog:Get(self.questID)
     if quest then
       ns.QuestTooltip:Show(frame, quest)
-      ns.MapAreas:SetCardHover(quest.questID)  -- its areas glow on the world map (UI/MapAreas.lua)
+      -- Its areas glow on the world map (UI/MapAreas.lua): over an objective row, just that
+      -- objective's (review); elsewhere on the card, the whole quest's. Rows take no mouse (the card's
+      -- clicks must reach the card), so which row is under the cursor is checked while hovered.
+      frame:SetScript("OnUpdate", function()
+        ns.MapAreas:SetCardHover(quest.questID, self:ObjectiveUnderCursor(quest))
+      end)
     end
   end)
   frame:SetScript("OnLeave", function()
     ns.QuestTooltip:Hide()
+    frame:SetScript("OnUpdate", nil)
     ns.MapAreas:SetCardHover(nil)
   end)
   frame:SetScript("OnMouseUp", function(_, button)
@@ -670,6 +676,23 @@ local function steps(quest)
     return nil
   end
   return done, total
+end
+
+---The objective row under the cursor: its objective index, "turnin" for the turn-in line, or nil (the
+---title, a tip, a gap: the whole quest).
+---@param quest table
+---@return number|string|nil
+function Card:ObjectiveUnderCursor(quest)
+  for i = 1, self.rowCount or 0 do
+    local row = self.rows[i]
+    if row and row:IsShown() and row:IsMouseOver() then
+      if quest.readyForTurnIn and i == self.rowCount then
+        return "turnin"
+      end
+      return quest.objectives[i] and i or nil
+    end
+  end
+  return nil
 end
 
 ---When a quest's timer runs out (GetTime() scale), or nil when it has no running timer. The same
