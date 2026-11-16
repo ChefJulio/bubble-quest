@@ -21,7 +21,7 @@ local TICK_SECONDS = 0.1   -- 10 updates a second (agreed in review)
 -- "Here" distance by what the area is (decided in review): a turn-in you must be at (not 5: location
 -- data is often a few yards off the NPC, who may wander); an object you must be near; a place; mobs,
 -- which roam (their nameplates confirm it too).
-local HERE_YARDS = { turnin = 10, object = 20, explore = 30, npc = 40 }
+local HERE_YARDS = { turnin = 10, object = 20, explore = 30, npc = 40 }  -- single objects: 5 (hereYards)
 local SWITCH_RATIO = 0.8   -- switch area only when another is at least 20% closer
 local MAX_LEARNED_WEIGHT = 3
 
@@ -221,7 +221,17 @@ local function nearbyObjective(quest)
   return nil
 end
 
-local function hereYards(area)
+-- One thing to pick up off the ground (an object objective needing 1): "here" means on top of it, so
+-- the arrow keeps guiding to the spot (review). Database coordinates are good to a few yards.
+local SINGLE_OBJECT_YARDS = 5
+
+local function hereYards(area, quest)
+  if area.kind == "object" and quest and area.objective then
+    local objective = quest.objectives[area.objective]
+    if objective and objective.required == 1 then
+      return SINGLE_OBJECT_YARDS
+    end
+  end
   return HERE_YARDS[area.kind] or HERE_YARDS.npc
 end
 
@@ -239,7 +249,7 @@ function Navigation:InArea(quest)
     return false
   end
   for _, area in ipairs(targetsFor(quest).areas) do
-    if not area.marker and ns.Areas:Nearest(area, instanceMap, north, west, hereYards(area)) then
+    if not area.marker and ns.Areas:Nearest(area, instanceMap, north, west, hereYards(area, quest)) then
       return true
     end
   end
@@ -284,7 +294,7 @@ function Navigation:ObjectiveNav(quest, index)
     distance = bestDistance,
     compass = COMPASS[math.floor((math.deg(bearing) % 360 + 22.5) / 45) % 8 + 1],
     angle = facing and bearing - facing or nil,
-    inArea = bestDistance <= hereYards(best),
+    inArea = bestDistance <= hereYards(best, quest),
     point = { map = instanceMap, x = bestPoint.x, y = bestPoint.y },
   }
 end
@@ -331,7 +341,7 @@ function Navigation:ComputeTarget(quest)
   self.current[quest.questID] = { id = area.id, map = instanceMap, x = point.x, y = point.y }
 
   local nav = { distance = distance, objective = area.objective }
-  nav.inArea = not area.marker and distance <= hereYards(area)
+  nav.inArea = not area.marker and distance <= hereYards(area, quest)
   local facing = GetPlayerFacing()
   if facing then
     -- Bearing counter-clockwise from north (towards west), minus where the player faces.
