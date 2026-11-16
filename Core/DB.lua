@@ -54,6 +54,7 @@ local PROFILE_DEFAULTS = {
     guide = true,         -- a faint dotted line on the minimap to the guided quest's target
     opacity = 40,         -- each area circle's opacity, percent
     size = 30,            -- each area circle's radius, yards
+    iconSize = 100,       -- the turn-in "?" on the maps, percent
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {

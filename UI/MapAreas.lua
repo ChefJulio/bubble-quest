@@ -14,8 +14,11 @@ local ADDON_NAME, ns = ...
 -- quests/areas change.
 
 local BLOB_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\blob"
-local TURNIN_TEXTURE = "Interface/GossipFrame/ActiveQuestIcon"  -- Blizzard's "?" (QuestUtils.lua:185)
-local TURNIN_SIZE = 20       -- pixels, whatever the zoom
+-- A ready quest's turn-in: Blizzard's map "?" (POIButton.lua:237), the one its own map shows; the
+-- gossip window's small "?" (review: "lame") if the client lacks the atlas.
+local TURNIN_ATLAS = "UI-QuestIcon-TurnIn-Normal"
+local TURNIN_FALLBACK = "Interface/GossipFrame/ActiveQuestIcon"
+local TURNIN_SIZE = 24       -- pixels at 100% (setting map.iconSize), whatever the zoom
 local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer textures)
 
 -- A circle's radius in yards (setting map.size; 30 by default).
@@ -30,6 +33,24 @@ end
 local function blobAlpha()
   return (ns.DB.profile.map.opacity or 40) / 100
 end
+-- Icons' size (setting map.iconSize, percent).
+local function iconScale()
+  return (ns.DB.profile.map.iconSize or 100) / 100
+end
+
+local turninHasAtlas
+-- Sets a texture to the turn-in "?".
+local function setTurninArt(texture)
+  if turninHasAtlas == nil then
+    turninHasAtlas = C_Texture.GetAtlasInfo(TURNIN_ATLAS) ~= nil
+  end
+  if turninHasAtlas then
+    texture:SetAtlas(TURNIN_ATLAS)
+  else
+    texture:SetTexture(TURNIN_FALLBACK)
+  end
+end
+
 -- While something is highlighted (see Highlights), the other circles dim to this.
 -- A share of their normal opacity (a fixed 0.12 was too dim in review), so it follows the setting.
 local DIMMED_SHARE = 0.6
@@ -57,10 +78,11 @@ local MapAreas = {
   version = 0,
   -- Shared with the minimap.
   BLOB_TEXTURE = BLOB_TEXTURE,
-  TURNIN_TEXTURE = TURNIN_TEXTURE,
   MERGE_YARDS = MERGE_YARDS,
   blobYards = blobYards,
   blobAlpha = blobAlpha,
+  iconScale = iconScale,
+  setTurninArt = setTurninArt,
 }
 ns.MapAreas = MapAreas
 
@@ -169,11 +191,11 @@ local function placeMarker(group, canvas, x, y)
   local marker = group.markers[group.markersUsed]
   if not marker then
     marker = group:CreateTexture(nil, "OVERLAY")
-    marker:SetTexture(TURNIN_TEXTURE)
+    setTurninArt(marker)
     group.markers[group.markersUsed] = marker
   end
-  local scale = canvas:GetEffectiveScale() / UIParent:GetEffectiveScale()
-  marker:SetSize(TURNIN_SIZE / scale, TURNIN_SIZE / scale)  -- the canvas zooms; the "?" doesn't
+  local size = TURNIN_SIZE * iconScale() * UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
+  marker:SetSize(size, size)  -- the canvas zooms; the "?" doesn't
   marker:ClearAllPoints()
   marker:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   marker:Show()

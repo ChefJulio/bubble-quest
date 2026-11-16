@@ -341,6 +341,14 @@ function Schema:Entries()
       get = function(p) return p.map.size end,
       set = function(p, v) p.map.size = v; ns.MapAreas:MarkDirty() end,
     },
+    {
+      kind = "slider", id = "QUESTMARKER_MAP_ICON_SIZE", column = 2, default = 100, min = 50, max = 200, step = 10,
+      label = "Icon size",
+      tooltip = "Size of the \"?\" at ready quests' turn-ins, on the world map and the minimap.",
+      format = percent,
+      get = function(p) return p.map.iconSize end,
+      set = function(p, v) p.map.iconSize = v; ns.MapAreas:MarkDirty() end,
+    },
 
     { kind = "section", label = "Arrows", column = 2 },
     {

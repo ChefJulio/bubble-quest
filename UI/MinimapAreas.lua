@@ -12,7 +12,7 @@ local ADDON_NAME, ns = ...
 -- hides everything there.
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
-local MARKER_SIZE = 14       -- the turn-in "?", pixels
+local MARKER_SIZE = 16       -- the turn-in "?", pixels at 100% (setting map.iconSize)
 -- Pixels, not yards: a minimap is small (140 px across for 233 yd each way in review, 0.3 px a yard),
 -- so "too close for a line" is the arrows' "here" (yards, Navigation), never a pixel threshold.
 local DOT_SIZE = 5           -- guide dots
@@ -64,7 +64,11 @@ local function acquire(pool, kind, texture, drawLayer)
   local t = pool[used[kind]]
   if not t then
     t = layer:CreateTexture(nil, drawLayer)
-    t:SetTexture(texture)
+    if type(texture) == "function" then
+      texture(t)  -- sets its own art (the turn-in "?": an atlas)
+    else
+      t:SetTexture(texture)
+    end
     t:AddMaskTexture(mask)
     pool[used[kind]] = t
   end
@@ -191,7 +195,8 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
         if not p.objective then
-          place(acquire(markers, "markers", ns.MapAreas.TURNIN_TEXTURE, "OVERLAY"), x, y, MARKER_SIZE)
+          place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y,
+            MARKER_SIZE * ns.MapAreas.iconScale())
         end
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
       end
