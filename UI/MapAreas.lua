@@ -89,8 +89,34 @@ local function readable(value)
   return value ~= nil and not issecretvalue(value)
 end
 
--- The quest whose details the quest log shows (a plain read of Blizzard's frame), or nil. Its areas
--- are drawn even when it isn't on the cards, and glow (review).
+-- The quest the quest log points at, read from Blizzard's frames (plain reads, no hooks): one hovered
+-- in its list (an entry carries .questID, QuestMapFrame.lua:8; the cursor may be on a child of it),
+-- else the one its details show. Drawn even when it isn't on the cards, and glows (review).
+local function questField(frame)
+  local ok, id = pcall(function() return frame.questID end)  -- a forbidden frame can't be indexed
+  return ok and type(id) == "number" and id or nil
+end
+
+local function logHoverQuest()
+  local list = rawget(_G, "QuestScrollFrame")
+  if not list or not list:IsVisible() or not list:IsMouseOver() then
+    return nil
+  end
+  local foci = GetMouseFoci()
+  local frame = foci and foci[1]
+  for _ = 1, 4 do  -- the entry, or a line inside it
+    if not frame then
+      return nil
+    end
+    local id = questField(frame)
+    if id then
+      return id
+    end
+    frame = frame:GetParent()
+  end
+  return nil
+end
+
 local function detailsQuest()
   local questMap = rawget(_G, "QuestMapFrame")
   local details = questMap and questMap.DetailsFrame
@@ -98,6 +124,10 @@ local function detailsQuest()
     return details.questID
   end
   return nil
+end
+
+local function logQuest()
+  return logHoverQuest() or detailsQuest()
 end
 
 local function acquireGroup(layer, n)
@@ -165,7 +195,7 @@ function MapAreas:Redraw()
   local mapID = map:GetMapID()
   local canvas = map:GetCanvas()
   local width, height = canvas:GetSize()
-  local details = detailsQuest()
+  local details = logQuest()
   self.drawnFor = { mapID = mapID, width = width, height = height, details = details }
   self.dirty = false
   if not self:Enabled() or not mapID or not width or width == 0 then
@@ -179,6 +209,7 @@ function MapAreas:Redraw()
   vector = vector or CreateVector2D(0, 0)
   wipe(self.hits)
   self.highlightReset()  -- new circles start untinted by any hover
+  self.blobSize = size
   self.radius = size / 2 * 0.7  -- the circle's visible core (its edge fades out)
 
   -- The cards' quests, plus the quest open in the quest log's details when it isn't on them.
@@ -278,6 +309,7 @@ end
 -- rest dim. `target` is { [questID] = { [objective index | "turnin" | "*" (all)] = true } }.
 
 local GLOW_LOW, GLOW_HIGH, GLOW_SECONDS = 0.45, 0.9, 1.4
+local GLOW_GROW = 1.3  -- lit circles grow by this, so the highlighted area reads bolder (review)
 
 local highlightKey
 local lit = {}  -- the circles currently glowing
@@ -298,19 +330,21 @@ local function highlight(target)
   end
   highlightKey = key
   wipe(lit)
+  local size = MapAreas.blobSize or 0
   for _, hit in ipairs(MapAreas.hits) do
-    local alpha = BLOB_ALPHA
+    local alpha, scale = BLOB_ALPHA, 1
     if target then
       local objectives = target[hit.questID]
       if objectives and (objectives["*"] or objectives[hit.objective or "turnin"]) then
         lit[#lit + 1] = hit
-        alpha = GLOW_HIGH
+        alpha, scale = GLOW_HIGH, GLOW_GROW
       else
         alpha = DIMMED_ALPHA
       end
     end
     local c = hit.color
     hit.texture:SetVertexColor(c[1], c[2], c[3], alpha)
+    hit.texture:SetSize(size * scale, size * scale)
   end
 end
 
@@ -372,7 +406,7 @@ local function updateHover(layer, map, delta)
   if not target and MapAreas.cardHover then
     target = { [MapAreas.cardHover] = { [MapAreas.cardHoverObjective or "*"] = true } }
   elseif not target then
-    local questID = detailsQuest()
+    local questID = logQuest()
     target = questID and { [questID] = { ["*"] = true } } or nil
   end
   highlight(target)
@@ -396,7 +430,7 @@ local function createLayer()
     local drawn = MapAreas.drawnFor
     local width = canvas:GetWidth()
     if MapAreas.dirty or not drawn or drawn.mapID ~= map:GetMapID() or drawn.width ~= width
-        or drawn.details ~= detailsQuest() then
+        or drawn.details ~= logQuest() then
       MapAreas:Redraw()
     end
     updateHover(layer, map, delta)
