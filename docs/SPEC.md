@@ -225,7 +225,7 @@ Build in this order; each phase is usable on its own.
 7. **Hint data:** data format and loader first, then the build-time pipeline (separate repo folder, not shipped): forever-db tips triaged first, then quests the confusion detector flags.
 8. **In-game learning:** where collector, confusion detector, note button, export string.
 
-**Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). ~~10. Questie replacement~~ (dropped: Questmarker runs alongside Questie). 11. Quest log replacement window. 12. Terrain map: the minimap's real terrain on the world map (toggle), then a zoomable radar, with map areas on top ([design](design/terrain-map.md)).
+**Later phases:** 9. card extras (item buttons, don't-leave-yet, keep-item tooltips, elite flag, party progress). ~~10. Questie replacement~~ (dropped: Questmarker runs alongside Questie). 11. Quest log replacement window. 12. Questmarker_Map, a companion addon in the same release: a square minimap docked on the tracker, everything around it redone and toggleable, one deduplicated launcher list, terrain padding and extended zoom, the world map terrain toggle and our own deep-zoom map window ([design](design/questmarker-map.md), terrain: [design](design/terrain-map.md)).
 
 ## Open questions
 
