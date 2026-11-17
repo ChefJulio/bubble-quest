@@ -17,6 +17,8 @@ local CALLBACKS = {
   TrackerResized = { "TrackerWidthChanged" },  -- (width): the tracker's outer width, pixels
   ThemeChanged = { "FontsChanged", "BackgroundChanged" },
   AreasChanged = { "AreasChanged" },           -- what the map areas draw changed
+  -- The tracker's header dragged the attached frame (it must be movable) and let go: save its place.
+  TrackerAttachMoved = { "TrackerAttachMoved" },
 }
 
 local api = {}
@@ -51,9 +53,9 @@ function api.GetTracker()
 end
 
 ---Attach the tracker's top edge under `frame` (left edges aligned), or nil to put it back where it
----was. While attached it can't be dragged (move `frame` instead) and its resize grip only changes
----width and height. Applied after combat if called in combat (the tracker carries secure quest item
----buttons).
+---was. While attached, dragging the tracker's header moves `frame` if it's movable (then
+---TrackerAttachMoved fires), and nothing otherwise; the resize grip still changes width and height.
+---Applied after combat if called in combat (the tracker carries secure quest item buttons).
 ---@param frame Frame?
 function api.SetTrackerAttach(frame)
   ns.Combat:Run("trackerAttach", function()

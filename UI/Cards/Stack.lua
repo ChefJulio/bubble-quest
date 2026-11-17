@@ -48,6 +48,7 @@ local Stack = {
   sections = {},    -- section headers laid out, top to bottom: { frame, y (in the body) }
   resortPending = false,
   attachedTo = nil, ---@type Frame? -- the frame the tracker hangs under (QuestmarkerAPI.SetTrackerAttach)
+  draggingAttached = false,  -- our header is dragging attachedTo
   PAD = PAD,
   HEADER_HEIGHT = HEADER_HEIGHT,
 }
@@ -616,7 +617,18 @@ end
 
 local function savePosition()
   local container = Stack.container
-  if not container or Stack.attachedTo then
+  if not container then
+    return
+  end
+  local attached = Stack.attachedTo
+  if attached then
+    -- The frame we hang under was dragged by our header (OnDragStart): its owner saves where it is.
+    if Stack.draggingAttached then
+      Stack.draggingAttached = false
+      attached:StopMovingOrSizing()
+      ns.Bus:Fire("TrackerAttachMoved")
+      Stack:Request(false, true)
+    end
     return
   end
   container:StopMovingOrSizing()
@@ -658,8 +670,16 @@ local function createHeader(container)
   end)
   header:SetScript("OnDragStart", function()
     header.dragged = true
-    if not ns.DB.profile.cards.locked and not Stack.attachedTo then
+    if ns.DB.profile.cards.locked or InCombatLockdown() then
+      return
+    end
+    local attached = Stack.attachedTo
+    if not attached then
       container:StartMoving()
+    elseif attached:IsMovable() then
+      -- Attached (Questmarker_Map's column): the header moves the whole column, tracker included.
+      Stack.draggingAttached = true
+      attached:StartMoving()
     end
   end)
   header:SetScript("OnDragStop", savePosition)
@@ -695,9 +715,9 @@ local function createHeader(container)
 
   header.lock = headerButton(header, function()
     if Stack.attachedTo then
-      return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag the corner to resize. The "
-        .. "cards hang under the minimap: move it in Edit Mode."
-        or "Unlocked: drag the corner to resize. Click to lock."
+      return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag this header to move the "
+        .. "minimap and cards together, or the corner to resize."
+        or "Unlocked: drag this header to move the minimap and cards together. Click to lock."
     end
     return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag this header to move the cards."
       or "Unlocked: drag this header to move the cards. Click to lock."

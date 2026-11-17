@@ -36,7 +36,8 @@
     "QuestmarkerMinimapTooltip",
     "QuestmarkerAPI",
     "Questmarker_MapDB",
-    "GetMinimapShape"
+    "GetMinimapShape",
+    "SLASH_QUESTMARKERMAP1"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {

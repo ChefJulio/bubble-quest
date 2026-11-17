@@ -90,11 +90,37 @@ local function corner()
   return onRight and "TOPRIGHT" or "TOPLEFT"
 end
 
+-- Where the column is: where it was dragged to (the tracker's header drags it, Stack.lua), else hanging
+-- from Edit Mode's box. Our frame is the one source of truth for the map's position; Blizzard's
+-- minimap follows it and its Edit Mode box is never moved by us.
 local function applyAnchor()
-  local point = corner()
   outer:ClearAllPoints()
+  local saved = ns.DB.position
+  if saved then
+    outer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", saved[1], saved[2])
+    Minimap_.appliedCorner = nil
+    return
+  end
+  local point = corner()
   outer:SetPoint(point, MinimapCluster, point)
   Minimap_.appliedCorner = point
+end
+
+-- After a drag: StartMoving may have re-anchored `outer` by any point; pin its top-left so it grows
+-- only right and down (the tracker's resize grip), and save that.
+local function savePosition()
+  local left, top = outer:GetLeft(), outer:GetTop()
+  if not left or not top then
+    return
+  end
+  ns.DB.position = { left, top }
+  applyAnchor()
+end
+
+---Back to hanging from Edit Mode's minimap box.
+function Minimap_:ResetPosition()
+  ns.DB.position = nil
+  ns.AfterCombat("size", function() applyAnchor() end)
 end
 
 -- The tracker hangs under `outer`, so resizing or moving `outer` moves its secure quest item buttons:
@@ -113,6 +139,8 @@ local function createOuter()
   frame:SetFrameStrata(Minimap:GetFrameStrata())
   frame:SetFrameLevel(math.max(0, Minimap:GetFrameLevel() - 1))
   frame:EnableMouse(false)
+  frame:SetMovable(true)  -- moved by the tracker's header (QuestmarkerAPI's TrackerAttachMoved)
+  frame:SetClampedToScreen(true)
 
   -- A 1 px border just outside the map (the tracker's panel continues below it).
   local edges = {
@@ -139,7 +167,8 @@ local function createOuter()
       return
     end
     elapsed = 0
-    if Minimap:GetEffectiveScale() ~= Minimap_.appliedScale or corner() ~= Minimap_.appliedCorner then
+    local moved = not ns.DB.position and corner() ~= Minimap_.appliedCorner
+    if Minimap:GetEffectiveScale() ~= Minimap_.appliedScale or moved then
       refresh()
     end
   end)
@@ -165,6 +194,7 @@ function Minimap_:Activate()
   ns.API.SetTrackerAttach(outer)
   ns.API.RegisterCallback("TrackerResized", refresh)
   ns.API.RegisterCallback("ProfileChanged", refresh)
+  ns.API.RegisterCallback("TrackerAttachMoved", savePosition)
 end
 
 ---One line for bug reports (a /qm subcommand later).
@@ -175,6 +205,19 @@ function Minimap_:Describe()
   end
   return ("column %dx%d, minimap %.0f (scale %.2f), shape %s"):format(outer:GetWidth(), outer:GetHeight(),
     Minimap:GetWidth(), Minimap:GetEffectiveScale(), GetMinimapShape())
+end
+
+-- /qmmap reset: back to Edit Mode's position. (Settings come with step 3.)
+SLASH_QUESTMARKERMAP1 = "/qmmap"
+SlashCmdList.QUESTMARKERMAP = function(input)
+  local command = (input or ""):lower():match("^%s*(%S*)")
+  if command == "reset" then
+    Minimap_:ResetPosition()
+    print("|cffffd100Questmarker Map|r: back at the minimap's Edit Mode position.")
+  else
+    print("|cffffd100Questmarker Map|r: " .. Minimap_:Describe() .. ". /qmmap reset: back at the minimap's Edit "
+      .. "Mode position.")
+  end
 end
 
 ns.On("PLAYER_LOGIN", function()
