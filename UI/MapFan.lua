@@ -8,7 +8,8 @@ local ADDON_NAME, ns = ...
 -- was a ring that opened at once: "kinda ugly", review asked for a row and a smooth move.)
 --
 -- The icon layers (UI/MapAvailable.lua, UI/MapServices.lua, UI/MapAreas.lua's turn-ins) each keep a
--- list of their icons (fanItems: texture, x, y on the canvas, base size, fill(tooltip)) and register
+-- list of their icons (fanItems: texture, x, y on the canvas, base size, fill(tooltip), and click() when
+-- clicking it does something: a turn-in opens its quest) and register
 -- it here. While a row is open this file owns the tooltip; the layers' own hovers stand aside
 -- (MapFan.fanned), and a redraw or zoom folds it back at once (Collapse), as textures move or go.
 
@@ -186,13 +187,25 @@ local function cluster(x, y)
   return #group >= 2 and group or nil
 end
 
--- The open row goes above every pin on the map, Blizzard's included (review: its spirit healer pin
--- showed over the row): the map's pin manager says where its topmost pins are (read only).
+-- The open row goes above everything on the map canvas, Blizzard's pins included (review: its spirit
+-- healer pin showed over the row; the pin manager's "topmost" level wasn't the highest in use). Every
+-- pin is a child frame of the canvas: the highest level among them and their own children, read only,
+-- once per opening.
+local function highestOnCanvas()
+  local highest = 0
+  for _, child in ipairs({ canvas:GetChildren() }) do
+    if child ~= frame then
+      highest = math.max(highest, child:GetFrameLevel())
+      for _, grandchild in ipairs({ child:GetChildren() }) do
+        highest = math.max(highest, grandchild:GetFrameLevel())
+      end
+    end
+  end
+  return highest
+end
+
 local function raiseAbovePins()
-  local map = rawget(_G, "WorldMapFrame")
-  local manager = map and map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
-  local topmost = manager and manager:GetValidFrameLevel("PIN_FRAME_LEVEL_TOPMOST") or 0
-  local level = math.max(BACKDROP_LEVEL, topmost + 1)
+  local level = math.max(BACKDROP_LEVEL, highestOnCanvas() + 1)
   if frame:GetFrameLevel() ~= level then
     frame:SetFrameLevel(level)
     strip:SetFrameLevel(level + 1)
@@ -294,6 +307,38 @@ local function animate(delta)
   render(fanned)
 end
 
+-- The open row's icon at canvas pixels x, y, or nil.
+local function itemAt(x, y)
+  local fanned = MapFan.fanned
+  if not fanned or fanned.closing then
+    return nil
+  end
+  local factor = sizeFactor()
+  for _, item in ipairs(fanned.items) do
+    local r = item.base * factor / 2
+    if item.curX and (x - item.curX) ^ 2 + (y - item.curY) ^ 2 <= r * r then
+      return item
+    end
+  end
+  return nil
+end
+
+-- A left-click on an icon in the open row that does something (its click()); anything else is the map's.
+-- Through the map's canvas click handlers, ahead of UI/MapAreas.lua's (priority), as the row covers it.
+local function onCanvasClick(_, button, nx, ny)
+  if button ~= "LeftButton" or IsModifierKeyDown() or InCombatLockdown() or issecretvalue(nx)
+      or issecretvalue(ny) then
+    return false
+  end
+  local width, height = canvas:GetSize()
+  local item = itemAt(nx * width, ny * height)
+  if not (item and item.click) then
+    return false
+  end
+  item.click()
+  return true
+end
+
 local elapsed = 0
 local function hover(map, delta)
   elapsed = elapsed + delta
@@ -323,16 +368,13 @@ local function hover(map, delta)
       return
     end
     fanned.closing = false  -- came back in while it was folding: open again
-    local factor = sizeFactor()
-    for _, item in ipairs(fanned.items) do
-      local r = item.base * factor / 2
-      if item.curX and (x - item.curX) ^ 2 + (y - item.curY) ^ 2 <= r * r then
-        local tooltip = ns.Tooltips:Take(frame, "ANCHOR_CURSOR")  -- nil while Ctrl hides ours
-        if tooltip then
-          item.fill(tooltip)
-        end
-        return
+    local item = itemAt(x, y)
+    if item then
+      local tooltip = ns.Tooltips:Take(frame, "ANCHOR_CURSOR")  -- nil while Ctrl hides ours
+      if tooltip then
+        item.fill(tooltip)
       end
+      return
     end
     if GameTooltip:GetOwner() == frame then
       GameTooltip:Hide()
@@ -372,6 +414,7 @@ local function create()
     animate(delta)
   end)
   frame:SetScript("OnHide", finish)
+  map:AddCanvasClickHandler(onCanvasClick, 1)
 end
 
 ns.Events:On("PLAYER_LOGIN", create)

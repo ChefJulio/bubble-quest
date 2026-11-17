@@ -24,7 +24,10 @@
   switches its trainers on). Quest givers and town icons show on zone maps; on continent maps only
   if you switch that on
 - Overlapping icons on the world map (a "?" under a trainer, quest givers side by side) glide into a row
-  above the spot when you hover them, each with its own tooltip and a line down to where it is
+  above the spot when you hover them, each with its own tooltip and a line down to where it is. The
+  row shows over everything on the map, Blizzard's own pins included
+- Click a quest area or a turn-in "?" on the world map to open that quest in the quest log
+- Turn-in "?" and quest-giver "!" on the world map are the same size
 - A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
   for a menu of what Questmarker shows on the maps
 - Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides

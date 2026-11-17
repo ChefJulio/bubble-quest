@@ -14,14 +14,12 @@ local ADDON_NAME, ns = ...
 -- quests/areas change.
 
 local BLOB_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\blob"
--- A ready quest's turn-in, drawn as Blizzard's own map pin is (review: ours "didn't look like the
--- default"): its round disc (UI-QuestPoi-QuestNumber, POIButton.lua:79) with the "?" on it
--- (UI-QuestIcon-TurnIn-Normal, POIButton.lua:237), in their native size ratio. Without the atlases:
--- the gossip window's "?" alone.
+-- A ready quest's turn-in: Blizzard's yellow "?" (UI-QuestIcon-TurnIn-Normal, POIButton.lua:237), the
+-- gossip window's "?" without the atlas. The size of the quest givers' "!" (UI/MapAvailable.lua), so
+-- they match (review: sizes "slightly different"; the round button look tried after was not wanted).
 local TURNIN_ATLAS = "UI-QuestIcon-TurnIn-Normal"
-local TURNIN_DISC_ATLAS = "UI-QuestPoi-QuestNumber"
 local TURNIN_FALLBACK = "Interface/GossipFrame/ActiveQuestIcon"
-local TURNIN_SIZE = 20       -- the disc, pixels at 100% (setting map.iconSize; Blizzard's pin is 20)
+local TURNIN_SIZE = 16       -- pixels at 100% (setting map.iconSize), whatever the zoom
 local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer textures)
 
 -- A circle's radius in yards (setting map.size; 30 by default).
@@ -39,16 +37,6 @@ end
 -- Icons' size (setting map.iconSize, percent).
 local function iconScale()
   return (ns.DB.profile.map.iconSize or 100) / 100
-end
-
--- The "?"'s size relative to the disc (their native atlas sizes), or nil without the disc atlas.
-local discRatio
-local function turninRatio()
-  if discRatio == nil then
-    local disc, icon = C_Texture.GetAtlasInfo(TURNIN_DISC_ATLAS), C_Texture.GetAtlasInfo(TURNIN_ATLAS)
-    discRatio = disc and icon and disc.width > 0 and icon.width / disc.width or false
-  end
-  return discRatio or nil
 end
 
 local turninHasAtlas
@@ -276,7 +264,6 @@ local function acquireGroup(layer, n)
     group:EnableMouse(false)
     group.textures = {}
     group.markers = {}
-    group.discs = {}  -- each marker's disc (Blizzard's pin look), same index
     -- Turn-in "?" above the other layers (review: a trainer's icon hid one; levels at FRAME_LEVEL).
     -- A child frame, so it hides with its group.
     group.markerFrame = CreateFrame("Frame", nil, group)
@@ -320,8 +307,8 @@ local function blizzardQuestPins(map)
   return pins, count
 end
 
--- A ready quest's turn-in: Blizzard's pin look (disc and "?"), a fixed size on screen. Returns the "?"
--- and its disc (nil without the atlas), or false when one is already there.
+-- A ready quest's turn-in "?", a fixed size on screen. Returns the texture, or false when one is
+-- already there.
 local function placeMarker(group, canvas, x, y)
   local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
   local limit = TURNIN_SIZE * iconScale() * scale * 0.75
@@ -333,32 +320,18 @@ local function placeMarker(group, canvas, x, y)
   placedMarkers[#placedMarkers + 1] = x
   placedMarkers[#placedMarkers + 1] = y
   group.markersUsed = group.markersUsed + 1
-  local i = group.markersUsed
-  local ratio = turninRatio()
-  local marker, disc = group.markers[i], group.discs[i]
+  local marker = group.markers[group.markersUsed]
   if not marker then
-    marker = group.markerFrame:CreateTexture(nil, "OVERLAY", nil, 1)
+    marker = group.markerFrame:CreateTexture(nil, "OVERLAY")
     setTurninArt(marker)
-    group.markers[i] = marker
-    if ratio then
-      disc = group.markerFrame:CreateTexture(nil, "OVERLAY", nil, 0)
-      disc:SetAtlas(TURNIN_DISC_ATLAS)
-      group.discs[i] = disc
-    end
+    group.markers[group.markersUsed] = marker
   end
   local size = TURNIN_SIZE * iconScale() * UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
-  local iconSize = ratio and size * ratio or size  -- the canvas zooms; the pin doesn't
-  marker:SetSize(iconSize, iconSize)
+  marker:SetSize(size, size)  -- the canvas zooms; the "?" doesn't
   marker:ClearAllPoints()
   marker:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   marker:Show()
-  if disc then
-    disc:SetSize(size, size)
-    disc:ClearAllPoints()
-    disc:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
-    disc:Show()
-  end
-  return marker, disc
+  return marker
 end
 
 local function placeBlob(group, canvas, x, y, size, color)
@@ -383,9 +356,6 @@ local function finishGroup(group)
   end
   for i = group.markersUsed + 1, #group.markers do
     group.markers[i]:Hide()
-    if group.discs[i] then
-      group.discs[i]:Hide()
-    end
   end
 end
 
@@ -478,13 +448,13 @@ function MapAreas:Redraw()
           elseif not blizzardPins[questID] then
             -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable,
             -- and one of the icons that fan out when they overlap (UI/MapFan.lua).
-            local marker, disc = placeMarker(group, canvas, x, y)
+            local marker = placeMarker(group, canvas, x, y)
             if marker then
               self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, color = color }
-              -- The fan-out moves the pin whole: the disc as its main texture, the "?" over it.
               self.fanItems[#self.fanItems + 1] = {
-                texture = disc or marker, over = disc and marker or nil, x = x, y = y, base = TURNIN_SIZE,
+                texture = marker, x = x, y = y, base = TURNIN_SIZE,
                 fill = function(tooltip) MapAreas.FillTooltip(tooltip, { [questID] = { turnin = true } }) end,
+                click = function() ns.Navigation:ShowOnMap(questID) end,
               }
             end
           end
@@ -794,6 +764,28 @@ local function updateHover(layer, map, delta)
   guide.questID, guide.key = guideFor(target)
 end
 
+-- Click (review: "clicking the turn in icon or any quest circle should open it in the quest log"): a
+-- left-click on an area or turn-in "?" opens that quest in the quest log, as a click on its card does
+-- (the top card's, when several are under the cursor). The areas still take no mouse: the click comes
+-- through the map's own canvas click handlers (MapCanvasMixin:AddCanvasClickHandler, run by Blizzard
+-- in securecallfunction), and anything else (a modifier held, a pin or one of our icons under the
+-- cursor, an open fan-out row, combat) leaves the click to the map.
+local function onCanvasClick(map, button, nx, ny)
+  if button ~= "LeftButton" or IsModifierKeyDown() or InCombatLockdown() or #MapAreas.hits == 0
+      or ns.MapFan.fanned or ns.MapAvailable.hovering or ns.MapServices.hovering
+      or not readable(nx) or not readable(ny) then
+    return false
+  end
+  local width, height = map:GetCanvas():GetSize()
+  local found = MapAreas.Under(MapAreas.hits, MapAreas.radius, nx * width, ny * height)
+  local questID = found and inCardOrder(found)[1]
+  if not questID then
+    return false
+  end
+  ns.Navigation:ShowOnMap(questID)
+  return true
+end
+
 -- The layer -----------------------------------------------------------------------------------------
 
 local function createLayer()
@@ -807,6 +799,7 @@ local function createLayer()
   layer:EnableMouse(false)
   layer:SetFrameLevel(FRAME_LEVEL)
   ns.MapFan:Register("turnins", MapAreas.fanItems)
+  map:AddCanvasClickHandler(onCanvasClick)
   -- Runs only while the map is shown (the layer is part of it): redraw when the zone shown, the
   -- canvas size or our data changed.
   layer:SetScript("OnUpdate", function(_, delta)
