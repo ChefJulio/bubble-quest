@@ -311,6 +311,8 @@ function builders.profiles(parent, entry, x, y)
   create:SetScript("OnClick", createProfile)
   nameBox:SetScript("OnEnterPressed", createProfile)
   nameBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+  -- Clicking in selects it all, so typing replaces the suggested name.
+  nameBox:SetScript("OnEditFocusGained", function(self) self:HighlightText() end)
   tooltip(create, "New profile", "Starts as a copy of this character's current settings, and this character "
     .. "switches to it.")
   y = y - INLINE_HEIGHT
@@ -340,12 +342,15 @@ function builders.profiles(parent, entry, x, y)
   y = y - INLINE_HEIGHT
 
   -- [Delete this profile] [Reset to defaults]
-  local delete = confirmButton(parent, "Delete profile", "Click again", 140, function()
+  local delete = confirmButton(parent, "Delete profile", "Click again", 105, function()
     ns.DB:DeleteProfile(ns.DB.char.profile)
   end)
   delete:SetPoint("LEFT", parent, "TOPLEFT", controlX, y - INLINE_HEIGHT / 2)
-  tooltip(delete, "Delete profile", "Deletes the profile this character uses (not Global); it goes back to "
-    .. "Global, as do other characters that used it. Click twice.")
+  -- Greyed out on Global, which can't be deleted (DB:DeleteProfile refuses it too); the tooltip still
+  -- shows while greyed, to say why.
+  delete:SetMotionScriptsWhileDisabled(true)
+  tooltip(delete, "Delete profile", "Deletes the profile this character uses; it goes back to Global, as do "
+    .. "other characters that used it. Click twice. Global itself can't be deleted.")
   local reset = confirmButton(parent, "Reset", "Click again", 70, function()
     ns.DB:ResetProfile()
   end)
@@ -354,6 +359,18 @@ function builders.profiles(parent, entry, x, y)
   y = y - INLINE_HEIGHT
 
   return top - y, function()
+    -- A suggested name for a new profile (review): "Shima - (Priest)".
+    if nameBox:GetText() == "" and not nameBox:HasFocus() then
+      -- apiguard: allow our own character ("player") is never identity-restricted; secret values are skipped
+      local name = UnitName("player")
+      -- apiguard: allow our own character ("player") is never identity-restricted; secret values are skipped
+      local class = UnitClass("player")
+      if type(name) == "string" and type(class) == "string" and not issecretvalue(name)
+          and not issecretvalue(class) then
+        nameBox:SetText(("%s - (%s)"):format(name, class))
+        nameBox:SetCursorPosition(0)
+      end
+    end
     current:GenerateMenu()
     if copyFrom and (copyFrom == ns.DB.char.profile or not ns.DB.account.profiles[copyFrom]) then
       copyFrom = nil
