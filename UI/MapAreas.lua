@@ -14,11 +14,14 @@ local ADDON_NAME, ns = ...
 -- quests/areas change.
 
 local BLOB_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\blob"
--- A ready quest's turn-in: Blizzard's map "?" (POIButton.lua:237), the one its own map shows; the
--- gossip window's small "?" (review: "lame") if the client lacks the atlas.
+-- A ready quest's turn-in, drawn as Blizzard's own map pin is (review: ours "didn't look like the
+-- default"): its round disc (UI-QuestPoi-QuestNumber, POIButton.lua:79) with the "?" on it
+-- (UI-QuestIcon-TurnIn-Normal, POIButton.lua:237), in their native size ratio. Without the atlases:
+-- the gossip window's "?" alone.
 local TURNIN_ATLAS = "UI-QuestIcon-TurnIn-Normal"
+local TURNIN_DISC_ATLAS = "UI-QuestPoi-QuestNumber"
 local TURNIN_FALLBACK = "Interface/GossipFrame/ActiveQuestIcon"
-local TURNIN_SIZE = 24       -- pixels at 100% (setting map.iconSize), whatever the zoom
+local TURNIN_SIZE = 20       -- the disc, pixels at 100% (setting map.iconSize; Blizzard's pin is 20)
 local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer textures)
 
 -- A circle's radius in yards (setting map.size; 30 by default).
@@ -36,6 +39,16 @@ end
 -- Icons' size (setting map.iconSize, percent).
 local function iconScale()
   return (ns.DB.profile.map.iconSize or 100) / 100
+end
+
+-- The "?"'s size relative to the disc (their native atlas sizes), or nil without the disc atlas.
+local discRatio
+local function turninRatio()
+  if discRatio == nil then
+    local disc, icon = C_Texture.GetAtlasInfo(TURNIN_DISC_ATLAS), C_Texture.GetAtlasInfo(TURNIN_ATLAS)
+    discRatio = disc and icon and disc.width > 0 and icon.width / disc.width or false
+  end
+  return discRatio or nil
 end
 
 local turninHasAtlas
@@ -263,6 +276,7 @@ local function acquireGroup(layer, n)
     group:EnableMouse(false)
     group.textures = {}
     group.markers = {}
+    group.discs = {}  -- each marker's disc (Blizzard's pin look), same index
     -- Turn-in "?" above the other layers (review: a trainer's icon hid one; levels at FRAME_LEVEL).
     -- A child frame, so it hides with its group.
     group.markerFrame = CreateFrame("Frame", nil, group)
@@ -306,8 +320,8 @@ local function blizzardQuestPins(map)
   return pins, count
 end
 
--- A ready quest's turn-in: Blizzard's "?", a fixed size on screen. Returns the texture, or false when
--- one is already there.
+-- A ready quest's turn-in: Blizzard's pin look (disc and "?"), a fixed size on screen. Returns the "?"
+-- and its disc (nil without the atlas), or false when one is already there.
 local function placeMarker(group, canvas, x, y)
   local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
   local limit = TURNIN_SIZE * iconScale() * scale * 0.75
@@ -319,18 +333,32 @@ local function placeMarker(group, canvas, x, y)
   placedMarkers[#placedMarkers + 1] = x
   placedMarkers[#placedMarkers + 1] = y
   group.markersUsed = group.markersUsed + 1
-  local marker = group.markers[group.markersUsed]
+  local i = group.markersUsed
+  local ratio = turninRatio()
+  local marker, disc = group.markers[i], group.discs[i]
   if not marker then
-    marker = group.markerFrame:CreateTexture(nil, "OVERLAY")
+    marker = group.markerFrame:CreateTexture(nil, "OVERLAY", nil, 1)
     setTurninArt(marker)
-    group.markers[group.markersUsed] = marker
+    group.markers[i] = marker
+    if ratio then
+      disc = group.markerFrame:CreateTexture(nil, "OVERLAY", nil, 0)
+      disc:SetAtlas(TURNIN_DISC_ATLAS)
+      group.discs[i] = disc
+    end
   end
   local size = TURNIN_SIZE * iconScale() * UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
-  marker:SetSize(size, size)  -- the canvas zooms; the "?" doesn't
+  local iconSize = ratio and size * ratio or size  -- the canvas zooms; the pin doesn't
+  marker:SetSize(iconSize, iconSize)
   marker:ClearAllPoints()
   marker:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   marker:Show()
-  return marker
+  if disc then
+    disc:SetSize(size, size)
+    disc:ClearAllPoints()
+    disc:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
+    disc:Show()
+  end
+  return marker, disc
 end
 
 local function placeBlob(group, canvas, x, y, size, color)
@@ -355,6 +383,9 @@ local function finishGroup(group)
   end
   for i = group.markersUsed + 1, #group.markers do
     group.markers[i]:Hide()
+    if group.discs[i] then
+      group.discs[i]:Hide()
+    end
   end
 end
 
@@ -447,11 +478,12 @@ function MapAreas:Redraw()
           elseif not blizzardPins[questID] then
             -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable,
             -- and one of the icons that fan out when they overlap (UI/MapFan.lua).
-            local marker = placeMarker(group, canvas, x, y)
+            local marker, disc = placeMarker(group, canvas, x, y)
             if marker then
               self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, color = color }
+              -- The fan-out moves the pin whole: the disc as its main texture, the "?" over it.
               self.fanItems[#self.fanItems + 1] = {
-                texture = marker, x = x, y = y, base = TURNIN_SIZE,
+                texture = disc or marker, over = disc and marker or nil, x = x, y = y, base = TURNIN_SIZE,
                 fill = function(tooltip) MapAreas.FillTooltip(tooltip, { [questID] = { turnin = true } }) end,
               }
             end

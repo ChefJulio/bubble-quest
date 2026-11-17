@@ -50,6 +50,7 @@ local lines = {}
 -- Stand-ins: while a row is open the grouped icons are drawn here, on top of everything of ours
 -- (review: another "?" showed over the strip), copies of the originals, which turn invisible in place.
 local proxies = {}
+local overProxies = {}  -- an item's second layer (`over`: a turn-in's "?" on its disc)
 
 local function copyLook(from, to)
   local atlas = from:GetAtlas()
@@ -85,6 +86,9 @@ local function render(fanned)
     item.curX = item.x + (item.fanX - item.x) * e
     item.curY = item.y + (item.fanY - item.y) * e
     place(proxies[i], item.curX, item.curY)
+    if item.over then
+      place(overProxies[i], item.curX, item.curY)
+    end
     local line = lines[i]
     line:SetStartPoint("TOPLEFT", canvas, item.x, -item.y)
     line:SetEndPoint("TOPLEFT", canvas, item.curX, -item.curY)
@@ -101,9 +105,15 @@ local function finish()
   if fanned then
     for _, item in ipairs(fanned.items) do
       item.texture:SetAlpha(1)  -- the original, back
+      if item.over then
+        item.over:SetAlpha(1)
+      end
     end
   end
   for _, proxy in ipairs(proxies) do
+    proxy:Hide()
+  end
+  for _, proxy in ipairs(overProxies) do
     proxy:Hide()
   end
   for _, line in ipairs(lines) do
@@ -218,6 +228,17 @@ local function open(group)
     place(proxy, item.x, item.y)
     proxy:Show()
     item.texture:SetAlpha(0)
+    if item.over then
+      local over = overProxies[i]
+      if not over then
+        over = overlay:CreateTexture(nil, "OVERLAY", nil, 1)
+        overProxies[i] = over
+      end
+      copyLook(item.over, over)
+      place(over, item.x, item.y)
+      over:Show()
+      item.over:SetAlpha(0)
+    end
   end
   -- The strip around the row; its border sized for the zoom (it's on the canvas, which scales).
   local edge = STRIP_EDGE * scale
