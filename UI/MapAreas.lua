@@ -119,12 +119,13 @@ end
 -- told apart). The quest's colour stays the family; each objective after the first moves its
 -- lightness and, a little, its hue, so overlaps separate on the parchment and still read as one quest.
 -- { hue turn (fraction of the wheel), saturation change, value change }, by objective index.
+-- (A first, gentler set was "pretty similar" on the map in review: the steps are bolder now.)
 local SHADES = {
   { 0, 0, 0 },              -- 1: the quest's colour
-  { 0.045, -0.30, 0.18 },   -- 2: lighter, towards the next hue
-  { -0.045, 0.12, -0.28 },  -- 3: deeper, towards the previous hue
-  { 0.09, -0.15, -0.10 },   -- 4
-  { -0.09, -0.35, 0.12 },   -- 5
+  { 0.08, -0.45, 0.25 },    -- 2: clearly lighter, a step along the hue (teal -> sky blue)
+  { -0.07, 0.15, -0.35 },   -- 3: deeper, a step the other way (teal -> deep green)
+  { 0.14, -0.20, -0.12 },   -- 4
+  { -0.13, -0.40, 0.15 },   -- 5
 }
 
 local function toHSV(r, g, b)
@@ -244,6 +245,12 @@ local function acquireGroup(layer, n)
     group:EnableMouse(false)
     group.textures = {}
     group.markers = {}
+    -- Turn-in "?" above the other layers (review: a trainer's icon hid one): areas 2005, town services
+    -- 2006, quest givers' "!" 2007, turn-ins 2008. A child frame, so it hides with its group.
+    group.markerFrame = CreateFrame("Frame", nil, group)
+    group.markerFrame:SetAllPoints(group)
+    group.markerFrame:EnableMouse(false)
+    group.markerFrame:SetFrameLevel(FRAME_LEVEL + 3)
     MapAreas.groups[n] = group
   end
   group.used, group.markersUsed = 0, 0
@@ -295,7 +302,7 @@ local function placeMarker(group, canvas, x, y)
   group.markersUsed = group.markersUsed + 1
   local marker = group.markers[group.markersUsed]
   if not marker then
-    marker = group:CreateTexture(nil, "OVERLAY")
+    marker = group.markerFrame:CreateTexture(nil, "OVERLAY")
     setTurninArt(marker)
     group.markers[group.markersUsed] = marker
   end
