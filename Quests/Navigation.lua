@@ -307,6 +307,11 @@ end
 ---@param key (number|string)?
 ---@return table? point { map, x, y } in world yards
 function Navigation:GuidePoint(quest, key)
+  -- A ready quest leads to its turn-in, whichever of its (done) objectives is hovered (review: hovering
+  -- an objective row of a ready quest made the dots disappear).
+  if quest.readyForTurnIn then
+    key = "turnin"
+  end
   if key ~= nil then
     local nav = self:ObjectiveNav(quest, key)
     return nav and nav.point or nil

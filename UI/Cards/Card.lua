@@ -83,11 +83,13 @@ end
 -- Arrow colour. By distance (setting, default on): green close, through yellow and orange, to red far;
 -- a target in another zone counts as far. Always alongside the distance text, never the only cue.
 local GOLD = { 1, 0.82, 0 }
+-- Stops (review): mostly green to 100 yards, yellow around 200, orange around 500, red around 750.
 local DISTANCE_COLORS = {  -- { yards, r, g, b }, blended between stops
   { 0, 0.3, 1, 0.3 },
-  { 100, 1, 0.9, 0.2 },
-  { 400, 1, 0.55, 0.1 },
-  { 1000, 1, 0.25, 0.2 },
+  { 100, 0.45, 1, 0.25 },
+  { 200, 1, 0.9, 0.2 },
+  { 500, 1, 0.55, 0.1 },
+  { 750, 1, 0.25, 0.2 },
 }
 local function distanceColor(yards)
   if not yards then
