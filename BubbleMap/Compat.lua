@@ -1,11 +1,10 @@
 local ADDON_NAME, ns = ...
 
 -- Another minimap addon (SexyMap, ...) and ours would both set the mask, size the map and define
--- GetMinimapShape, and fight. So if one is loaded, Questmarker Map leaves the minimap alone and says so
--- once per login (a prompt like Questmarker's Questie one: our own small window, as Blizzard's
--- StaticPopup system taints when addons define dialogs). The fix is one of them off in the AddOns list;
--- the prompt's button does that for the other addon and reloads (a secure "/reload" macro button: addon
--- code can't call ReloadUI on Forever, Questmarker's Compat/Questie.lua).
+-- GetMinimapShape, and fight. So if one is loaded, BubbleMap leaves the minimap alone and says so once
+-- per login (our own small window, as Blizzard's StaticPopup system taints when addons define
+-- dialogs). The fix is one of them off in the AddOns list; the prompt's button does that for the other
+-- addon and reloads (a secure "/reload" macro button: addon code can't call ReloadUI on Forever).
 
 local NEVER = "other-minimap-never"
 local PROMPT_DELAY = 5  -- seconds after login
@@ -43,13 +42,13 @@ local function plainButton(parent, text, onClick)
 end
 
 local function createPrompt(other)
-  local frame = CreateFrame("Frame", "QuestmarkerMapOtherPrompt", UIParent)
+  local frame = CreateFrame("Frame", "BubbleMapOtherPrompt", UIParent)
   frame:SetFrameStrata("DIALOG")
   frame:SetPoint("TOP", 0, -140)
   frame:SetSize(420, 104)
   frame:EnableMouse(true)
   frame:Hide()
-  tinsert(UISpecialFrames, "QuestmarkerMapOtherPrompt")  -- Escape closes it (= Not now)
+  tinsert(UISpecialFrames, "BubbleMapOtherPrompt")  -- Escape closes it (= Not now)
 
   local background = frame:CreateTexture(nil, "BACKGROUND")
   background:SetAllPoints()
@@ -67,7 +66,7 @@ local function createPrompt(other)
   text:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
   text:SetPoint("RIGHT", -14, 0)
   text:SetJustifyH("LEFT")
-  text:SetText("Questmarker Map is leaving the minimap alone until one of them is off.")
+  text:SetText("BubbleMap is leaving the minimap alone until one of them is off.")
 
   local last
   if other ~= "another addon" then
@@ -98,10 +97,14 @@ local function createPrompt(other)
   return frame
 end
 
-function Compat:MaybePrompt(other)
-  if ns.DB.notices[NEVER] or InCombatLockdown() then
-    return
-  end
-  prompt = prompt or createPrompt(other)
-  prompt:Show()
+---Prompt about `other` a few seconds after login, unless the player said "Don't ask again".
+---@param other string
+function Compat:PromptSoon(other)
+  C_Timer.After(PROMPT_DELAY, function()
+    if ns.DB.notices[NEVER] or InCombatLockdown() then
+      return
+    end
+    prompt = prompt or createPrompt(other)
+    prompt:Show()
+  end)
 end

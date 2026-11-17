@@ -1,21 +1,20 @@
 local ADDON_NAME, ns = ...
 
--- Questmarker_Map: the square minimap made for Questmarker's tracker. Design:
--- docs/design/questmarker-map.md. Talks to Questmarker only through QuestmarkerAPI, never its
--- private namespace.
+-- BubbleMap: a square minimap and everything around it, standalone, part of the Bubble suite. With
+-- the suite's quest addon loaded it also carries that addon's tracker under the map, in one column.
+-- Design: docs/design/questmarker-map.md; suite rules: docs/design/bubble-suite.md (no Bubble addon
+-- requires another: siblings are optional and found through their public API).
 
-local API_NEEDED = 1  -- the QuestmarkerAPI version this addon is written against
+local QUEST_API_NEEDED = 1  -- the quest addon's API version these features are written against
 
--- Required by the TOC, so Questmarker has loaded; an older one without the members we use is the case
--- left to catch.
-local api = rawget(_G, "QuestmarkerAPI")
-ns.API = api
-ns.enabled = api ~= nil and api.API >= API_NEEDED
-
-if not ns.enabled then
-  print(("|cffffd100Questmarker Map|r is off: it needs a newer Questmarker (API %d, found %s)."):format(
-    API_NEEDED, api and tostring(api.API) or "none"))
+-- The quest addon's public API, if it's loaded and new enough. Loaded before us when present
+-- (## OptionalDeps). Two names while the quest addon is renamed (Questmarker to BubbleQuest); the
+-- second goes once the rename has shipped.
+local quest = rawget(_G, "BubbleQuestAPI") or rawget(_G, "QuestmarkerAPI")
+if quest and quest.API < QUEST_API_NEEDED then
+  quest = nil
 end
+ns.Quest = quest  ---@type table?
 
 -- Events: one frame, handlers per event (errors reported without stopping the others).
 local handlers = {}
@@ -39,8 +38,9 @@ function ns.On(event, fn)
   table.insert(handlers[event], fn)
 end
 
--- Work that must wait for the end of combat (the tracker carries secure quest item buttons and hangs
--- under our frame, so our frame doesn't move in combat). Keyed: the latest request per key wins.
+-- Work that must wait for the end of combat (with the quest addon, its tracker carries secure quest
+-- item buttons and hangs under our frame, so our frame doesn't move in combat). Keyed: the latest
+-- request per key wins.
 local pending, pendingOrder = {}, {}
 
 ---@param key string
@@ -67,20 +67,33 @@ ns.On("PLAYER_REGEN_ENABLED", function()
   end
 end)
 
--- Saved settings (account-wide). Map settings move into Questmarker's settings window with step 3.
+-- Saved settings, account-wide (the suite's shared profiles replace this with LibBubble).
 local DEFAULTS = {
-  notices = {},  -- [key] = true: "Don't ask again"
+  notices = {},       -- [key] = true: "Don't ask again"
+  position = nil,     -- { left, top } once dragged; nil: hang from Edit Mode's minimap box
+  locked = false,     -- the bar can't drag the map (with the quest addon: its lock decides)
+  width = 220,        -- the map's width without the quest addon (with it: the tracker's width)
+  heightPercent = 100,  -- the map's height, percent of its width
 }
+
+local function fill(target, defaults)
+  for key, value in pairs(defaults) do
+    if type(value) == "table" then
+      if type(target[key]) ~= "table" then
+        target[key] = {}
+      end
+      fill(target[key], value)
+    elseif target[key] == nil then
+      target[key] = value
+    end
+  end
+end
 
 ns.On("ADDON_LOADED", function(name)
   if name ~= ADDON_NAME then
     return
   end
-  Questmarker_MapDB = Questmarker_MapDB or {}
-  for key, value in pairs(DEFAULTS) do
-    if Questmarker_MapDB[key] == nil then
-      Questmarker_MapDB[key] = type(value) == "table" and {} or value
-    end
-  end
-  ns.DB = Questmarker_MapDB
+  BubbleMapDB = BubbleMapDB or {}
+  fill(BubbleMapDB, DEFAULTS)
+  ns.DB = BubbleMapDB
 end)

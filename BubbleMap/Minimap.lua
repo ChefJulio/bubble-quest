@@ -1,12 +1,14 @@
 local ADDON_NAME, ns = ...
 
--- The square minimap and the column: Blizzard's own Minimap frame, restyled in place, with
--- Questmarker's tracker hanging under it. Design: docs/design/questmarker-map.md ("The minimap").
+-- The square minimap and the column: Blizzard's own Minimap frame, restyled in place, with the quest
+-- addon's tracker hanging under it when that addon is loaded. Design: docs/design/questmarker-map.md
+-- ("The minimap").
 --
--- Blizzard's frame stays in its Edit Mode container: Edit Mode places and scales it, we never move it.
+-- Blizzard's frame stays in its Edit Mode container: Edit Mode scales it, we never move the container.
 -- Everything else is our own frame or a widget setter on Blizzard's:
---   - `outer` (ours, on UIParent): the column's top, the tracker's width, holding the border; the
---     tracker attaches under it (QuestmarkerAPI.SetTrackerAttach). It hangs from the top corner of
+--   - `outer` (ours, on UIParent): the column's top, holding the border. Its width is the tracker's
+--     with the quest addon (which then attaches its tracker under it: SetTrackerAttach), else our own
+--     width setting; its height a percentage of that. It hangs from the top corner of
 --     Edit Mode's minimap box nearest the screen edge, so it grows inward: centred on the box (where
 --     Blizzard anchors the minimap, Minimap.xml:62), a map wider than the box ran off the screen (seen
 --     in review; Edit Mode clamps only its own box).
@@ -16,9 +18,9 @@ local ADDON_NAME, ns = ...
 --     textures faded out (alpha: Blizzard re-sets their atlas, never their alpha). Forever re-applies
 --     its mask on every rotate toggle (Camelot/Minimap.lua:42), so a post-hook on UpdateMinimapConfig
 --     re-applies ours; it sets widget state only, calling no Blizzard update function.
---   - GetMinimapShape (global, the convention LibDBIcon and Questmarker's minimap areas read).
+--   - GetMinimapShape (global, the convention LibDBIcon and the quest addon's minimap areas read).
 --
--- Not hooked: Edit Mode's apply path (SetEditModeScale; a hook there is how Questmarker's tracker
+-- Not hooked: Edit Mode's apply path (SetEditModeScale; a hook there is how the quest addon's tracker
 -- once tainted Edit Mode). Scale changes are noticed by a throttled check on our own frame instead.
 --
 -- Step 2 of the design's build order. Blizzard's zone text, tracking and indicators stay as they are
@@ -28,7 +30,6 @@ local SQUARE_MASK = "Interface\\BUTTONS\\WHITE8X8"
 local BORDER = { 0, 0, 0, 0.9 }
 local BORDER_SIZE = 1
 local WATCH_SECONDS = 0.25  -- how often scale and size are checked (Edit Mode changes, UI scale)
-local FALLBACK_WIDTH = 262  -- before the tracker exists: its default width (250 + 2 * 6)
 
 local Minimap_ = {
   shapeIsOurs = false,
@@ -50,12 +51,12 @@ local function applyShape()
   MinimapCompassTextureUnderlay:SetAlpha(0)
 end
 
--- Size: the column's width from the tracker, the minimap the largest square inside ----------------
+-- Size: the column's width (the tracker's, or our setting), the minimap the largest square inside -
 
 local function columnSize()
-  local tracker = ns.API.GetTracker()
-  local width = tracker and tracker:GetWidth() or FALLBACK_WIDTH
-  return width, width  -- height: its own setting with step 3; square until then
+  local tracker = ns.Quest and ns.Quest.GetTracker()
+  local width = tracker and tracker:GetWidth() or ns.DB.width
+  return width, math.floor(width * ns.DB.heightPercent / 100 + 0.5)
 end
 
 local function applySize()
@@ -90,8 +91,8 @@ local function corner()
   return onRight and "TOPRIGHT" or "TOPLEFT"
 end
 
--- Where the column is: where it was dragged to (the tracker's header drags it, Stack.lua), else hanging
--- from Edit Mode's box. Our frame is the one source of truth for the map's position; Blizzard's
+-- Where the column is: where it was dragged to (by the quest addon's tracker header, or our own bar),
+-- else hanging from Edit Mode's box. Our frame is the one source of truth for the map's position; Blizzard's
 -- minimap follows it and its Edit Mode box is never moved by us.
 local function applyAnchor()
   outer:ClearAllPoints()
@@ -108,7 +109,7 @@ end
 
 -- After a drag: StartMoving may have re-anchored `outer` by any point; pin its top-left so it grows
 -- only right and down (the tracker's resize grip), and save that.
-local function savePosition()
+function Minimap_:SavePosition()
   local left, top = outer:GetLeft(), outer:GetTop()
   if not left or not top then
     return
@@ -132,14 +133,21 @@ local function refresh()
   end)
 end
 
+---Size or position settings changed.
+function Minimap_:Refresh()
+  if self.active then
+    refresh()
+  end
+end
+
 -- Construction -----------------------------------------------------------------------------------
 
 local function createOuter()
-  local frame = CreateFrame("Frame", "QuestmarkerMapFrame", UIParent)
+  local frame = CreateFrame("Frame", "BubbleMapFrame", UIParent)
   frame:SetFrameStrata(Minimap:GetFrameStrata())
   frame:SetFrameLevel(math.max(0, Minimap:GetFrameLevel() - 1))
   frame:EnableMouse(false)
-  frame:SetMovable(true)  -- moved by the tracker's header (QuestmarkerAPI's TrackerAttachMoved)
+  frame:SetMovable(true)  -- dragged by the quest addon's tracker header (TrackerAttachMoved) or our bar
   frame:SetClampedToScreen(true)
 
   -- A 1 px border just outside the map (the tracker's panel continues below it).
@@ -191,44 +199,48 @@ function Minimap_:Activate()
   applySize()
   Minimap:ClearAllPoints()
   Minimap:SetPoint("CENTER", outer, "CENTER")
-  ns.API.SetTrackerAttach(outer)
-  ns.API.RegisterCallback("TrackerResized", refresh)
-  ns.API.RegisterCallback("ProfileChanged", refresh)
-  ns.API.RegisterCallback("TrackerAttachMoved", savePosition)
+
+  -- With the quest addon: one column, its tracker under the map.
+  local quest = ns.Quest
+  if quest then
+    quest.SetTrackerAttach(outer)
+    quest.RegisterCallback("TrackerResized", refresh)
+    quest.RegisterCallback("ProfileChanged", refresh)
+    quest.RegisterCallback("TrackerAttachMoved", function() Minimap_:SavePosition() end)
+  end
 end
 
----One line for bug reports (a /qm subcommand later).
+---One line for bug reports (/bmap).
 ---@return string
 function Minimap_:Describe()
   if not self.active then
     return "inactive"
   end
-  return ("column %dx%d, minimap %.0f (scale %.2f), shape %s"):format(outer:GetWidth(), outer:GetHeight(),
-    Minimap:GetWidth(), Minimap:GetEffectiveScale(), GetMinimapShape())
+  return ("column %dx%d, minimap %.0f (scale %.2f), shape %s, %s"):format(outer:GetWidth(),
+    outer:GetHeight(), Minimap:GetWidth(), Minimap:GetEffectiveScale(), GetMinimapShape(),
+    ns.Quest and "with the quest tracker" or "standalone")
 end
 
--- /qmmap reset: back to Edit Mode's position. (Settings come with step 3.)
-SLASH_QUESTMARKERMAP1 = "/qmmap"
-SlashCmdList.QUESTMARKERMAP = function(input)
+-- /bmap: status; /bmap reset: back to Edit Mode's position. (Settings come with step 3.)
+SLASH_BUBBLEMAP1 = "/bmap"
+SLASH_BUBBLEMAP2 = "/bubblemap"
+SlashCmdList.BUBBLEMAP = function(input)
   local command = (input or ""):lower():match("^%s*(%S*)")
   if command == "reset" then
     Minimap_:ResetPosition()
-    print("|cffffd100Questmarker Map|r: back at the minimap's Edit Mode position.")
+    print("|cffffd100BubbleMap|r: back at the minimap's Edit Mode position.")
   else
-    print("|cffffd100Questmarker Map|r: " .. Minimap_:Describe() .. ". /qmmap reset: back at the minimap's Edit "
+    print("|cffffd100BubbleMap|r: " .. Minimap_:Describe() .. ". /bmap reset: back at the minimap's Edit "
       .. "Mode position.")
   end
 end
 
 ns.On("PLAYER_LOGIN", function()
-  if not ns.enabled then
-    return
-  end
   local other = ns.Compat:Other()
   if other then
-    C_Timer.After(5, function() ns.Compat:MaybePrompt(other) end)
+    ns.Compat:PromptSoon(other)
     return
   end
-  -- Questmarker creates its tracker on PLAYER_LOGIN too; which handler runs first isn't ours to pick.
+  -- The quest addon creates its tracker on PLAYER_LOGIN too; which handler runs first isn't ours to pick.
   C_Timer.After(0, function() ns.AfterCombat("activate", function() Minimap_:Activate() end) end)
 end)

@@ -1,12 +1,11 @@
 ## Interface: 16001
-## Title: Questmarker Map
-## Notes: A square minimap made for Questmarker's tracker
+## Title: BubbleMap
+## Notes: A clean square minimap; with BubbleQuest, one column with its tracker
 ## Author: ChefJulio
 ## Version: @project-version@
-## Category: Quests
-## IconTexture: Interface\AddOns\Questmarker\Media\Icon
-## Dependencies: Questmarker
-## SavedVariables: Questmarker_MapDB
+## Category: Map & Minimap
+## OptionalDeps: BubbleQuest, Questmarker
+## SavedVariables: BubbleMapDB
 
 Init.lua
 Compat.lua

@@ -1,5 +1,5 @@
 """Build a release zip locally: .release/Questmarker-<version>.zip, holding a Questmarker/ folder and one
-folder per companion addon (Questmarker_Map/) beside it.
+folder per companion addon (BubbleMap/) beside it.
 
 Releases are built by the BigWigs packager on GitHub (.github/workflows/release.yml, on a version tag);
 this builds the same zip locally for testing, and checks that the two agree on what ships.
@@ -25,7 +25,7 @@ import zipfile
 from pathlib import Path
 
 ADDON = "Questmarker"
-COMPANIONS = ["Questmarker_Map"]  # repo subfolders shipped as their own addon folders
+COMPANIONS = ["BubbleMap"]  # repo subfolders shipped as their own addon folders (until the repo split)
 ROOT = Path(__file__).resolve().parent.parent
 TOC = f"{ADDON}.toc"
 EXTRA_FILES = ["LICENSE", "THIRD-PARTY-NOTICES", "README.md", "CHANGELOG.md"]

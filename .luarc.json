@@ -35,9 +35,10 @@
     "Questmarker_OnAddonCompartmentLeave",
     "QuestmarkerMinimapTooltip",
     "QuestmarkerAPI",
-    "Questmarker_MapDB",
+    "BubbleMapDB",
     "GetMinimapShape",
-    "SLASH_QUESTMARKERMAP1"
+    "SLASH_BUBBLEMAP1",
+    "SLASH_BUBBLEMAP2"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {
