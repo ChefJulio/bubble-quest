@@ -109,6 +109,9 @@ end
 -- icon, and a group is everything linked to the hovered icon through neighbours (A near B near C).
 -- Zoomed out a town's icons chain into one row; zoomed in they part, and there's nothing to untangle.
 local LINK_GAP = 0.6
+-- At most this many in a row, the nearest the cursor (review: on a continent map a whole kingdom's
+-- icons chained into one strip across the map).
+local MAX_ROW = 6
 
 -- The icon under (x, y) and every icon linked to it, or nil when it stands alone.
 local function cluster(x, y)
@@ -141,6 +144,14 @@ local function cluster(x, y)
       end
     end
     i = i + 1
+  end
+  if #group > MAX_ROW then
+    table.sort(group, function(a, b)
+      return (a.x - x) ^ 2 + (a.y - y) ^ 2 < (b.x - x) ^ 2 + (b.y - y) ^ 2
+    end)
+    for j = #group, MAX_ROW + 1, -1 do
+      group[j] = nil
+    end
   end
   return #group >= 2 and group or nil
 end
