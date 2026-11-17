@@ -312,6 +312,18 @@ end
 -- blip's tooltip is up too, ours hangs under it instead of covering it.
 
 local tooltip  -- created with the layer
+
+-- The cursor is on the minimap itself, not just inside its rectangle: a frame over it (BubbleMap's
+-- bar, an addon's minimap button) is what the mouse is on then, and the areas under it flashed their
+-- tooltips through it (seen in review).
+local function onMinimap()
+  if not Minimap:IsMouseOver() then
+    return false
+  end
+  local foci = GetMouseFoci()
+  return foci ~= nil and foci[1] == Minimap
+end
+
 local hoverElapsed = 0
 local function updateHover(delta)
   hoverElapsed = hoverElapsed + delta
@@ -321,7 +333,7 @@ local function updateHover(delta)
   hoverElapsed = 0
   -- A quest giver under the cursor first (its icon sits on top), else the quest areas.
   local found, offers
-  if Minimap:IsMouseOver() and (#MinimapAreas.hits > 0 or #MinimapAreas.giverHits > 0) then
+  if onMinimap() and (#MinimapAreas.hits > 0 or #MinimapAreas.giverHits > 0) then
     local cx, cy = GetCursorPosition()
     local scale = layer:GetEffectiveScale()
     local mx, my = layer:GetCenter()

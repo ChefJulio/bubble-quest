@@ -15,6 +15,11 @@ local ADDON_NAME, ns = ...
 -- queue eye (QueueStatusButton), its own Edit Mode system; the addon compartment ("13", the addon
 -- count) until the launcher list replaces it (build step 4).
 
+-- One strata above the minimap's. MinimapCluster is toplevel (Minimap.xml:3): a click on the map
+-- raises it, Minimap and all, over anything at its strata, and the bar vanished under the map after a
+-- ping (seen in review). A higher strata can't be raised over.
+local STRATA_ABOVE = { BACKGROUND = "LOW", LOW = "MEDIUM", MEDIUM = "HIGH", HIGH = "DIALOG" }
+
 local BAR_HEIGHT = 20
 local BAR_BAND = { 0, 0, 0, 0.45 }
 local ICON = 15
@@ -36,6 +41,11 @@ local function font(kind)
     return name
   end
   return kind == "header" and "GameFontNormal" or "GameFontHighlightSmall"
+end
+
+-- Our frames over the map: above the minimap's strata (see STRATA_ABOVE).
+local function overMap(frame)
+  frame:SetFrameStrata(STRATA_ABOVE[Minimap:GetFrameStrata()] or "MEDIUM")
 end
 
 local function tooltip(owner, fill)
@@ -238,8 +248,7 @@ end
 
 local function createBar(outer)
   bar = CreateFrame("Frame", nil, outer)
-  bar:SetFrameStrata(Minimap:GetFrameStrata())
-  bar:SetFrameLevel(Minimap:GetFrameLevel() + 10)  -- over the map and its pins
+  overMap(bar)
   bar:SetPoint("TOPLEFT")
   bar:SetPoint("TOPRIGHT")
   bar:SetHeight(BAR_HEIGHT)
@@ -307,8 +316,7 @@ end
 
 local function createCoords(outer)
   coords = CreateFrame("Frame", nil, outer)
-  coords:SetFrameStrata(Minimap:GetFrameStrata())
-  coords:SetFrameLevel(Minimap:GetFrameLevel() + 10)
+  overMap(coords)
   coords:SetSize(80, 14)
   coords:SetPoint("BOTTOMLEFT", PAD, 4)
   coords.text = coords:CreateFontString(nil, "OVERLAY", font("small"))
@@ -330,8 +338,7 @@ end
 
 local function zoomButton(outer, label, step)
   local b = CreateFrame("Button", nil, outer)
-  b:SetFrameStrata(Minimap:GetFrameStrata())
-  b:SetFrameLevel(Minimap:GetFrameLevel() + 10)
+  overMap(b)
   b:SetSize(16, 16)
   local back = b:CreateTexture(nil, "BACKGROUND")
   back:SetAllPoints()
