@@ -10,6 +10,11 @@
   CurseForge; Questie itself isn't needed): a "!" at each quest giver (blue: repeatable), hover for its
   quests. Quests started by a drop (like Furlbrow's Deed) get a smaller bronze "!" where the mobs are;
   hover it to see their area and what to loot. Low-level quests and drop quests each have a toggle
+- Holiday quests (Darkmoon Faire, Hallow's End, Winter Veil, ...) show while the holiday is on, read
+  from the game's calendar (English clients)
+- Drop chances in tooltips: "Dropped by Gray Forest Wolf (45%), Prowler (30%)" (how often a kill drops
+  it at all), and on drop-started quests on the map
+- Without QuestieDB installed, quests to pick up still show, from Questmarker's own data (fewer checks)
 - Talking to a quest giver corrects the map: a "!" for a quest they don't actually offer you goes away
   (it comes back after a level-up, a turn-in or the daily reset)
 - A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
