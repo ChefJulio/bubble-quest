@@ -6,5 +6,8 @@
 ## Category: Quests
 ## IconTexture: Interface\AddOns\Questmarker\Media\Icon
 ## Dependencies: Questmarker
+## SavedVariables: Questmarker_MapDB
 
 Init.lua
+Compat.lua
+Minimap.lua
