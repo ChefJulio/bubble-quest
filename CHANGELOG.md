@@ -18,10 +18,11 @@
 - Talking to a quest giver corrects the map: a "!" for a quest they don't actually offer you goes away
   (it comes back after a level-up, a turn-in or the daily reset)
 - Town services on the world map, each toggled from the map button's "Town services" menu: flight
-  master, innkeeper, banker, auctioneer, repair, mailbox, your class trainer, weapon master, stable
-  master, battlemaster, spirit healer, and profession trainers one by one. On by default: flight
-  master, innkeeper, auctioneer, mailbox, class trainer, and the trainers of professions you have
-  (a profession you learn switches its trainers on)
+  master, innkeeper, banker, auctioneer, repair, mailbox, weapon master, stable master, battlemaster,
+  and class and profession trainers one by one. On by default: flight master, innkeeper, auctioneer,
+  mailbox, your class's trainers, and the trainers of professions you have (a profession you learn
+  switches its trainers on). Quest givers and town icons show on zone maps; on continent maps only
+  if you switch that on
 - Overlapping icons on the world map (a "?" under a trainer, quest givers side by side) glide into a row
   above the spot when you hover them, each with its own tooltip and a line down to where it is
 - A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
