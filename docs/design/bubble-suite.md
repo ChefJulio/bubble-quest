@@ -21,7 +21,8 @@ BubbleQuest status (2026-11-17): renamed in this repo (TOC, `BubbleQuestDB`/`Bub
 `BubbleQuestAPI`, every global and setting ID); the `Questmarker/` stub hands the old settings over
 (Core/DB.lua takeOverQuestmarker). The party message prefix stays "Questmarker" on the wire, so old and
 new versions still talk. Logo: "BQ" in the BubbleFonts style (tools/logo.py). GitHub repo renamed to
-ChefJulio/bubble-quest (the old URL redirects). CurseForge rename pending.
+ChefJulio/bubble-quest (the old URL redirects). CurseForge project renamed to BubbleQuest, slug
+`bubblequest`, same ID 1806606, new logo (2026-11-17).
 
 BubbleMap status (2026-11-17): renamed to BubbleMap in this repo (folder, TOC, `BubbleMapDB`, `/bmap`),
 standalone with `## OptionalDeps: BubbleQuest, Questmarker`; quest features gated on the API. Repo
