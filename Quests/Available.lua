@@ -90,8 +90,10 @@ local function build()
       local npcs, objects, items = startedBy and list(startedBy[1]), startedBy and list(startedBy[2]),
         startedBy and list(startedBy[3])
       -- Starters are sparse ({[3] = {1972}}): each index on its own, never ipairs over startedBy.
-      -- Questie's own list hides what isn't takeable or shouldn't be on the map (Data/QuestieHidden.lua).
-      if (npcs or objects or items) and not ns.QuestieHidden[questID] and not EVENT_SORTS[v[24] or 0]
+      -- Questie's own list hides what isn't takeable or shouldn't be on the map (Data/QuestieHidden.lua);
+      -- holiday quests (Data/QuestieEvents.lua) are kept, and shown while their event runs (Refresh).
+      local event = ns.QuestieEvents[questID]
+      if (npcs or objects or items) and (event or (not ns.QuestieHidden[questID] and not EVENT_SORTS[v[24] or 0]))
           and (not raceFlag or hasBit(v[5], raceFlag))
           and (not classFlag or hasBit(v[6], classFlag)) then
         records[questID] = {
@@ -99,7 +101,7 @@ local function build()
           preSingle = list(v[8]), exclusiveTo = list(v[9]), skill = list(v[10]), minRep = list(v[11]),
           maxRep = list(v[12]), nextInChain = v[13], questFlags = v[14], specialFlags = v[15], parent = v[16],
           breadcrumbFor = v[17], breadcrumbs = list(v[18]), spell = v[19], maxLevel = v[20],
-          untilCompleted = v[21], startingWith = v[22], disabledBy = v[23],
+          untilCompleted = v[21], startingWith = v[22], disabledBy = v[23], event = event,
           npcs = npcs, objects = objects, items = items,
         }
       end
@@ -193,6 +195,9 @@ local function doable(r)
   local id = r.questID
   if done(id) or active(id) then
     return false
+  end
+  if r.event and not ns.Holidays:Active(r.event) then
+    return false  -- a holiday quest outside its holiday (Quests/Holidays.lua)
   end
   if r.preSingle and #r.preSingle > 0 and not anyDone(r.preSingle) then
     return false

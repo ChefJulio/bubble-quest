@@ -32,6 +32,7 @@ Data\CategoryOverrides.lua
 Data\Learned.lua
 Data\QuestieData.lua
 Data\QuestieHidden.lua
+Data\QuestieEvents.lua
 Data\Hints.lua
 Quests\QuestLog.lua
 Quests\Categories.lua
@@ -42,6 +43,7 @@ Quests\Areas.lua
 Quests\Navigation.lua
 Quests\Available.lua
 Quests\Offers.lua
+Quests\Holidays.lua
 Quests\Nearby.lua
 Quests\Mouseover.lua
 Quests\Tracking.lua
