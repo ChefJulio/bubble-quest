@@ -297,7 +297,7 @@ function MapAvailable:Redraw()
   local mapID = map:GetMapID()
   local width, height = canvas:GetSize()
   self.drawnFor = { mapID = mapID, width = width, built = self.builtFor, scale = canvas:GetEffectiveScale() }
-  if not self:Enabled() or not mapID or not width or width == 0 then
+  if not self:Enabled() or not mapID or not width or width == 0 or not ns.MapAreas.ShowsIcons(mapID) then
     return
   end
   local entries = self:Entries()

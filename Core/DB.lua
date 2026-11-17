@@ -58,6 +58,7 @@ local PROFILE_DEFAULTS = {
     available = true,     -- quests you can pick up, on the world map and minimap
     availableTrivial = false,  -- also grey (trivial) ones
     availableDrops = true,     -- also quests started by a dropped item (their droppers' area)
+    continentIcons = false,    -- quest givers and town services on continent maps too (zone maps always)
     -- Town services on the world map (UI/MapServices.lua): [key] = true / false (off is kept, so a
     -- default can't come back). Profession trainers are per character (char.professionTrainers).
     services = { flight = true, inn = true, auction = true, mailbox = true },

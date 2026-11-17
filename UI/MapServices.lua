@@ -6,7 +6,7 @@ local ADDON_NAME, ns = ...
 -- Found once, in the background, the first time any is switched on: QuestieDB's NPC flags (as Questie's
 -- Townsfolk.lua), NPC subtitles for trainers ("Warrior Trainer", "Expert Leatherworker", "Weapon
 -- Master": the in-game title, so every trainer in the data counts, no hand-kept lists), forever-db
--- objects named Mailbox. Friendly NPCs only, except spirit healers.
+-- objects named Mailbox. Friendly NPCs only.
 --
 -- World map only (the minimap has Blizzard's own tracking for these). Same approach as the other
 -- layers: our own mouse-disabled frame on the canvas, hover from the cursor; an available-quest "!"
@@ -30,8 +30,8 @@ local SERVICES = {
   { key = "weapon", label = "Weapon master", icon = TRACKING .. "class" },
   { key = "stable", label = "Stable master", icon = TRACKING .. "stablemaster", flag = "STABLEMASTER" },
   { key = "battle", label = "Battlemaster", icon = TRACKING .. "battlemaster", flag = "BATTLEMASTER" },
-  { key = "spirit", label = "Spirit healer", icon = "Interface\\RaidFrame\\Raid-Icon-Rez", flag = "SPIRIT_HEALER",
-    anyFaction = true },
+  -- No spirit healers (review): the world map shows every graveyard itself, clickable to choose where
+  -- to revive (Blizzard's SelectableGraveyardDataProvider); ours only doubled it.
 }
 
 -- Professions: a trainer's subtitle names the profession or its practitioner ("Cooking Trainer",
@@ -197,7 +197,7 @@ local function build()
         local mine = friendly == nil or friendly == "AH" or friendly == faction
         local entry = { kind = "npc", id = id, name = name, title = title }
         for _, s in ipairs(SERVICES) do
-          if s.flag and hasFlag(npcFlags, flags[s.flag]) and (mine or s.anyFaction) then
+          if s.flag and mine and hasFlag(npcFlags, flags[s.flag]) then
             add(s.key, entry)
           end
         end
@@ -301,7 +301,7 @@ function MapServices:Redraw()
   local mapID = map:GetMapID()
   local width, height = canvas:GetSize()
   self.drawnFor = { mapID = mapID, width = width, scale = canvas:GetEffectiveScale() }
-  if not self.lists or not mapID or not width or width == 0 then
+  if not self.lists or not mapID or not width or width == 0 or not ns.MapAreas.ShowsIcons(mapID) then
     return
   end
   local size = iconSize(canvas)

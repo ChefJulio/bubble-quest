@@ -383,6 +383,14 @@ function Schema:Entries()
       get = function(p) return p.map.availableDrops end,
       set = function(p, v) p.map.availableDrops = v; ns.MapAvailable:MarkDirty() end,
     },
+    {
+      kind = "checkbox", id = "QUESTMARKER_MAP_CONTINENT_ICONS", column = 2, default = false,
+      label = "Quest givers and town icons on continent maps",
+      tooltip = "Zoomed out to a continent, a whole kingdom's \"!\" and town icons crowd together, so by default "
+        .. "they show on zone and city maps only. Quest areas and turn-ins show everywhere.",
+      get = function(p) return p.map.continentIcons end,
+      set = function(p, v) p.map.continentIcons = v; ns.MapAvailable:MarkDirty(); ns.MapServices:MarkDirty() end,
+    },
 
     { kind = "section", label = "Arrows", column = 2 },
     {

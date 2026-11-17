@@ -187,6 +187,19 @@ function MapAreas:ShadeFor(questID, objective)
   return color
 end
 
+---Does this map show quest givers' and town icons? Not on continent, world and cosmic maps unless the
+---setting says so (review: a kingdom's worth of icons on the continent map was clutter); zone and city
+---maps always do. Quest areas and turn-ins show on every map.
+---@param mapID number
+---@return boolean
+function MapAreas.ShowsIcons(mapID)
+  if ns.DB.profile.map.continentIcons then
+    return true
+  end
+  local info = C_Map.GetMapInfo(mapID)
+  return not info or info.mapType > Enum.UIMapType.Continent
+end
+
 -- What's drawn changed. `version` lets the minimap (UI/MinimapAreas.lua) notice too.
 function MapAreas:MarkDirty()
   self.dirty = true

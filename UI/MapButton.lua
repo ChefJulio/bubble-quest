@@ -24,6 +24,7 @@ local ITEMS = {
   { "QUESTMARKER_MAP_AVAILABLE", "Quests you can pick up" },
   { "QUESTMARKER_MAP_AVAILABLE_TRIVIAL", "Low-level quests", indent = true },
   { "QUESTMARKER_MAP_AVAILABLE_DROPS", "Quests started by a drop", indent = true },
+  { "QUESTMARKER_MAP_CONTINENT_ICONS", "Icons on continent maps" },
   "-",
   { "QUESTMARKER_MINIMAP_AREAS", "Quest areas on the minimap" },
   { "QUESTMARKER_MINIMAP_GUIDE", "Guide line on the minimap" },
