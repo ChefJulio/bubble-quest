@@ -17,9 +17,11 @@
 - Without QuestieDB installed, quests to pick up still show, from Questmarker's own data (fewer checks)
 - Talking to a quest giver corrects the map: a "!" for a quest they don't actually offer you goes away
   (it comes back after a level-up, a turn-in or the daily reset)
-- Town services on the world map, each toggled from the map button's "Town services" menu (all off by
-  default): flight master, innkeeper, banker, auctioneer, repair, mailbox, your class trainer, weapon
-  master, stable master, battlemaster, spirit healer, and profession trainers one by one
+- Town services on the world map, each toggled from the map button's "Town services" menu: flight
+  master, innkeeper, banker, auctioneer, repair, mailbox, your class trainer, weapon master, stable
+  master, battlemaster, spirit healer, and profession trainers one by one. On by default: flight
+  master, innkeeper, auctioneer, mailbox, class trainer, and the trainers of professions you have
+  (a profession you learn switches its trainers on)
 - A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
   for a menu of what Questmarker shows on the maps
 - Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides

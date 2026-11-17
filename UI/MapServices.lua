@@ -36,12 +36,13 @@ local SERVICES = {
 }
 
 -- Professions: a trainer's subtitle names the profession or its practitioner ("Cooking Trainer",
--- "Expert Leatherworker"). Matched in English (recorded in the design doc).
+-- "Expert Leatherworker"), matched in English (recorded in the design doc); the third value is its
+-- skill line ID, to know which ones you have in any language.
 local PROFESSIONS = {
-  { "Alchemy", "Alchemist" }, { "Blacksmithing", "Blacksmith" }, { "Cooking", "Cook" },
-  { "Enchanting", "Enchanter" }, { "Engineering", "Engineer" }, { "First Aid", "Physician" },
-  { "Fishing", "Fisherman" }, { "Herbalism", "Herbalist" }, { "Leatherworking", "Leatherworker" },
-  { "Mining", "Miner" }, { "Skinning", "Skinner" }, { "Tailoring", "Tailor" },
+  { "Alchemy", "Alchemist", 171 }, { "Blacksmithing", "Blacksmith", 164 }, { "Cooking", "Cook", 185 },
+  { "Enchanting", "Enchanter", 333 }, { "Engineering", "Engineer", 202 }, { "First Aid", "Physician", 129 },
+  { "Fishing", "Fisherman", 356 }, { "Herbalism", "Herbalist", 182 }, { "Leatherworking", "Leatherworker", 165 },
+  { "Mining", "Miner", 186 }, { "Skinning", "Skinner", 393 }, { "Tailoring", "Tailor", 197 },
 }
 
 local MapServices = {
@@ -55,22 +56,73 @@ ns.MapServices = MapServices
 MapServices.SERVICES = SERVICES
 MapServices.PROFESSIONS = PROFESSIONS
 
-local function enabledSet()
-  local map = ns.DB.profile and ns.DB.profile.map
-  return map and map.services or {}
+-- Where a key's on/off lives: services in the profile (map.services), profession trainers per
+-- character (char.professionTrainers, by profession name). Off is stored as false, not removed, so a
+-- default never comes back after you turned it off.
+local function storeFor(key)
+  local profession = key:match("^trainer:(.+)$")
+  if profession then
+    return ns.DB.char.professionTrainers, profession
+  end
+  return ns.DB.profile.map.services, key
 end
 
 ---Is this service (or "trainer:<profession>") switched on?
 function MapServices:IsOn(key)
-  return enabledSet()[key] == true
+  if not (ns.DB.profile and ns.DB.char) then
+    return false
+  end
+  local store, name = storeFor(key)
+  return store[name] == true
+end
+
+local function anyOn()
+  for _, on in pairs(ns.DB.profile.map.services) do
+    if on then
+      return true
+    end
+  end
+  for _, on in pairs(ns.DB.char.professionTrainers) do
+    if on then
+      return true
+    end
+  end
+  return false
 end
 
 function MapServices:Toggle(key)
-  local set = ns.DB.profile.map.services
-  set[key] = not set[key] or nil
+  local store, name = storeFor(key)
+  store[name] = not store[name]
   self:MarkDirty()
-  if next(set) then
+  if store[name] then
     self:Build()
+  end
+end
+
+-- Professions you have switch their trainers on, the first time each is seen (at login, or when you
+-- learn one: SKILL_LINES_CHANGED). Turned off later, it stays off: only a never-seen one is switched.
+local function adoptProfessions()
+  local skillInfo = rawget(_G, "C_SkillInfo")  -- SkillInfoDocumentation.lua; not in the type stubs
+  if not (skillInfo and skillInfo.GetNumSkillLines and ns.DB.char) then
+    return
+  end
+  local known = {}
+  for i = 1, skillInfo.GetNumSkillLines() do
+    local line = skillInfo.GetSkillLineInfo(i)
+    if line and line.skillID then
+      known[line.skillID] = true
+    end
+  end
+  local trainers, changed = ns.DB.char.professionTrainers, false
+  for _, p in ipairs(PROFESSIONS) do
+    if known[p[3]] and trainers[p[1]] == nil then
+      trainers[p[1]] = true
+      changed = true
+    end
+  end
+  if changed then
+    MapServices:MarkDirty()
+    MapServices:Build()
   end
 end
 
@@ -331,10 +383,12 @@ end
 
 ns.Events:On("PLAYER_LOGIN", function()
   createLayer()
-  if next(enabledSet()) then
+  adoptProfessions()
+  if anyOn() then
     MapServices:Build()
   end
 end)
+ns.Events:On("SKILL_LINES_CHANGED", adoptProfessions)
 ns.Events:On("ADDON_LOADED", function(name)
   if name == "Blizzard_WorldMap" then
     createLayer()

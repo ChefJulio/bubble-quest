@@ -22,7 +22,10 @@ only once a service is switched on.
 
 World map only: the minimap has Blizzard's own tracking for these (its tracking menu). Blizzard's
 minimap-tracking icons (`Interface\Minimap\tracking\*`), close spawns merged, a tooltip with the NPC's
-name and title. Toggled from the map button's menu ("Town services" submenu), all off by default.
+name and title. Toggled from the map button's menu ("Town services" submenu). On by default (review):
+flight master, innkeeper, auctioneer, mailbox, class trainer. Profession trainers are per character:
+each profession you have switches its trainers on the first time it's seen (login, or learning one:
+SKILL_LINES_CHANGED, by skill line ID so any language works); turned off, it stays off.
 
 ## Remaining (recorded)
 
