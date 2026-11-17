@@ -233,6 +233,10 @@ function Schema:Entries()
       set = function(p, v) p.questieData = v; ns.QuestieData:Reset() end,
     },
 
+    -- Profiles (Core/DB.lua): Global by default; our window only (Blizzard's panel has no such control).
+    { kind = "section", label = "Profiles", column = 1, windowOnly = true },
+    { kind = "profiles", id = "QUESTMARKER_PROFILES", column = 1, windowOnly = true },
+
     { kind = "section", label = "Quest categories", column = 2 },
   }
 

@@ -463,3 +463,4 @@ function MapAvailable:MarkDirty()
   self.drawnFor = nil
   self.builtFor = nil
 end
+ns.Bus:On("ProfileChanged", function() MapAvailable:MarkDirty() end)

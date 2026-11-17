@@ -599,7 +599,7 @@ end)
 
 -- Our data changed: redraw next time the map is looked at (or now, if it's open).
 for _, message in ipairs({
-  "QuestLogChanged", "QuestChanged", "LocationsChanged", "TrackingChanged", "LearnedChanged",
+  "QuestLogChanged", "QuestChanged", "LocationsChanged", "TrackingChanged", "LearnedChanged", "ProfileChanged",
 }) do
   ns.Bus:On(message, function() MapAreas:MarkDirty() end)
 end

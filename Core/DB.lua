@@ -146,13 +146,103 @@ function DB:Load()
   self:UseProfile(self.char.profile)
 end
 
----Switch this character to a profile, creating it from defaults if new.
+-- Profiles (review: "default should be global"): every character uses GLOBAL, the shared profile, unless
+-- it's switched to one of its own in the settings window. Layout and behaviour live in the profile;
+-- what's naturally per character (pins, hidden and collapsed quests, trainers you want, ...) lives in
+-- QuestmarkerCharDB and never in a profile.
+local GLOBAL = "Default"  -- the shared profile's key (shown as "Global"); kept for existing saved data
+DB.GLOBAL = GLOBAL
+
+---Switch this character to a profile. An unknown name (deleted on another character) falls back to
+---Global instead of starting a blank one.
 ---@param name string
 function DB:UseProfile(name)
   local profiles = self.account.profiles
+  if not profiles[name] and name ~= GLOBAL then
+    name = GLOBAL
+  end
   profiles[name] = profiles[name] or {}
   fill(profiles[name], PROFILE_DEFAULTS)
   self.char.profile = name
   self.profile = profiles[name]
   ns.Bus:Fire("ProfileChanged", name)
+end
+
+---Every profile's name, Global first, then the rest alphabetically.
+---@return string[]
+function DB:ProfileNames()
+  local names = {}
+  for name in pairs(self.account.profiles) do
+    if name ~= GLOBAL then
+      names[#names + 1] = name
+    end
+  end
+  table.sort(names)
+  table.insert(names, 1, GLOBAL)
+  return names
+end
+
+---How a profile's name is shown.
+---@param name string
+---@return string
+function DB:ProfileLabel(name)
+  return name == GLOBAL and "Global (all characters)" or name
+end
+
+local function deepCopy(value)
+  if type(value) ~= "table" then
+    return value
+  end
+  local out = {}
+  for k, v in pairs(value) do
+    out[k] = deepCopy(v)
+  end
+  return out
+end
+
+---A new profile, starting as a copy of the current one (the usual wish: the same but one thing
+---different), and this character switches to it. False when the name is empty or taken.
+---@param name string
+---@return boolean
+function DB:CreateProfile(name)
+  name = name and name:match("^%s*(.-)%s*$") or ""
+  if name == "" or self.account.profiles[name] or name == GLOBAL then
+    return false
+  end
+  self.account.profiles[name] = deepCopy(self.profile)
+  self:UseProfile(name)
+  return true
+end
+
+---Replace the current profile's settings with a copy of another's.
+---@param from string
+function DB:CopyProfile(from)
+  local source, profile = self.account.profiles[from], self.profile
+  if not source or not profile or from == self.char.profile then
+    return
+  end
+  wipe(profile)
+  for k, v in pairs(deepCopy(source)) do
+    profile[k] = v
+  end
+  self:UseProfile(self.char.profile)
+end
+
+---Delete a profile of your own (Global can't be). This character, if it used it, goes back to Global;
+---others do when they next log in (UseProfile's fallback).
+---@param name string
+function DB:DeleteProfile(name)
+  if name == GLOBAL or not self.account.profiles[name] then
+    return
+  end
+  self.account.profiles[name] = nil
+  if self.char.profile == name then
+    self:UseProfile(GLOBAL)
+  end
+end
+
+---Put the current profile back to its defaults.
+function DB:ResetProfile()
+  wipe(self.profile)
+  self:UseProfile(self.char.profile)
 end

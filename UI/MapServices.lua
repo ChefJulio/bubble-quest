@@ -437,6 +437,13 @@ ns.Events:On("PLAYER_LOGIN", function()
   end
 end)
 ns.Events:On("SKILL_LINES_CHANGED", adoptProfessions)
+-- Another profile: other services on (the per-character trainers stay as they are).
+ns.Bus:On("ProfileChanged", function()
+  MapServices:MarkDirty()
+  if layer and anyOn() then
+    MapServices:Build()
+  end
+end)
 ns.Events:On("ADDON_LOADED", function(name)
   if name == "Blizzard_WorldMap" then
     createLayer()

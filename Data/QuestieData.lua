@@ -246,6 +246,13 @@ function QuestieData:Reset()
   ns.Bus:Fire("LocationsChanged")
 end
 
+-- Another profile may switch "Use QuestieDB's location data": cached answers follow it.
+ns.Bus:On("ProfileChanged", function()
+  if next(QuestieData.cache) then
+    QuestieData:Reset()
+  end
+end)
+
 -- With Questie also running: it adds its own corrections when ready, so cached answers are stale.
 ns.Events:On("PLAYER_LOGIN", function()
   local q = rawget(_G, "Questie")

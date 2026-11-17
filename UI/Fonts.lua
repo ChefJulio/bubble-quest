@@ -142,3 +142,9 @@ ns.Events:On("PLAYER_LOGIN", function()
   watchSharedMedia()
   Fonts:Apply()
 end)
+-- Another profile (UI/SettingsWindow.lua's profiles), another face and size.
+ns.Bus:On("ProfileChanged", function()
+  if Fonts.objects[1] then
+    Fonts:Apply()
+  end
+end)

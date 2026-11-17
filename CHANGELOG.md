@@ -29,6 +29,11 @@
 - In a group, hovering quest areas on the map or minimap shows your party's progress on that quest too
 - Section headers never scroll out of view: ones below dock at the bottom of the tracker, so a
   collapsed "Hidden" or "Elsewhere" is always one click away
+- Profiles in the settings window: every character uses Global (one shared layout) unless you make a
+  profile of its own. New profiles start as a copy of the current one; copy, delete and reset are
+  there too. Pins, hidden quests and trainers stay per character either way
+- Class trainers are a list like profession trainers (your own class on), so you can look up any
+  class's trainers
 - Hold Ctrl to hide Questmarker's tooltips (cards, map and minimap areas, buttons); let go to get the
   one under the cursor back
 - Clearer section headers (Ready to turn in, Camping, Elsewhere, ...) with an open/closed arrow, and a

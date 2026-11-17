@@ -228,6 +228,142 @@ function builders.status(parent, entry, x, y)
   end
 end
 
+-- Profiles (Core/DB.lua): which one this character uses, a new one (a copy of the current), copy from
+-- another, delete, reset. Delete, reset and copy ask for a second click ("Click again to ...") rather
+-- than a popup: Blizzard's StaticPopupDialogs is a shared table addons shouldn't add to (taint).
+local CONFIRM_SECONDS = 4
+
+local function panelButton(parent, text, width)
+  local button = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
+  button:SetSize(width, 22)
+  button:SetText(text)
+  return button
+end
+
+-- A button that acts on its second click within CONFIRM_SECONDS.
+local function confirmButton(parent, text, confirmText, width, action)
+  local button = panelButton(parent, text, width)
+  button:SetScript("OnClick", function(self)
+    if self.armed then
+      self.armed = nil
+      self:SetText(text)
+      action()
+      return
+    end
+    self.armed = true
+    self:SetText(confirmText)
+    C_Timer.After(CONFIRM_SECONDS, function()
+      if self.armed then
+        self.armed = nil
+        self:SetText(text)
+      end
+    end)
+  end)
+  return button
+end
+
+local function profileDropdown(parent, x, y, width, isSelected, choose, names)
+  local dropdown = CreateFrame("DropdownButton", nil, parent, "WowStyle1DropdownTemplate")
+  dropdown:SetPoint("LEFT", parent, "TOPLEFT", x, y - INLINE_HEIGHT / 2)
+  dropdown:SetWidth(width)
+  dropdown:SetupMenu(function(_, root)
+    for _, name in ipairs(names()) do
+      root:CreateRadio(ns.DB:ProfileLabel(name), function() return isSelected(name) end, function() choose(name) end)
+    end
+  end)
+  return dropdown
+end
+
+local function rowLabel(parent, text, x, y)
+  return inlineLabel(parent, { label = text }, x, y)
+end
+
+function builders.profiles(parent, entry, x, y)
+  local controlX, controlWidth = x + INLINE_LABEL_WIDTH, COLUMN_WIDTH - INLINE_LABEL_WIDTH
+  local top = y
+
+  -- This character uses ...
+  hoverArea(parent, x, y, COLUMN_WIDTH, INLINE_HEIGHT, "Profile",
+    "Global is shared by every character: the tracker's position, size, cards, map and automation. Make "
+    .. "another to set one character apart. Pins, hidden quests and trainers are per character anyway.")
+  rowLabel(parent, "This character uses", x, y)
+  local current = profileDropdown(parent, controlX, y, controlWidth,
+    function(name) return ns.DB.char.profile == name end,
+    function(name) ns.DB:UseProfile(name) end,
+    function() return ns.DB:ProfileNames() end)
+  y = y - INLINE_HEIGHT
+
+  -- New profile: [name] [Create]
+  rowLabel(parent, "New profile", x, y)
+  local nameBox = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
+  nameBox:SetAutoFocus(false)
+  nameBox:SetSize(controlWidth - 80, 20)
+  nameBox:SetPoint("LEFT", parent, "TOPLEFT", controlX + 6, y - INLINE_HEIGHT / 2)
+  nameBox:SetMaxLetters(32)
+  local create = panelButton(parent, "Create", 70)
+  create:SetPoint("RIGHT", parent, "TOPLEFT", x + COLUMN_WIDTH, y - INLINE_HEIGHT / 2)
+  local function createProfile()
+    if ns.DB:CreateProfile(nameBox:GetText()) then
+      nameBox:SetText("")
+      nameBox:ClearFocus()
+    end
+  end
+  create:SetScript("OnClick", createProfile)
+  nameBox:SetScript("OnEnterPressed", createProfile)
+  nameBox:SetScript("OnEscapePressed", function(self) self:ClearFocus() end)
+  tooltip(create, "New profile", "Starts as a copy of this character's current settings, and this character "
+    .. "switches to it.")
+  y = y - INLINE_HEIGHT
+
+  -- Copy from: [profile] [Copy]
+  rowLabel(parent, "Copy settings from", x, y)
+  local copyFrom
+  local source = profileDropdown(parent, controlX, y, controlWidth - 80,
+    function(name) return copyFrom == name end,
+    function(name) copyFrom = name end,
+    function()
+      local others = {}
+      for _, name in ipairs(ns.DB:ProfileNames()) do
+        if name ~= ns.DB.char.profile then
+          others[#others + 1] = name
+        end
+      end
+      return others
+    end)
+  local copy = confirmButton(parent, "Copy", "Sure?", 70, function()
+    if copyFrom then
+      ns.DB:CopyProfile(copyFrom)
+    end
+  end)
+  copy:SetPoint("RIGHT", parent, "TOPLEFT", x + COLUMN_WIDTH, y - INLINE_HEIGHT / 2)
+  tooltip(copy, "Copy settings", "Replaces this profile's settings with the chosen one's. Click twice.")
+  y = y - INLINE_HEIGHT
+
+  -- [Delete this profile] [Reset to defaults]
+  local delete = confirmButton(parent, "Delete profile", "Click again", 140, function()
+    ns.DB:DeleteProfile(ns.DB.char.profile)
+  end)
+  delete:SetPoint("LEFT", parent, "TOPLEFT", controlX, y - INLINE_HEIGHT / 2)
+  tooltip(delete, "Delete profile", "Deletes the profile this character uses (not Global); it goes back to "
+    .. "Global, as do other characters that used it. Click twice.")
+  local reset = confirmButton(parent, "Reset", "Click again", 70, function()
+    ns.DB:ResetProfile()
+  end)
+  reset:SetPoint("RIGHT", parent, "TOPLEFT", x + COLUMN_WIDTH, y - INLINE_HEIGHT / 2)
+  tooltip(reset, "Reset to defaults", "Puts this profile's settings back to Questmarker's defaults. Click twice.")
+  y = y - INLINE_HEIGHT
+
+  return top - y, function()
+    current:GenerateMenu()
+    if copyFrom and (copyFrom == ns.DB.char.profile or not ns.DB.account.profiles[copyFrom]) then
+      copyFrom = nil
+    end
+    source:GenerateMenu()
+    delete:SetEnabled(ns.DB.char.profile ~= ns.DB.GLOBAL)
+    copy:SetEnabled(copyFrom ~= nil)
+  end
+end
+
 -- Entries sharing a `row`, left to right on one line: the first one's rowLabel, then each control
 -- (checkboxes with their short label, dropdowns `width` wide). Greys the row label with the first.
 local function buildRow(parent, members, x, y)
@@ -438,5 +574,9 @@ function Window:Toggle()
 end
 
 ns.Bus:On("SettingChanged", function()
+  Window:Refresh()
+end)
+-- Another profile: every control shows its values.
+ns.Bus:On("ProfileChanged", function()
   Window:Refresh()
 end)
