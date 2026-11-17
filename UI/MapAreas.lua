@@ -537,6 +537,78 @@ function MapAreas:SetCardHover(questID, objective)
   self.cardHover, self.cardHoverObjective = questID, objective
 end
 
+-- The guide line on the world map (review: "the guide dots on the map when highlighting the quest"):
+-- while one quest is highlighted, dots in its colour drift from you to where it takes you
+-- (Navigation:GuidePoint: the hovered objective, else its nearest one you aren't in, or the turn-in),
+-- like the minimap's. Only when you're on the map shown. Sizes are on screen, whatever the zoom.
+local GUIDE_DOT, GUIDE_SPACING, GUIDE_SPEED = 7, 14, 18  -- pixels on screen; pixels a second
+local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"
+local guide = { questID = nil, key = nil, dots = {} }
+
+-- The one quest (and objective) a highlight is about, or nil when it's several or none.
+local function guideFor(target)
+  if not target then
+    return nil
+  end
+  local questID, objectives = next(target)
+  if questID == nil or next(target, questID) ~= nil then
+    return nil  -- several quests under the cursor: no single way to go
+  end
+  if type(objectives) ~= "table" then
+    return questID, nil
+  end
+  local key = next(objectives)
+  if key == nil or key == "*" or next(objectives, key) ~= nil then
+    return questID, nil
+  end
+  return questID, key
+end
+
+local function drawGuide(layer, map)
+  local used = 0
+  local quest = guide.questID and ns.QuestLog:Get(guide.questID)
+  local point = quest and ns.Navigation:GuidePoint(quest, guide.key)
+  local north, west, instanceMap = ns.Navigation:PlayerPosition()
+  local mapID = map:GetMapID()
+  if point and north and mapID and point.map == instanceMap then
+    vector = vector or CreateVector2D(0, 0)
+    vector:SetXY(north, west)
+    local _, from = C_Map.GetMapPosFromWorldPos(instanceMap, vector, mapID)
+    vector:SetXY(point.x, point.y)
+    local _, to = C_Map.GetMapPosFromWorldPos(point.map, vector, mapID)
+    if from and to and from.x >= 0 and from.x <= 1 and from.y >= 0 and from.y <= 1 then
+      local canvas = map:GetCanvas()
+      local width, height = canvas:GetSize()
+      local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()  -- screen px -> canvas
+      local x1, y1, x2, y2 = from.x * width, from.y * height, to.x * width, to.y * height
+      local length = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
+      local spacing, size = GUIDE_SPACING * scale, GUIDE_DOT * scale
+      local color = MapAreas:ColorFor(guide.questID)
+      local d = (GetTime() * GUIDE_SPEED * scale) % spacing + spacing
+      while d < length - spacing / 2 do
+        used = used + 1
+        local dot = guide.dots[used]
+        if not dot then
+          dot = layer:CreateTexture(nil, "OVERLAY", nil, 2)
+          dot:SetTexture(DOT_TEXTURE)
+          guide.dots[used] = dot
+        end
+        local t = d / length
+        dot:SetSize(size, size)
+        dot:ClearAllPoints()
+        dot:SetPoint("CENTER", canvas, "TOPLEFT", x1 + (x2 - x1) * t, -(y1 + (y2 - y1) * t))
+        local fade = math.min(1, (d - spacing) / spacing)  -- fades in from you
+        dot:SetVertexColor(color[1], color[2], color[3], 0.9 * fade)
+        dot:Show()
+        d = d + spacing
+      end
+    end
+  end
+  for i = used + 1, #guide.dots do
+    guide.dots[i]:Hide()
+  end
+end
+
 local hoverElapsed, hovering = 0, false
 local function updateHover(layer, map, delta)
   glow()
@@ -573,6 +645,7 @@ local function updateHover(layer, map, delta)
     target = questID and { [questID] = { ["*"] = true } } or nil
   end
   highlight(target)
+  guide.questID, guide.key = guideFor(target)
 end
 
 -- The layer -----------------------------------------------------------------------------------------
@@ -599,6 +672,7 @@ local function createLayer()
       MapAreas:Redraw()
     end
     updateHover(layer, map, delta)
+    drawGuide(layer, map)  -- every frame: the dots drift
   end)
   layer:SetScript("OnHide", function()
     if hovering and GameTooltip:GetOwner() == layer then
@@ -606,6 +680,7 @@ local function createLayer()
     end
     highlight(nil)
     hovering = false
+    guide.questID, guide.key = nil, nil
   end)
   MapAreas.layer = layer
 end

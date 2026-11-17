@@ -261,7 +261,7 @@ local COMPASS = { "N", "NW", "W", "SW", "S", "SE", "E", "NE" }  -- counter-clock
 ---Where one objective is, on its own (review: "the areas are in different places"): each objective
 ---row's arrow and the tooltip's per-objective distances. Nil when unknown.
 ---@param quest table
----@param index number objective index
+---@param index number|string objective index, or "turnin"
 ---@return table? { distance, compass, angle?, inArea, point } or { zone } on another map
 function Navigation:ObjectiveNav(quest, index)
   local areas = targetsFor(quest).byObjective[index]
@@ -297,6 +297,28 @@ function Navigation:ObjectiveNav(quest, index)
     inArea = bestDistance <= hereYards(best, quest),
     point = { map = instanceMap, x = bestPoint.x, y = bestPoint.y },
   }
+end
+
+---Where a guide line leads (the minimap's and the world map's): with `key` (an objective index or
+---"turnin"), that one's nearest point; else the nearest of the quest's current objectives (or its
+---turn-in) you aren't already in. Not the card's arrow target: that one is "here" while you're in an
+---area (review: no line showed while killing one objective's mobs with the other's elsewhere).
+---@param quest table
+---@param key (number|string)?
+---@return table? point { map, x, y } in world yards
+function Navigation:GuidePoint(quest, key)
+  if key ~= nil then
+    local nav = self:ObjectiveNav(quest, key)
+    return nav and nav.point or nil
+  end
+  local best
+  for objective in pairs(targetsFor(quest).byObjective) do
+    local nav = self:ObjectiveNav(quest, objective)
+    if nav and nav.point and not nav.inArea and (not best or nav.distance < best.distance) then
+      best = nav
+    end
+  end
+  return best and best.point or nil
 end
 
 ---Everything a card's arrow needs, or nil (no position, no target).

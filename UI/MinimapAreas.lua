@@ -183,22 +183,10 @@ end
 
 -- The guide ---------------------------------------------------------------------------------------
 
--- Its target: the nearest of the quest's current objectives (or its turn-in) you aren't already in.
--- Not the card's arrow target: that one is "here" while you're in an area (review: no line showed
--- while killing one objective's mobs with the other's elsewhere).
+-- Its target: Navigation:GuidePoint, shared with the world map's line (UI/MapAreas.lua).
 local function guideTarget(questID)
   local quest = ns.QuestLog:Get(questID)
-  if not quest then
-    return nil
-  end
-  local best
-  for key in pairs(ns.Navigation:Targets(quest).byObjective) do
-    local nav = ns.Navigation:ObjectiveNav(quest, key)
-    if nav and nav.point and not nav.inArea and (not best or nav.distance < best.distance) then
-      best = nav
-    end
-  end
-  return best and best.point
+  return quest and ns.Navigation:GuidePoint(quest) or nil
 end
 
 -- Its quest: the hovered card (that one only: it's what you're asking about), else the pinned quests
