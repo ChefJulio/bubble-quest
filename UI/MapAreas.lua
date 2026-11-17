@@ -115,6 +115,72 @@ function MapAreas:ColorFor(questID)
   return PALETTE[index]
 end
 
+-- Shades per objective (review: a quest's two kill objectives overlapped in one colour and couldn't be
+-- told apart). The quest's colour stays the family; each objective after the first moves its
+-- lightness and, a little, its hue, so overlaps separate on the parchment and still read as one quest.
+-- { hue turn (fraction of the wheel), saturation change, value change }, by objective index.
+local SHADES = {
+  { 0, 0, 0 },              -- 1: the quest's colour
+  { 0.045, -0.30, 0.18 },   -- 2: lighter, towards the next hue
+  { -0.045, 0.12, -0.28 },  -- 3: deeper, towards the previous hue
+  { 0.09, -0.15, -0.10 },   -- 4
+  { -0.09, -0.35, 0.12 },   -- 5
+}
+
+local function toHSV(r, g, b)
+  local max, min = math.max(r, g, b), math.min(r, g, b)
+  local d = max - min
+  local h = 0
+  if d > 0 then
+    if max == r then
+      h = ((g - b) / d) % 6
+    elseif max == g then
+      h = (b - r) / d + 2
+    else
+      h = (r - g) / d + 4
+    end
+    h = h / 6
+  end
+  return h, max > 0 and d / max or 0, max
+end
+
+local function fromHSV(h, s, v)
+  local i = math.floor(h * 6)
+  local f = h * 6 - i
+  local p, q, t = v * (1 - s), v * (1 - f * s), v * (1 - (1 - f) * s)
+  i = i % 6
+  if i == 0 then return v, t, p end
+  if i == 1 then return q, v, p end
+  if i == 2 then return p, v, t end
+  if i == 3 then return p, q, v end
+  if i == 4 then return t, p, v end
+  return v, p, q
+end
+
+local shadeCache = {}  -- [palette index .. ":" .. objective] = { r, g, b }
+
+---An objective's shade of its quest's colour (the turn-in, or nil: the quest's colour itself).
+---@param questID number
+---@param objective number?
+---@return table { r, g, b }
+function MapAreas:ShadeFor(questID, objective)
+  local base = self:ColorFor(questID)
+  local shade = objective and SHADES[(objective - 1) % #SHADES + 1]
+  if not shade or objective == 1 then
+    return base
+  end
+  local key = self.colors[questID] .. ":" .. objective
+  local color = shadeCache[key]
+  if not color then
+    local h, s, v = toHSV(base[1], base[2], base[3])
+    local clamp = function(x) return math.max(0, math.min(1, x)) end
+    local r, g, b = fromHSV((h + shade[1]) % 1, clamp(s + shade[2]), clamp(v + shade[3]))
+    color = { r, g, b }
+    shadeCache[key] = color
+  end
+  return color
+end
+
 -- What's drawn changed. `version` lets the minimap (UI/MinimapAreas.lua) notice too.
 function MapAreas:MarkDirty()
   self.dirty = true
@@ -345,9 +411,10 @@ function MapAreas:Redraw()
         if pos and pos.x >= 0 and pos.x <= 1 and pos.y >= 0 and pos.y <= 1 then
           local x, y = pos.x * width, pos.y * height
           if entry.objective then
-            local texture = placeBlob(group, canvas, x, y, size, color)
+            local shade = self:ShadeFor(questID, entry.objective)
+            local texture = placeBlob(group, canvas, x, y, size, shade)
             self.hits[#self.hits + 1] = {
-              x = x, y = y, questID = questID, objective = entry.objective, texture = texture, color = color,
+              x = x, y = y, questID = questID, objective = entry.objective, texture = texture, color = shade,
             }
           elseif not blizzardPins[questID] and placeMarker(group, canvas, x, y) then
             -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.

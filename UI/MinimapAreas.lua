@@ -98,11 +98,11 @@ local function rebuild()
   for questID in pairs(ns.Stack.visible) do
     local quest = ns.QuestLog:Get(questID)
     if quest then
-      local color = ns.MapAreas:ColorFor(questID)
       for _, entry in ipairs(ns.MapAreas:QuestPoints(quest)) do
         local p = entry.point
         MinimapAreas.points[#MinimapAreas.points + 1] = {
-          x = p.x, y = p.y, map = p.map, color = color, questID = questID, objective = entry.objective,
+          x = p.x, y = p.y, map = p.map, questID = questID, objective = entry.objective,
+          color = ns.MapAreas:ShadeFor(questID, entry.objective),  -- each objective its shade
         }
       end
     end
