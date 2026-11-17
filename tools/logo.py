@@ -1,4 +1,6 @@
-"""Draw BubbleQuest's logo (still Questmarker's "QM": a new one is to come): gold "QM" (Bahnschrift) on a dark navy square, edge to edge.
+"""Draw BubbleQuest's logo: gold "BQ" on a dark navy square, edge to edge. The BubbleSuite style: the
+same as BubbleFonts' "BF" (bubble-fonts/tools/logo.py), letters in Inter SemiBold, read from the
+bubble-fonts repo beside this one (BubbleFonts bundles it); Bahnschrift if that isn't there.
 
 Square, no rounded corners: CurseForge frames the logo in its own square tile, and in game the icon is
 shown at 16-20 px, where every pixel counts.
@@ -10,13 +12,15 @@ The format follows the extension; TGA is saved uncompressed with alpha (sizes mu
 """
 import math
 import sys
+from pathlib import Path
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 OUT = sys.argv[1]
 SIZE = int(sys.argv[2]) if len(sys.argv) > 2 else 512
 S = 4  # supersampling
 W = 512 * S
-FONT = "C:/Windows/Fonts/bahnschrift.ttf"
+INTER = Path(__file__).resolve().parents[2] / "bubble-fonts" / "Media" / "Fonts" / "Inter" / "Inter-SemiBold.ttf"
+FONT = str(INTER) if INTER.exists() else "C:/Windows/Fonts/bahnschrift.ttf"
 GOLD_TOP, GOLD_BOTTOM = (255, 214, 110), (214, 148, 40)
 OUTLINE = (70, 44, 12, 255)
 
@@ -35,15 +39,16 @@ def background() -> Image.Image:
   return bg
 
 
-def letters(text: str = "QM", size: int = 340, spacing: int = -10) -> Image.Image:
-  """The letters: vertical gold gradient, dark outline, drop shadow; centred, 76% of the width."""
+def letters(text: str = "BQ", size: int = 340, spacing: int = -6) -> Image.Image:
+  """The letters: vertical gold gradient, dark outline, drop shadow; centred, 70% of the width (as
+  BubbleFonts' logo, tuned for Inter)."""
   mask = Image.new("L", (W, W), 0)
   d = ImageDraw.Draw(mask)
   while True:
     font = ImageFont.truetype(FONT, size * S)
     boxes = [d.textbbox((0, 0), ch, font=font) for ch in text]
     total = sum(b[2] - b[0] for b in boxes) + spacing * S * (len(text) - 1)
-    if total <= W * 0.76:
+    if total <= W * 0.70:
       break
     size -= 4
   top = min(b[1] for b in boxes)

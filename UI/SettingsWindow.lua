@@ -293,15 +293,19 @@ function builders.profiles(parent, entry, x, y)
     function() return ns.DB:ProfileNames() end)
   y = y - INLINE_HEIGHT
 
-  -- New profile: [name] [Create]
-  rowLabel(parent, "New profile", x, y)
+  -- New profile: [name] [Create]. The box starts right after its short label, not at the controls'
+  -- column (review: in the column's width the suggested "Shiny - (Priest)" was cut off), and runs to
+  -- the button.
+  local newLabel = rowLabel(parent, "New profile", x, y)
   local nameBox = CreateFrame("EditBox", nil, parent, "InputBoxTemplate")
   nameBox:SetAutoFocus(false)
-  nameBox:SetSize(controlWidth - 80, 20)
-  nameBox:SetPoint("LEFT", parent, "TOPLEFT", controlX + 6, y - INLINE_HEIGHT / 2)
+  nameBox:SetHeight(20)
   nameBox:SetMaxLetters(32)
   local create = panelButton(parent, "Create", 70)
   create:SetPoint("RIGHT", parent, "TOPLEFT", x + COLUMN_WIDTH, y - INLINE_HEIGHT / 2)
+  local boxLeft = math.min(controlX, x + newLabel:GetStringWidth() + 14)  -- 14: the template's left edge
+  nameBox:SetPoint("LEFT", parent, "TOPLEFT", boxLeft, y - INLINE_HEIGHT / 2)
+  nameBox:SetPoint("RIGHT", create, "LEFT", -8, 0)
   local function createProfile()
     if ns.DB:CreateProfile(nameBox:GetText()) then
       nameBox:SetText("")
