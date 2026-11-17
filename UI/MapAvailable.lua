@@ -129,27 +129,50 @@ end
 
 -- Tooltip -----------------------------------------------------------------------------------------
 
-local dropperNames = {}  -- [itemID] = "Defias Thug, Defias Bandit +3", for the session
+local dropperNames = {}  -- [itemID] = "Defias Pathstalker (4%), Defias Thug (3%) +3", for the session
 
+-- Who drops it, most likely first, with the drop chance where forever-db knows it (QuestieDB has the
+-- droppers, not the chances). One entry per name: several NPC ids can share one (keep the best chance).
 local function droppersText(itemID)
   local text = dropperNames[itemID]
   if not text then
-    local names, seen = {}, {}
-    local function addName(name)
-      if name and not seen[name] then
-        seen[name] = true
-        names[#names + 1] = name
+    local chances = ns.ForeverData:DropChances(itemID) or {}
+    local byName, names = {}, {}
+    local function add(name, chance)
+      if not name then
+        return
+      end
+      local entry = byName[name]
+      if not entry then
+        entry = { name = name }
+        byName[name] = entry
+        names[#names + 1] = entry
+      end
+      if chance and (not entry.chance or chance > entry.chance) then
+        entry.chance = chance
       end
     end
     for _, npcID in ipairs(ns.QuestieData.Get("ItemDB", "npcDrops", itemID) or {}) do
-      addName(ns.QuestieData.Get("NpcDB", "name", npcID))
+      add(ns.QuestieData.Get("NpcDB", "name", npcID), chances["npc" .. npcID])
     end
     for _, objectID in ipairs(ns.QuestieData.Get("ItemDB", "objectDrops", itemID) or {}) do
-      addName(ns.QuestieData.Get("ObjectDB", "name", objectID))
+      add(ns.QuestieData.Get("ObjectDB", "name", objectID), chances["object" .. objectID])
     end
+    table.sort(names, function(a, b)
+      if (a.chance ~= nil) ~= (b.chance ~= nil) then
+        return a.chance ~= nil
+      end
+      if a.chance and b.chance and a.chance ~= b.chance then
+        return a.chance > b.chance
+      end
+      return a.name < b.name
+    end)
     local shown = {}
     for i = 1, math.min(3, #names) do
-      shown[i] = names[i]
+      local n = names[i]
+      -- Below 1%, one decimal; otherwise whole percents.
+      local chance = n.chance and (n.chance < 1 and ("%.1f%%"):format(n.chance) or ("%d%%"):format(math.floor(n.chance + 0.5)))
+      shown[i] = chance and ("%s (%s)"):format(n.name, chance) or n.name
     end
     text = table.concat(shown, ", ") .. (#names > 3 and (" +%d"):format(#names - 3) or "")
     dropperNames[itemID] = text

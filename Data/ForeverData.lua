@@ -51,6 +51,24 @@ function ForeverData:Quest(questID)
   return record
 end
 
+---An item's drop chances by source: { ["npc" .. id | "object" .. id] = percent }, or nil.
+---@param itemID number
+---@return table?
+function ForeverData:DropChances(itemID)
+  local lib = library()
+  local item = lib and lib.Get("item", itemID)
+  if not item or not item.sources then
+    return nil
+  end
+  local chances = {}
+  for _, source in ipairs(item.sources) do
+    if source.kind and source.id and source.chance then
+      chances[source.kind .. source.id] = source.chance
+    end
+  end
+  return chances
+end
+
 ---Who (or what) takes the quest in: the first finisher's name.
 ---@param questID number
 ---@return string?
