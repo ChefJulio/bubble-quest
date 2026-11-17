@@ -81,8 +81,12 @@ came from.
 - **Width comes from the tracker.** The tracker's width setting (and its resize grip) sets the map's
   width; the map's height is its own setting. The map's outer frame is anchored on `Minimap`, and the
   tracker docks under it (`SetTrackerDock`), so moving the minimap in Edit Mode moves the whole column.
-- **The outer frame is as big as the column.** Blizzard's minimap sits in it at the largest size that
-  fits, sized with `Minimap:SetSize` and re-applied from the same post-hook.
+- **The outer frame is as big as the column** and hangs from the top corner of Edit Mode's minimap box
+  nearest the screen edge, so it grows inward (centred on the box, as Blizzard anchors the minimap, it
+  ran off the screen: Edit Mode clamps only its own box; seen in game). Blizzard's minimap is
+  re-anchored to the outer frame's centre inside its own container (Blizzard positions only the
+  container, never the `Minimap` frame) and sized with `Minimap:SetSize` to the largest square that
+  fits.
   - If the engine renders a rectangular minimap (`SetSize(w, h)` with `w ~= h`), it fills the whole
     frame.
   - If not, it's the largest square, centred, and the rest is **terrain padding** at exactly the

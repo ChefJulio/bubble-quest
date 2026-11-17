@@ -5,10 +5,14 @@ local ADDON_NAME, ns = ...
 --
 -- Blizzard's frame stays in its Edit Mode container: Edit Mode places and scales it, we never move it.
 -- Everything else is our own frame or a widget setter on Blizzard's:
---   - `outer` (ours, on UIParent): the column's top. Centred on the minimap, the tracker's width,
---     holding the border; the tracker attaches under it (QuestmarkerAPI.SetTrackerAttach).
---   - Minimap:SetSize to the largest square `outer` holds (it's anchored at its container's centre,
---     Minimap.xml:62, so it grows evenly), SetMaskTexture square, the blob rings off, the compass ring
+--   - `outer` (ours, on UIParent): the column's top, the tracker's width, holding the border; the
+--     tracker attaches under it (QuestmarkerAPI.SetTrackerAttach). It hangs from the top corner of
+--     Edit Mode's minimap box nearest the screen edge, so it grows inward: centred on the box (where
+--     Blizzard anchors the minimap, Minimap.xml:62), a map wider than the box ran off the screen (seen
+--     in review; Edit Mode clamps only its own box).
+--   - Minimap re-anchored to `outer`'s centre, inside its own container: Blizzard only ever positions
+--     the container, never the Minimap frame itself, so this anchor stays.
+--   - Minimap:SetSize to the largest square `outer` holds, SetMaskTexture square, the blob rings off, the compass ring
 --     textures faded out (alpha: Blizzard re-sets their atlas, never their alpha). Forever re-applies
 --     its mask on every rotate toggle (Camelot/Minimap.lua:42), so a post-hook on UpdateMinimapConfig
 --     re-applies ours; it sets widget state only, calling no Blizzard update function.
@@ -64,10 +68,31 @@ local function applySize()
   Minimap_.appliedWidth = width
 end
 
+-- Which top corner of Edit Mode's box `outer` hangs from: the one nearest the screen edge.
+local function corner()
+  local x = MinimapCluster:GetCenter()
+  local center = UIParent:GetCenter()
+  if not x or not center then
+    return "TOPRIGHT"
+  end
+  local onRight = x * MinimapCluster:GetEffectiveScale() > center * UIParent:GetEffectiveScale()
+  return onRight and "TOPRIGHT" or "TOPLEFT"
+end
+
+local function applyAnchor()
+  local point = corner()
+  outer:ClearAllPoints()
+  outer:SetPoint(point, MinimapCluster, point)
+  Minimap_.appliedCorner = point
+end
+
 -- The tracker hangs under `outer`, so resizing or moving `outer` moves its secure quest item buttons:
 -- never in combat.
 local function refresh()
-  ns.AfterCombat("size", applySize)
+  ns.AfterCombat("size", function()
+    applyAnchor()
+    applySize()
+  end)
 end
 
 -- Construction -----------------------------------------------------------------------------------
@@ -76,7 +101,6 @@ local function createOuter()
   local frame = CreateFrame("Frame", "QuestmarkerMapFrame", UIParent)
   frame:SetFrameStrata(Minimap:GetFrameStrata())
   frame:SetFrameLevel(math.max(0, Minimap:GetFrameLevel() - 1))
-  frame:SetPoint("CENTER", Minimap, "CENTER")
   frame:EnableMouse(false)
 
   -- A 1 px border just outside the map (the tracker's panel continues below it).
@@ -96,7 +120,7 @@ local function createOuter()
     end
   end
 
-  -- Edit Mode rescales the minimap's container, and the UI scale can change: check, cheaply.
+  -- Edit Mode rescales and moves the minimap's box, and the UI scale can change: check, cheaply.
   local elapsed = 0
   frame:SetScript("OnUpdate", function(_, delta)
     elapsed = elapsed + delta
@@ -104,7 +128,7 @@ local function createOuter()
       return
     end
     elapsed = 0
-    if Minimap:GetEffectiveScale() ~= Minimap_.appliedScale then
+    if Minimap:GetEffectiveScale() ~= Minimap_.appliedScale or corner() ~= Minimap_.appliedCorner then
       refresh()
     end
   end)
@@ -123,7 +147,10 @@ function Minimap_:Activate()
   outer = createOuter()
   applyShape()
   hooksecurefunc(MinimapCluster, "UpdateMinimapConfig", applyShape)
-  applySize()  -- at login, out of combat
+  applyAnchor()  -- at login, out of combat
+  applySize()
+  Minimap:ClearAllPoints()
+  Minimap:SetPoint("CENTER", outer, "CENTER")
   ns.API.SetTrackerAttach(outer)
   ns.API.RegisterCallback("TrackerResized", refresh)
   ns.API.RegisterCallback("ProfileChanged", refresh)
