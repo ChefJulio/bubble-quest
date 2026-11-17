@@ -24,8 +24,9 @@ local STRIP_FILL = { 0.05, 0.05, 0.06, 0.85 }
 local STRIP_BORDER = { 0.6, 0.6, 0.6, 0.95 }
 local LINE_ALPHA = 0.5
 local KEEP_PAD = 0.6          -- icon sizes of margin around what's open before it folds back
--- The strip and lines: over the quest areas (2004), under the icons (2006-2008); see UI/MapAreas.lua.
-local BACKDROP_LEVEL = 2005
+-- The open row (strip, lines, stand-ins) over every layer of ours (2004-2008, UI/MapAreas.lua), so it
+-- covers icons that aren't in it; under Questie's (2015+).
+local BACKDROP_LEVEL = 2010
 
 local MapFan = {
   lists = {},       -- registered fanItems lists, by layer name
@@ -45,6 +46,22 @@ local frame ---@type table
 local canvas ---@type table
 local strip ---@type table
 local lines = {}
+-- Stand-ins: while a row is open the grouped icons are drawn here, on top of everything of ours
+-- (review: another "?" showed over the strip), copies of the originals, which turn invisible in place.
+local proxies = {}
+
+local function copyLook(from, to)
+  local atlas = from:GetAtlas()
+  if atlas then
+    to:SetAtlas(atlas)
+  else
+    to:SetTexture(from:GetTexture())
+    to:SetTexCoord(from:GetTexCoord())
+  end
+  to:SetDesaturated(from:IsDesaturated())
+  to:SetVertexColor(from:GetVertexColor())
+  to:SetSize(from:GetSize())
+end
 
 -- An icon's size on the canvas per unit of its base size (the scales, read once per use).
 local function sizeFactor()
@@ -66,7 +83,7 @@ local function render(fanned)
   for i, item in ipairs(fanned.items) do
     item.curX = item.x + (item.fanX - item.x) * e
     item.curY = item.y + (item.fanY - item.y) * e
-    place(item.texture, item.curX, item.curY)
+    place(proxies[i], item.curX, item.curY)
     local line = lines[i]
     line:SetStartPoint("TOPLEFT", canvas, item.x, -item.y)
     line:SetEndPoint("TOPLEFT", canvas, item.curX, -item.curY)
@@ -82,8 +99,11 @@ local function finish()
   MapFan.fanned = nil
   if fanned then
     for _, item in ipairs(fanned.items) do
-      place(item.texture, item.x, item.y)
+      item.texture:SetAlpha(1)  -- the original, back
     end
+  end
+  for _, proxy in ipairs(proxies) do
+    proxy:Hide()
   end
   for _, line in ipairs(lines) do
     line:Hide()
@@ -187,6 +207,16 @@ local function open(group)
       lines[i] = line
     end
     line:SetThickness(1.2 * scale)
+    -- The stand-in takes the icon's look; the original turns invisible where it is.
+    local proxy = proxies[i]
+    if not proxy then
+      proxy = frame:CreateTexture(nil, "OVERLAY")
+      proxies[i] = proxy
+    end
+    copyLook(item.texture, proxy)
+    place(proxy, item.x, item.y)
+    proxy:Show()
+    item.texture:SetAlpha(0)
   end
   -- The strip around the row; its border sized for the zoom (it's on the canvas, which scales).
   local edge = STRIP_EDGE * scale

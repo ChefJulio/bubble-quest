@@ -55,9 +55,9 @@ end
 -- A share of their normal opacity (a fixed 0.12 was too dim in review), so it follows the setting.
 local DIMMED_SHARE = 0.6
 local HOVER_SECONDS = 0.05  -- how often the hover is checked while the map is open
--- Our map layers, bottom to top: quest areas 2004, the fan-out strip 2005 (UI/MapFan.lua, over the
--- areas: review), town services 2006, quest givers' "!" 2007, turn-in "?" 2008; under Questie's map
--- lines (2015) and icons (2016+).
+-- Our map layers, bottom to top: quest areas 2004, town services 2006, quest givers' "!" 2007, turn-in
+-- "?" 2008, and an open fan-out row on top of them all at 2010 (UI/MapFan.lua: its strip covers what
+-- isn't in it, review); under Questie's map lines (2015) and icons (2016+).
 local FRAME_LEVEL = 2004
 local MARKER_LEVEL = 2008
 
