@@ -215,13 +215,13 @@ local function blizzardQuestPins(map)
   return pins, count
 end
 
--- A ready quest's turn-in: Blizzard's "?" over the quest's coloured circle, a fixed size on screen.
+-- A ready quest's turn-in: Blizzard's "?", a fixed size on screen. False when one is already there.
 local function placeMarker(group, canvas, x, y)
   local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
   local limit = TURNIN_SIZE * iconScale() * scale * 0.75
   for i = 1, #placedMarkers, 2 do
     if math.abs(placedMarkers[i] - x) < limit and math.abs(placedMarkers[i + 1] - y) < limit then
-      return
+      return false
     end
   end
   placedMarkers[#placedMarkers + 1] = x
@@ -238,6 +238,7 @@ local function placeMarker(group, canvas, x, y)
   marker:ClearAllPoints()
   marker:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   marker:Show()
+  return true
 end
 
 local function placeBlob(group, canvas, x, y, size, color)
@@ -343,13 +344,15 @@ function MapAreas:Redraw()
         local _, pos = C_Map.GetMapPosFromWorldPos(p.map, vector, mapID)
         if pos and pos.x >= 0 and pos.x <= 1 and pos.y >= 0 and pos.y <= 1 then
           local x, y = pos.x * width, pos.y * height
-          local texture = placeBlob(group, canvas, x, y, size, color)
-          if not entry.objective and not blizzardPins[questID] then
-            placeMarker(group, canvas, x, y)
+          if entry.objective then
+            local texture = placeBlob(group, canvas, x, y, size, color)
+            self.hits[#self.hits + 1] = {
+              x = x, y = y, questID = questID, objective = entry.objective, texture = texture, color = color,
+            }
+          elseif not blizzardPins[questID] and placeMarker(group, canvas, x, y) then
+            -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
+            self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, color = color }
           end
-          self.hits[#self.hits + 1] = {
-            x = x, y = y, questID = questID, objective = entry.objective, texture = texture, color = color,
-          }
         end
       end
       finishGroup(group)
@@ -494,19 +497,21 @@ local function highlight(target)
   wipe(lit)
   local size = MapAreas.blobSize or 0
   for _, hit in ipairs(MapAreas.hits) do
-    local alpha, scale = blobAlpha(), 1
-    if target then
-      local objectives = target[hit.questID]
-      if objectives and (objectives["*"] or objectives[hit.objective or "turnin"]) then
-        lit[#lit + 1] = hit
-        alpha, scale = GLOW_HIGH, GLOW_GROW
-      else
-        alpha = alpha * DIMMED_SHARE
+    if hit.texture then  -- circles; a turn-in's "?" (no texture here) stays as it is
+      local alpha, scale = blobAlpha(), 1
+      if target then
+        local objectives = target[hit.questID]
+        if objectives and (objectives["*"] or objectives[hit.objective or "turnin"]) then
+          lit[#lit + 1] = hit
+          alpha, scale = GLOW_HIGH, GLOW_GROW
+        else
+          alpha = alpha * DIMMED_SHARE
+        end
       end
+      local c = hit.color
+      hit.texture:SetVertexColor(c[1], c[2], c[3], alpha)
+      hit.texture:SetSize(size * scale, size * scale)
     end
-    local c = hit.color
-    hit.texture:SetVertexColor(c[1], c[2], c[3], alpha)
-    hit.texture:SetSize(size * scale, size * scale)
   end
 end
 

@@ -259,16 +259,17 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
       else
         inside = x * x + y * y <= reach * reach
       end
-      if inside then
+      if inside and p.objective then
         local blob = acquire(blobs, "blobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
-        if not p.objective and not ns.MapAreas.GameMarksTurnIn(p.questID) and not markerNear(x, y) then
-          place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
-          placedMarkers[#placedMarkers + 1] = x
-          placedMarkers[#placedMarkers + 1] = y
-        end
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
+      elseif inside and not ns.MapAreas.GameMarksTurnIn(p.questID) and not markerNear(x, y) then
+        -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
+        place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
+        placedMarkers[#placedMarkers + 1] = x
+        placedMarkers[#placedMarkers + 1] = y
+        hits[#hits + 1] = { x = x, y = y, questID = p.questID }
       end
     end
   end
