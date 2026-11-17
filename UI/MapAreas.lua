@@ -14,12 +14,18 @@ local ADDON_NAME, ns = ...
 -- quests/areas change.
 
 local BLOB_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\blob"
--- A ready quest's turn-in: Blizzard's yellow "?" (UI-QuestIcon-TurnIn-Normal, POIButton.lua:237), the
--- gossip window's "?" without the atlas. The size of the quest givers' "!" (UI/MapAvailable.lua), so
+-- A ready quest's turn-in: a yellow "?" the size of the quest givers' "!" (UI/MapAvailable.lua), so
 -- they match (review: sizes "slightly different"; the round button look tried after was not wanted).
-local TURNIN_ATLAS = "UI-QuestIcon-TurnIn-Normal"
-local TURNIN_FALLBACK = "Interface/GossipFrame/ActiveQuestIcon"
-local TURNIN_SIZE = 16       -- pixels at 100% (setting map.iconSize), whatever the zoom
+-- First choice: QuestTurnin, the "?" of the same set as the givers' QuestNormal, framed alike. Else
+-- Blizzard's map "?" (UI-QuestIcon-TurnIn-Normal, POIButton.lua:237), drawn to sit inside a round
+-- button, so its glyph fills less of its square: drawn larger (at the givers' size it was "tiny"). Else
+-- the gossip window's "?". Each with its size relative to the "!".
+local TURNIN_ART = {
+  { atlas = "QuestTurnin", scale = 1 },
+  { atlas = "UI-QuestIcon-TurnIn-Normal", scale = 1.5 },
+}
+local TURNIN_FALLBACK = { texture = "Interface/GossipFrame/ActiveQuestIcon", scale = 1 }
+local GIVER_SIZE = 16        -- the givers' "!" (UI/MapAvailable.lua ICON_SIZE), pixels at 100%
 local MERGE_YARDS = 12       -- spawns closer than this share one circle (fewer textures)
 
 -- A circle's radius in yards (setting map.size; 30 by default).
@@ -39,17 +45,36 @@ local function iconScale()
   return (ns.DB.profile.map.iconSize or 100) / 100
 end
 
-local turninHasAtlas
+local turninArt
+-- The turn-in art this client has (TURNIN_ART), looked up once.
+local function turnin()
+  if not turninArt then
+    turninArt = TURNIN_FALLBACK
+    for _, art in ipairs(TURNIN_ART) do
+      if C_Texture.GetAtlasInfo(art.atlas) then
+        turninArt = art
+        break
+      end
+    end
+  end
+  return turninArt
+end
+
 -- Sets a texture to the turn-in "?".
 local function setTurninArt(texture)
-  if turninHasAtlas == nil then
-    turninHasAtlas = C_Texture.GetAtlasInfo(TURNIN_ATLAS) ~= nil
-  end
-  if turninHasAtlas then
-    texture:SetAtlas(TURNIN_ATLAS)
+  local art = turnin()
+  if art.atlas then
+    texture:SetAtlas(art.atlas)
   else
-    texture:SetTexture(TURNIN_FALLBACK)
+    texture:SetTexture(art.texture)
   end
+end
+
+---The turn-in "?"'s size for a quest-giver "!" of `giverSize` pixels: the same look (also the minimap's).
+---@param giverSize number
+---@return number
+local function turninSize(giverSize)
+  return giverSize * turnin().scale
 end
 
 -- While something is highlighted (see Highlights), the other circles dim to this.
@@ -89,6 +114,7 @@ local MapAreas = {
   blobAlpha = blobAlpha,
   iconScale = iconScale,
   setTurninArt = setTurninArt,
+  turninSize = turninSize,
 }
 ns.MapAreas = MapAreas
 
@@ -311,7 +337,7 @@ end
 -- already there.
 local function placeMarker(group, canvas, x, y)
   local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
-  local limit = TURNIN_SIZE * iconScale() * scale * 0.75
+  local limit = turninSize(GIVER_SIZE) * iconScale() * scale * 0.75
   for i = 1, #placedMarkers, 2 do
     if math.abs(placedMarkers[i] - x) < limit and math.abs(placedMarkers[i + 1] - y) < limit then
       return false
@@ -326,7 +352,7 @@ local function placeMarker(group, canvas, x, y)
     setTurninArt(marker)
     group.markers[group.markersUsed] = marker
   end
-  local size = TURNIN_SIZE * iconScale() * UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
+  local size = turninSize(GIVER_SIZE) * iconScale() * UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
   marker:SetSize(size, size)  -- the canvas zooms; the "?" doesn't
   marker:ClearAllPoints()
   marker:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
@@ -452,7 +478,7 @@ function MapAreas:Redraw()
             if marker then
               self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, color = color }
               self.fanItems[#self.fanItems + 1] = {
-                texture = marker, x = x, y = y, base = TURNIN_SIZE,
+                texture = marker, x = x, y = y, base = turninSize(GIVER_SIZE),
                 fill = function(tooltip) MapAreas.FillTooltip(tooltip, { [questID] = { turnin = true } }) end,
                 click = function() ns.Navigation:ShowOnMap(questID) end,
               }

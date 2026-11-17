@@ -12,7 +12,6 @@ local ADDON_NAME, ns = ...
 -- hides everything there.
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
-local MARKER_SIZE = 16       -- the turn-in "?", pixels at 100% (setting map.iconSize)
 -- Pixels, not yards: a minimap is small (140 px across for 233 yd each way in review, 0.3 px a yard),
 -- so "too close for a line" is the arrows' "here" (yards, Navigation), never a pixel threshold.
 local DOT_SIZE = 5           -- guide dots
@@ -247,7 +246,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
   local hits = MinimapAreas.hits
   wipe(hits)
   wipe(placedMarkers)
-  markerSize = MARKER_SIZE * ns.MapAreas.iconScale()
+  markerSize = ns.MapAreas.turninSize(GIVER_SIZE) * ns.MapAreas.iconScale()  -- matches the givers' "!"
   -- The whole circle: on the minimap they're small (the world map's 70% core was too fiddly in review).
   MinimapAreas.radius = math.max(size / 2, HOVER_MIN)
   for _, p in ipairs(MinimapAreas.points) do

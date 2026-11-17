@@ -188,28 +188,49 @@ local function cluster(x, y)
 end
 
 -- The open row goes above everything on the map canvas, Blizzard's pins included (review: its spirit
--- healer pin showed over the row; the pin manager's "topmost" level wasn't the highest in use). Every
--- pin is a child frame of the canvas: the highest level among them and their own children, read only,
--- once per opening.
+-- healer pin showed over the row, through two fixes by frame level alone: the pin manager's "topmost"
+-- level, then the highest level on the canvas). Strata outranks level, so the row takes the highest
+-- strata any pin is in, then the highest level within it. Every pin is a child frame of the canvas:
+-- it and its own children are read, once per opening.
+local STRATA_RANK = {
+  BACKGROUND = 1, LOW = 2, MEDIUM = 3, HIGH = 4, DIALOG = 5, FULLSCREEN = 6, FULLSCREEN_DIALOG = 7,
+  TOOLTIP = 8,
+}
+local MAX_ROW_STRATA = "HIGH"  -- never above the map's own frame and buttons' strata (BorderFrame is HIGH)
+
 local function highestOnCanvas()
-  local highest = 0
+  local strata, level = canvas:GetFrameStrata(), 0
+  local function consider(f)
+    local s = f:GetFrameStrata()
+    local rank, best = STRATA_RANK[s] or 0, STRATA_RANK[strata] or 0
+    if rank > STRATA_RANK[MAX_ROW_STRATA] then
+      return
+    end
+    if rank > best then
+      strata, level = s, f:GetFrameLevel()
+    elseif rank == best then
+      level = math.max(level, f:GetFrameLevel())
+    end
+  end
   for _, child in ipairs({ canvas:GetChildren() }) do
-    if child ~= frame then
-      highest = math.max(highest, child:GetFrameLevel())
+    if child ~= frame and child:IsShown() then
+      consider(child)
       for _, grandchild in ipairs({ child:GetChildren() }) do
-        highest = math.max(highest, grandchild:GetFrameLevel())
+        consider(grandchild)
       end
     end
   end
-  return highest
+  return strata, level
 end
 
 local function raiseAbovePins()
-  local level = math.max(BACKDROP_LEVEL, highestOnCanvas() + 1)
-  if frame:GetFrameLevel() ~= level then
-    frame:SetFrameLevel(level)
-    strip:SetFrameLevel(level + 1)
-    overlay:SetFrameLevel(level + 2)
+  local strata, highest = highestOnCanvas()
+  local level = math.max(BACKDROP_LEVEL, highest + 1)
+  if frame:GetFrameStrata() ~= strata or frame:GetFrameLevel() ~= level then
+    for i, f in ipairs({ frame, strip, overlay }) do
+      f:SetFrameStrata(strata)
+      f:SetFrameLevel(level + i - 1)
+    end
   end
 end
 
