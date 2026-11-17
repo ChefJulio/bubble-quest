@@ -1,23 +1,23 @@
 local ADDON_NAME, ns = ...
 
 -- Settings. Every setting is defined once in UI/SettingsSchema.lua. This file:
---   - registers them in Blizzard's Options > AddOns > Questmarker panel (proxies onto the active
+--   - registers them in Blizzard's Options > AddOns > BubbleQuest panel (proxies onto the active
 --     profile, so switching profiles later needs no re-registration);
---   - opens Questmarker's own window (UI/SettingsWindow.lua) for /qm, the header and its button.
+--   - opens BubbleQuest's own window (UI/SettingsWindow.lua) for /qm, the header and its button.
 --     Blizzard's panel always reopens the game menu when it closes
 --     (Blizzard_SettingsPanel.lua:295-302, TransitionBackOpeningPanel); our window doesn't, and as a
 --     plain frame it also opens in combat.
 
-local QuestmarkerSettings = {
+local BubbleQuestSettings = {
   category = nil,  -- Blizzard panel category, once registered
 }
-ns.Settings = QuestmarkerSettings
+ns.Settings = BubbleQuestSettings
 
 local VAR_TYPE = { checkbox = "Boolean", slider = "Number", dropdown = "String" }
 
 local function register(category, layout, entry)
   if entry.windowOnly or (entry.onlyIf and not entry.onlyIf()) then
-    return  -- Questmarker's window only (e.g. the Questie status row: not a setting)
+    return  -- BubbleQuest's window only (e.g. the Questie status row: not a setting)
   end
   if entry.kind == "section" then
     layout:AddInitializer(CreateSettingsListSectionHeaderInitializer(entry.label))
@@ -45,8 +45,8 @@ local function register(category, layout, entry)
 end
 
 -- Called once SavedVariables are loaded.
-function QuestmarkerSettings:Register()
-  local category = Settings.RegisterVerticalLayoutCategory("Questmarker")
+function BubbleQuestSettings:Register()
+  local category = Settings.RegisterVerticalLayoutCategory("BubbleQuest")
   -- SettingsPanel is Blizzard's global frame. (This module's table was once a local of the same name,
   -- which hid it: the panel never registered.)
   local layout = SettingsPanel:GetLayout(category)
@@ -59,21 +59,21 @@ end
 
 ---Change a setting from outside both UIs (the header's lock button).
 ---@param id string
-function QuestmarkerSettings:SetValue(id, value)
+function BubbleQuestSettings:SetValue(id, value)
   local entry = ns.SettingsSchema:Find(id)
   if entry then
     ns.SettingsSchema:Set(entry, value)
   end
 end
 
----Open Questmarker's own settings window.
-function QuestmarkerSettings:Open()
+---Open BubbleQuest's own settings window.
+function BubbleQuestSettings:Open()
   ns.SettingsWindow:Toggle()
 end
 
 -- Keep Blizzard's panel in step when a setting changes elsewhere (our window, the lock button).
 ns.Bus:On("SettingChanged", function(id)
-  if QuestmarkerSettings.category then
+  if BubbleQuestSettings.category then
     Settings.NotifyUpdate(id)
   end
 end)

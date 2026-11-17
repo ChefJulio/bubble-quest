@@ -1,7 +1,7 @@
 # Hint triage brief
 
 You are deciding, for each forever-db step row, whether it becomes a **hint**, a **do** line, or is
-**skipped**, for Questmarker, a World of Warcraft: Forever quest tracker. Each quest card shows the
+**skipped**, for BubbleQuest, a World of Warcraft: Forever quest tracker. Each quest card shows the
 quest's objectives ("Kill Kobold Vermin 3/10"), a source line for items ("Loot Red Burlap Bandana from
 Defias Thug"), a tag for elite/dungeon/group quests, and its category (dungeon, profession, seasonal,
 class, repeatable get their own groups). A **hint** is a one-line tip under the objectives, shown only

@@ -1,4 +1,4 @@
-"""Draw Questmarker's logo: gold "QM" (Bahnschrift) on a dark navy square, edge to edge.
+"""Draw BubbleQuest's logo (still Questmarker's "QM": a new one is to come): gold "QM" (Bahnschrift) on a dark navy square, edge to edge.
 
 Square, no rounded corners: CurseForge frames the logo in its own square tile, and in game the icon is
 shown at 16-20 px, where every pixel counts.

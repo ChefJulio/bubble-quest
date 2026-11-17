@@ -400,7 +400,7 @@ local function create()
   mask:SetAllPoints(layer)
   -- Every frame while the minimap shows: it moves (and may turn) every frame.
   layer:SetScript("OnUpdate", update)
-  tooltip = CreateFrame("GameTooltip", "QuestmarkerMinimapTooltip", UIParent, "GameTooltipTemplate")
+  tooltip = CreateFrame("GameTooltip", "BubbleQuestMinimapTooltip", UIParent, "GameTooltipTemplate")
   layer:SetScript("OnHide", function() tooltip:Hide() end)
 end
 

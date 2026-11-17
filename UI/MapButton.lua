@@ -10,7 +10,7 @@ local ADDON_NAME, ns = ...
 -- that column would put it: under Blizzard's map pin button (Forever moves it to the top-left,
 -- Krowi_WorldMapButtons.lua:22-24).
 -- Look: the round minimap-button style Questie's uses (its QuestieWorldMapButtonTemplate.xml), with
--- Questmarker's icon.
+-- BubbleQuest's icon.
 
 local ICON = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Icon"
 local KROWI = "Krowi_WorldMapButtons-1.4"
@@ -20,14 +20,14 @@ ns.MapButton = MapButton
 
 -- The menu: { setting id, label } or "-" for a divider. Settings live in UI/SettingsSchema.lua.
 local ITEMS = {
-  { "QUESTMARKER_MAP_AREAS", "Quest areas" },
-  { "QUESTMARKER_MAP_AVAILABLE", "Quests you can pick up" },
-  { "QUESTMARKER_MAP_AVAILABLE_TRIVIAL", "Low-level quests", indent = true },
-  { "QUESTMARKER_MAP_AVAILABLE_DROPS", "Quests started by a drop", indent = true },
-  { "QUESTMARKER_MAP_CONTINENT_ICONS", "Icons on continent maps" },
+  { "BUBBLEQUEST_MAP_AREAS", "Quest areas" },
+  { "BUBBLEQUEST_MAP_AVAILABLE", "Quests you can pick up" },
+  { "BUBBLEQUEST_MAP_AVAILABLE_TRIVIAL", "Low-level quests", indent = true },
+  { "BUBBLEQUEST_MAP_AVAILABLE_DROPS", "Quests started by a drop", indent = true },
+  { "BUBBLEQUEST_MAP_CONTINENT_ICONS", "Icons on continent maps" },
   "-",
-  { "QUESTMARKER_MINIMAP_AREAS", "Quest areas on the minimap" },
-  { "QUESTMARKER_MINIMAP_GUIDE", "Guide line on the minimap" },
+  { "BUBBLEQUEST_MINIMAP_AREAS", "Quest areas on the minimap" },
+  { "BUBBLEQUEST_MINIMAP_GUIDE", "Guide line on the minimap" },
 }
 
 local function value(id)
@@ -37,7 +37,7 @@ end
 
 local function openMenu(owner)
   MenuUtil.CreateContextMenu(owner, function(_, root)
-    root:CreateTitle("Questmarker")
+    root:CreateTitle("BubbleQuest")
     for _, item in ipairs(ITEMS) do
       if item == "-" then
         root:CreateDivider()
@@ -47,7 +47,7 @@ local function openMenu(owner)
           function() return value(id) end,
           function() ns.Settings:SetValue(id, not value(id)) end)
         -- The sub-options only matter while "Quests you can pick up" is on.
-        if item.indent and not value("QUESTMARKER_MAP_AVAILABLE") then
+        if item.indent and not value("BUBBLEQUEST_MAP_AVAILABLE") then
           checkbox:SetEnabled(false)
         end
       end
@@ -96,8 +96,8 @@ local function style(button)
   button:SetScript("OnClick", function(self) openMenu(self) end)
   local function showTooltip()
     if ns.Tooltips:Take(button, "ANCHOR_RIGHT", showTooltip) then
-      GameTooltip:SetText("Questmarker", 1, 1, 1)
-      GameTooltip:AddLine("Click: what Questmarker shows on the maps", 0.8, 0.8, 0.8)
+      GameTooltip:SetText("BubbleQuest", 1, 1, 1)
+      GameTooltip:AddLine("Click: what BubbleQuest shows on the maps", 0.8, 0.8, 0.8)
       GameTooltip:Show()
     end
   end

@@ -208,7 +208,7 @@ local function createRow(card)
   row.check:SetPoint("TOPLEFT", 0, 0)
   -- Each unfinished objective of a quest with several gets its own arrow and distance, left of the
   -- counter (review: "all separate objectives to have arrow/dist"; their areas can be far apart).
-  row.navText = row:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallHighlightFont")
+  row.navText = row:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallHighlightFont")
   row.navText:SetPoint("TOPRIGHT", -COUNTER_WIDTH, -1)
   row.navText:SetJustifyH("RIGHT")
   row.navText:SetWordWrap(false)
@@ -217,12 +217,12 @@ local function createRow(card)
   row.navArrow:SetPoint("RIGHT", row.navText, "LEFT", -2, 0)  -- right next to the text, whatever its length
   Card.PrepareRotatingTexture(row.navArrow)
   row.navArrow:Hide()
-  row.text = row:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+  row.text = row:CreateFontString(nil, "ARTWORK", "BubbleQuestLineFont")
   row.text:SetPoint("TOPLEFT", ROW_INDENT, 0)
   row.text:SetWidth(WIDTH - ROW_INDENT - COUNTER_WIDTH)
   row.text:SetJustifyH("LEFT")
   row.text:SetWordWrap(true)
-  row.counter = row:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+  row.counter = row:CreateFontString(nil, "ARTWORK", "BubbleQuestLineFont")
   row.counter:SetPoint("TOPRIGHT", 0, 0)
   row.counter:SetWidth(COUNTER_WIDTH)
   row.counter:SetJustifyH("RIGHT")
@@ -266,14 +266,14 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   end)
   self.frame = frame
 
-  self.title = frame:CreateFontString(nil, "ARTWORK", "QuestmarkerHeaderFont")
+  self.title = frame:CreateFontString(nil, "ARTWORK", "BubbleQuestHeaderFont")
   self.title:SetPoint("TOPLEFT", 0, 0)
   self.title:SetWidth(WIDTH - TOGGLE_WIDTH)  -- narrowed by SetNavigation while an arrow shows
   self.title:SetJustifyH("LEFT")
   self.title:SetWordWrap(false)
 
   -- Arrow / in-area diamond and the distance or zone name, right-aligned before the toggle.
-  self.navText = frame:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallHighlightFont")
+  self.navText = frame:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallHighlightFont")
   self.navText:SetPoint("TOPRIGHT", -TOGGLE_WIDTH, -2)
   self.navText:SetJustifyH("RIGHT")
   self.arrow = frame:CreateTexture(nil, "ARTWORK")
@@ -292,7 +292,7 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   -- and distance by SetNavigation, which fits the title around both.
   local party = CreateFrame("Button", nil, frame)
   party:SetHeight(TITLE_HEIGHT)
-  party.label = party:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
+  party.label = party:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
   party.label:SetPoint("CENTER")
   party.label:SetTextColor(0.4, 0.8, 1)
   party:SetScript("OnClick", function()
@@ -309,7 +309,7 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
       GameTooltip:AddLine(name, 0.4, 0.8, 1)
     end
     -- Members without it who can't take it, and why (Quests/Party.lua: level, class, their
-    -- Questmarker's answer, or a share's reply).
+    -- BubbleQuest's answer, or a share's reply).
     for _, entry in ipairs(self.partyCannot or {}) do
       GameTooltip:AddDoubleLine(entry.name, entry.reason, 0.6, 0.6, 0.6, 0.6, 0.6, 0.6)
     end
@@ -333,7 +333,7 @@ function Card.Create(parent, onToggleCollapse, onMenu, onClick)
   self.bar = createBar(frame)
 
   -- Timed quests: "Time left 2:12" under the title (review: Iverron's Antidote's timer was missing).
-  self.timer = frame:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+  self.timer = frame:CreateFontString(nil, "ARTWORK", "BubbleQuestLineFont")
   self.timer:SetJustifyH("LEFT")
   self.timer:Hide()
 

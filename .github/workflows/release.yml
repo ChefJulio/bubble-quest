@@ -29,7 +29,7 @@ jobs:
       - name: Check package contents
         run: python3 tools/package.py --check
 
-      # Names like most addons in the CurseForge app (review): "Questmarker-0.2.0.zip", as Bagnon-12.1.10.zip.
+      # Names like most addons in the CurseForge app (review): "BubbleQuest-0.2.0.zip", as Bagnon-12.1.10.zip.
       # The release type (beta, alpha) shows as CurseForge's badge, so it's cut from the name along
       # with the tag's "v": tag v0.2.0-beta -> 0.2.0.
       - name: Release name

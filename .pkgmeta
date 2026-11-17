@@ -1,9 +1,12 @@
-package-as: Questmarker
+package-as: BubbleQuest
 
-# Companion addons in this repo ship beside Questmarker in the same zip, each its own folder in
+# Companion addons in this repo ship beside BubbleQuest in the same zip, each its own folder in
 # Interface\AddOns (the BigWigs/DBM model). tools/package.py's COMPANIONS must list the same.
+# Questmarker: the stub that hands the old Questmarker settings to BubbleQuest; it also replaces the
+# old Questmarker folder on update, so the old addon can't load beside the new one.
 move-folders:
-  Questmarker/BubbleMap: BubbleMap
+  BubbleQuest/BubbleMap: BubbleMap
+  BubbleQuest/Questmarker: Questmarker
 
 # Release notes for CurseForge and GitHub: CHANGELOG.md holds only the coming release's notes;
 # replace them before tagging (past notes stay on the release pages).

@@ -1,4 +1,4 @@
-"""Vendor LibForeverData into Libs/LibForeverData (bundled with Questmarker, unmodified).
+"""Vendor LibForeverData into Libs/LibForeverData (bundled with BubbleQuest, unmodified).
 
   python tools/vendor.py            install the release pinned in tools/toolchain.json
   python tools/vendor.py --update   pin the newest lib-v* release, then install it

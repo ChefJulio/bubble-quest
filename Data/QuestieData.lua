@@ -5,7 +5,7 @@ local ADDON_NAME, ns = ...
 -- Through QuestieDB's public library, written for other addons: "Another addon can read entity
 -- fields ... Questie is the first consumer, but nothing here assumes it" (QuestieDB/src/api.lua:3-6),
 -- versioned by contract (RequireContract). Questie itself isn't needed (review, 2026-11-16:
--- Questmarker is replacing Questie; docs/design/available-quests.md): QuestieDB applies its own
+-- BubbleQuest is replacing Questie; docs/design/available-quests.md): QuestieDB applies its own
 -- corrections at load, so its data is usable as soon as it's loaded, and it publishes the area ->
 -- uiMap table Questie's ZoneDB reads. With Questie also running, its extra corrections land when it's
 -- ready (RegisterOnReady), and the cache is dropped then.

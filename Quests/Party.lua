@@ -36,7 +36,7 @@ local REPLIES = {
 
 local Party = {
   refused = {},    -- [name] = { [questID] = reply key }: lasting refusals this session
-  remote = {},     -- [name] = { [questID] = "ok" | reason }: answers from their Questmarker
+  remote = {},     -- [name] = { [questID] = "ok" | reason }: answers from their BubbleQuest
   asking = {},     -- [questID] = true: to ask in the next query
   patterns = nil,  -- { { pattern, outcome, key, named } }
   chain = { tried = {} },  -- Share next: quests already offered this round; pending share
@@ -72,8 +72,8 @@ end
 --   1. Pre-check, anyone: their level, class, race and faction against the quest's requirements
 --      (forever-db; Questie's max level). Party members' class and race are readable (secret only
 --      for units outside the party: SecretPredicatesDocumentation.lua:130-133).
---   2. Ask their Questmarker (when they run it): it answers for its own player (completed, earlier
---      quest missing, log full) over addon messages. See "Questmarker to Questmarker" below.
+--   2. Ask their BubbleQuest (when they run it): it answers for its own player (completed, earlier
+--      quest missing, log full) over addon messages. See "BubbleQuest to BubbleQuest" below.
 --   3. Share replies: lasting refusals from a share this session (Party.refused).
 local REASONS = {
   low = "too low level", high = "too high level", class = "wrong class", race = "wrong race",
@@ -302,17 +302,18 @@ ns.Events:On("CHAT_MSG_SYSTEM", function(message)
   end
 end)
 
--- Questmarker to Questmarker ---------------------------------------------------------------------------
+-- BubbleQuest to BubbleQuest ---------------------------------------------------------------------------
 -- The only way to know a party member's completed quests, prerequisites or log space before sharing
--- (review, researched): ask their Questmarker, which answers for its own player. Party channel, prefix
--- "Questmarker":
+-- (review, researched): ask their BubbleQuest, which answers for its own player. Party channel, prefix
+-- "Questmarker" (the addon's name before the rename, kept on the wire so the new version and the old
+-- one still understand each other; players never see it):
 --   "Q1:123,456"         which of these can you take? (debounced: one query for everything unknown)
---   "A1:123=ok,456=done" the answer, to the whole party (every Questmarker learns it)
+--   "A1:123=ok,456=done" the answer, to the whole party (every BubbleQuest learns it)
 -- Codes: ok, done (completed), pre (an earlier quest missing, per forever-db), full (log full), onq.
--- Members without Questmarker never answer; layers 1 and 3 still apply to them. Addon messages are
+-- Members without BubbleQuest never answer; layers 1 and 3 still apply to them. Addon messages are
 -- refused during chat lockdown (InChatMessagingLockdown: restricted content); nothing is sent then.
 
-local PREFIX = "Questmarker"
+local PREFIX = "Questmarker"  -- the wire name, unchanged by the rename (see above)
 local ASK_DELAY = 1  -- seconds to gather quests into one query
 local MAX_MESSAGE = 240
 
@@ -341,7 +342,7 @@ local function sendList(head, items)
 end
 
 local askTimer
----Ask the party's Questmarkers about a quest (gathered into one query shortly after).
+---Ask the party's BubbleQuests about a quest (gathered into one query shortly after).
 ---@param questID number
 function Party:Ask(questID)
   if self.asking[questID] ~= nil then

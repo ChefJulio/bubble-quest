@@ -1,8 +1,9 @@
 local ADDON_NAME, ns = ...
 
 -- SavedVariables.
---   QuestmarkerDB      account-wide: profiles (settings shared across characters), debug flags
---   QuestmarkerCharDB  per character: which profile, pins, ignore list, collapse state, notices
+--   BubbleQuestDB      account-wide: profiles (settings shared across characters), debug flags
+--   BubbleQuestCharDB  per character: which profile, pins, ignore list, collapse state, notices
+-- Before the rename these were QuestmarkerDB and QuestmarkerCharDB: see takeOverQuestmarker.
 -- Defaults are deep-filled on load (missing keys only), so new settings reach existing users.
 -- When a later version changes the shape, bump SCHEMA and add MIGRATIONS[SCHEMA]: it receives the
 -- saved table at schema SCHEMA - 1 and upgrades it in place.
@@ -138,19 +139,34 @@ local function prepare(saved, steps, defaults)
   return saved
 end
 
+-- Questmarker became BubbleQuest (docs/design/bubble-suite.md). Its settings are still in the old
+-- variables, loaded by the Questmarker stub addon (Questmarker/, loaded before us: OptionalDeps). Each
+-- is taken over once, when ours is still empty, and cleared there so the stub's file empties. Account
+-- settings move on the first login after the update; each character's on that character's first login.
+-- Remove with the stub, a few releases after the rename.
+local function takeOverQuestmarker()
+  if BubbleQuestDB == nil and type(QuestmarkerDB) == "table" then
+    BubbleQuestDB, QuestmarkerDB = QuestmarkerDB, nil
+  end
+  if BubbleQuestCharDB == nil and type(QuestmarkerCharDB) == "table" then
+    BubbleQuestCharDB, QuestmarkerCharDB = QuestmarkerCharDB, nil
+  end
+end
+
 -- Called once, on our ADDON_LOADED (SavedVariables are available from then on).
 function DB:Load()
-  QuestmarkerDB = prepare(QuestmarkerDB, MIGRATIONS.account, ACCOUNT_DEFAULTS)
-  QuestmarkerCharDB = prepare(QuestmarkerCharDB, MIGRATIONS.char, CHAR_DEFAULTS)
-  self.account = QuestmarkerDB
-  self.char = QuestmarkerCharDB
+  takeOverQuestmarker()
+  BubbleQuestDB = prepare(BubbleQuestDB, MIGRATIONS.account, ACCOUNT_DEFAULTS)
+  BubbleQuestCharDB = prepare(BubbleQuestCharDB, MIGRATIONS.char, CHAR_DEFAULTS)
+  self.account = BubbleQuestDB
+  self.char = BubbleQuestCharDB
   self:UseProfile(self.char.profile)
 end
 
 -- Profiles (review: "default should be global"): every character uses GLOBAL, the shared profile, unless
 -- it's switched to one of its own in the settings window. Layout and behaviour live in the profile;
 -- what's naturally per character (pins, hidden and collapsed quests, trainers you want, ...) lives in
--- QuestmarkerCharDB and never in a profile.
+-- BubbleQuestCharDB and never in a profile.
 local GLOBAL = "Default"  -- the shared profile's key (shown as "Global"); kept for existing saved data
 DB.GLOBAL = GLOBAL
 

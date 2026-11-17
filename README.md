@@ -1,17 +1,22 @@
-# Questmarker
+# BubbleQuest
 
-A quest helper addon for World of Warcraft: Forever. Licensed under GPL-3.0-or-later (see `LICENSE`).
+A quest helper addon for World of Warcraft: Forever, part of the BubbleSuite. Formerly Questmarker.
+Licensed under GPL-3.0-or-later (see `LICENSE`).
 
 ## Install (dev)
 
-Junction this folder into the Forever AddOns directory as `Questmarker`, so the game reads the repo
-directly and changes only need a `/reload` (PowerShell):
+Junction this folder into the Forever AddOns directory as `BubbleQuest`, and each companion folder
+(`BubbleMap`, and `Questmarker`: the stub that hands old Questmarker settings over) under its own
+name, so the game reads the repo directly and changes only need a `/reload` (PowerShell):
 
 ```
-New-Item -ItemType Junction -Path "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns\Questmarker" -Target <repo path>
+$addons = "C:\Program Files (x86)\World of Warcraft\_forever_\Interface\AddOns"
+New-Item -ItemType Junction -Path "$addons\BubbleQuest" -Target <repo path>
+New-Item -ItemType Junction -Path "$addons\BubbleMap" -Target <repo path>\BubbleMap
+New-Item -ItemType Junction -Path "$addons\Questmarker" -Target <repo path>\Questmarker
 ```
 
-Then `/reload` in game and type `/qm`.
+New addon folders need a full game restart (not just `/reload`). Then type `/bq` (`/qm` still works).
 
 Forever disables user scripts, so `/dump`, `/run` and `/script` do nothing (silently). Debug through
 the addon's own slash commands instead.

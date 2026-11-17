@@ -1,13 +1,13 @@
 local ADDON_NAME, ns = ...
 
--- Fonts for the tracker (setting: font face and text size). The tracker's text uses Questmarker's own
+-- Fonts for the tracker (setting: font face and text size). The tracker's text uses BubbleQuest's own
 -- font objects, created here as copies of the Blizzard fonts it used before; changing the font sets
 -- these objects once and every font string using them follows.
 --
 -- Faces come from LibSharedMedia-3.0 when any addon has loaded it (most setups have it: BugSack, DBM,
 -- Details, Plater, Prat, MSBT embed it), which lists every font any addon registered, e.g. MSBT's
--- "MSBT Porky". Questmarker doesn't bundle it; without it the list is WoW's four built-in fonts. A face
--- registered after Questmarker loads (MSBT loading later) is applied when it registers.
+-- "MSBT Porky". BubbleQuest doesn't bundle it; without it the list is WoW's four built-in fonts. A face
+-- registered after BubbleQuest loads (MSBT loading later) is applied when it registers.
 
 local DEFAULT = "default"
 
@@ -21,10 +21,10 @@ local BUILTIN = {
 local Fonts = {
   -- name = Blizzard font object it starts as a copy of
   objects = {
-    { name = "QuestmarkerHeaderFont", base = "ObjectiveTrackerHeaderFont" },
-    { name = "QuestmarkerLineFont", base = "ObjectiveTrackerLineFont" },
-    { name = "QuestmarkerSmallFont", base = "GameFontNormalSmall" },
-    { name = "QuestmarkerSmallHighlightFont", base = "GameFontHighlightSmall" },
+    { name = "BubbleQuestHeaderFont", base = "ObjectiveTrackerHeaderFont" },
+    { name = "BubbleQuestLineFont", base = "ObjectiveTrackerLineFont" },
+    { name = "BubbleQuestSmallFont", base = "GameFontNormalSmall" },
+    { name = "BubbleQuestSmallHighlightFont", base = "GameFontHighlightSmall" },
   },
 }
 ns.Fonts = Fonts
@@ -73,7 +73,7 @@ function Fonts:PreviewObject(path)
   local object = previewObjects[path]
   if not object then
     previewCount = previewCount + 1
-    object = CreateFont(("QuestmarkerPreviewFont%d"):format(previewCount))
+    object = CreateFont(("BubbleQuestPreviewFont%d"):format(previewCount))
     object:CopyFontObject("GameFontHighlight")
     local _, size = object:GetFont()
     object:SetFont(path, size or 12, "")
@@ -104,7 +104,7 @@ function Fonts:Options()
   return options
 end
 
----Set every Questmarker font object from the profile (face, size percent), then relayout.
+---Set every BubbleQuest font object from the profile (face, size percent), then relayout.
 function Fonts:Apply()
   local settings = ns.DB.profile.font
   local path = self:Path(settings.face)

@@ -6,7 +6,7 @@ local ADDON_NAME, ns = ...
 --
 -- When a nameplate of a creature that counts for an objective appears (Quests/Nearby.lua), the
 -- player is within nameplate range of it: their position is recorded for that objective. The arrow
--- then points at the nearest recorded spot. Account-wide (QuestmarkerDB.learned), so every character
+-- then points at the nearest recorded spot. Account-wide (BubbleQuestDB.learned), so every character
 -- benefits; local only, nothing leaves the machine.
 
 local MIN_SPACING_YARDS = 25   -- don't record a spot closer than this to a known one

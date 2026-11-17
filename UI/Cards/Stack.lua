@@ -47,7 +47,7 @@ local Stack = {
   order = {},       -- questIDs of the cards on screen, top to bottom
   sections = {},    -- section headers laid out, top to bottom: { frame, y (in the body) }
   resortPending = false,
-  attachedTo = nil, ---@type Frame? -- the frame the tracker hangs under (QuestmarkerAPI.SetTrackerAttach)
+  attachedTo = nil, ---@type Frame? -- the frame the tracker hangs under (BubbleQuestAPI.SetTrackerAttach)
   draggingAttached = false,  -- our header is dragging attachedTo
   PAD = PAD,
   HEADER_HEIGHT = HEADER_HEIGHT,
@@ -554,7 +554,7 @@ function Stack:ApplyPosition()
   end
   container:ClearAllPoints()
   if self.attachedTo then
-    -- Hanging under another frame (Questmarker_Map's minimap): it moves, we follow. The saved
+    -- Hanging under another frame (BubbleQuest_Map's minimap): it moves, we follow. The saved
     -- position is kept for when it lets go.
     container:SetPoint("TOPLEFT", self.attachedTo, "BOTTOMLEFT")
   elseif saved then
@@ -572,7 +572,7 @@ function Stack:ApplyPosition()
 end
 
 ---Hang the tracker under `frame` (nil: back to its own position). Out of combat only: the caller
----(QuestmarkerAPI.SetTrackerAttach) queues it, as the quest item buttons are anchored to the cards.
+---(BubbleQuestAPI.SetTrackerAttach) queues it, as the quest item buttons are anchored to the cards.
 ---@param frame Frame?
 function Stack:Attach(frame)
   if frame == self.attachedTo then
@@ -677,7 +677,7 @@ local function createHeader(container)
     if not attached then
       container:StartMoving()
     elseif attached:IsMovable() then
-      -- Attached (Questmarker_Map's column): the header moves the whole column, tracker included.
+      -- Attached (BubbleQuest_Map's column): the header moves the whole column, tracker included.
       Stack.draggingAttached = true
       attached:StartMoving()
     end
@@ -694,19 +694,19 @@ local function createHeader(container)
   band:SetAllPoints()
   band:SetColorTexture(0, 0, 0, 0.35)
 
-  header.title = header:CreateFontString(nil, "ARTWORK", "QuestmarkerHeaderFont")
+  header.title = header:CreateFontString(nil, "ARTWORK", "BubbleQuestHeaderFont")
   header.title:SetPoint("LEFT", PAD, 0)
-  header.title:SetText("Questmarker")
+  header.title:SetText("BubbleQuest")
 
   header.minimize = headerButton(header, function()
-    return ns.DB.char.minimized and "Show Questmarker's cards" or "Minimize to this header"
+    return ns.DB.char.minimized and "Show BubbleQuest's cards" or "Minimize to this header"
   end, function()
     ns.DB.char.minimized = not ns.DB.char.minimized
     Stack:Request(false, true)
   end)
   header.minimize:SetPoint("RIGHT", -PAD + 2, 0)
 
-  header.settings = headerButton(header, function() return "Questmarker settings" end, function()
+  header.settings = headerButton(header, function() return "BubbleQuest settings" end, function()
     ns.Settings:Open()
   end)
   header.settings:SetNormalAtlas("ui-questtrackerbutton-filter")
@@ -723,25 +723,25 @@ local function createHeader(container)
       or "Unlocked: drag this header to move the cards. Click to lock."
   end, function()
     -- Through the setting, so both settings UIs follow (their checkboxes refresh on SettingChanged).
-    ns.Settings:SetValue("QUESTMARKER_LOCK_CARDS", not ns.DB.profile.cards.locked)
+    ns.Settings:SetValue("BUBBLEQUEST_LOCK_CARDS", not ns.DB.profile.cards.locked)
   end)
   header.lock:SetPoint("RIGHT", header.settings, "LEFT", -2, 0)
   local lockAtlas = firstAtlas("worldquest-tracker-lock", "honorsystem-bar-lock", "groupfinder-icon-lock")
   if lockAtlas then
     header.lock:SetNormalAtlas(lockAtlas)
   else
-    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallHighlightFont")
+    header.lock.fallback = header.lock:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallHighlightFont")
     header.lock.fallback:SetPoint("CENTER")
   end
 
-  header.count = header:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
+  header.count = header:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
   header.count:SetPoint("RIGHT", header.lock, "LEFT", -6, 0)
 
   -- "Share next" (review): grouped only. Each click shares the next quest in this zone a party member
   -- lacks; a share nobody can take goes straight on to the next (Quests/Party.lua).
   local share = CreateFrame("Button", nil, header)
   share:SetHeight(HEADER_HEIGHT)
-  share.label = share:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
+  share.label = share:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
   share.label:SetPoint("CENTER")
   share.label:SetText("Share next")
   share.label:SetTextColor(0.4, 0.8, 1)
@@ -768,7 +768,7 @@ local function createHeader(container)
 end
 
 function Stack:Create()
-  local container = CreateFrame("Frame", "QuestmarkerStack", UIParent)
+  local container = CreateFrame("Frame", "BubbleQuestStack", UIParent)
   container:SetSize(ns.Card.WIDTH + 2 * PAD, HEADER_HEIGHT)
   container:SetMovable(true)
   container:SetClampedToScreen(true)
@@ -856,7 +856,7 @@ function Stack:Create()
   end)
 
   headingPool = ns.CreatePool(function()
-    local heading = body:CreateFontString(nil, "ARTWORK", "QuestmarkerSmallFont")
+    local heading = body:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
     heading:SetTextColor(0.7, 0.7, 0.7)
     return heading
   end)
@@ -865,7 +865,7 @@ function Stack:Create()
     local line = CreateFrame("Button", nil, body)
     line:SetSize(ns.Card.WIDTH, LINE_HEIGHT)
     line:RegisterForClicks("LeftButtonUp", "RightButtonUp")
-    line.label = line:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+    line.label = line:CreateFontString(nil, "ARTWORK", "BubbleQuestLineFont")
     line.label:SetPoint("LEFT")
     line:SetScript("OnClick", function(self, button)
       if self.onClick then
@@ -899,10 +899,10 @@ function Stack:Create()
     section.chevron:SetSize(12, 12)
     section.chevron:SetPoint("LEFT", 3, 0)
     if not (chevronOpen and chevronClosed) then
-      section.fallback = section:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+      section.fallback = section:CreateFontString(nil, "ARTWORK", "BubbleQuestLineFont")
       section.fallback:SetPoint("CENTER", section.chevron)
     end
-    section.label = section:CreateFontString(nil, "ARTWORK", "QuestmarkerLineFont")
+    section.label = section:CreateFontString(nil, "ARTWORK", "BubbleQuestLineFont")
     section.label:SetPoint("LEFT", section.chevron, "RIGHT", 4, 0)
     section:SetScript("OnClick", function(self)
       if self.onClick then

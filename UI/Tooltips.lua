@@ -1,6 +1,6 @@
 local ADDON_NAME, ns = ...
 
--- Every tooltip Questmarker shows takes its tooltip here (review: holding Ctrl hides all of ours, to
+-- Every tooltip BubbleQuest shows takes its tooltip here (review: holding Ctrl hides all of ours, to
 -- see the map or minimap under them). While Ctrl is held none of ours show, and pressing it hides the
 -- ones up. Letting go brings back the one under the cursor: tooltips that follow the cursor (maps)
 -- show again by themselves; ones shown on enter pass `reshow`.

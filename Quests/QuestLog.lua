@@ -1,6 +1,6 @@
 local ADDON_NAME, ns = ...
 
--- The quest-log model: the one place Questmarker reads the game's quest log.
+-- The quest-log model: the one place BubbleQuest reads the game's quest log.
 --
 -- QuestLog.quests[questID] = quest snapshot (see readQuest). Keyed by quest ID, never by log
 -- index: indices shift when headers collapse or quests are added.

@@ -2,14 +2,14 @@
 
 Questie hides quests that aren't in the game, duplicates, other versions' quests, and quests it
 shouldn't draw on the map (started by reading a book, legacy rewards): a list in its own code
-(Database/Corrections/QuestieQuestBlacklist.lua), not in the QuestieDB data Questmarker reads. This
+(Database/Corrections/QuestieQuestBlacklist.lua), not in the QuestieDB data BubbleQuest reads. This
 reads that file from the player's Questie install and evaluates each entry the way Questie does on
 Forever (Questie/Modules/Expansions.lua:21-23: Forever counts as Era, the lowest expansion; not SoD,
 not Titan-Reforged, not the China region). Also its Scourge Invasion and AQ War Effort lists
 (events not running).
 
 Questie is GPLv3 (with the Questie team's consent for forks and copies, its LICENSE.md); so is
-Questmarker. The output keeps the attribution. Re-run when Questie updates its list.
+BubbleQuest. The output keeps the attribution. Re-run when Questie updates its list.
 
 Usage: python tools/extract_questie_hidden.py [path to Questie's QuestieQuestBlacklist.lua]
 """

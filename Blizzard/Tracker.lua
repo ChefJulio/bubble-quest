@@ -4,7 +4,7 @@ local ADDON_NAME, ns = ...
 --
 -- The tracker hides itself when no module has content (Blizzard_ObjectiveTrackerContainer.lua:117-126,
 -- `self:Hide()` from its own update), and its quest module lists only watched quests
--- (Blizzard_QuestObjectiveTracker.lua:185-191). Questmarker doesn't use Blizzard's watch list, so it
+-- (Blizzard_QuestObjectiveTracker.lua:185-191). BubbleQuest doesn't use Blizzard's watch list, so it
 -- removes every quest watch (remembered per character, put back when the setting is turned off), and
 -- removes new ones as Blizzard auto-adds them on QUEST_ACCEPTED (autoQuestWatch). The CVar is left
 -- alone: it's the player's, and it would outlive the addon.
@@ -13,12 +13,12 @@ local ADDON_NAME, ns = ...
 -- and hiding it again from an OnShow hook runs Blizzard's OnHide (ManagedFrameMixin.OnHide ->
 -- RemoveManagedFrame) inside our code. That tainted the managed-frame layout and Edit Mode, and their
 -- next updates hit secret aura reads: "GetAuraDataByIndex(): Auras cannot be accessed when secret
--- while tainted by 'Questmarker'" (BugSack, Forever 1.60.1). Here we never call the tracker's
+-- while tainted by 'BubbleQuest'" (BugSack, Forever 1.60.1). Here we never call the tracker's
 -- methods; it shows and hides only through Blizzard's own code.
 --
 -- Side effects: other modules (tracked achievements, scenarios, quest auto-complete popups) still
 -- show Blizzard's tracker when they have content. The popups showing is wanted; the rest is
--- Blizzard's UI for things Questmarker doesn't track.
+-- Blizzard's UI for things BubbleQuest doesn't track.
 
 local Tracker = {}
 ns.BlizzardTracker = Tracker

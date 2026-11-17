@@ -1,0 +1,6 @@
+-- Questmarker is now BubbleQuest (docs/design/bubble-suite.md). The game keeps an addon's saved settings
+-- in a file named after its folder, so BubbleQuest can't read Questmarker's: this folder keeps the name
+-- and declares the old QuestmarkerDB and QuestmarkerCharDB, and BubbleQuest (which loads after it,
+-- OptionalDeps) moves them into its own and clears them here (Core/DB.lua). Shipped in the same zip, it
+-- also replaces the old Questmarker folder on update, so the old addon can't load beside BubbleQuest.
+-- Nothing runs here. Remove it a few releases after the rename.

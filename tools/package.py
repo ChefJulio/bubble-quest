@@ -1,5 +1,6 @@
-"""Build a release zip locally: .release/Questmarker-<version>.zip, holding a Questmarker/ folder and one
-folder per companion addon (BubbleMap/) beside it.
+"""Build a release zip locally: .release/BubbleQuest-<version>.zip, holding a BubbleQuest/ folder and one
+folder per companion addon beside it (BubbleMap/, and Questmarker/: the stub that hands the old
+Questmarker settings over to BubbleQuest, docs/design/bubble-suite.md).
 
 Releases are built by the BigWigs packager on GitHub (.github/workflows/release.yml, on a version tag);
 this builds the same zip locally for testing, and checks that the two agree on what ships.
@@ -24,8 +25,10 @@ import sys
 import zipfile
 from pathlib import Path
 
-ADDON = "Questmarker"
-COMPANIONS = ["BubbleMap"]  # repo subfolders shipped as their own addon folders (until the repo split)
+ADDON = "BubbleQuest"
+# Repo subfolders shipped as their own addon folders: BubbleMap until the repo split, Questmarker (the
+# settings hand-off stub) for a few releases after the rename.
+COMPANIONS = ["BubbleMap", "Questmarker"]
 ROOT = Path(__file__).resolve().parent.parent
 TOC = f"{ADDON}.toc"
 EXTRA_FILES = ["LICENSE", "THIRD-PARTY-NOTICES", "README.md", "CHANGELOG.md"]
@@ -44,7 +47,7 @@ def toc_files(toc_text: str, prefix: str = "") -> list[str]:
 
 
 def tocs() -> list[str]:
-  """Every TOC that ships: Questmarker's, then each companion's."""
+  """Every TOC that ships: BubbleQuest's, then each companion's."""
   return [TOC, *(f"{name}/{name}.toc" for name in COMPANIONS)]
 
 
@@ -58,7 +61,7 @@ def shipped(tracked: set[str]) -> set[str]:
 
 
 def zip_path(f: str) -> str:
-  """Where a repo file goes in the zip: a companion's files at the top level, the rest in Questmarker/."""
+  """Where a repo file goes in the zip: a companion's files at the top level, the rest in BubbleQuest/."""
   if any(f.startswith(name + "/") for name in COMPANIONS):
     return f
   return f"{ADDON}/{f}"

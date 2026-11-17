@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Questmarker (now BubbleQuest)
+## Notes: Questmarker is now BubbleQuest. This only hands your Questmarker settings over; it does nothing else.
+## Author: ChefJulio
+## Version: @project-version@
+## Category: Quests
+## SavedVariables: QuestmarkerDB
+## SavedVariablesPerCharacter: QuestmarkerCharDB
+
+Questmarker.lua

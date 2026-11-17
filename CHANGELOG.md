@@ -1,3 +1,8 @@
+**Questmarker is now BubbleQuest**, the first of the BubbleSuite addons. Your settings, profiles and
+pins carry over by themselves on your first login. A small "Questmarker (now BubbleQuest)" entry stays
+in your AddOns list for a few releases to hand them over; leave it enabled. The command is `/bq` now
+(`/qm` still works).
+
 ## What's new
 
 - Ready quests get their own "Ready to turn in" section: on top when you're nearer a turn-in than an
@@ -14,7 +19,7 @@
   from the game's calendar (English clients)
 - Drop chances in tooltips: "Dropped by Gray Forest Wolf (45%), Prowler (30%)" (how often a kill drops
   it at all), and on drop-started quests on the map
-- Without QuestieDB installed, quests to pick up still show, from Questmarker's own data (fewer checks)
+- Without QuestieDB installed, quests to pick up still show, from BubbleQuest's own data (fewer checks)
 - Talking to a quest giver corrects the map: a "!" for a quest they don't actually offer you goes away
   (it comes back after a level-up, a turn-in or the daily reset)
 - Town services on the world map, each toggled from the map button's "Town services" menu: flight
@@ -28,8 +33,8 @@
   row shows over everything on the map, Blizzard's own pins included
 - Click a quest area or a turn-in "?" on the world map to open that quest in the quest log
 - Turn-in "?" and quest-giver "!" on the world map are the same size
-- A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
-  for a menu of what Questmarker shows on the maps
+- A BubbleQuest button on the world map (under Blizzard's, or in the same column as Questie's): click
+  for a menu of what BubbleQuest shows on the maps
 - Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides
   you to the spot
 - In a group, hovering quest areas on the map or minimap shows your party's progress on that quest too
@@ -40,13 +45,13 @@
   there too. Pins, hidden quests and trainers stay per character either way
 - Class trainers are a list like profession trainers (your own class on), so you can look up any
   class's trainers
-- Hold Ctrl to hide Questmarker's tooltips (cards, map and minimap areas, buttons); let go to get the
+- Hold Ctrl to hide BubbleQuest's tooltips (cards, map and minimap areas, buttons); let go to get the
   one under the cursor back
 - Clearer section headers (Ready to turn in, Camping, Elsewhere, ...) with an open/closed arrow, and a
   proper collapse button on each card
 - In a group, cards show "+2" when party members don't have that quest and could take it (hover for
   who, click to share). It leaves out who can't: too low level, wrong class or race, and, when they run
-  Questmarker too, already completed, an earlier quest missing, or a full quest log
+  BubbleQuest too, already completed, an earlier quest missing, or a full quest log
 - "Share next" in the tracker's header: shares the next quest in this zone someone lacks, and skips
   straight on when nobody can take it (already done, not eligible, ...)
 

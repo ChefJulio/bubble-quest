@@ -13,7 +13,7 @@ ns.CopyWindow = CopyWindow
 local WIDTH, HEIGHT = 640, 420
 
 local function create()
-  local frame = CreateFrame("Frame", "QuestmarkerCopyWindow", UIParent, "BasicFrameTemplateWithInset")
+  local frame = CreateFrame("Frame", "BubbleQuestCopyWindow", UIParent, "BasicFrameTemplateWithInset")
   frame:SetSize(WIDTH, HEIGHT)
   frame:SetPoint("CENTER")
   frame:SetFrameStrata("DIALOG")
@@ -22,7 +22,7 @@ local function create()
   frame:RegisterForDrag("LeftButton")
   frame:SetScript("OnDragStart", frame.StartMoving)
   frame:SetScript("OnDragStop", frame.StopMovingOrSizing)
-  tinsert(UISpecialFrames, "QuestmarkerCopyWindow")  -- Escape closes it
+  tinsert(UISpecialFrames, "BubbleQuestCopyWindow")  -- Escape closes it
 
   local scroll = CreateFrame("ScrollFrame", nil, frame, "InputScrollFrameTemplate")
   scroll:SetPoint("TOPLEFT", 16, -34)

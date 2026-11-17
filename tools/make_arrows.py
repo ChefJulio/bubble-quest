@@ -1,4 +1,4 @@
-"""Draw Questmarker's arrow textures (Media/Arrows/*.tga) and a preview sheet.
+"""Draw BubbleQuest's arrow textures (Media/Arrows/*.tga) and a preview sheet.
 
   python tools/make_arrows.py
 

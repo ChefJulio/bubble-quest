@@ -1,6 +1,8 @@
 # BubbleSuite: the suite, the rename, the shared code
 
-Status: proposal, awaiting the user's review (2026-11-17). Nothing here is built yet.
+Status: approved by the user (2026-11-17). Built so far: the rename below (BubbleQuest, with the
+Questmarker stub) and BubbleMap's rename, both in this repo. Not yet: the repo split, LibBubble,
+bubble-tools, the CurseForge changes.
 
 ## Goal
 
@@ -9,15 +11,20 @@ its own, and lights up extra features when its siblings are loaded too.
 
 | Addon | Was | State |
 |---|---|---|
-| BubbleQuest | Questmarker (CurseForge 1806606, released up to v0.5.0) | live, to be renamed |
-| BubbleMap | Questmarker_Map (companion in this repo, steps 1-2 built, unpushed) | in progress |
+| BubbleQuest | Questmarker (CurseForge 1806606, released up to v0.5.0) | live; renamed in this repo, unreleased |
+| BubbleMap | Questmarker_Map (companion in this repo) | in progress |
+| BubbleFonts | - | exists, separate repo |
+| BubbleBags | - | planned |
+| BubbleBuffs | - | planned |
+
+BubbleQuest status (2026-11-17): renamed in this repo (TOC, `BubbleQuestDB`/`BubbleQuestCharDB`, `/bq`,
+`BubbleQuestAPI`, every global and setting ID); the `Questmarker/` stub hands the old settings over
+(Core/DB.lua takeOverQuestmarker). The party message prefix stays "Questmarker" on the wire, so old and
+new versions still talk. The logo is still Questmarker's "QM". CurseForge and GitHub renames pending.
 
 BubbleMap status (2026-11-17): renamed to BubbleMap in this repo (folder, TOC, `BubbleMapDB`, `/bmap`),
 standalone with `## OptionalDeps: BubbleQuest, Questmarker`; quest features gated on the API. Repo
 split pending.
-| BubbleFonts | - | exists, separate repo |
-| BubbleBags | - | planned |
-| BubbleBuffs | - | planned |
 
 ## Rules
 

@@ -1,7 +1,7 @@
 local ADDON_NAME, ns = ...
 
 -- Every setting, defined once. Both Blizzard's Options > AddOns panel (UI/Settings.lua) and
--- Questmarker's own window (UI/SettingsWindow.lua) are built from this list, so they can't drift apart.
+-- BubbleQuest's own window (UI/SettingsWindow.lua) are built from this list, so they can't drift apart.
 --
 -- Entry fields:
 --   kind     "checkbox" | "slider" | "dropdown" | "section"
@@ -10,10 +10,10 @@ local ADDON_NAME, ns = ...
 --   get(profile) / set(profile, value)   read and change the active profile
 --   slider:   min, max, step, format(value) -> text
 --   dropdown: options() -> { { value, label }, ... }; preview(value) -> font file to draw that
---             option's label in (Questmarker's window only)
---   column   1 or 2 in Questmarker's window
---   grid     dropdowns sharing a grid name and the same options form one table in Questmarker's window
--- Questmarker's window only (Blizzard's panel shows every entry on its own line, full label):
+--             option's label in (BubbleQuest's window only)
+--   column   1 or 2 in BubbleQuest's window
+--   grid     dropdowns sharing a grid name and the same options form one table in BubbleQuest's window
+-- BubbleQuest's window only (Blizzard's panel shows every entry on its own line, full label):
 --   row         entries sharing a row name sit on one line; the first one's rowLabel leads the line,
 --               checkboxes show their `short` label, dropdowns are `width` wide
 --   enabledWhen(profile) -> false greys the control out (e.g. automation options while it's all off)
@@ -24,7 +24,7 @@ local ADDON_NAME, ns = ...
 --   onlyIf() -> false leaves the entry out (checked when the UI is built, e.g. Questie not installed)
 --   windowOnly  not in Blizzard's panel
 --
--- List order is the order in Blizzard's panel, and per column in Questmarker's window.
+-- List order is the order in Blizzard's panel, and per column in BubbleQuest's window.
 
 local Schema = {}
 ns.SettingsSchema = Schema
@@ -52,23 +52,23 @@ function Schema:Entries()
   local entries = {
     { kind = "section", label = "Tracker", column = 1 },
     {
-      kind = "checkbox", id = "QUESTMARKER_HIDE_BLIZZARD_TRACKER", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_HIDE_BLIZZARD_TRACKER", column = 1, default = true,
       label = "Hide Blizzard quest tracker",
-      tooltip = "Hide the game's objective tracker so Questmarker's cards replace it. Done by untracking "
-        .. "quests in the game's own tracker (Questmarker doesn't use it); they come back when you untick "
+      tooltip = "Hide the game's objective tracker so BubbleQuest's cards replace it. Done by untracking "
+        .. "quests in the game's own tracker (BubbleQuest doesn't use it); they come back when you untick "
         .. "this. Tracked achievements, scenarios and quest popups still show the game's tracker.",
       get = function(p) return p.blizzardTracker.hide end,
       set = function(p, v) p.blizzardTracker.hide = v; ns.BlizzardTracker:Apply() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_LOCK_CARDS", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_LOCK_CARDS", column = 1, default = true,
       label = "Lock card position",
-      tooltip = "Untick to drag Questmarker's cards by their header; tick again to lock them there.",
+      tooltip = "Untick to drag BubbleQuest's cards by their header; tick again to lock them there.",
       get = function(p) return p.cards.locked end,
       set = function(p, v) p.cards.locked = v; ns.Stack:ApplyLock() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_CLICK_OPENS_MAP", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_CLICK_OPENS_MAP", column = 1, default = true,
       label = "Click a card to show its quest on the map",
       tooltip = "Left-clicking a card makes it your tracked quest (map highlight and in-world beacon) and "
         .. "opens the map at it. Out of combat only.",
@@ -76,7 +76,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.clickOpensMap = v end,
     },
     {
-      kind = "slider", id = "QUESTMARKER_CARD_CAP", column = 1, default = 5, min = 1, max = 15, step = 1,
+      kind = "slider", id = "BUBBLEQUEST_CARD_CAP", column = 1, default = 5, min = 1, max = 15, step = 1,
       label = "Cards for this zone",
       tooltip = "How many of this zone's quests get a card before the rest go behind \"N more here\". "
         .. "Pinned quests always show and don't count. Greyed out once you've set the tracker's height "
@@ -87,7 +87,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.cap = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "dropdown", id = "QUESTMARKER_SORT_MODE", column = 1, default = "smart",
+      kind = "dropdown", id = "BUBBLEQUEST_SORT_MODE", column = 1, default = "smart",
       label = "Sort quests by",
       tooltip = "Smart: quests whose area you're in (or with a timer running) first, then by distance. "
         .. "Distance: nearest first. Level and Quest log: a fixed order that doesn't change as you move. "
@@ -104,7 +104,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.sortMode = v; ns.Tracking:ResetOrder() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_NEAREST_ANYWHERE", column = 1, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_NEAREST_ANYWHERE", column = 1, default = false,
       label = "Always show nearest quests",
       tooltip = "When this zone has fewer quests than the card limit, fill the free cards with your "
         .. "nearest quests elsewhere on this continent, so the tracker is never empty.",
@@ -113,24 +113,24 @@ function Schema:Entries()
     },
 
     -- What a card shows (review: a card layout editor). The four "Show" toggles share one row in
-    -- Questmarker's window; Blizzard's panel lists them with their full labels.
+    -- BubbleQuest's window; Blizzard's panel lists them with their full labels.
     { kind = "section", label = "Cards", column = 1 },
     {
-      kind = "checkbox", id = "QUESTMARKER_SHOW_NAME", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_SHOW_NAME", column = 1, default = true,
       row = "show", rowLabel = "Show:", short = "Name",
       label = "Show quest names on cards",
       get = function(p) return p.cards.show.name end,
       set = function(p, v) p.cards.show.name = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_SHOW_LEVEL", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_SHOW_LEVEL", column = 1, default = true,
       row = "show", short = "Level",
       label = "Show quest levels on cards",
       get = function(p) return p.cards.show.level end,
       set = function(p, v) p.cards.show.level = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_SHOW_ARROW", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_SHOW_ARROW", column = 1, default = true,
       row = "show", short = "Arrow",
       label = "Show arrows on cards",
       tooltip = "The direction arrow, and the green marker when you're in the area.",
@@ -138,7 +138,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.show.arrow = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_SHOW_DISTANCE", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_SHOW_DISTANCE", column = 1, default = true,
       row = "show", short = "Distance",
       label = "Show distances on cards",
       tooltip = "The yards, zone name or \"here\" next to the arrow.",
@@ -146,7 +146,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.show.distance = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_KEEP_DONE", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_KEEP_DONE", column = 1, default = true,
       label = "Keep finished objectives on ready quests",
       tooltip = "When a quest is ready to turn in, its card keeps showing the objectives you finished "
         .. "(greyed, with their counts) above the turn-in line, so you can still tell which quest it is. "
@@ -155,7 +155,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.keepDone = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_PROGRESS_BAR", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_PROGRESS_BAR", column = 1, default = true,
       label = "Progress bar under each quest",
       tooltip = "A thin bar under each card showing how far along the quest is; green when ready to "
         .. "turn in. Split into segments when progress is a count.",
@@ -163,7 +163,7 @@ function Schema:Entries()
       set = function(p, v) p.cards.progressBar = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_HINTS", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_HINTS", column = 1, default = true,
       label = "Show hints for tricky steps",
       tooltip = "A \"Tip:\" line under quests that have a step players often get stuck on (timers, hidden "
         .. "spawns, items to use or keep). Only some quests have one.",
@@ -173,7 +173,7 @@ function Schema:Entries()
 
     { kind = "section", label = "Look", column = 1 },
     {
-      kind = "dropdown", id = "QUESTMARKER_FONT", column = 1, default = "default",
+      kind = "dropdown", id = "BUBBLEQUEST_FONT", column = 1, default = "default",
       label = "Font",
       tooltip = "The tracker's font. Lists every font your addons share through SharedMedia (MSBT, "
         .. "Details, ...), or WoW's own fonts if none do.",
@@ -183,7 +183,7 @@ function Schema:Entries()
       set = function(p, v) p.font.face = v; ns.Fonts:Apply() end,
     },
     {
-      kind = "slider", id = "QUESTMARKER_FONT_SCALE", column = 1, default = 100, min = 80, max = 140, step = 5,
+      kind = "slider", id = "BUBBLEQUEST_FONT_SCALE", column = 1, default = 100, min = 80, max = 140, step = 5,
       label = "Text size",
       tooltip = "Size of the tracker's text.",
       format = percent,
@@ -191,7 +191,7 @@ function Schema:Entries()
       set = function(p, v) p.font.scale = v; ns.Fonts:Apply() end,
     },
     {
-      kind = "slider", id = "QUESTMARKER_BACKGROUND_OPACITY", column = 1, default = 25, min = 0, max = 100, step = 5,
+      kind = "slider", id = "BUBBLEQUEST_BACKGROUND_OPACITY", column = 1, default = 25, min = 0, max = 100, step = 5,
       label = "Background opacity",
       tooltip = "How dark the panel behind the cards is. 0% shows no panel.",
       format = percent,
@@ -205,9 +205,9 @@ function Schema:Entries()
       return questieInstalled() or ns.QuestieData:Installed()
     end },
     {
-      kind = "status", id = "QUESTMARKER_QUESTIE_TRACKER", column = 1, windowOnly = true, onlyIf = questieInstalled,
+      kind = "status", id = "BUBBLEQUEST_QUESTIE_TRACKER", column = 1, windowOnly = true, onlyIf = questieInstalled,
       label = "Questie's tracker",
-      tooltip = "Questmarker replaces Questie's quest tracker (Questie keeps its map, tooltips and the rest). "
+      tooltip = "BubbleQuest replaces Questie's quest tracker (Questie keeps its map, tooltips and the rest). "
         .. "Turn off runs Questie's own switch, which reloads your UI. Not in combat.",
       status = function()
         local enabled = ns.Questie:TrackerEnabled()
@@ -223,7 +223,7 @@ function Schema:Entries()
       actionEnabled = function() return ns.Questie:TrackerEnabled() ~= false end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_QUESTIE_DATA", column = 1, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_QUESTIE_DATA", column = 1, default = true,
       onlyIf = function() return ns.QuestieData:Installed() end,
       label = "Use QuestieDB's location data",
       tooltip = "Arrows and map areas also use QuestieDB's spawn locations for mobs, objects and turn-ins "
@@ -235,7 +235,7 @@ function Schema:Entries()
 
     -- Profiles (Core/DB.lua): Global by default; our window only (Blizzard's panel has no such control).
     { kind = "section", label = "Profiles", column = 1, windowOnly = true },
-    { kind = "profiles", id = "QUESTMARKER_PROFILES", column = 1, windowOnly = true },
+    { kind = "profiles", id = "BUBBLEQUEST_PROFILES", column = 1, windowOnly = true },
 
     { kind = "section", label = "Quest categories", column = 2 },
   }
@@ -245,9 +245,9 @@ function Schema:Entries()
   end
   for _, name in ipairs(ns.Categories.ORDER) do
     entries[#entries + 1] = {
-      -- grid: Questmarker's window shows these as one table (a row each, a radio per option); Blizzard's
+      -- grid: BubbleQuest's window shows these as one table (a row each, a radio per option); Blizzard's
       -- panel, which has no such control, keeps dropdowns.
-      kind = "dropdown", grid = "categories", id = "QUESTMARKER_CATEGORY_" .. name:upper(), column = 2,
+      kind = "dropdown", grid = "categories", id = "BUBBLEQUEST_CATEGORY_" .. name:upper(), column = 2,
       default = ns.Categories.DEFAULT_MODES[name],
       label = ns.Categories.LABELS[name],
       tooltip = "Show: as normal cards with this zone's quests. Separate: in their own collapsed group. "
@@ -261,7 +261,7 @@ function Schema:Entries()
   local rest = {
     { kind = "section", label = "Automation", column = 2 },
     {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_AUTO_ACCEPT", column = 2, default = false,
       row = "accept", rowLabel = "Accept:", short = "Regular",
       label = "Accept regular quests automatically",
       tooltip = "Accepts quests when an NPC offers them, and picks them from the NPC's dialogue. "
@@ -270,21 +270,21 @@ function Schema:Entries()
       set = function(p, v) p.automation.accept = v end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_DAILY", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_AUTO_ACCEPT_DAILY", column = 2, default = false,
       row = "accept", short = "Daily",
       label = "Accept daily quests automatically",
       get = function(p) return p.automation.acceptDaily end,
       set = function(p, v) p.automation.acceptDaily = v end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_ACCEPT_WEEKLY", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_AUTO_ACCEPT_WEEKLY", column = 2, default = false,
       row = "accept", short = "Weekly",
       label = "Accept weekly quests automatically",
       get = function(p) return p.automation.acceptWeekly end,
       set = function(p, v) p.automation.acceptWeekly = v end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_TURN_IN", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_AUTO_TURN_IN", column = 2, default = false,
       label = "Turn in completed quests automatically",
       tooltip = "Turns in completed quests when you talk to the NPC. Never picks between rewards (you "
         .. "choose when there's more than one), never pays gold or currency, never hands over crafting "
@@ -293,7 +293,7 @@ function Schema:Entries()
       set = function(p, v) p.automation.turnIn = v end,
     },
     {
-      kind = "dropdown", id = "QUESTMARKER_AUTO_KEY", column = 2, default = "SHIFT", enabledWhen = automating,
+      kind = "dropdown", id = "BUBBLEQUEST_AUTO_KEY", column = 2, default = "SHIFT", enabledWhen = automating,
       label = "Override key",
       tooltip = "Hold this while talking to an NPC to do it yourself (or, with the option below, to "
         .. "automate only then).",
@@ -302,7 +302,7 @@ function Schema:Entries()
       set = function(p, v) p.automation.key = v end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_AUTO_REQUIRE_KEY", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_AUTO_REQUIRE_KEY", column = 2, default = false,
       enabledWhen = automating,
       label = "Only automate while holding it",
       get = function(p) return p.automation.requireKey end,
@@ -311,7 +311,7 @@ function Schema:Entries()
 
     { kind = "section", label = "Map", column = 2 },
     {
-      kind = "checkbox", id = "QUESTMARKER_MAP_AREAS", column = 2, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_MAP_AREAS", column = 2, default = true,
       label = "Show quest areas on the world map",
       tooltip = "Shades where each card's objectives are on the world map, one colour per quest, matched by "
         .. "a strip on its card; ready quests get a \"?\" at their turn-in. With Questie, untick its "
@@ -320,14 +320,14 @@ function Schema:Entries()
       set = function(p, v) p.map.areas = v; ns.MapAreas:MarkDirty(); ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_MINIMAP_AREAS", column = 2, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_MINIMAP_AREAS", column = 2, default = true,
       label = "Show quest areas on the minimap",
       tooltip = "The same coloured areas around you on the minimap.",
       get = function(p) return p.map.minimapAreas end,
       set = function(p, v) p.map.minimapAreas = v end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_MINIMAP_GUIDE", column = 2, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_MINIMAP_GUIDE", column = 2, default = true,
       label = "Guide line on the minimap",
       tooltip = "A faint dotted line from you toward the nearest area of one quest: the card you're hovering, "
         .. "else your first pinned quest, else the top card.",
@@ -335,7 +335,7 @@ function Schema:Entries()
       set = function(p, v) p.map.guide = v end,
     },
     {
-      kind = "slider", id = "QUESTMARKER_MAP_OPACITY", column = 2, default = 40, min = 10, max = 80, step = 5,
+      kind = "slider", id = "BUBBLEQUEST_MAP_OPACITY", column = 2, default = 40, min = 10, max = 80, step = 5,
       label = "Area opacity",
       tooltip = "How strong each area circle is; where spawns overlap, colour builds up.",
       format = percent,
@@ -343,7 +343,7 @@ function Schema:Entries()
       set = function(p, v) p.map.opacity = v; ns.MapAreas:MarkDirty() end,
     },
     {
-      kind = "slider", id = "QUESTMARKER_MAP_SIZE", column = 2, default = 30, min = 15, max = 60, step = 5,
+      kind = "slider", id = "BUBBLEQUEST_MAP_SIZE", column = 2, default = 30, min = 15, max = 60, step = 5,
       label = "Area circle size",
       tooltip = "The radius of the soft circle around each spawn point, in yards.",
       format = function(v) return ("%d yd"):format(v) end,
@@ -351,7 +351,7 @@ function Schema:Entries()
       set = function(p, v) p.map.size = v; ns.MapAreas:MarkDirty() end,
     },
     {
-      kind = "slider", id = "QUESTMARKER_MAP_ICON_SIZE", column = 2, default = 100, min = 50, max = 200, step = 10,
+      kind = "slider", id = "BUBBLEQUEST_MAP_ICON_SIZE", column = 2, default = 100, min = 50, max = 200, step = 10,
       label = "Icon size",
       tooltip = "Size of the \"?\" at turn-ins and the \"!\" at quest givers, on the world map and the minimap.",
       format = percent,
@@ -359,15 +359,15 @@ function Schema:Entries()
       set = function(p, v) p.map.iconSize = v; ns.MapAreas:MarkDirty(); ns.MapAvailable:MarkDirty() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE", column = 2, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_MAP_AVAILABLE", column = 2, default = true,
       label = "Show quests you can pick up",
       tooltip = "A \"!\" at every quest giver with a quest for you (blue: repeatable), on the world map and the "
-        .. "minimap. Best with QuestieDB installed; without it, from Questmarker's own data (fewer checks).",
+        .. "minimap. Best with QuestieDB installed; without it, from BubbleQuest's own data (fewer checks).",
       get = function(p) return p.map.available end,
       set = function(p, v) p.map.available = v; ns.MapAvailable:MarkDirty() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE_TRIVIAL", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_MAP_AVAILABLE_TRIVIAL", column = 2, default = false,
       enabledWhen = function(p) return p.map.available end,
       label = "Include low-level quests",
       tooltip = "Also grey quests, far below your level (little or no experience).",
@@ -375,7 +375,7 @@ function Schema:Entries()
       set = function(p, v) p.map.availableTrivial = v; ns.MapAvailable:MarkDirty() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE_DROPS", column = 2, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_MAP_AVAILABLE_DROPS", column = 2, default = true,
       enabledWhen = function(p) return p.map.available end,
       label = "Include quests started by a drop",
       tooltip = "Quests that start from an item mobs drop (like Furlbrow's Deed): the mobs' area in faint grey, "
@@ -384,7 +384,7 @@ function Schema:Entries()
       set = function(p, v) p.map.availableDrops = v; ns.MapAvailable:MarkDirty() end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_MAP_CONTINENT_ICONS", column = 2, default = false,
+      kind = "checkbox", id = "BUBBLEQUEST_MAP_CONTINENT_ICONS", column = 2, default = false,
       label = "Quest givers and town icons on continent maps",
       tooltip = "Zoomed out to a continent, a whole kingdom's \"!\" and town icons crowd together, so by default "
         .. "they show on zone and city maps only. Quest areas and turn-ins show everywhere.",
@@ -394,9 +394,9 @@ function Schema:Entries()
 
     { kind = "section", label = "Arrows", column = 2 },
     {
-      kind = "dropdown", id = "QUESTMARKER_ARROW_STYLE", column = 2, default = "classic",
+      kind = "dropdown", id = "BUBBLEQUEST_ARROW_STYLE", column = 2, default = "classic",
       label = "Arrow style",
-      tooltip = "The arrow on each card. /qm arrows shows them all side by side.",
+      tooltip = "The arrow on each card. /bq arrows shows them all side by side.",
       options = function()
         local list = {}
         for _, style in ipairs(ns.Card.ARROW_STYLES) do
@@ -408,10 +408,10 @@ function Schema:Entries()
       set = function(p, v) p.cards.arrowStyle = v; ns.Stack:Request(false, true) end,
     },
     {
-      kind = "checkbox", id = "QUESTMARKER_ARROW_COLOR", column = 2, default = true,
+      kind = "checkbox", id = "BUBBLEQUEST_ARROW_COLOR", column = 2, default = true,
       label = "Color arrows by distance",
       tooltip = "Green when close, through yellow and orange, to red when far (or in another zone). "
-        .. "Off: gold. Applies to Questmarker's own arrow styles.",
+        .. "Off: gold. Applies to BubbleQuest's own arrow styles.",
       get = function(p) return p.cards.arrowColorByDistance end,
       set = function(p, v) p.cards.arrowColorByDistance = v end,
     },

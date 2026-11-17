@@ -1,17 +1,18 @@
 ## Interface: 16001
-## Title: Questmarker
-## Notes: Quest cards with what to do, where to go, and a hint for confusing steps
+## Title: BubbleQuest
+## Notes: Quest cards with what to do, where to go, and a hint for confusing steps (was Questmarker)
 ## Author: ChefJulio
 ## Version: @project-version@
 ## Category: Quests
 ## X-Curse-Project-ID: 1806606
-## IconTexture: Interface\AddOns\Questmarker\Media\Icon
-## AddonCompartmentFunc: Questmarker_OnAddonCompartmentClick
-## AddonCompartmentFuncOnEnter: Questmarker_OnAddonCompartmentEnter
-## AddonCompartmentFuncOnLeave: Questmarker_OnAddonCompartmentLeave
-## OptionalDeps: Questie, QuestieDB
-## SavedVariables: QuestmarkerDB
-## SavedVariablesPerCharacter: QuestmarkerCharDB
+## IconTexture: Interface\AddOns\BubbleQuest\Media\Icon
+## AddonCompartmentFunc: BubbleQuest_OnAddonCompartmentClick
+## AddonCompartmentFuncOnEnter: BubbleQuest_OnAddonCompartmentEnter
+## AddonCompartmentFuncOnLeave: BubbleQuest_OnAddonCompartmentLeave
+# Questmarker: the stub holding the old settings; loaded first so Core/DB.lua can take them over.
+## OptionalDeps: Questie, QuestieDB, Questmarker
+## SavedVariables: BubbleQuestDB
+## SavedVariablesPerCharacter: BubbleQuestCharDB
 
 # LibForeverData (bundled, see THIRD-PARTY-NOTICES); the newest copy loaded by any addon wins.
 Libs\LibForeverData\LuaChunks.lua

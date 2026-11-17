@@ -2,6 +2,9 @@
 
 Nov 14, 2026 · @Hunter Graves
 
+> **Renamed:** the addon this spec describes, Questmarker, is BubbleQuest since 2026-11-17, part of the
+> BubbleSuite ([design/bubble-suite.md](design/bubble-suite.md)). The text below keeps the old name.
+
 Revised Nov 14, 2026 with the pre-build research in [docs/research/](research/README.md). Decisions taken: license GPL-3.0-or-later; forever-db (LibForeverData) as quest database and first-pass hint source, bundled inside Questmarker's folder; Blizzard tracker hidden with an `OnShow` re-hide hook; Questmarker works alongside Questie, replacing only its quest tracker and leaving map pins, available quests and tooltips to Questie.
 
 ## Overview

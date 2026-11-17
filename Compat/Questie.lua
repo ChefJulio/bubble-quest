@@ -1,6 +1,6 @@
 local ADDON_NAME, ns = ...
 
--- Questmarker runs alongside Questie and replaces only its quest tracker (spec decision). When
+-- BubbleQuest runs alongside Questie and replaces only its quest tracker (spec decision). When
 -- Questie's tracker is on too, offer to turn it off, by Questie's own switch: a prompt at login (our
 -- own small window: Blizzard's StaticPopup system taints when addons define dialogs) and a status
 -- row in the settings window (UI/SettingsSchema.lua). Asked for in review: make it easy.
@@ -110,13 +110,13 @@ local function button(parent, text, onClick)
 end
 
 local function createPrompt()
-  local frame = CreateFrame("Frame", "QuestmarkerQuestiePrompt", UIParent)
+  local frame = CreateFrame("Frame", "BubbleQuestQuestiePrompt", UIParent)
   frame:SetFrameStrata("DIALOG")
   frame:SetPoint("TOP", 0, -140)
   frame:SetSize(400, 104)
   frame:EnableMouse(true)
   frame:Hide()
-  tinsert(UISpecialFrames, "QuestmarkerQuestiePrompt")  -- Escape closes it (= Not now)
+  tinsert(UISpecialFrames, "BubbleQuestQuestiePrompt")  -- Escape closes it (= Not now)
 
   local background = frame:CreateTexture(nil, "BACKGROUND")
   background:SetAllPoints()
@@ -134,7 +134,7 @@ local function createPrompt()
   text:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
   text:SetPoint("RIGHT", -14, 0)
   text:SetJustifyH("LEFT")
-  text:SetText("Questmarker replaces it. Turn Questie's tracker off? Your UI reloads.")
+  text:SetText("BubbleQuest replaces it. Turn Questie's tracker off? Your UI reloads.")
 
   local off = Questie:CreateTurnOffButton(frame, "Turn it off")
   off:SetSize(math.max(96, off:GetFontString():GetStringWidth() + 24), 22)

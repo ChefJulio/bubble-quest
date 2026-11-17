@@ -1,6 +1,6 @@
 local ADDON_NAME, ns = ...
 
--- /qm and /questmarker. Forever disables /dump and /run, so the inspection commands here are how we
+-- /bq (also /bquest, /bubblequest, and /qm, /questmarker from before the rename). Forever disables /dump and /run, so the inspection commands here are how we
 -- look inside the addon in game.
 
 local print = function(...) ns.Debug:Print(...) end
@@ -77,7 +77,7 @@ local function describeQuest(quest, lines)
 end
 
 commands.quests = {
-  help = "list every quest Questmarker sees (copy window)",
+  help = "list every quest BubbleQuest sees (copy window)",
   run = function()
     local list = sortedQuests()
     local _, numQuests = C_QuestLog.GetNumQuestLogEntries()
@@ -86,7 +86,7 @@ commands.quests = {
       lines[#lines + 1] = ("  %d %s [%s] %s, objectives %s"):format(quest.questID, tostring(quest.title),
         tostring(quest.group), flags(quest), objectivesDone(quest))
     end
-    ns.CopyWindow:Show("Questmarker: quests", lines)
+    ns.CopyWindow:Show("BubbleQuest: quests", lines)
   end,
 }
 
@@ -101,12 +101,12 @@ commands.quest = {
     else
       local quest = ns.QuestLog:Get(tonumber(arg) or 0)
       if not quest then
-        print(("No quest %q in the model. /qm quests lists IDs."):format(arg))
+        print(("No quest %q in the model. /bq quests lists IDs."):format(arg))
         return
       end
       describeQuest(quest, lines)
     end
-    ns.CopyWindow:Show("Questmarker: quest details", lines)
+    ns.CopyWindow:Show("BubbleQuest: quest details", lines)
   end,
 }
 
@@ -147,7 +147,7 @@ commands.map = {
       lines[#lines + 1] = ("  %d %s [%s] header matches map: %s"):format(quest.questID, tostring(quest.title),
         tostring(quest.group), tostring(names[quest.group or ""] == true))
     end
-    ns.CopyWindow:Show("Questmarker: map", lines)
+    ns.CopyWindow:Show("BubbleQuest: map", lines)
   end,
 }
 
@@ -186,7 +186,7 @@ commands.where = {
         end
       end
     end
-    ns.CopyWindow:Show("Questmarker: where", lines)
+    ns.CopyWindow:Show("BubbleQuest: where", lines)
   end,
 }
 
@@ -208,7 +208,7 @@ commands.available = {
     local north, west, instanceMap = ns.Navigation:PlayerPosition()
     if not north then
       lines[#lines + 1] = "No position (instance?)"
-      ns.CopyWindow:Show("Questmarker: available", lines)
+      ns.CopyWindow:Show("BubbleQuest: available", lines)
       return
     end
     local near = {}
@@ -235,7 +235,7 @@ commands.available = {
           q.trivial and "  (trivial)" or "", A.Repeatable(r) and "  (repeatable)" or "")
       end
     end
-    ns.CopyWindow:Show("Questmarker: available", lines)
+    ns.CopyWindow:Show("BubbleQuest: available", lines)
   end,
 }
 
@@ -244,7 +244,7 @@ commands.available = {
 commands.minimap = {
   help = "minimap areas, guide line and hover state (copy window)",
   run = function()
-    ns.CopyWindow:Show("Questmarker: minimap", ns.MinimapAreas:Diagnose())
+    ns.CopyWindow:Show("BubbleQuest: minimap", ns.MinimapAreas:Diagnose())
   end,
 }
 
@@ -263,7 +263,7 @@ commands.areas = {
       end
     end
     if not quest then
-      print("Usage: /qm areas <questID or part of the title>")
+      print("Usage: /bq areas <questID or part of the title>")
       return
     end
     local north, west, instanceMap = ns.Navigation:PlayerPosition()
@@ -297,7 +297,7 @@ commands.areas = {
       lines[#lines + 1] = "No location data: the map marker"
     end
     lines[#lines + 1] = ("Questie data: %s"):format(ns.QuestieData:Available() and "in use" or "not available")
-    ns.CopyWindow:Show("Questmarker: areas", lines)
+    ns.CopyWindow:Show("BubbleQuest: areas", lines)
   end,
 }
 
@@ -308,11 +308,11 @@ commands.arrows = {
   help = "preview the arrow styles (pick one in settings)",
   run = function()
     if not arrowPreview then
-      arrowPreview = CreateFrame("Frame", "QuestmarkerArrowPreview", UIParent, "BasicFrameTemplateWithInset")
+      arrowPreview = CreateFrame("Frame", "BubbleQuestArrowPreview", UIParent, "BasicFrameTemplateWithInset")
       arrowPreview:SetPoint("CENTER")
       arrowPreview:SetFrameStrata("DIALOG")
-      arrowPreview.TitleText:SetText("Questmarker arrows (Escape closes)")
-      tinsert(UISpecialFrames, "QuestmarkerArrowPreview")
+      arrowPreview.TitleText:SetText("BubbleQuest arrows (Escape closes)")
+      tinsert(UISpecialFrames, "BubbleQuestArrowPreview")
       local y = -34
       for _, style in ipairs(ns.Card.ARROW_STYLES) do
         local label = arrowPreview:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
@@ -380,29 +380,29 @@ commands.unit = {
         lines[#lines + 1] = ("line %d: %s"):format(i, table.concat(fields, " "))
       end
     end
-    ns.CopyWindow:Show("Questmarker: unit", lines)
+    ns.CopyWindow:Show("BubbleQuest: unit", lines)
   end,
 }
 
 commands.memory = {
-  help = "Questmarker's memory use, including the bundled quest data",
+  help = "BubbleQuest's memory use, including the bundled quest data",
   run = function()
     UpdateAddOnMemoryUsage()
     local kb = GetAddOnMemoryUsage(ADDON_NAME)
-    print(("Questmarker uses %.1f MB (forever-db %s)"):format(kb / 1024,
+    print(("BubbleQuest uses %.1f MB (forever-db %s)"):format(kb / 1024,
       ns.ForeverData:Available() and tostring(ns.ForeverData:Version()) or "not loaded"))
   end,
 }
 
 commands.copy = {
-  help = "recent Questmarker chat output, including /qm events lines (copy window)",
+  help = "recent BubbleQuest chat output, including /bq events lines (copy window)",
   run = function()
-    ns.CopyWindow:Show("Questmarker: recent output", ns.Debug.history)
+    ns.CopyWindow:Show("BubbleQuest: recent output", ns.Debug.history)
   end,
 }
 
 commands.events = {
-  help = "toggle printing quest and Questmarker events as they fire",
+  help = "toggle printing quest and BubbleQuest events as they fire",
   run = function()
     local enabled = not ns.Debug:EventsEnabled()
     ns.Debug:SetEventsEnabled(enabled)
@@ -426,14 +426,18 @@ commands.help = {
     for name in pairs(commands) do names[#names + 1] = name end
     table.sort(names)
     for _, name in ipairs(names) do
-      print(("  /qm %s - %s"):format(name, commands[name].help))
+      print(("  /bq %s - %s"):format(name, commands[name].help))
     end
   end,
 }
 
-SLASH_QUESTMARKER1 = "/questmarker"
-SLASH_QUESTMARKER2 = "/qm"
-SlashCmdList.QUESTMARKER = function(msg)
+-- /qm and /questmarker: from before the rename (docs/design/bubble-suite.md), kept as aliases.
+SLASH_BUBBLEQUEST1 = "/bq"
+SLASH_BUBBLEQUEST2 = "/bquest"
+SLASH_BUBBLEQUEST3 = "/bubblequest"
+SLASH_BUBBLEQUEST4 = "/qm"
+SLASH_BUBBLEQUEST5 = "/questmarker"
+SlashCmdList.BUBBLEQUEST = function(msg)
   local name, arg = msg:match("^%s*(%S*)%s*(.-)%s*$")
   local command = commands[name:lower()]
   if not command then

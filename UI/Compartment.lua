@@ -11,7 +11,7 @@ local function toggleMinimized()
   ns.Stack:Request(false, true)
 end
 
-function Questmarker_OnAddonCompartmentClick(_, button)
+function BubbleQuest_OnAddonCompartmentClick(_, button)
   if button == "RightButton" then
     toggleMinimized()
   else
@@ -19,19 +19,19 @@ function Questmarker_OnAddonCompartmentClick(_, button)
   end
 end
 
-function Questmarker_OnAddonCompartmentEnter(addon, menuButton)
+function BubbleQuest_OnAddonCompartmentEnter(addon, menuButton)
   if not ns.Tooltips:Take(menuButton, "ANCHOR_LEFT", function()
-    Questmarker_OnAddonCompartmentEnter(addon, menuButton)
+    BubbleQuest_OnAddonCompartmentEnter(addon, menuButton)
   end) then
     return
   end
-  GameTooltip:SetText("Questmarker", 1, 1, 1)
+  GameTooltip:SetText("BubbleQuest", 1, 1, 1)
   GameTooltip:AddLine("Left-click: settings", 0.8, 0.8, 0.8)
   GameTooltip:AddLine(ns.DB.char.minimized and "Right-click: show the cards" or "Right-click: minimize the cards",
     0.8, 0.8, 0.8)
   GameTooltip:Show()
 end
 
-function Questmarker_OnAddonCompartmentLeave()
+function BubbleQuest_OnAddonCompartmentLeave()
   GameTooltip:Hide()
 end

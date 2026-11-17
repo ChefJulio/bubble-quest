@@ -1,6 +1,8 @@
-# Questmarker
+# BubbleQuest
 
-WoW Forever quest addon. Spec: [docs/SPEC.md](docs/SPEC.md). Build order: the spec's "Implementation plan".
+WoW Forever quest addon, part of the BubbleSuite ([docs/design/bubble-suite.md](docs/design/bubble-suite.md)).
+Renamed from Questmarker on 2026-11-17; older docs use the old name. Spec: [docs/SPEC.md](docs/SPEC.md).
+Build order: the spec's "Implementation plan".
 
 ## API ground truth
 
