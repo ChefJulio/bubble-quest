@@ -155,7 +155,8 @@ end
 ---@param questID number
 ---@param itemName string the objective text without its counter
 ---@param maxNames number? names to list before counting the rest in `more` (default 2)
----@return table? sources { kind = "npc" | "object" | "item", names = { ... }, more = n }
+---@return table? sources { kind = "npc" | "object" | "item", names = { ... }, more = n,
+---  chances = { [name] = percent, the best of that name's sources } }
 function ForeverData:ItemSources(questID, itemName, maxNames)
   maxNames = maxNames or MAX_SOURCE_NAMES
   local lib = library()
@@ -194,12 +195,16 @@ function ForeverData:ItemSources(questID, itemName, maxNames)
         end
         return (a.chance or 0) > (b.chance or 0)
       end)
-      local result = { kind = best.kind, names = {}, more = 0 }
+      local result = { kind = best.kind, names = {}, more = 0, chances = {} }
       for _, source in ipairs(list) do
+        local name = lib.Name(source.kind, source.id)
         if #result.names < maxNames then
-          result.names[#result.names + 1] = lib.Name(source.kind, source.id)
+          result.names[#result.names + 1] = name
         else
           result.more = result.more + 1
+        end
+        if name and source.chance and (result.chances[name] or 0) < source.chance then
+          result.chances[name] = source.chance
         end
       end
       return result

@@ -72,6 +72,14 @@ function DoLine.GroupName(names)
   return "any " .. bestWord, #names - bestCount
 end
 
+---A drop chance as shown in tooltips: "45%", or "0.5%" under one percent. It's how often a kill (or
+---a search) drops it at all, not how many: forever-db has no counts.
+---@param chance number percent
+---@return string
+function DoLine.ChanceText(chance)
+  return chance < 1 and ("%.1f%%"):format(chance) or ("%d%%"):format(math.floor(chance + 0.5))
+end
+
 ---"any Stonesplinter +1", or the first `shown` names "A, B +7": how to name an objective's sources.
 ---@param names string[] every source name
 ---@param more number sources beyond `names`

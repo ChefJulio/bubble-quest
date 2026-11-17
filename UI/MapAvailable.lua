@@ -172,9 +172,7 @@ local function droppersText(itemID)
     local shown = {}
     for i = 1, math.min(3, #names) do
       local n = names[i]
-      -- Below 1%, one decimal; otherwise whole percents.
-      local chance = n.chance and (n.chance < 1 and ("%.1f%%"):format(n.chance) or ("%d%%"):format(math.floor(n.chance + 0.5)))
-      shown[i] = chance and ("%s (%s)"):format(n.name, chance) or n.name
+      shown[i] = n.chance and ("%s (%s)"):format(n.name, ns.DoLine.ChanceText(n.chance)) or n.name
     end
     text = table.concat(shown, ", ") .. (#names > 3 and (" +%d"):format(#names - 3) or "")
     dropperNames[itemID] = text

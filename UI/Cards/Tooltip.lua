@@ -41,9 +41,24 @@ local function sourcesText(questID, objective)
     return nil
   end
   -- Grouped when they share a word ("any Stonesplinter"), else at most MAX_TOOLTIP_SOURCES names,
-  -- nearest first, then "+N" (all 20 was a wall of text).
+  -- nearest first, then "+N" (all 20 was a wall of text). Each with its drop chance where forever-db
+  -- knows it (review: "no drop chances for regular loot-from-mob items?"); a group shows its best.
   local verb = sources.kind == "object" and "Gathered from" or "Dropped by"
-  return ("%s %s"):format(verb, ns.DoLine.SourcesText(sources.names, sources.more, MAX_TOOLTIP_SOURCES))
+  local chances = sources.chances or {}
+  local group = ns.DoLine.GroupName(sources.names)
+  if group then
+    local best
+    for _, name in ipairs(sources.names) do
+      best = chances[name] and math.max(best or 0, chances[name]) or best
+    end
+    local text = ns.DoLine.SourcesText(sources.names, sources.more, MAX_TOOLTIP_SOURCES)
+    return ("%s %s%s"):format(verb, text, best and (" (up to %s)"):format(ns.DoLine.ChanceText(best)) or "")
+  end
+  local named = {}
+  for i, name in ipairs(sources.names) do
+    named[i] = chances[name] and ("%s (%s)"):format(name, ns.DoLine.ChanceText(chances[name])) or name
+  end
+  return ("%s %s"):format(verb, ns.DoLine.SourcesText(named, sources.more, MAX_TOOLTIP_SOURCES))
 end
 
 -- Mini bars ----------------------------------------------------------------------------------------
