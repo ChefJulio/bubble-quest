@@ -22,8 +22,8 @@
   master, battlemaster, spirit healer, and profession trainers one by one. On by default: flight
   master, innkeeper, auctioneer, mailbox, class trainer, and the trainers of professions you have
   (a profession you learn switches its trainers on)
-- Overlapping icons on the world map (a "?" under a trainer, quest givers side by side) fan out into a
-  ring when you hover them, each with its own tooltip and a line back to where it is
+- Overlapping icons on the world map (a "?" under a trainer, quest givers side by side) glide into a row
+  above the spot when you hover them, each with its own tooltip and a line down to where it is
 - A Questmarker button on the world map (under Blizzard's, or in the same column as Questie's): click
   for a menu of what Questmarker shows on the maps
 - Picking up a single object (like Downstream's saw): "here" only within 5 yards, so the arrow guides
