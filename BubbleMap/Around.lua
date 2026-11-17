@@ -134,8 +134,24 @@ local function iconButton(atlas)
   return b
 end
 
+-- Tracking changes land a moment after SetTracking (spell tracking like Find Herbs is an aura), so the
+-- menu re-read the old state and kept a box ticked that had just been turned off (seen in review).
+-- As Blizzard's menu does (its predicted tracking state, Mainline/Minimap.lua:80, 628-636): what was
+-- clicked shows until MINIMAP_UPDATE_TRACKING confirms it, then the open menu is redrawn (one spell
+-- tracking on turns another off, which only the event tells).
+local predicted = {}   -- [index] = the state clicked, until the game confirms
+local trackingOpen     -- the open menu, if any
+
+local function trackingActive(index)
+  if predicted[index] ~= nil then
+    return predicted[index]
+  end
+  local info = C_Minimap.GetTrackingInfo(index)
+  return info ~= nil and info.active == true
+end
+
 local function trackingMenu(owner)
-  MenuUtil.CreateContextMenu(owner, function(_, root)
+  trackingOpen = MenuUtil.CreateContextMenu(owner, function(_, root)
     root:CreateTitle("Tracking")
     for index = 1, C_Minimap.GetNumTrackingTypes() do
       local filter = C_Minimap.GetTrackingFilter(index)
@@ -144,16 +160,24 @@ local function trackingMenu(owner)
         local info = C_Minimap.GetTrackingInfo(index)
         if info then
           root:CreateCheckbox(info.name,
-            function() local now = C_Minimap.GetTrackingInfo(index); return now ~= nil and now.active == true end,
+            function() return trackingActive(index) end,
             function()
-              local now = C_Minimap.GetTrackingInfo(index)
-              C_Minimap.SetTracking(index, not (now and now.active))
+              local on = not trackingActive(index)
+              predicted[index] = on
+              C_Minimap.SetTracking(index, on)
             end)
         end
       end
     end
   end)
 end
+
+ns.On("MINIMAP_UPDATE_TRACKING", function()
+  wipe(predicted)
+  if trackingOpen and trackingOpen:IsShown() then
+    trackingOpen:ReinitializeAll()
+  end
+end)
 
 local function updateMail()
   buttons.mail.has = HasNewMail() and true or false
