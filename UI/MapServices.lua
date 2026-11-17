@@ -67,6 +67,7 @@ local MapServices = {
   building = false,
   hits = {},
   icons = {},
+  fanItems = {},    -- the icons for fanning out (UI/MapFan.lua)
   hovering = false,
 }
 ns.MapServices = MapServices
@@ -291,9 +292,11 @@ function MapServices:Redraw()
   if not map or not layer then
     return
   end
+  ns.MapFan:Collapse()  -- an open ring holds textures that are about to go
   iconPool:ReleaseAll()
   wipe(self.hits)
   wipe(self.icons)
+  wipe(self.fanItems)
   local canvas = map:GetCanvas()
   local mapID = map:GetMapID()
   local width, height = canvas:GetSize()
@@ -327,7 +330,12 @@ function MapServices:Redraw()
               texture:SetSize(size, size)
               texture:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
               self.icons[#self.icons + 1] = texture
-              self.hits[#self.hits + 1] = { x = x, y = y, entry = entry, key = key }
+              local hit = { x = x, y = y, entry = entry, key = key }
+              self.hits[#self.hits + 1] = hit
+              self.fanItems[#self.fanItems + 1] = {
+                texture = texture, x = x, y = y, base = ICON_SIZE,
+                fill = function(tooltip) MapServices.FillTooltip(tooltip, { hit }) end,
+              }
             end
           end
         end
@@ -345,6 +353,20 @@ local function labelOf(key)
   return (key:gsub("^trainer:", ""):gsub("^class:", "")) .. " trainer"
 end
 
+---Fills `tooltip` (owned and anchored by the caller) for service icons: name, and title or service.
+function MapServices.FillTooltip(tooltip, hits)
+  tooltip:ClearLines()
+  for i, hit in ipairs(hits) do
+    if i > 1 then
+      tooltip:AddLine(" ")
+    end
+    tooltip:AddLine(hit.entry.name or "?", 1, 1, 1)
+    local title = hit.entry.title
+    tooltip:AddLine(title and title ~= "" and title or labelOf(hit.key), 0.8, 0.8, 0.8)
+  end
+  tooltip:Show()
+end
+
 local hoverElapsed = 0
 local function updateHover(map, delta)
   hoverElapsed = hoverElapsed + delta
@@ -353,7 +375,8 @@ local function updateHover(map, delta)
   end
   hoverElapsed = 0
   local found
-  if map:IsMouseOver() and #MapServices.hits > 0 and not ns.MapAvailable.hovering then
+  -- An open ring of fanned-out icons owns the tooltip (UI/MapFan.lua).
+  if map:IsMouseOver() and #MapServices.hits > 0 and not ns.MapAvailable.hovering and not ns.MapFan.fanned then
     local nx, ny = map:GetNormalizedCursorPosition()
     if nx and ny and not issecretvalue(nx) and not issecretvalue(ny) then
       local width, height = map:GetCanvas():GetSize()
@@ -371,16 +394,7 @@ local function updateHover(map, delta)
   if found then
     local tooltip = ns.Tooltips:Take(layer, "ANCHOR_CURSOR")  -- nil while Ctrl hides ours
     if tooltip then
-      tooltip:ClearLines()
-      for i, hit in ipairs(found) do
-        if i > 1 then
-          tooltip:AddLine(" ")
-        end
-        tooltip:AddLine(hit.entry.name or "?", 1, 1, 1)
-        local title = hit.entry.title
-        tooltip:AddLine(title and title ~= "" and title or labelOf(hit.key), 0.8, 0.8, 0.8)
-      end
-      tooltip:Show()
+      MapServices.FillTooltip(tooltip, found)
     end
     MapServices.hovering = tooltip ~= nil
   elseif MapServices.hovering then
@@ -401,6 +415,7 @@ local function createLayer()
   layer:SetAllPoints(canvas)
   layer:EnableMouse(false)
   layer:SetFrameLevel(FRAME_LEVEL)
+  ns.MapFan:Register("services", MapServices.fanItems)
   iconPool = ns.CreatePool(function()
     return layer:CreateTexture(nil, "OVERLAY")
   end)
@@ -409,6 +424,7 @@ local function createLayer()
     if not drawn or drawn.mapID ~= map:GetMapID() or drawn.width ~= canvas:GetWidth() then
       MapServices:Redraw()
     elseif drawn.scale ~= canvas:GetEffectiveScale() then
+      ns.MapFan:Collapse()
       drawn.scale = canvas:GetEffectiveScale()
       local size = iconSize(canvas)
       for _, icon in ipairs(MapServices.icons) do

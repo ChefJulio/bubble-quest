@@ -59,6 +59,7 @@ UI\Cards\Menu.lua
 UI\Cards\Tooltip.lua
 UI\Cards\ItemButtons.lua
 UI\Cards\Stack.lua
+UI\MapFan.lua
 UI\MapAreas.lua
 UI\MinimapAreas.lua
 UI\MapAvailable.lua

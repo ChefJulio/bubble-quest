@@ -32,6 +32,7 @@ local MapAvailable = {
   builtFor = nil,   -- Available.version .. settings, the entries were built for
   hits = {},        -- world map: { x, y, radius (canvas pixels), base (icon size), entries }
   icons = {},       -- world map icon textures in use, for resizing on zoom
+  fanItems = {},    -- the icons for fanning out (UI/MapFan.lua)
   hovering = false,
 }
 ns.MapAvailable = MapAvailable
@@ -262,6 +263,10 @@ local function placeIcon(canvas, x, y, entry, base)
   MapAvailable.icons[#MapAvailable.icons + 1] = icon
   local hit = { x = x, y = y, radius = size / 2, base = base, entries = { entry } }
   MapAvailable.hits[#MapAvailable.hits + 1] = hit
+  MapAvailable.fanItems[#MapAvailable.fanItems + 1] = {
+    texture = icon, x = x, y = y, base = base,
+    fill = function(tooltip) MapAvailable.FillTooltip(tooltip, hit.entries) end,  -- merged drops too
+  }
   return hit
 end
 
@@ -280,10 +285,12 @@ function MapAvailable:Redraw()
   if not map or not layer then
     return
   end
+  ns.MapFan:Collapse()  -- an open ring holds textures that are about to go
   iconPool:ReleaseAll()
   blobPool:ReleaseAll()
   wipe(self.hits)
   wipe(self.icons)
+  wipe(self.fanItems)
   wipe(dropAreas)
   wipe(shownAreas)
   local canvas = map:GetCanvas()
@@ -347,6 +354,7 @@ end
 
 -- Zooming scales the canvas: keep the icons' size on screen (cheaper than a redraw every frame).
 local function resizeIcons(canvas)
+  ns.MapFan:Collapse()
   for _, icon in ipairs(MapAvailable.icons) do
     local size = iconSize(icon.base, canvas)
     icon:SetSize(size, size)
@@ -390,7 +398,8 @@ local function updateHover(map, delta)
   end
   hoverElapsed = 0
   local found
-  if map:IsMouseOver() and #MapAvailable.hits > 0 then
+  -- An open ring of fanned-out icons owns the tooltip (UI/MapFan.lua).
+  if map:IsMouseOver() and #MapAvailable.hits > 0 and not ns.MapFan.fanned then
     local nx, ny = map:GetNormalizedCursorPosition()
     if nx and ny and not issecretvalue(nx) and not issecretvalue(ny) then
       local width, height = map:GetCanvas():GetSize()
@@ -422,6 +431,7 @@ local function createLayer()
   layer:SetAllPoints(canvas)
   layer:EnableMouse(false)
   layer:SetFrameLevel(FRAME_LEVEL)
+  ns.MapFan:Register("available", MapAvailable.fanItems)
   iconPool = ns.CreatePool(function()
     return layer:CreateTexture(nil, "OVERLAY")
   end)

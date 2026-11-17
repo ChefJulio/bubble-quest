@@ -73,6 +73,7 @@ local MapAreas = {
   colors = {},   -- [questID] = palette index, for the session (stays when cards re-sort)
   groups = {},   -- [n] = per-quest frame with its textures
   hits = {},     -- every drawn circle: { x, y (canvas pixels), questID, objective (index or nil) }
+  fanItems = {}, -- the turn-in "?" for fanning out (UI/MapFan.lua)
   radius = 0,    -- a circle's radius in canvas pixels, for the hover
   dirty = true,
   version = 0,
@@ -288,7 +289,8 @@ local function blizzardQuestPins(map)
   return pins, count
 end
 
--- A ready quest's turn-in: Blizzard's "?", a fixed size on screen. False when one is already there.
+-- A ready quest's turn-in: Blizzard's "?", a fixed size on screen. Returns the texture, or false when
+-- one is already there.
 local function placeMarker(group, canvas, x, y)
   local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()
   local limit = TURNIN_SIZE * iconScale() * scale * 0.75
@@ -311,7 +313,7 @@ local function placeMarker(group, canvas, x, y)
   marker:ClearAllPoints()
   marker:SetPoint("CENTER", canvas, "TOPLEFT", x, -y)
   marker:Show()
-  return true
+  return marker
 end
 
 local function placeBlob(group, canvas, x, y, size, color)
@@ -389,7 +391,9 @@ function MapAreas:Redraw()
   end
   local size = 2 * blobYards() / worldWidth * width
   vector = vector or CreateVector2D(0, 0)
+  ns.MapFan:Collapse()  -- an open ring holds markers that are about to move
   wipe(self.hits)
+  wipe(self.fanItems)
   wipe(placedMarkers)
   self.highlightReset()  -- new circles start untinted by any hover
   self.blobSize = size
@@ -423,9 +427,17 @@ function MapAreas:Redraw()
             self.hits[#self.hits + 1] = {
               x = x, y = y, questID = questID, objective = entry.objective, texture = texture, color = shade,
             }
-          elseif not blizzardPins[questID] and placeMarker(group, canvas, x, y) then
-            -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
-            self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, color = color }
+          elseif not blizzardPins[questID] then
+            -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable,
+            -- and one of the icons that fan out when they overlap (UI/MapFan.lua).
+            local marker = placeMarker(group, canvas, x, y)
+            if marker then
+              self.hits[#self.hits + 1] = { x = x, y = y, questID = questID, color = color }
+              self.fanItems[#self.fanItems + 1] = {
+                texture = marker, x = x, y = y, base = TURNIN_SIZE,
+                fill = function(tooltip) MapAreas.FillTooltip(tooltip, { [questID] = { turnin = true } }) end,
+              }
+            end
           end
         end
       end
@@ -702,7 +714,8 @@ local function updateHover(layer, map, delta)
   end
   hoverElapsed = 0
   local found
-  if map:IsMouseOver() and #MapAreas.hits > 0 then
+  -- An open ring of fanned-out icons owns the tooltip (UI/MapFan.lua).
+  if map:IsMouseOver() and #MapAreas.hits > 0 and not ns.MapFan.fanned then
     local nx, ny = map:GetNormalizedCursorPosition()
     if readable(nx) and readable(ny) then
       local width, height = map:GetCanvas():GetSize()
@@ -744,6 +757,7 @@ local function createLayer()
   layer:SetAllPoints(canvas)
   layer:EnableMouse(false)
   layer:SetFrameLevel(FRAME_LEVEL)
+  ns.MapFan:Register("turnins", MapAreas.fanItems)
   -- Runs only while the map is shown (the layer is part of it): redraw when the zone shown, the
   -- canvas size or our data changed.
   layer:SetScript("OnUpdate", function(_, delta)
