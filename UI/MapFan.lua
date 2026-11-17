@@ -45,6 +45,7 @@ end
 local frame ---@type table
 local canvas ---@type table
 local strip ---@type table
+local top ---@type table
 local lines = {}
 -- Stand-ins: while a row is open the grouped icons are drawn here, on top of everything of ours
 -- (review: another "?" showed over the strip), copies of the originals, which turn invisible in place.
@@ -202,7 +203,7 @@ local function open(group)
     y1, y2 = math.min(y1, item.y, item.fanY), math.max(y2, item.y, item.fanY)
     local line = lines[i]
     if not line then
-      line = frame:CreateLine(nil, "ARTWORK")
+      line = top:CreateLine(nil, "ARTWORK")
       line:SetColorTexture(1, 1, 1, LINE_ALPHA)
       lines[i] = line
     end
@@ -210,7 +211,7 @@ local function open(group)
     -- The stand-in takes the icon's look; the original turns invisible where it is.
     local proxy = proxies[i]
     if not proxy then
-      proxy = frame:CreateTexture(nil, "OVERLAY")
+      proxy = top:CreateTexture(nil, "OVERLAY")
       proxies[i] = proxy
     end
     copyLook(item.texture, proxy)
@@ -322,7 +323,14 @@ local function create()
   frame:SetFrameLevel(BACKDROP_LEVEL)
   strip = CreateFrame("Frame", nil, frame, "BackdropTemplate")
   strip:EnableMouse(false)
+  strip:SetFrameLevel(BACKDROP_LEVEL + 1)
   strip:Hide()
+  -- Lines and stand-ins on a frame above the strip: a child frame draws over its parent's textures, so
+  -- on `frame` itself they went under the strip (review).
+  top = CreateFrame("Frame", nil, frame)
+  top:SetAllPoints(canvas)
+  top:EnableMouse(false)
+  top:SetFrameLevel(BACKDROP_LEVEL + 2)
   frame:SetScript("OnUpdate", function(_, delta)
     hover(map, delta)
     animate(delta)
