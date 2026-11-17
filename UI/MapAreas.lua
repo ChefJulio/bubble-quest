@@ -621,6 +621,7 @@ end
 -- (Navigation:GuidePoint: the hovered objective, else its nearest one you aren't in, or the turn-in),
 -- like the minimap's. Only when you're on the map shown. Sizes are on screen, whatever the zoom.
 local GUIDE_DOT, GUIDE_SPACING, GUIDE_SPEED = 7, 14, 18  -- pixels on screen; pixels a second
+local GUIDE_MIN_DOTS = 3
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"
 local guide = { questID = nil, key = nil, dots = {} }
 
@@ -655,15 +656,19 @@ local function drawGuide(layer, map)
     local _, from = C_Map.GetMapPosFromWorldPos(instanceMap, vector, mapID)
     vector:SetXY(point.x, point.y)
     local _, to = C_Map.GetMapPosFromWorldPos(point.map, vector, mapID)
-    if from and to and from.x >= 0 and from.x <= 1 and from.y >= 0 and from.y <= 1 then
+    if from and to and from.x >= 0 and from.x <= 1 and from.y >= 0 and from.y <= 1
+        and (from.x ~= to.x or from.y ~= to.y) then  -- standing on it: no line (and no zero spacing)
       local canvas = map:GetCanvas()
       local width, height = canvas:GetSize()
       local scale = UIParent:GetEffectiveScale() / canvas:GetEffectiveScale()  -- screen px -> canvas
       local x1, y1, x2, y2 = from.x * width, from.y * height, to.x * width, to.y * height
       local length = math.sqrt((x2 - x1) ^ 2 + (y2 - y1) ^ 2)
-      local spacing, size = GUIDE_SPACING * scale, GUIDE_DOT * scale
+      -- At least GUIDE_MIN_DOTS on a short line (review: a turn-in close by on the small quest log
+      -- map showed none: one faded dot fitted, or none).
+      local spacing = math.min(GUIDE_SPACING * scale, length / (GUIDE_MIN_DOTS + 1))
+      local size = math.min(GUIDE_DOT * scale, spacing * 0.6)
       local color = MapAreas:ColorFor(guide.questID)
-      local d = (GetTime() * GUIDE_SPEED * scale) % spacing + spacing
+      local d = (GetTime() * GUIDE_SPEED * scale) % spacing + spacing / 2
       while d < length - spacing / 2 do
         used = used + 1
         local dot = guide.dots[used]
@@ -676,7 +681,7 @@ local function drawGuide(layer, map)
         dot:SetSize(size, size)
         dot:ClearAllPoints()
         dot:SetPoint("CENTER", canvas, "TOPLEFT", x1 + (x2 - x1) * t, -(y1 + (y2 - y1) * t))
-        local fade = math.min(1, (d - spacing) / spacing)  -- fades in from you
+        local fade = math.min(1, 0.35 + d / (2 * spacing))  -- fades in from you, never invisible
         dot:SetVertexColor(color[1], color[2], color[3], 0.9 * fade)
         dot:Show()
         d = d + spacing

@@ -112,9 +112,9 @@ end
 local function createBar(parent)
   local bar = CreateFrame("Frame", nil, parent)
   bar:SetSize(BAR_WIDTH, BAR_HEIGHT)
-  local track = bar:CreateTexture(nil, "BACKGROUND")
-  track:SetAllPoints()
-  track:SetColorTexture(1, 1, 1, 0.12)
+  bar.track = bar:CreateTexture(nil, "BACKGROUND")
+  bar.track:SetAllPoints()
+  bar.track:SetColorTexture(1, 1, 1, 0.12)
   bar.fill = bar:CreateTexture(nil, "ARTWORK")
   bar.fill:SetPoint("TOPLEFT")
   bar.fill:SetHeight(BAR_HEIGHT)
@@ -144,30 +144,52 @@ local function setSegments(bar, total)
   end
 end
 
+-- Bars in the map's colours (review): an objective's bar in its shade of the quest's colour, the card's
+-- bar in the quest's, so a row matches its areas on the map. The empty track is a faint wash of the
+-- colour, so an empty bar shows it too (a border, asked about, would leave a 4 px bar muddy); done is
+-- still green. Gold while the map areas are off: the colours mean nothing then.
+local TRACK_ALPHA = 0.28
+
 ---@param fraction number 0..1
 ---@param segments number? steps to mark, nil for a smooth bar
----@param complete boolean green (done) instead of gold
-local function setBar(bar, fraction, segments, complete)
+---@param complete boolean green (done) instead of the colour
+---@param color table? { r, g, b } the map colour; nil: gold, the plain look
+local function setBar(bar, fraction, segments, complete, color)
   bar:SetWidth(BAR_WIDTH)  -- the card width can change (resize grip)
   setSegments(bar, segments)
   bar.fill:SetWidth(math.max(1, BAR_WIDTH * fraction))
   bar.fill:SetShown(fraction > 0)
+  if color then
+    bar.track:SetColorTexture(color[1], color[2], color[3], TRACK_ALPHA)
+  else
+    bar.track:SetColorTexture(1, 1, 1, 0.12)
+  end
   if complete then
     bar.fill:SetColorTexture(0.2, 0.85, 0.2, 0.9)
+  elseif color then
+    bar.fill:SetColorTexture(color[1], color[2], color[3], 0.95)
   else
     bar.fill:SetColorTexture(0.95, 0.75, 0.15, 0.9)
   end
 end
 
+-- The map colour for a bar: an objective's shade (index), or the quest's (nil); nil with areas off.
+local function barColor(questID, index)
+  if not ns.MapAreas:Enabled() then
+    return nil
+  end
+  return index and ns.MapAreas:ShadeFor(questID, index) or ns.MapAreas:ColorFor(questID)
+end
+
 -- One objective's bar: its own count (segmented when 2..MAX_SEGMENTS), or full/empty without one.
-local function setObjectiveBar(bar, objective)
+local function setObjectiveBar(bar, objective, color)
   local required = objective.required or 0
   if required > 0 then
     local done = math.min(objective.fulfilled or 0, required)
     local segments = required >= 2 and required <= MAX_SEGMENTS and required or nil
-    setBar(bar, done / required, segments, objective.finished or done >= required)
+    setBar(bar, done / required, segments, objective.finished or done >= required, color)
   else
-    setBar(bar, objective.finished and 1 or 0, nil, objective.finished)
+    setBar(bar, objective.finished and 1 or 0, nil, objective.finished, color)
   end
 end
 
@@ -500,7 +522,7 @@ function Card:SetQuest(quest, collapsed, options)
       row.bar:ClearAllPoints()
       row.bar:SetPoint("TOPLEFT", row, "TOPLEFT", ROW_INDENT, -(height + BAR_GAP))
       row.bar:Show()
-      setObjectiveBar(row.bar, quest.objectives[i])
+      setObjectiveBar(row.bar, quest.objectives[i], barColor(quest.questID, i))
       height = height + BAR_GAP + BAR_HEIGHT
     elseif row.bar then
       row.bar:Hide()
@@ -753,11 +775,11 @@ end
 function Card:UpdateBar(quest)
   if self.bar:IsShown() then
     local done, total = steps(quest)
-    setBar(self.bar, done and done / total or progressOf(quest), total, quest.readyForTurnIn)
+    setBar(self.bar, done and done / total or progressOf(quest), total, quest.readyForTurnIn, barColor(quest.questID))
   end
   for i, row in ipairs(self.rows) do
     if row.bar and row.bar:IsShown() and quest.objectives[i] then
-      setObjectiveBar(row.bar, quest.objectives[i])
+      setObjectiveBar(row.bar, quest.objectives[i], barColor(quest.questID, i))
     end
   end
 end
