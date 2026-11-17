@@ -1,5 +1,10 @@
 package-as: Questmarker
 
+# Companion addons in this repo ship beside Questmarker in the same zip, each its own folder in
+# Interface\AddOns (the BigWigs/DBM model). tools/package.py's COMPANIONS must list the same.
+move-folders:
+  Questmarker/Questmarker_Map: Questmarker_Map
+
 # Release notes for CurseForge and GitHub: CHANGELOG.md holds only the coming release's notes;
 # replace them before tagging (past notes stay on the release pages).
 manual-changelog:

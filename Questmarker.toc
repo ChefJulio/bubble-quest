@@ -27,6 +27,7 @@ Core\Debug.lua
 Core\Bus.lua
 Core\Combat.lua
 Core\DB.lua
+Core\API.lua
 Data\ForeverData.lua
 Data\CategoryOverrides.lua
 Data\Learned.lua

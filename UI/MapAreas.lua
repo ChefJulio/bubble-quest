@@ -231,6 +231,7 @@ end
 function MapAreas:MarkDirty()
   self.dirty = true
   self.version = (self.version or 0) + 1
+  ns.Bus:Fire("AreasChanged")  -- QuestmarkerAPI's AreasChanged
 end
 
 -- Drawing ------------------------------------------------------------------------------------------

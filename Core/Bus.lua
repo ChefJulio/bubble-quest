@@ -28,6 +28,7 @@ local SHOWN_EVENTS = {
 -- Questmarker events /qm events doesn't print (they fire every few steps while moving).
 local QUIET_BUS_EVENTS = {
   LearnedChanged = true,
+  AreasChanged = true,  -- follows LearnedChanged and most quest events
 }
 
 local Events = {

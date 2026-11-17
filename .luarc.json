@@ -33,7 +33,8 @@
     "Questmarker_OnAddonCompartmentClick",
     "Questmarker_OnAddonCompartmentEnter",
     "Questmarker_OnAddonCompartmentLeave",
-    "QuestmarkerMinimapTooltip"
+    "QuestmarkerMinimapTooltip",
+    "QuestmarkerAPI"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {

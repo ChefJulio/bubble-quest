@@ -1,0 +1,10 @@
+## Interface: 16001
+## Title: Questmarker Map
+## Notes: A square minimap made for Questmarker's tracker
+## Author: ChefJulio
+## Version: @project-version@
+## Category: Quests
+## IconTexture: Interface\AddOns\Questmarker\Media\Icon
+## Dependencies: Questmarker
+
+Init.lua

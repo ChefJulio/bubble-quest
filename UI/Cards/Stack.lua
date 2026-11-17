@@ -47,6 +47,9 @@ local Stack = {
   order = {},       -- questIDs of the cards on screen, top to bottom
   sections = {},    -- section headers laid out, top to bottom: { frame, y (in the body) }
   resortPending = false,
+  attachedTo = nil, ---@type Frame? -- the frame the tracker hangs under (QuestmarkerAPI.SetTrackerAttach)
+  PAD = PAD,
+  HEADER_HEIGHT = HEADER_HEIGHT,
 }
 ns.Stack = Stack
 
@@ -179,6 +182,7 @@ end
 function Stack:ApplyBackground()
   if self.background then
     self.background:SetColorTexture(0, 0, 0, ns.DB.profile.cards.opacity / 100)
+    ns.Bus:Fire("BackgroundChanged")
   end
 end
 
@@ -357,6 +361,10 @@ function Stack:ApplyWidth()
   self.container:SetWidth(width + 2 * PAD)
   self.scroll:SetWidth(width)
   self.body:SetWidth(width)
+  if width ~= self.appliedWidth then
+    self.appliedWidth = width
+    ns.Bus:Fire("TrackerWidthChanged", width + 2 * PAD)
+  end
 end
 
 -- Resize grip (review: "the lock button allows corner dragging"): bottom-right corner, shown while the
@@ -378,7 +386,10 @@ function Stack:StartResize()
     return
   end
   -- Grow right and down: pin the top-left corner first (a default position is anchored top-right).
-  ns.DB.profile.cards.position = self:AnchorTopLeft() or ns.DB.profile.cards.position
+  -- Attached, the frame above holds the position; re-anchoring here would detach it.
+  if not self.attachedTo then
+    ns.DB.profile.cards.position = self:AnchorTopLeft() or ns.DB.profile.cards.position
+  end
   local x, y = cursorPosition()
   self.resizing = {
     x = x, y = y,
@@ -541,7 +552,11 @@ function Stack:ApplyPosition()
     return
   end
   container:ClearAllPoints()
-  if saved then
+  if self.attachedTo then
+    -- Hanging under another frame (Questmarker_Map's minimap): it moves, we follow. The saved
+    -- position is kept for when it lets go.
+    container:SetPoint("TOPLEFT", self.attachedTo, "BOTTOMLEFT")
+  elseif saved then
     container:SetPoint(saved[1], UIParent, saved[2], saved[3], saved[4])
     if saved[1] ~= "TOPLEFT" then
       -- Saved before positions were normalized: convert once, so the stack grows only downward.
@@ -553,6 +568,18 @@ function Stack:ApplyPosition()
     local p = DEFAULT_POSITION
     container:SetPoint(p[1], UIParent, p[2], p[3], p[4])
   end
+end
+
+---Hang the tracker under `frame` (nil: back to its own position). Out of combat only: the caller
+---(QuestmarkerAPI.SetTrackerAttach) queues it, as the quest item buttons are anchored to the cards.
+---@param frame Frame?
+function Stack:Attach(frame)
+  if frame == self.attachedTo then
+    return
+  end
+  self.attachedTo = frame
+  self:ApplyPosition()
+  self:Request(false, true)  -- the room below changed: refit the scroll area
 end
 
 -- The resize grip shows while unlocked, but not while minimized: the panel is then just the header,
@@ -589,7 +616,7 @@ end
 
 local function savePosition()
   local container = Stack.container
-  if not container then
+  if not container or Stack.attachedTo then
     return
   end
   container:StopMovingOrSizing()
@@ -631,7 +658,7 @@ local function createHeader(container)
   end)
   header:SetScript("OnDragStart", function()
     header.dragged = true
-    if not ns.DB.profile.cards.locked then
+    if not ns.DB.profile.cards.locked and not Stack.attachedTo then
       container:StartMoving()
     end
   end)
@@ -667,6 +694,11 @@ local function createHeader(container)
   header.settings:SetPoint("RIGHT", header.minimize, "LEFT", -2, 0)
 
   header.lock = headerButton(header, function()
+    if Stack.attachedTo then
+      return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag the corner to resize. The "
+        .. "cards hang under the minimap: move it in Edit Mode."
+        or "Unlocked: drag the corner to resize. Click to lock."
+    end
     return ns.DB.profile.cards.locked and "Locked. Click to unlock, then drag this header to move the cards."
       or "Unlocked: drag this header to move the cards. Click to lock."
   end, function()
