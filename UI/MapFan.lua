@@ -136,10 +136,12 @@ function MapFan:Collapse()
 end
 
 -- Crowding, measured on screen relative to the icons' size (review: "hard to decide what should be
--- included by distance with zoom"): two icons are neighbours when their gap is under LINK_GAP of an
--- icon, and a group is everything linked to the hovered icon through neighbours (A near B near C).
--- Zoomed out a town's icons chain into one row; zoomed in they part, and there's nothing to untangle.
-local LINK_GAP = 0.6
+-- included by distance with zoom"): a row opens only when the hovered icon overlaps another, and then
+-- holds everything linked to it through neighbours (A near B near C), neighbours being icons whose gap
+-- is under LINK_GAP of an icon. Zoomed out a town's icons chain into one row; zoomed in they part, and
+-- there's nothing to untangle. (Review: at 0.6, with no overlap needed, a lone "?" pulled in a cluster
+-- of "!" it didn't touch.)
+local LINK_GAP = 0.25
 -- At most this many in a row, the nearest the cursor (review: on a continent map a whole kingdom's
 -- icons chained into one strip across the map).
 local MAX_ROW = 6
@@ -161,6 +163,17 @@ local function cluster(x, y)
   end
   if not first then
     return nil
+  end
+  local overlaps = false
+  for _, b in ipairs(all) do
+    local touch = (first.base + b.base) / 2 * factor
+    if b ~= first and (first.x - b.x) ^ 2 + (first.y - b.y) ^ 2 < touch * touch then
+      overlaps = true
+      break
+    end
+  end
+  if not overlaps then
+    return nil  -- nothing on top of it: its own tooltip is enough
   end
   local group, inGroup, i = { first }, { [first] = true }, 1
   while group[i] do
