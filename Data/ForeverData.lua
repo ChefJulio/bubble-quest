@@ -60,6 +60,13 @@ function ForeverData:QuestIds()
   return lib and lib.Ids("quest") or {}
 end
 
+---Every object ID in forever-db (town services: mailboxes).
+---@return number[]
+function ForeverData:ObjectIds()
+  local lib = library()
+  return lib and lib.Ids("object") or {}
+end
+
 ---An NPC's or object's name.
 ---@param kind string "npc" or "object" (or "item")
 ---@param id number

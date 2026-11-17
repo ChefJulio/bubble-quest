@@ -537,6 +537,7 @@ local function updateHover(layer, map, delta)
   end
   -- An available-quest icon under the cursor has the tooltip (UI/MapAvailable.lua).
   local tooltipBusy = (GameTooltip:IsShown() and GameTooltip:GetOwner() ~= layer) or ns.MapAvailable.hovering
+    or ns.MapServices.hovering
   if found and not tooltipBusy then
     hovering = showTooltip(layer, found)
   elseif hovering and not found then

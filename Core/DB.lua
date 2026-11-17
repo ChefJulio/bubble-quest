@@ -58,6 +58,7 @@ local PROFILE_DEFAULTS = {
     available = true,     -- quests you can pick up, on the world map and minimap
     availableTrivial = false,  -- also grey (trivial) ones
     availableDrops = true,     -- also quests started by a dropped item (their droppers' area)
+    services = {},        -- [service key | "trainer:<profession>"] = true: shown on the world map (UI/MapServices.lua)
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {

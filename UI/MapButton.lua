@@ -51,6 +51,19 @@ local function openMenu(owner)
         end
       end
     end
+    -- Town services (UI/MapServices.lua): on the world map, each its own toggle.
+    root:CreateDivider()
+    local services = root:CreateButton("Town services")
+    for _, s in ipairs(ns.MapServices.SERVICES) do
+      services:CreateCheckbox(s.label, function() return ns.MapServices:IsOn(s.key) end,
+        function() ns.MapServices:Toggle(s.key) end)
+    end
+    local trainers = services:CreateButton("Profession trainers")
+    for _, p in ipairs(ns.MapServices.PROFESSIONS) do
+      local key = "trainer:" .. p[1]
+      trainers:CreateCheckbox(p[1], function() return ns.MapServices:IsOn(key) end,
+        function() ns.MapServices:Toggle(key) end)
+    end
     root:CreateDivider()
     root:CreateButton("Map settings...", function() ns.Settings:Open() end)
   end)
