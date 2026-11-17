@@ -192,10 +192,27 @@ local placedMarkers = {}
 ---Does the game draw its own "?" for this ready quest? It does, on the world map and the minimap, for
 ---quests it has a marker for (C_QuestLog.GetQuestsOnMap on the continent, Quests/Zone.lua). Ours then
 ---only doubled it, a few yards off (review); the coloured circle stays.
+---(The minimap's test.)
 ---@param questID number
 ---@return boolean
 function MapAreas.GameMarksTurnIn(questID)
   return ns.Zone.markers[questID] ~= nil
+end
+
+-- The world map's test is stricter (review: no "?" at all on the world map): Blizzard draws a quest's
+-- pin there only when its questPOI setting is on, no other quest is focused in the log and the map
+-- type shows quests (QuestDataProvider.lua:114-186), and addons can switch those off. So: the quests
+-- Blizzard actually placed a QuestPinTemplate pin for, read from the map (nothing changed).
+local function blizzardQuestPins(map)
+  local pins, count = {}, 0
+  for pin in map:EnumeratePinsByTemplate("QuestPinTemplate") do
+    local questID = pin.questID
+    if type(questID) == "number" then
+      pins[questID] = true
+      count = count + 1
+    end
+  end
+  return pins, count
 end
 
 -- A ready quest's turn-in: Blizzard's "?" over the quest's coloured circle, a fixed size on screen.
@@ -286,7 +303,8 @@ function MapAreas:Redraw()
   local canvas = map:GetCanvas()
   local width, height = canvas:GetSize()
   local details = logQuest()
-  self.drawnFor = { mapID = mapID, width = width, height = height, details = details }
+  local blizzardPins, pinCount = blizzardQuestPins(map)
+  self.drawnFor = { mapID = mapID, width = width, height = height, details = details, pins = pinCount }
   self.dirty = false
   if not self:Enabled() or not mapID or not width or width == 0 then
     return
@@ -326,7 +344,7 @@ function MapAreas:Redraw()
         if pos and pos.x >= 0 and pos.x <= 1 and pos.y >= 0 and pos.y <= 1 then
           local x, y = pos.x * width, pos.y * height
           local texture = placeBlob(group, canvas, x, y, size, color)
-          if not entry.objective and not MapAreas.GameMarksTurnIn(questID) then
+          if not entry.objective and not blizzardPins[questID] then
             placeMarker(group, canvas, x, y)
           end
           self.hits[#self.hits + 1] = {
@@ -574,8 +592,10 @@ local function createLayer()
   layer:SetScript("OnUpdate", function(_, delta)
     local drawn = MapAreas.drawnFor
     local width = canvas:GetWidth()
+    -- Blizzard's quest pins come and go after ours drew (its data provider refreshes): count them.
+    local _, pinCount = blizzardQuestPins(map)
     if MapAreas.dirty or not drawn or drawn.mapID ~= map:GetMapID() or drawn.width ~= width
-        or drawn.details ~= logQuest() then
+        or drawn.details ~= logQuest() or drawn.pins ~= pinCount then
       MapAreas:Redraw()
     end
     updateHover(layer, map, delta)
