@@ -34,6 +34,8 @@ local WATCH_SECONDS = 0.25  -- how often scale and size are checked (Edit Mode c
 local Minimap_ = {
   shapeIsOurs = false,
   active = false,
+  outer = nil,       ---@type Frame? -- the column's top (see the header)
+  onActivate = {},   -- fn(outer) for each, once the map is ours (Around.lua)
 }
 ns.Minimap = Minimap_
 
@@ -207,6 +209,28 @@ function Minimap_:Activate()
     quest.RegisterCallback("TrackerResized", refresh)
     quest.RegisterCallback("ProfileChanged", refresh)
     quest.RegisterCallback("TrackerAttachMoved", function() Minimap_:SavePosition() end)
+  end
+
+  self.outer = outer
+  for _, fn in ipairs(self.onActivate) do
+    fn(outer)
+  end
+end
+
+---Drag the column (our bar's drag handle). Not while locked, not in combat: with the quest addon its
+---tracker, carrying secure quest item buttons, hangs under us.
+function Minimap_:StartDrag()
+  if self.active and not ns.DB.locked and not InCombatLockdown() then
+    self.dragging = true
+    outer:StartMoving()
+  end
+end
+
+function Minimap_:StopDrag()
+  if self.dragging then
+    self.dragging = false
+    outer:StopMovingOrSizing()
+    self:SavePosition()
   end
 end
 

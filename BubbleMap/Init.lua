@@ -71,9 +71,19 @@ end)
 local DEFAULTS = {
   notices = {},       -- [key] = true: "Don't ask again"
   position = nil,     -- { left, top } once dragged; nil: hang from Edit Mode's minimap box
-  locked = false,     -- the bar can't drag the map (with the quest addon: its lock decides)
+  locked = true,      -- the bar can't drag the map
   width = 220,        -- the map's width without the quest addon (with it: the tracker's width)
   heightPercent = 100,  -- the map's height, percent of its width
+  show = {            -- what's around the map (Around.lua); Blizzard's own versions are always hidden
+    bar = true,       -- the bar along the map's top (zone, buttons, clock)
+    zone = true,
+    clock = true,
+    calendar = true,
+    tracking = true,
+    mail = true,
+    coords = false,   -- the quest addon's header shows them already
+    zoom = false,     -- the mouse wheel zooms
+  },
 }
 
 local function fill(target, defaults)
