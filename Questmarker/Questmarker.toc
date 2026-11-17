@@ -4,6 +4,7 @@
 ## Author: ChefJulio
 ## Version: @project-version@
 ## Category: Quests
+## IconTexture: Interface\AddOns\BubbleQuest\Media\Icon
 ## SavedVariables: QuestmarkerDB
 ## SavedVariablesPerCharacter: QuestmarkerCharDB
 
