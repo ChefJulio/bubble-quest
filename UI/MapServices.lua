@@ -27,7 +27,6 @@ local SERVICES = {
   { key = "auction", label = "Auctioneer", icon = TRACKING .. "auctioneer", flag = "AUCTIONEER" },
   { key = "repair", label = "Repair", icon = TRACKING .. "repair", flag = "REPAIR" },
   { key = "mailbox", label = "Mailbox", icon = TRACKING .. "mailbox" },
-  { key = "class", label = "Class trainer", icon = TRACKING .. "class" },
   { key = "weapon", label = "Weapon master", icon = TRACKING .. "class" },
   { key = "stable", label = "Stable master", icon = TRACKING .. "stablemaster", flag = "STABLEMASTER" },
   { key = "battle", label = "Battlemaster", icon = TRACKING .. "battlemaster", flag = "BATTLEMASTER" },
@@ -45,6 +44,24 @@ local PROFESSIONS = {
   { "Mining", "Miner", 186 }, { "Skinning", "Skinner", 393 }, { "Tailoring", "Tailor", 197 },
 }
 
+-- Classes, by their localised names (C_CreatureInfo.GetClassInfo): a class trainer's subtitle is
+-- "<class> Trainer". A list like the professions (review: a priest can look up warrior trainers for a
+-- friend); your own class is switched on the first time it's seen.
+local classes
+local function classList()
+  if not classes then
+    classes = {}
+    for id = 1, 20 do
+      local info = C_CreatureInfo.GetClassInfo(id)
+      if info and info.className then
+        classes[#classes + 1] = info.className
+      end
+    end
+    table.sort(classes)
+  end
+  return classes
+end
+
 local MapServices = {
   lists = nil,      -- [service key | "trainer:" .. profession] = { { kind, id, name, title } }, once built
   building = false,
@@ -56,6 +73,21 @@ ns.MapServices = MapServices
 MapServices.SERVICES = SERVICES
 MapServices.PROFESSIONS = PROFESSIONS
 
+---The classes for the menu: those with trainers in the data once it's built, else every class.
+---@return string[]
+function MapServices:Classes()
+  if not self.lists then
+    return classList()
+  end
+  local out = {}
+  for _, name in ipairs(classList()) do
+    if self.lists["class:" .. name] then
+      out[#out + 1] = name
+    end
+  end
+  return out
+end
+
 -- Where a key's on/off lives: services in the profile (map.services), profession trainers per
 -- character (char.professionTrainers, by profession name). Off is stored as false, not removed, so a
 -- default never comes back after you turned it off.
@@ -63,6 +95,10 @@ local function storeFor(key)
   local profession = key:match("^trainer:(.+)$")
   if profession then
     return ns.DB.char.professionTrainers, profession
+  end
+  local class = key:match("^class:(.+)$")
+  if class then
+    return ns.DB.char.classTrainers, class
   end
   return ns.DB.profile.map.services, key
 end
@@ -82,9 +118,11 @@ local function anyOn()
       return true
     end
   end
-  for _, on in pairs(ns.DB.char.professionTrainers) do
-    if on then
-      return true
+  for _, store in ipairs({ ns.DB.char.professionTrainers, ns.DB.char.classTrainers }) do
+    for _, on in pairs(store) do
+      if on then
+        return true
+      end
     end
   end
   return false
@@ -120,6 +158,13 @@ local function adoptProfessions()
       changed = true
     end
   end
+  -- Your own class's trainers, the same way.
+  -- apiguard: allow our own character ("player") is never identity-restricted; a secret name is skipped
+  local className = UnitClass("player")
+  if className and not issecretvalue(className) and ns.DB.char.classTrainers[className] == nil then
+    ns.DB.char.classTrainers[className] = true
+    changed = true
+  end
   if changed then
     MapServices:MarkDirty()
     MapServices:Build()
@@ -142,9 +187,7 @@ local function build()
   if lib and lib.Npc then
     local flags = lib.Enum and lib.Enum.npcFlags or {}
     local faction = UnitFactionGroup("player") == "Horde" and "H" or "A"
-    -- apiguard: allow our own character ("player") is never identity-restricted; a secret name is dropped
-    local playerClass = UnitClass("player")
-    local className = not issecretvalue(playerClass) and playerClass or nil  -- secret: no class trainers
+    local classNames = classList()
     local n = 0
     for _, id in ipairs(lib.Npc.GetAllIds()) do
       local ok, v = pcall(lib.Npc.GetAll, id, { "npcFlags", "subName", "friendlyToFaction", "name" })
@@ -158,16 +201,21 @@ local function build()
           end
         end
         if mine and type(title) == "string" and hasFlag(npcFlags, flags.TRAINER) then
+          local matched = false
           if title == "Weapon Master" then
             add("weapon", entry)
-          elseif className and title:find(className, 1, true) then
-            add("class", entry)
-          else
-            for _, p in ipairs(PROFESSIONS) do
-              if title:find(p[1], 1, true) or title:find(p[2], 1, true) then
-                add("trainer:" .. p[1], entry)
-                break
-              end
+            matched = true
+          end
+          for _, class in ipairs(classNames) do
+            if not matched and title:find(class, 1, true) then
+              add("class:" .. class, entry)
+              matched = true
+            end
+          end
+          for _, p in ipairs(PROFESSIONS) do
+            if not matched and (title:find(p[1], 1, true) or title:find(p[2], 1, true)) then
+              add("trainer:" .. p[1], entry)
+              matched = true
             end
           end
         end
@@ -227,7 +275,7 @@ local function iconOf(key)
       return s.icon
     end
   end
-  return TRACKING .. "profession"
+  return key:find("^class:") and TRACKING .. "class" or TRACKING .. "profession"
 end
 
 -- World map ---------------------------------------------------------------------------------------
@@ -294,7 +342,7 @@ local function labelOf(key)
       return s.label
     end
   end
-  return (key:gsub("^trainer:", "")) .. " trainer"
+  return (key:gsub("^trainer:", ""):gsub("^class:", "")) .. " trainer"
 end
 
 local hoverElapsed = 0

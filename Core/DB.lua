@@ -60,7 +60,7 @@ local PROFILE_DEFAULTS = {
     availableDrops = true,     -- also quests started by a dropped item (their droppers' area)
     -- Town services on the world map (UI/MapServices.lua): [key] = true / false (off is kept, so a
     -- default can't come back). Profession trainers are per character (char.professionTrainers).
-    services = { flight = true, inn = true, auction = true, mailbox = true, class = true },
+    services = { flight = true, inn = true, auction = true, mailbox = true },
   },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {
@@ -92,6 +92,7 @@ local CHAR_DEFAULTS = {
   notices = {},    -- [noticeKey] = true, one-time messages already shown
   removedWatches = {},  -- [questID] = true: Blizzard quest watches we removed to hide its tracker
   professionTrainers = {},  -- [profession] = true / false: its trainers on the world map; nil until first seen
+  classTrainers = {},       -- [class name] = true / false: the same for class trainers (yours on when first seen)
   notOffered = {},  -- ["npc"|"object" .. id] = { [questID] = expiry time }: a giver left it out (Quests/Offers.lua)
 }
 

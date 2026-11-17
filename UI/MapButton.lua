@@ -58,6 +58,12 @@ local function openMenu(owner)
       services:CreateCheckbox(s.label, function() return ns.MapServices:IsOn(s.key) end,
         function() ns.MapServices:Toggle(s.key) end)
     end
+    local classTrainers = services:CreateButton("Class trainers")
+    for _, class in ipairs(ns.MapServices:Classes()) do
+      local key = "class:" .. class
+      classTrainers:CreateCheckbox(class, function() return ns.MapServices:IsOn(key) end,
+        function() ns.MapServices:Toggle(key) end)
+    end
     local trainers = services:CreateButton("Profession trainers")
     for _, p in ipairs(ns.MapServices.PROFESSIONS) do
       local key = "trainer:" .. p[1]
