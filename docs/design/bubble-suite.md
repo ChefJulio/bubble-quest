@@ -11,6 +11,10 @@ its own, and lights up extra features when its siblings are loaded too.
 |---|---|---|
 | BubbleQuest | Questmarker (CurseForge 1806606, released up to v0.5.0) | live, to be renamed |
 | BubbleMap | Questmarker_Map (companion in this repo, steps 1-2 built, unpushed) | in progress |
+
+BubbleMap status (2026-11-17): renamed to BubbleMap in this repo (folder, TOC, `BubbleMapDB`, `/bmap`),
+standalone with `## OptionalDeps: BubbleQuest, Questmarker`; quest features gated on the API. Repo
+split pending.
 | BubbleFonts | - | exists, separate repo |
 | BubbleBags | - | planned |
 | BubbleBuffs | - | planned |
@@ -61,8 +65,7 @@ It holds what every Bubble addon would otherwise copy:
 - **Look:** fonts, colours, the tooltip border and section header styles.
 - **Small utilities:** the Ctrl-held tooltip suppression (UI/Tooltips.lua), the event helper, the
   combat queue.
-- **Tooling** (not shipped): lint.py with apiguard, package.py, the toolchain pin. These could live in
-  a shared tools repo, or stay copied per repo; to be decided.
+- Tooling is not part of the library: it lives in `bubble-tools` (Decisions, 4).
 
 Extract it from BubbleQuest's code after the rename, not before: one move at a time.
 
@@ -75,7 +78,7 @@ Extract it from BubbleQuest's code after the rename, not before: one move at a t
 | folder and TOC `Questmarker` | `BubbleQuest` |
 | `## Title: Questmarker` | `BubbleQuest` |
 | SavedVariables `QuestmarkerDB`, `QuestmarkerCharDB` | `BubbleQuestDB`, `BubbleQuestCharDB` |
-| `/qm`, `/questmarker` (SLASH_QUESTMARKER1/2) | `/bq`, `/bubblequest`; `/qm` kept as an alias |
+| `/qm`, `/questmarker` (SLASH_QUESTMARKER1/2) | `/bq`, `/bquest`, `/bubblequest`; `/qm`, `/questmarker` kept as aliases |
 | setting IDs `QUESTMARKER_*` | `BUBBLEQUEST_*` (not saved anywhere, free to rename) |
 | font objects `QuestmarkerLineFont`, ... | `BubbleQuest*` |
 | `QuestmarkerMinimapTooltip`, `QuestmarkerMenu`, `QuestmarkerSettings` | `BubbleQuest*` |
@@ -119,19 +122,30 @@ The usual fix is a **stub addon**:
 As one dedicated change, before the next release and before BubbleMap goes further. The longer it
 waits, the more names (the API above all) a second addon depends on.
 
-## Open questions for the user
+## Decisions (2026-11-17)
 
-1. Are the names free? Check CurseForge and Wago for existing "BubbleQuest", "BubbleMap",
-   "BubbleBags", "BubbleBuffs" and "BubbleSuite".
-2. Repos: one per addon (recommended), or one monorepo?
-3. Slash command: `/bq`? (`/bq` may clash with another addon; to check.)
-4. Shared tooling: a shared tools repo, or a copy in each repo?
-5. BubbleFonts: does it adopt the shared library and the standalone rule as is, or does it need
-   changes? Its own session should look at it.
+1. **Names:** a web search (CurseForge, WowInterface, GitHub) found no WoW addon named BubbleQuest,
+   BubbleMap, BubbleSuite, BubbleBags or BubbleBuffs. Nearest: "Bubble-Collector" and "nBubble"
+   (speech bubbles), and a Pathfinder mod called BubbleBuffs (another game). Search engines don't
+   index everything: confirm when creating each CurseForge project, which rejects a taken slug.
+2. **Repos:** one per addon, plus one for LibBubble (as recommended above).
+3. **Slash commands:** `/bq`, `/bquest`, `/bubblequest`, plus `/qm` and `/questmarker` kept as
+   aliases through the stub period. If another addon also registers `/bq`, the longer ones still work.
+4. **Tooling: one shared repo, `bubble-tools`.** BubbleFonts' tools began as copies of this repo's and
+   have already drifted both ways (its lint.py declares Forever API namespaces missing from the
+   annotations, ensure_doc_namespaces; the toolchain pins differ). Each addon repo keeps a thin
+   `tools/lint.py` and `tools/package.py` that fetch `bubble-tools` at a commit pinned in
+   `tools/toolchain.json` into `.tools/`, the way lint.py already fetches wow-ui-source. Then a fix
+   lands once and each addon takes it by bumping the pin. Per-addon settings (shipped files, globals,
+   companions) stay in each repo.
+5. **BubbleFonts** (`../bubble-fonts`, CurseForge 1809013) already fits: its own repo, standalone, its
+   own names (BubbleFontsDB, `BubbleFonts_On...`). It uses LibSharedMedia; whatever LibBubble offers
+   for fonts should build on that rather than compete with it. Later it adopts LibBubble (settings
+   look) and bubble-tools.
 
 ## Order of work
 
-1. User reviews this doc; name check (question 1).
+1. User reviews this doc. Decisions recorded above.
 2. BubbleMap work pauses on anything named Questmarker (told to questmark-01, 2026-11-17).
 3. The rename, with the stub migration, in this repo. Test an update over a real Questmarker install.
 4. BubbleMap: own repo, BubbleMap names, OptionalDeps on BubbleQuest, checks the API exists.
