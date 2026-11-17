@@ -21,7 +21,7 @@ local DROP_ICON_ALPHA = 0.85
 local DROP_AREA_ALPHA = 0.18  -- the droppers' area, shown while its icon is hovered
 local MERGE_PIXELS = 8        -- a giver's spawns closer than this on screen share one icon
 local DROP_MERGE_PIXELS = 14  -- drop icons closer than this share one (their tooltip lists them all)
-local FRAME_LEVEL = 2007      -- above the areas (2005) and town services (2006), under turn-ins (2008)
+local FRAME_LEVEL = 2007      -- above town services (2006), under turn-ins (2008): see UI/MapAreas.lua
                               -- and Questie's icons (2016+)
 local HOVER_SECONDS = 0.05
 local ATLAS_NORMAL, ATLAS_REPEATABLE = "QuestNormal", "UI-QuestPoiRecurring-QuestBang"

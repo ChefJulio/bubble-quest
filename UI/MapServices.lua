@@ -14,7 +14,7 @@ local ADDON_NAME, ns = ...
 
 local ICON_SIZE = 14          -- pixels at 100% (setting map.iconSize)
 local MERGE_PIXELS = 10
-local FRAME_LEVEL = 2006      -- above the areas (2005), under quest givers' "!" (2007) and turn-ins (2008)
+local FRAME_LEVEL = 2006      -- above the fan-out strip (2005), under quest givers' "!" (2007): see UI/MapAreas.lua
 local HOVER_SECONDS = 0.05
 local BUILD_PER_FRAME = 400
 local TRACKING = "Interface\\Minimap\\tracking\\"

@@ -24,9 +24,8 @@ local STRIP_FILL = { 0.05, 0.05, 0.06, 0.85 }
 local STRIP_BORDER = { 0.6, 0.6, 0.6, 0.95 }
 local LINE_ALPHA = 0.5
 local KEEP_PAD = 0.6          -- icon sizes of margin around what's open before it folds back
--- The strip and lines go under the icons (their layers are 2006-2008): a frame of their own at 2004,
--- below the quest areas too. The hover runs on a frame of no particular level.
-local BACKDROP_LEVEL = 2004
+-- The strip and lines: over the quest areas (2004), under the icons (2006-2008); see UI/MapAreas.lua.
+local BACKDROP_LEVEL = 2005
 
 local MapFan = {
   lists = {},       -- registered fanItems lists, by layer name

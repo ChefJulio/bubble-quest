@@ -55,7 +55,11 @@ end
 -- A share of their normal opacity (a fixed 0.12 was too dim in review), so it follows the setting.
 local DIMMED_SHARE = 0.6
 local HOVER_SECONDS = 0.05  -- how often the hover is checked while the map is open
-local FRAME_LEVEL = 2005     -- under Questie's map lines (2015) and icons (2016+)
+-- Our map layers, bottom to top: quest areas 2004, the fan-out strip 2005 (UI/MapFan.lua, over the
+-- areas: review), town services 2006, quest givers' "!" 2007, turn-in "?" 2008; under Questie's map
+-- lines (2015) and icons (2016+).
+local FRAME_LEVEL = 2004
+local MARKER_LEVEL = 2008
 
 -- Eight hues that stay distinct on the map's parchment and from each other.
 local PALETTE = {
@@ -246,12 +250,12 @@ local function acquireGroup(layer, n)
     group:EnableMouse(false)
     group.textures = {}
     group.markers = {}
-    -- Turn-in "?" above the other layers (review: a trainer's icon hid one): areas 2005, town services
-    -- 2006, quest givers' "!" 2007, turn-ins 2008. A child frame, so it hides with its group.
+    -- Turn-in "?" above the other layers (review: a trainer's icon hid one; levels at FRAME_LEVEL).
+    -- A child frame, so it hides with its group.
     group.markerFrame = CreateFrame("Frame", nil, group)
     group.markerFrame:SetAllPoints(group)
     group.markerFrame:EnableMouse(false)
-    group.markerFrame:SetFrameLevel(FRAME_LEVEL + 3)
+    group.markerFrame:SetFrameLevel(MARKER_LEVEL)
     MapAreas.groups[n] = group
   end
   group.used, group.markersUsed = 0, 0
