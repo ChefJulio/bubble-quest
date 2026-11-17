@@ -25,7 +25,7 @@ local STRIP_BORDER = { 0.6, 0.6, 0.6, 0.95 }
 local LINE_ALPHA = 0.5
 local KEEP_PAD = 0.6          -- icon sizes of margin around what's open before it folds back
 -- The open row (strip, lines, stand-ins) over every layer of ours (2004-2008, UI/MapAreas.lua), so it
--- covers icons that aren't in it; under Questie's (2015+).
+-- covers icons that aren't in it; at least this, and above Blizzard's topmost pins (raiseAbovePins).
 local BACKDROP_LEVEL = 2010
 
 local MapFan = {
@@ -186,7 +186,22 @@ local function cluster(x, y)
   return #group >= 2 and group or nil
 end
 
+-- The open row goes above every pin on the map, Blizzard's included (review: its spirit healer pin
+-- showed over the row): the map's pin manager says where its topmost pins are (read only).
+local function raiseAbovePins()
+  local map = rawget(_G, "WorldMapFrame")
+  local manager = map and map.GetPinFrameLevelsManager and map:GetPinFrameLevelsManager()
+  local topmost = manager and manager:GetValidFrameLevel("PIN_FRAME_LEVEL_TOPMOST") or 0
+  local level = math.max(BACKDROP_LEVEL, topmost + 1)
+  if frame:GetFrameLevel() ~= level then
+    frame:SetFrameLevel(level)
+    strip:SetFrameLevel(level + 1)
+    overlay:SetFrameLevel(level + 2)
+  end
+end
+
 local function open(group)
+  raiseAbovePins()
   local factor = sizeFactor()
   local size, cx, top, bottom = 0, 0, math.huge, -math.huge
   for _, item in ipairs(group) do
