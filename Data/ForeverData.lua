@@ -51,6 +51,53 @@ function ForeverData:Quest(questID)
   return record
 end
 
+-- For the available-quest index when QuestieDB isn't installed (Quests/Available.lua's forever source).
+
+---Every quest ID in forever-db.
+---@return number[]
+function ForeverData:QuestIds()
+  local lib = library()
+  return lib and lib.Ids("quest") or {}
+end
+
+---An NPC's or object's name.
+---@param kind string "npc" or "object" (or "item")
+---@param id number
+---@return string?
+function ForeverData:Name(kind, id)
+  local lib = library()
+  return lib and lib.Name(kind, id)
+end
+
+---Every spawn of an NPC or object, in world yards: { { map, x, y, kind } }, cached; nil when none.
+---@param kind string "npc" or "object"
+---@param id number
+---@return table?
+function ForeverData:EntityPoints(kind, id)
+  local key = "spawns:" .. kind .. id
+  local hit = self.cache[key]
+  if hit == nil then
+    local lib = library()
+    local points = {}
+    for _, p in ipairs(lib and lib.Spawns(kind, id) or {}) do
+      points[#points + 1] = { map = p.map, x = p.x, y = p.y, kind = kind }
+    end
+    hit = #points > 0 and points or false
+    self.cache[key] = hit
+  end
+  return hit or nil
+end
+
+---Who drops an item: NPC ids and object ids.
+---@param itemID number
+---@return number[] npcs
+---@return number[] objects
+function ForeverData:ItemDroppers(itemID)
+  local lib = library()
+  local item = lib and lib.Get("item", itemID)
+  return item and item.npcDrops or {}, item and item.objectDrops or {}
+end
+
 ---An item's drop chances by source: { ["npc" .. id | "object" .. id] = percent }, or nil.
 ---@param itemID number
 ---@return table?

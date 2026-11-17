@@ -358,7 +358,7 @@ function Schema:Entries()
       kind = "checkbox", id = "QUESTMARKER_MAP_AVAILABLE", column = 2, default = true,
       label = "Show quests you can pick up",
       tooltip = "A \"!\" at every quest giver with a quest for you (blue: repeatable), on the world map and the "
-        .. "minimap. Needs QuestieDB.",
+        .. "minimap. Best with QuestieDB installed; without it, from Questmarker's own data (fewer checks).",
       get = function(p) return p.map.available end,
       set = function(p, v) p.map.available = v; ns.MapAvailable:MarkDirty() end,
     },

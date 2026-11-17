@@ -152,11 +152,13 @@ local function droppersText(itemID)
         entry.chance = chance
       end
     end
-    for _, npcID in ipairs(ns.QuestieData.Get("ItemDB", "npcDrops", itemID) or {}) do
-      add(ns.QuestieData.Get("NpcDB", "name", npcID), chances["npc" .. npcID])
+    local src = ns.Available.source  -- QuestieDB, or forever-db without it
+    local npcs, objects = src.droppers(itemID)
+    for _, npcID in ipairs(npcs) do
+      add(src.name("npc", npcID), chances["npc" .. npcID])
     end
-    for _, objectID in ipairs(ns.QuestieData.Get("ItemDB", "objectDrops", itemID) or {}) do
-      add(ns.QuestieData.Get("ObjectDB", "name", objectID), chances["object" .. objectID])
+    for _, objectID in ipairs(objects) do
+      add(src.name("object", objectID), chances["object" .. objectID])
     end
     table.sort(names, function(a, b)
       if (a.chance ~= nil) ~= (b.chance ~= nil) then

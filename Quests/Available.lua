@@ -61,8 +61,111 @@ local function list(t)
   return type(t) == "table" and t or nil
 end
 
-local function playerMasks()
-  local lib = ns.QuestieData.Library()
+-- Sources ------------------------------------------------------------------------------------------
+-- Where quests, givers and droppers come from: QuestieDB when installed (everything the checks use),
+-- else the bundled forever-db (review: QuestieDB is a CurseForge dependency, but a manual install may
+-- lack it). Forever-db has no exclusiveTo, chains, skill, reputation, spell or NPC faction: those checks
+-- pass in that mode, and talking to givers (Quests/Offers.lua) corrects what slips through.
+-- Each source: ids(), record(questID) (nil: not a quest to index), points(kind, id), name(kind, id),
+-- droppers(itemID) -> npcIDs, objectIDs, friendly(npcID), raceFlag(raceID).
+
+local Sources = {}
+
+Sources.questie = {
+  ids = function()
+    return ns.QuestieData.Library().Quest.GetAllIds()
+  end,
+  record = function(questID)
+    local ok, v = pcall(ns.QuestieData.Library().Quest.GetAll, questID, KEYS)
+    if not ok or type(v) ~= "table" then
+      return nil
+    end
+    -- Starters are sparse ({[3] = {1972}}): each index on its own, never ipairs over startedBy.
+    local startedBy = list(v[2])
+    return {
+      questID = questID, name = v[1], requiredLevel = v[3], level = v[4], races = v[5], classes = v[6],
+      preGroup = list(v[7]), preSingle = list(v[8]), exclusiveTo = list(v[9]), skill = list(v[10]),
+      minRep = list(v[11]), maxRep = list(v[12]), nextInChain = v[13], questFlags = v[14], specialFlags = v[15],
+      parent = v[16], breadcrumbFor = v[17], breadcrumbs = list(v[18]), spell = v[19], maxLevel = v[20],
+      untilCompleted = v[21], startingWith = v[22], disabledBy = v[23], sort = v[24],
+      npcs = startedBy and list(startedBy[1]), objects = startedBy and list(startedBy[2]),
+      items = startedBy and list(startedBy[3]),
+    }
+  end,
+  points = function(kind, id)
+    return ns.QuestieData:EntityPoints(kind, id)
+  end,
+  name = function(kind, id)
+    return ns.QuestieData.Get(kind == "npc" and "NpcDB" or kind == "object" and "ObjectDB" or "ItemDB", "name", id)
+  end,
+  droppers = function(itemID)
+    return ns.QuestieData.Get("ItemDB", "npcDrops", itemID) or {}, ns.QuestieData.Get("ItemDB", "objectDrops", itemID) or {}
+  end,
+  friendly = function(npcID, faction)
+    local f = ns.QuestieData.Get("NpcDB", "friendlyToFaction", npcID)
+    return f == nil or f == "AH" or f == faction
+  end,
+  raceFlag = function(raceID)
+    local enum = ns.QuestieData.Library().Enum
+    return enum and enum.raceMaskById and enum.raceMaskById[raceID]
+  end,
+}
+
+local SIDE = { [1] = "A", [2] = "H" }  -- forever-db's side: 0 both, 1 Alliance, 2 Horde
+
+Sources.forever = {
+  ids = function()
+    return ns.ForeverData:QuestIds()
+  end,
+  record = function(questID)
+    local q = ns.ForeverData:Quest(questID)
+    if not q then
+      return nil
+    end
+    -- Required prerequisites only: a breadcrumb leading here is optional.
+    local preGroup, preSingle = {}, {}
+    for _, pre in ipairs(q.prereqs or {}) do
+      if not pre.breadcrumb and pre.quest then
+        table.insert(pre.mode == "any" and preSingle or preGroup, pre.quest)
+      end
+    end
+    local startedBy = q.startedBy or {}
+    return {
+      questID = questID, name = q.name, requiredLevel = q.minLevel, level = q.level, races = q.races,
+      classes = q.classes, side = SIDE[q.side or 0], preGroup = preGroup[1] and preGroup or nil,
+      preSingle = preSingle[1] and preSingle or nil, specialFlags = q.repeatable and SPECIAL_REPEATABLE or nil,
+      sort = q.zone, npcs = list(startedBy[1]), objects = list(startedBy[2]), items = list(startedBy[3]),
+    }
+  end,
+  points = function(kind, id)
+    return ns.ForeverData:EntityPoints(kind, id)
+  end,
+  name = function(kind, id)
+    return ns.ForeverData:Name(kind, id)
+  end,
+  droppers = function(itemID)
+    return ns.ForeverData:ItemDroppers(itemID)
+  end,
+  friendly = function()
+    return true  -- forever-db has no NPC faction; a hostile giver's "!" is corrected by talking to it
+  end,
+  raceFlag = function(raceID)
+    return 2 ^ (raceID - 1)
+  end,
+}
+
+---The source in use: QuestieDB when installed, else forever-db, else nil (nothing to show).
+local function source()
+  if ns.QuestieData:Installed() then
+    return Sources.questie
+  elseif ns.ForeverData:Available() then
+    return Sources.forever
+  end
+  return nil
+end
+Available.Source = source
+
+local function playerMasks(src)
   -- apiguard: allow our own character ("player") is never identity-restricted; secret values are skipped
   local raceID = select(3, UnitRace("player"))
   -- apiguard: allow our own character ("player") is never identity-restricted; secret values are skipped
@@ -70,41 +173,29 @@ local function playerMasks()
   if issecretvalue(raceID) or issecretvalue(classID) then
     return nil, nil  -- unreadable: no race/class filter rather than a wrong one
   end
-  local raceMasks = lib and lib.Enum and lib.Enum.raceMaskById
-  return raceMasks and raceMasks[raceID], classID and 2 ^ (classID - 1)
+  return raceID and src.raceFlag(raceID), classID and 2 ^ (classID - 1)
 end
 
 local function build()
-  local lib = ns.QuestieData.Library()
-  local quest = lib and lib.Quest
-  if not quest or not ns.QuestieData:Installed() then
+  local src = source()
+  if not src then
     Available.building = false
     return
   end
-  local raceFlag, classFlag = playerMasks()
+  local raceFlag, classFlag = playerMasks(src)
+  local side = UnitFactionGroup("player") == "Horde" and "H" or "A"
   local records, n = {}, 0
-  for _, questID in ipairs(quest.GetAllIds()) do
-    local ok, v = pcall(quest.GetAll, questID, KEYS)
-    if ok and type(v) == "table" then
-      local startedBy = list(v[2])
-      local npcs, objects, items = startedBy and list(startedBy[1]), startedBy and list(startedBy[2]),
-        startedBy and list(startedBy[3])
-      -- Starters are sparse ({[3] = {1972}}): each index on its own, never ipairs over startedBy.
-      -- Questie's own list hides what isn't takeable or shouldn't be on the map (Data/QuestieHidden.lua);
-      -- holiday quests (Data/QuestieEvents.lua) are kept, and shown while their event runs (Refresh).
-      local event = ns.QuestieEvents[questID]
-      if (npcs or objects or items) and (event or (not ns.QuestieHidden[questID] and not EVENT_SORTS[v[24] or 0]))
-          and (not raceFlag or hasBit(v[5], raceFlag))
-          and (not classFlag or hasBit(v[6], classFlag)) then
-        records[questID] = {
-          questID = questID, name = v[1], requiredLevel = v[3], level = v[4], preGroup = list(v[7]),
-          preSingle = list(v[8]), exclusiveTo = list(v[9]), skill = list(v[10]), minRep = list(v[11]),
-          maxRep = list(v[12]), nextInChain = v[13], questFlags = v[14], specialFlags = v[15], parent = v[16],
-          breadcrumbFor = v[17], breadcrumbs = list(v[18]), spell = v[19], maxLevel = v[20],
-          untilCompleted = v[21], startingWith = v[22], disabledBy = v[23], event = event,
-          npcs = npcs, objects = objects, items = items,
-        }
-      end
+  for _, questID in ipairs(src.ids()) do
+    local r = src.record(questID)
+    -- Questie's own list hides what isn't takeable or shouldn't be on the map (Data/QuestieHidden.lua);
+    -- holiday quests (Data/QuestieEvents.lua) are kept, and shown while their event runs (doable).
+    local event = ns.QuestieEvents[questID]
+    if r and (r.npcs or r.objects or r.items)
+        and (event or (not ns.QuestieHidden[questID] and not EVENT_SORTS[r.sort or 0]))
+        and (not raceFlag or hasBit(r.races, raceFlag)) and (not classFlag or hasBit(r.classes, classFlag))
+        and (not r.side or r.side == side) then
+      r.event = event
+      records[questID] = r
     end
     n = n + 1
     if n % BUILD_PER_FRAME == 0 then
@@ -112,6 +203,7 @@ local function build()
     end
   end
   Available.records = records
+  Available.source = src
   Available.building = false
   Available:Refresh()
 end
@@ -284,26 +376,27 @@ local function infoFor(kind, id)
   local key = kind .. id
   local info = giverInfo[key]
   if info == nil then
+    local src = Available.source
     local points
     if kind == "item" then
       -- The droppers' spawns: mobs that drop it, objects it's found in.
       points = {}
-      for _, npcID in ipairs(ns.QuestieData.Get("ItemDB", "npcDrops", id) or {}) do
-        for _, p in ipairs(ns.QuestieData:EntityPoints("npc", npcID) or {}) do
+      local npcs, objects = src.droppers(id)
+      for _, npcID in ipairs(npcs) do
+        for _, p in ipairs(src.points("npc", npcID) or {}) do
           points[#points + 1] = p
         end
       end
-      for _, objectID in ipairs(ns.QuestieData.Get("ItemDB", "objectDrops", id) or {}) do
-        for _, p in ipairs(ns.QuestieData:EntityPoints("object", objectID) or {}) do
+      for _, objectID in ipairs(objects) do
+        for _, p in ipairs(src.points("object", objectID) or {}) do
           points[#points + 1] = p
         end
       end
     else
-      points = ns.QuestieData:EntityPoints(kind, id)
+      points = src.points(kind, id)
     end
     if points and #points > 0 then
-      local dbName = kind == "npc" and "NpcDB" or kind == "object" and "ObjectDB" or "ItemDB"
-      info = { name = ns.QuestieData.Get(dbName, "name", id), points = points }
+      info = { name = src.name(kind, id), points = points }
     else
       info = false
     end
@@ -333,8 +426,7 @@ local function friendly(npcID)
   local cachedAnswer = friendlyCache[npcID]
   if cachedAnswer == nil then
     faction = faction or (UnitFactionGroup("player") == "Horde" and "H" or "A")
-    local f = ns.QuestieData.Get("NpcDB", "friendlyToFaction", npcID)
-    cachedAnswer = f == nil or f == "AH" or f == faction
+    cachedAnswer = Available.source.friendly(npcID, faction)
     friendlyCache[npcID] = cachedAnswer
   end
   return cachedAnswer

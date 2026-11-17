@@ -201,8 +201,9 @@ commands.available = {
     for _ in pairs(A.records or {}) do
       count = count + 1
     end
-    lines[#lines + 1] = ("QuestieDB: %s (zone table: %d areas); index: %s (%d quests this character could take); "
-      .. "%d givers now"):format(ns.QuestieData:Installed() and "yes" or "NO", ns.QuestieData:ZoneCount(),
+    lines[#lines + 1] = ("QuestieDB: %s (zone table: %d areas); source: %s; index: %s (%d quests this character "
+      .. "could take); %d givers now"):format(ns.QuestieData:Installed() and "yes" or "NO", ns.QuestieData:ZoneCount(),
+        A.source == nil and "-" or ns.QuestieData:Installed() and "QuestieDB" or "forever-db",
         A.records and "built" or (A.building and "building" or "not built"), count, #A.givers)
     local north, west, instanceMap = ns.Navigation:PlayerPosition()
     if not north then
