@@ -8,9 +8,8 @@ local ADDON_NAME, ns = ...
 local QUEST_API_NEEDED = 1  -- the quest addon's API version these features are written against
 
 -- The quest addon's public API, if it's loaded and new enough. Loaded before us when present
--- (## OptionalDeps). Two names while the quest addon is renamed (Questmarker to BubbleQuest); the
--- second goes once the rename has shipped.
-local quest = rawget(_G, "BubbleQuestAPI") or rawget(_G, "QuestmarkerAPI")
+-- (## OptionalDeps).
+local quest = rawget(_G, "BubbleQuestAPI")
 if quest and quest.API < QUEST_API_NEEDED then
   quest = nil
 end
