@@ -13,7 +13,7 @@
   "wow_ui_source": {
     "repo": "https://github.com/Gethe/wow-ui-source.git",
     "branch": "forever",
-    "commit": "bebcb6bf309cf41b41bd74f8ca651e6a105b2676",
-    "build": "1.60.1.70938"
+    "commit": "3d8abb1da73acd38e412e24fb3f99454a6392346",
+    "build": "1.60.1.70959"
   }
 }
