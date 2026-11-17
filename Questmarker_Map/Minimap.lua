@@ -63,9 +63,20 @@ local function applySize()
   outer:SetSize(width, height)
   -- Minimap's units differ from ours by Edit Mode's scale on its container.
   local side = math.min(width, height) * outer:GetEffectiveScale() / Minimap:GetEffectiveScale()
+  local resized = math.abs(Minimap:GetWidth() - side) > 0.5
   Minimap:SetSize(side, side)
   Minimap_.appliedScale = Minimap:GetEffectiveScale()
   Minimap_.appliedWidth = width
+  if resized then
+    -- The engine keeps drawing the ground at the old size until something redraws it (seen in game: a
+    -- small square of ground in one corner until the map was moved). A zoom step and back does, the
+    -- usual minimap-addon remedy. Next frame, once the new size has applied.
+    C_Timer.After(0, function()
+      local zoom = Minimap:GetZoom()
+      Minimap:SetZoom(zoom > 0 and zoom - 1 or zoom + 1)
+      Minimap:SetZoom(zoom)
+    end)
+  end
 end
 
 -- Which top corner of Edit Mode's box `outer` hangs from: the one nearest the screen edge.

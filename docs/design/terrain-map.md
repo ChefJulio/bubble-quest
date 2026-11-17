@@ -108,15 +108,21 @@ none of that is needed here.
 
 Designed in [questmarker-map.md](questmarker-map.md): the terrain fills the minimap's frame around
 Blizzard's square at its exact scale, takes over past Blizzard's zoom range in both directions, and is
-the base of our own deep-zoom map window. North-up only (neither reference addon supports a rotating
-minimap). Ring of 1 tile warm around the minimap view.
+the base of our own deep-zoom map window. Ring of 1 tile warm around the minimap view.
+
+**Rotating minimap: in scope** (decided in review 2026-11-17). With "Rotate Minimap" on, Blizzard
+draws a square ground image and rotates it, so at diagonal headings its corners fall short of our
+square frame (seen in game). With rotation on, we turn Blizzard's ground off
+(`C_Minimap.SetDrawGroundTextures(false)`) and draw it all ourselves: every tile turned with the
+player's facing (`Texture:SetRotation` around the view centre, positions rotated the same way),
+updated as facing changes. Blizzard still draws the blips. Neither reference addon supports this; it's
+our own work, after the north-up padding.
 
 ## Out of scope
 
 - **Open-world indoors** (caves, buildings outside cities). Same data system as cities, but needs new
   runtime work with no API support: know the player is indoors, find which WMO group they're in
   (point-in-box), pick the level from `UnitPosition` z, and several MB more data. Revisit after cities.
-- Terrain on a rotating minimap.
 
 ## Settle in game
 
