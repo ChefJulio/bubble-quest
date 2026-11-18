@@ -15,4 +15,5 @@ Terrain.lua
 Around.lua
 Launchers.lua
 Zoom.lua
+QuestMarkers.lua
 Settings.lua
