@@ -20,6 +20,10 @@ the minimap, and in our own map window. One shared terrain layer, part of the co
   `32 - worldCoord / 533.33` (world X and Y swapped: column from world Y, row from world X).
 - **Cities and dungeons** are WMO minimap textures: separate, smaller tiles placed per WMO group with
   an offset and a yaw, layered by height. No floors in the data; overlapping levels sort by z.
+  **Seen in game 2026-11-18 (supersedes the city plans below):** on Forever the continent tiles already
+  show the capitals' buildings (Stormwind complete in our own map, zoomed out past Blizzard's range), so
+  outdoor cities need no WMO data. What's left for WMO data is interiors and dungeons, where Blizzard's
+  minimap shows anyway (Zoom.lua's native mode); not planned.
 
 ## Data (build time)
 
