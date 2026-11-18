@@ -247,6 +247,21 @@ function Terrain:Report()
   return lines
 end
 
+---The map's projection for other layers (Group.lua): pixels per yard in `outer`'s units and the turn
+---(radians; 0 north-up), or nil before the map exists or without a scale.
+---@return number? pixelsPerYard
+---@return number? turn
+function Terrain:Projection()
+  if not clip then
+    return nil, nil
+  end
+  local s = scale()
+  if not s then
+    return nil, nil
+  end
+  return s, angle() or 0
+end
+
 ---One line for /bmap.
 ---@return string
 function Terrain:Describe()
