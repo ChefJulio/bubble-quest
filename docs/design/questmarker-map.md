@@ -83,19 +83,22 @@ Mode's apply path (`SetEditModeScale`), where BubbleQuest's tracker taint once c
 - **Rotation:** with "Rotate Minimap" on, Blizzard's square ground clips at diagonal headings; with
   terrain, our rotated ground fills it ([terrain-map.md](terrain-map.md)).
 
-### Zoom: one range, Blizzard's in the middle (step 6)
+### Zoom: Blizzard's levels, then our overview (step 6)
 
-Pixels per yard is the one zoom value; Blizzard's discrete levels (`Minimap:GetZoomLevels()`) are the
-middle of the range.
-
-- **Out past level 0: overview.** The minimap fades out, ground drawing off, our terrain and quest
-  content fill the frame, zooming smoothly. Blips vanish at this zoom.
-- **In past the last level:** the minimap can't be clipped by a parent without leaving Edit Mode, so:
-  1. *Mask magnify:* `Minimap:SetSize(k * side)` with a mask whose opaque centre is `1/k` of the
-     texture, showing `k` times the detail, blips included. Unknown whether blips are masked like the
-     ground; in-game test.
-  2. *Fallback:* our terrain. Tiles go soft past about Blizzard's closest level; quest content stays
-     sharp.
+- **Blizzard's own levels stay** (`Minimap:SetZoom`): its blips (herbs, ore, party, tracking, the game's
+  own quest "?" and "!") are only right at its own zoom.
+- **Out past level 0: overview** (built, `Zoom.lua`). The wheel carries on past Blizzard's farthest
+  level into steps reaching 1.6x to 6x as far: Blizzard's minimap fades out (alpha 0), our terrain is
+  the whole map with our own player arrow, BubbleQuest's areas scale with it
+  (`BubbleQuestAPI.SetMinimapZoom`; its "?" then draws everywhere, the game's being hidden). Outdoors
+  on our continents only; indoors or in an instance it ends. The wheel over the padding zooms too.
+- **In past Blizzard's closest level: not built.** Tried and rejected, 2026-11-17: *mask magnify*
+  (the Minimap frame k times its size behind a mask showing its centre). Blips are not masked (they
+  drew outside the map, over the game world) and the player arrow sat off-centre. Our terrain and
+  BubbleQuest's areas magnified fine, so a terrain-only close-up (no blips) is possible if it's ever
+  wanted; Blizzard's closest level is already close.
+- **Pinning Blizzard's zoom** (all zoom ours) was considered for the game's "!"/"?" changing with
+  zoom; rejected with mask magnify, as it would lose the blips at every level but one.
 
 ## Around the minimap (built, step 3)
 
@@ -170,9 +173,9 @@ again"). Two addons setting the mask and defining the shape would fight.
 2. ~~Square map and the column~~ (built).
 3. ~~Around the minimap~~ (built).
 4. ~~Addon list~~ (built).
-5. **Terrain core and padding:** pipeline and continent tiles ([terrain-map.md](terrain-map.md)),
-   `SetMinimapView`, padding at the minimap's scale; rotated ground.
-6. **Zoom:** overview past level 0; the mask-magnify test, else terrain past the last level.
+5. ~~Terrain core and padding~~ (built): pipeline and continent tiles, `SetMinimapView`, padding at the
+   minimap's scale, rotated ground, one ground outdoors.
+6. ~~Zoom~~ (built): overview past level 0. Zoom-in past Blizzard's closest: rejected (see Zoom).
 7. **World map terrain toggle** with cities (`BubbleMap_Terrain`).
 8. **Our map window:** deep zoom, then dungeons.
 
@@ -181,8 +184,9 @@ again"). Two addons setting the mask and defining the shape would fight.
 Settled: `Minimap:SetSize` square works and survives Edit Mode with no taint seen; alpha plus mouse
 off keeps Blizzard's elements away; `LibDBIcon:Hide` plus the re-hide holds (the list in review).
 
+Settled too: mask magnify doesn't mask the blips (rejected, see Zoom); our padding lines up with the
+minimap, and one ground (Blizzard's off outdoors) removed the seam.
+
 Open:
-1. Does `Minimap:SetSize(w, h)` with `w ~= h` render a rectangle, or stretch?
-2. Does the mask-magnify trick mask the blips and ground alike?
-3. Seam: does our padding line up with Blizzard's ground at every zoom level and indoors?
-4. Everything in [terrain-map.md](terrain-map.md)'s list.
+1. Does `Minimap:SetSize(w, h)` with `w ~= h` render a rectangle, or stretch? (Not needed now.)
+2. Everything in [terrain-map.md](terrain-map.md)'s list.
