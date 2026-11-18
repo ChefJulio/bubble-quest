@@ -75,6 +75,11 @@ end
 
 local function hideBlizzard()
   local cluster = MinimapCluster
+  -- Its box takes the mouse (Minimap.xml:3, enableMouse) and overlaps our map: it was the frame under
+  -- the cursor there, so BubbleQuest's quest giver tooltips (which want the map or the world under it)
+  -- never showed (review). Edit Mode selects it through its own Selection child (mouse on, its own
+  -- strata: EditModeSystemTemplates.xml:11), so moving it in Edit Mode still works. SexyMap does the same.
+  cluster:EnableMouse(false)
   fade(cluster.ZoneTextButton)
   fade(GameTimeFrame)
   fade(cluster.Tracking, cluster.Tracking and cluster.Tracking.Button)
