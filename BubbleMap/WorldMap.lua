@@ -22,7 +22,6 @@ local ADDON_NAME, ns = ...
 local TILE_YARDS = 1600 / 3
 local GRID = 64
 local FILL = { 0.05, 0.06, 0.07, 1 }
-local BUTTON_SIZE = 28
 
 local WorldMap = {
   failed = 0,
@@ -134,33 +133,49 @@ function WorldMap:SetEnabled(on)
   end
 end
 
+local KROWI = "Krowi_WorldMapButtons-1.4"  -- the shared map button column (Questie embeds it)
+
 local function createButton()
-  -- Our own button on the map's top right, under Blizzard's own buttons there (they stack from -2 in
-  -- 32 px steps from the canvas container's top right, Blizzard_WorldMap.lua:310-322, each only when the
-  -- game shows it). Not AddOverlayFrame: that runs our frame in Blizzard's secure refresh loop.
-  button = CreateFrame("Button", nil, WorldMapFrame)
-  button:SetSize(BUTTON_SIZE, BUTTON_SIZE)
-  local stacked = 0
-  for _, name in ipairs({ "WorldMapTrackingOptionsButton", "WorldMapTrackingPinButton" }) do
-    local b = rawget(_G, name)
-    if b and b:IsShown() then
-      stacked = stacked + 1
-    end
+  -- In the column of map buttons at the map's top left, under BubbleQuest's (review: at the top right it
+  -- sat under Blizzard's filter button, whose name differs on Forever). Through the shared column when
+  -- another addon has loaded its library, as BubbleQuest's button does (UI/MapButton.lua; the library
+  -- is "All Rights Reserved", so not shipped here); otherwise where it would put us: the slot under
+  -- BubbleQuest's button, or BubbleQuest's slot without it. Not AddOverlayFrame: that runs our frame in
+  -- Blizzard's secure refresh loop.
+  local libStub = rawget(_G, "LibStub")
+  local krowi = libStub and libStub:GetLibrary(KROWI, true)
+  if krowi and type(krowi.Add) == "function" then
+    button = krowi:Add(nil, "BUTTON")
+    button.Refresh = function() end
+  else
+    button = CreateFrame("Button", nil, WorldMapFrame)
+    local slot = ns.Quest and 2 or 1  -- BubbleQuest's button takes the first
+    button:SetPoint("TOPLEFT", WorldMapFrame:GetCanvasContainer(), "TOPLEFT", 3, -32 * slot)
   end
-  button:SetPoint("TOPRIGHT", WorldMapFrame:GetCanvasContainer(), "TOPRIGHT", -4, -2 - 32 * stacked)
-  button:SetFrameLevel(WorldMapFrame:GetCanvasContainer():GetFrameLevel() + 100)
-  local back = button:CreateTexture(nil, "BACKGROUND")
-  back:SetAllPoints()
-  back:SetColorTexture(0, 0, 0, 0.6)
+  -- The round map-button look of BubbleQuest's (and Questie's) button, with a terrain tile as its icon.
+  button:SetSize(32, 32)
+  button:SetFrameStrata("HIGH")  -- Blizzard's map buttons' strata
+  local background = button:CreateTexture(nil, "BACKGROUND")
+  background:SetTexture("Interface\\Minimap\\UI-Minimap-Background")
+  background:SetSize(25, 25)
+  background:SetPoint("TOPLEFT", 2, -4)
   button.icon = button:CreateTexture(nil, "ARTWORK")
-  button.icon:SetPoint("TOPLEFT", 2, -2)
-  button.icon:SetPoint("BOTTOMRIGHT", -2, 2)
+  button.icon:SetSize(20, 20)
+  button.icon:SetPoint("TOPLEFT", 6, -6)
   button.icon:SetTexture(ns.Tiles.maps[0] and ns.Tiles.maps[0][32 * GRID + 49] or 134400)  -- Elwynn
-  button:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
-  button:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.15)
+  local mask = button:CreateMaskTexture()
+  mask:SetTexture("Interface\\CharacterFrame\\TempPortraitAlphaMask", "CLAMPTOBLACKADDITIVE",
+    "CLAMPTOBLACKADDITIVE")
+  mask:SetAllPoints(button.icon)
+  button.icon:AddMaskTexture(mask)
+  local border = button:CreateTexture(nil, "OVERLAY")
+  border:SetTexture("Interface\\Minimap\\MiniMap-TrackingBorder")
+  border:SetSize(54, 54)
+  border:SetPoint("TOPLEFT")
+  button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
   button:SetScript("OnClick", function() WorldMap:SetEnabled(not ns.DB.worldTerrain) end)
   button:SetScript("OnEnter", function(self)
-    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:AddLine("Terrain: " .. (ns.DB.worldTerrain and "on" or "off"), 1, 1, 1)
     GameTooltip:AddLine("The real terrain on zone maps instead of the painted art (BubbleMap).", 0.8, 0.8,
       0.8, true)
