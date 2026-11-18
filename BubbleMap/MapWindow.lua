@@ -10,9 +10,8 @@ local ADDON_NAME, ns = ...
 -- under the cursor (or the centre) is named in the title (C_Map.GetMapPosFromWorldPos gives the map
 -- there). Opened with /bmap map, a key binding, and a right-click on the world map's terrain button.
 --
--- First part: terrain, pan, zoom, the player's arrow, zone names. Next (docs): BubbleQuest's quest layers
--- (needs a BubbleQuest renderer for any centre and scale), Blizzard-style points (flight masters, dungeon
--- entrances, area events), group members.
+-- Drawn: terrain, BubbleQuest's quest layer (when it's loaded), the player's arrow, zone names. Next
+-- (docs): Blizzard-style points (flight masters, dungeon entrances, area events), group members.
 
 local TILE_YARDS = 1600 / 3
 local MIN_PPY, MAX_PPY = 0.015, 4   -- a whole continent .. a few yards a tile pixel
@@ -27,6 +26,7 @@ local MapWindow = {
 ns.MapWindow = MapWindow
 
 local window, content, view, arrow, title
+local quests  -- BubbleQuest's quest view on our map, when BubbleQuest is loaded (BubbleQuestAPI.CreateQuestView)
 local centre = { north = 0, west = 0, map = nil }
 local ppy = DEFAULT_PPY
 local drag  -- { x, y, north, west } while dragging
@@ -75,6 +75,9 @@ local function redraw()
     return
   end
   view:Draw(centre.north, centre.west, centre.map, ppy)
+  if quests then
+    quests:Draw(centre.north, centre.west, centre.map, ppy, 0)  -- north up: no turn
+  end
 
   -- The player's arrow, where they are (hidden off this continent or out of view).
   local north, west, map = playerPosition()
@@ -187,6 +190,15 @@ local function create()
   end)
   content:SetScript("OnMouseUp", function() drag = nil end)
 
+  -- BubbleQuest's quest areas, givers' "!", turn-in "?" and the guide line, the same as on its minimap
+  -- and the world map (one renderer: its UI/QuestView.lua), over our tiles and under our arrow. Its hover
+  -- takes `content` as the frame under the cursor (content takes the mouse for drag and wheel).
+  local quest = ns.Quest
+  if quest and quest.CreateQuestView then
+    quests = quest.CreateQuestView(content, { guide = true, hover = true })
+    quests:GetFrame():SetFrameLevel(content:GetFrameLevel() + 3)
+  end
+
   local arrowFrame = CreateFrame("Frame", nil, content)
   arrowFrame:SetAllPoints()
   arrowFrame:SetFrameLevel(content:GetFrameLevel() + 5)
@@ -224,7 +236,15 @@ local function create()
   end)
   window:SetScript("OnShow", function()
     MapWindow.following = true
+    if quests then
+      quests:Show()
+    end
     redraw()
+  end)
+  window:SetScript("OnHide", function()
+    if quests then
+      quests:Hide()
+    end
   end)
 end
 
