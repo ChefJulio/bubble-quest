@@ -357,6 +357,22 @@ local function markerNear(x, y)
   return false
 end
 
+-- The game shows its own "?" for this quest on the minimap right now: it marks the quest, and its
+-- marker (where the game itself places it, Navigation:MarkerPoint) is inside the circle it draws in.
+-- Decided by the game's position, not ours (review: walking from 182 to 190 yd, the game's "?" went
+-- and ours didn't come, as our spot for the quest, a few yards nearer, was still inside the circle).
+local function gameShowsTurnIn(questID, north, west, instanceMap, cos, sin, scale)
+  if not ns.MapAreas.GameMarksTurnIn(questID) then
+    return false
+  end
+  local marker = ns.Navigation:MarkerPoint(questID)
+  if not marker or marker.map ~= instanceMap then
+    return false
+  end
+  local x, y = project(marker.x - north, marker.y - west, cos, sin, scale)
+  return inGameView(x, y)
+end
+
 local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
   local size = 2 * ns.MapAreas.blobYards() * scale
   local alpha = ns.MapAreas.blobAlpha()
@@ -395,7 +411,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
-      elseif inside and not (skipMarked and inGameView(x, y) and ns.MapAreas.GameMarksTurnIn(p.questID))
+      elseif inside and not (skipMarked and gameShowsTurnIn(p.questID, north, west, instanceMap, cos, sin, scale))
           and not markerNear(x, y) then
         -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
         place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)

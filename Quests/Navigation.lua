@@ -55,6 +55,15 @@ local function markerPoint(questID)
   return { map = instanceMap, x = world.x, y = world.y, marker = true }
 end
 
+---Where the game places its own marker for the quest (its "?" when ready), in world yards
+---{ map, x, y }, or nil when it has none. UI/MinimapAreas.lua leaves the minimap "?" to the game by
+---this position.
+---@param questID number
+---@return table?
+function Navigation:MarkerPoint(questID)
+  return markerPoint(questID)
+end
+
 local objectiveName = ns.QuestLog.ObjectiveName
 
 -- Every source's points for one objective (or the turn-in: objective nil), tagged with their source.
