@@ -47,6 +47,16 @@ local ENTRIES = {
     get = function() return ns.DB.gatherMode end,
     set = function(v) ns.DB.gatherMode = v; ns.Zoom:Update() end },
 
+  { kind = "dropdown", id = "BUBBLEMAP_MAP_STYLE", label = "Map style", default = "terrain",
+    tooltip = "What the map draws: the real terrain (the game's own minimap ground), or the world map's "
+      .. "painted art with your explored areas, as on the world map. Also in gather mode, under the game's "
+      .. "blips. Indoors the game's own minimap shows either way.",
+    options = function()
+      return { { "terrain", "Terrain" }, { "art", "Map art" } }
+    end,
+    get = function() return ns.DB.mapStyle end,
+    set = function(v) ns.DB.mapStyle = v end },
+
   { kind = "checkbox", id = "BUBBLEMAP_WORLD_TERRAIN", label = "Terrain on the world map", default = false,
     tooltip = "Zone maps on the world map show the real terrain (the minimap's own ground) instead of the "
       .. "painted art. Also the button at the world map's top right.",

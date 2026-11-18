@@ -114,6 +114,10 @@ Blizzard's, never a mix:
   has loaded that NPC, which no addon API can tell).
 - **One ground:** our terrain in both modes outdoors (Blizzard's ground off), so the colour never
   changes with the mode.
+- **Map style** (setting): Terrain, or Map art (Art.lua): the world map's painted art at our scale and
+  turn, explored overlays included (mouse-over-only ones left out); the continent's art at the bottom,
+  the zones around over it, your zone on top. The art is 2-5x magnified at minimap zooms (a zone's art
+  is about 0.3 px a yard), so it's soft up close. Indoors Blizzard's minimap shows either way.
 - **Drawn ourselves in our map** (Blizzard's minimap is hidden, its blips with it): group members
   (Group.lua) and BubbleQuest's town services (its QuestView draws them while SetMinimapZoom says the
   game's minimap is hidden; docs/design/town-services.md).

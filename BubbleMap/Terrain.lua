@@ -174,9 +174,20 @@ local function update()
     if lastMap then
       hideTiles()
     end
+    ns.Art:Hide()
     return
   end
   blizzardGround(false)
+
+  -- The "Map art" style: the world map's painted art instead of our tiles (Art.lua).
+  if ns.DB.mapStyle == "art" then
+    if lastMap then
+      hideTiles()
+    end
+    ns.Art:Draw(px, py, mapID, s, turn)
+    return
+  end
+  ns.Art:Hide()
 
   local tilePixels = TILE_YARDS * s
   -- Enough slots to cover the frame's diagonal (it turns), plus the ring of one each side (odd, so the
@@ -274,8 +285,8 @@ function Terrain:Describe()
       shown = shown + 1
     end
   end
-  return ("terrain: %d tiles shown, %d loaded, %d failed (data for build %s)"):format(shown, self.loaded,
-    self.failed, ns.Tiles.build)
+  return ("terrain (style %s): %d tiles shown, %d loaded, %d failed (data for build %s); map art: %d pieces")
+    :format(ns.DB.mapStyle, shown, self.loaded, self.failed, ns.Tiles.build, ns.Art.drawn)
 end
 
 table.insert(ns.Minimap.onActivate, function(outer)
@@ -290,6 +301,7 @@ table.insert(ns.Minimap.onActivate, function(outer)
   -- The tiles' frame: centred on the minimap (the player), which is centred on `outer`.
   holder = CreateFrame("Frame", nil, clip)
   holder:SetAllPoints()
+  ns.Art:Attach(holder)
   clip:SetScript("OnUpdate", update)
 
   -- The data is for one client build; FileDataIDs rarely change, so a different build only warns.

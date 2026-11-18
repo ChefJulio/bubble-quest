@@ -12,6 +12,7 @@ Data\Tiles.lua
 Compat.lua
 Minimap.lua
 Terrain.lua
+Art.lua
 Around.lua
 Launchers.lua
 Zoom.lua
