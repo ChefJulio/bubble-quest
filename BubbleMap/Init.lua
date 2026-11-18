@@ -71,7 +71,8 @@ local DEFAULTS = {
   notices = {},       -- [key] = true: "Don't ask again"
   position = nil,     -- { left, top } once dragged; nil: hang from Edit Mode's minimap box
   locked = true,      -- the bar can't drag the map
-  width = 220,        -- the map's width without the quest addon (with it: the tracker's width)
+  attachTracker = true, -- with the quest addon: its tracker hangs under the map (one column)
+  width = 220,        -- the map's width when the tracker isn't attached under it
   heightPercent = 100,  -- the map's height, percent of its width
   lastGather = nil,   -- the tracking spell the gather button turns on (its name)
   gatherMode = "never", -- Blizzard's minimap for its blips: "never" (our map only; Ctrl peeks), "auto" (a

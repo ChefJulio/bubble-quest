@@ -55,8 +55,13 @@ end
 
 -- Size: the column's width (the tracker's, or our setting), the minimap the largest square inside -
 
+-- The quest addon's tracker hangs under the map: its width is the column's (setting attachTracker).
+local function attached()
+  return ns.Quest ~= nil and ns.DB.attachTracker
+end
+
 local function columnSize()
-  local tracker = ns.Quest and ns.Quest.GetTracker()
+  local tracker = attached() and ns.Quest.GetTracker()
   local width = tracker and tracker:GetWidth() or ns.DB.width
   return width, math.floor(width * ns.DB.heightPercent / 100 + 0.5)
 end
@@ -96,8 +101,18 @@ end
 -- Where the column is: where it was dragged to (by the quest addon's tracker header, or our own bar),
 -- else hanging from Edit Mode's box. Our frame is the one source of truth for the map's position; Blizzard's
 -- minimap follows it and its Edit Mode box is never moved by us.
+-- Edit Mode's minimap box, where it is now (to notice it moved: see applyAnchor).
+local function boxPosition()
+  local left, top = MinimapCluster:GetLeft(), MinimapCluster:GetTop()
+  if not left or not top then
+    return nil
+  end
+  return ("%.0f,%.0f"):format(left, top)
+end
+
 local function applyAnchor()
   outer:ClearAllPoints()
+  Minimap_.appliedBox = boxPosition()
   local saved = ns.DB.position
   if saved then
     outer:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", saved[1], saved[2])
@@ -133,6 +148,17 @@ local function refresh()
     applyAnchor()
     applySize()
   end)
+end
+
+---Hang the quest addon's tracker under the map, or let it go (setting attachTracker: an option, not a
+---given, user's call). Let go, it's back where it was and drags itself; the map takes its own width.
+function Minimap_:ApplyAttach()
+  local quest = ns.Quest
+  if not outer or not quest then
+    return
+  end
+  quest.SetTrackerAttach(attached() and outer or nil)
+  refresh()
 end
 
 ---Size or position settings changed.
@@ -180,7 +206,14 @@ local function createOuter()
       return
     end
     elapsed = 0
-    local moved = not ns.DB.position and corner() ~= Minimap_.appliedCorner
+    -- Whatever moved last wins (review: once dragged, moving the minimap in Edit Mode did nothing):
+    -- Edit Mode moved its box, so a dragged position gives way and the map hangs from the box again.
+    local box = boxPosition()
+    if ns.DB.position and box and Minimap_.appliedBox and box ~= Minimap_.appliedBox then
+      ns.DB.position = nil
+    end
+    local moved = (not ns.DB.position and corner() ~= Minimap_.appliedCorner)
+      or (box ~= Minimap_.appliedBox)
     if Minimap:GetEffectiveScale() ~= Minimap_.appliedScale or moved then
       refresh()
     end
@@ -208,7 +241,7 @@ function Minimap_:Activate()
   -- With the quest addon: one column, its tracker under the map.
   local quest = ns.Quest
   if quest then
-    quest.SetTrackerAttach(outer)
+    self:ApplyAttach()
     quest.RegisterCallback("TrackerResized", refresh)
     quest.RegisterCallback("ProfileChanged", refresh)
     quest.RegisterCallback("TrackerAttachMoved", function() Minimap_:SavePosition() end)

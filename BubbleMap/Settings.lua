@@ -18,9 +18,15 @@ local ENTRIES = {
   { kind = "checkbox", id = "BUBBLEMAP_LOCKED", label = "Lock the map", default = true,
     tooltip = "Untick to drag the map by its top bar.",
     get = function() return ns.DB.locked end, set = function(v) ns.DB.locked = v end },
+  { kind = "checkbox", id = "BUBBLEMAP_ATTACH_TRACKER", label = "BubbleQuest's tracker under the map",
+    default = true,
+    tooltip = "With BubbleQuest: its tracker hangs under the map as one column, the map as wide as the "
+      .. "tracker. Untick to place them apart.",
+    get = function() return ns.DB.attachTracker end,
+    set = function(v) ns.DB.attachTracker = v; ns.Minimap:ApplyAttach() end },
   { kind = "slider", id = "BUBBLEMAP_WIDTH", label = "Width", default = 220, min = 140, max = 450, step = 5,
-    tooltip = "The map's width. With BubbleQuest it follows the tracker's width instead (drag the "
-      .. "tracker's corner).",
+    tooltip = "The map's width. With BubbleQuest's tracker under the map it follows the tracker's width "
+      .. "instead (drag the tracker's corner).",
     format = function(v) return ("%d"):format(v) end,
     get = function() return ns.DB.width end,
     set = function(v) ns.DB.width = v; ns.Minimap:Refresh() end },
