@@ -13,9 +13,9 @@ local ADDON_NAME, ns = ...
 --   - Stray minimap buttons (Buttons on Minimap that are neither LibDBIcon's nor Blizzard's, and not
 --     protected): button:Click(mouseButton).
 -- Duplicates: a compartment entry that LibDBIcon made for one of its own buttons
--- (lib.objects[name].compartmentData, LibDBIcon-1.0.lua:648) is dropped; otherwise an entry whose
--- name matches a launcher's (case and colour codes ignored) is dropped too, the launcher kept (richer
--- tooltip).
+-- (lib.objects[name].compartmentData, LibDBIcon-1.0.lua:648) is dropped; otherwise an entry is dropped
+-- when its name, or its addon's folder name, matches a launcher's on letters only, or when it has the
+-- same icon. The launcher is kept (richer tooltip).
 --
 -- Putting buttons away never touches another addon's saved settings: LibDBIcon buttons are hidden with
 -- Hide() (lib:Hide writes nothing, LibDBIcon-1.0.lua:391-396) plus an OnShow post-hook, as the library
@@ -44,8 +44,34 @@ local function plain(text)
   return (tostring(text or ""):gsub("|c%x%x%x%x%x%x%x%x", ""):gsub("|r", ""):gsub("|T.-|t", ""))
 end
 
+-- Names compared on their letters only: "Leatrix_Maps" and "Leatrix Maps", "Prat-3.0" and "Prat" are
+-- one addon each (seen in review: a minimap button's LDB name beside its compartment entry's title).
 local function key(text)
-  return plain(text):lower():gsub("%s+", "")
+  return (plain(text):lower():gsub("[^%a]", ""))
+end
+
+-- An icon as a comparable value: one addon's button and compartment entry often share one.
+local function iconKey(icon)
+  if type(icon) == "number" then
+    return tostring(icon)
+  end
+  if type(icon) ~= "string" or icon == "" then
+    return nil
+  end
+  return (icon:lower():gsub("/", "\\"):gsub("%.%a%a%a$", ""))
+end
+
+-- [title's key] = folder's key, for every addon: a compartment entry carries its addon's title
+-- ("Details! Damage Meter"), its minimap button the folder-like LDB name ("Details").
+local function foldersByTitle()
+  local map = {}
+  for i = 1, C_AddOns.GetNumAddOns() do
+    local name, title = C_AddOns.GetAddOnInfo(i)
+    if name and title then
+      map[key(title)] = key(name)
+    end
+  end
+  return map
 end
 
 -- Gathering -------------------------------------------------------------------------------------------
@@ -130,12 +156,24 @@ end
 ---Every launcher, deduplicated, sorted by name.
 ---@return table[]
 function Launchers:Entries()
-  local list, seen = {}, {}
-  local function add(entry)
-    if entry.key ~= "" and not seen[entry.key] then
-      seen[entry.key] = true
-      list[#list + 1] = entry
+  local list, seen, seenIcons = {}, {}, {}
+  -- `compartment`: a compartment entry, `also` another name it goes by (its addon's folder). Only these
+  -- are matched on icons too: two different addons' buttons may share an icon, but a compartment
+  -- entry with a button's icon is that button's addon.
+  local function add(entry, compartment, also)
+    local icon = iconKey(entry.icon)
+    if entry.key == "" or seen[entry.key] or (also and seen[also])
+        or (compartment and icon and seenIcons[icon]) then
+      return
     end
+    seen[entry.key] = true
+    if also then
+      seen[also] = true
+    end
+    if icon then
+      seenIcons[icon] = true
+    end
+    list[#list + 1] = entry
   end
 
   local ldb = lib("LibDataBroker-1.1")
@@ -162,9 +200,11 @@ function Launchers:Entries()
 
   local compartment = rawget(_G, "AddonCompartmentFrame")
   if compartment and compartment.registeredAddons then
+    local folders = foldersByTitle()
     for _, data in ipairs(compartment.registeredAddons) do
       if not own[data] then
-        add(compartmentEntry(data))
+        local entry = compartmentEntry(data)
+        add(entry, true, folders[entry.key])
       end
     end
   end
