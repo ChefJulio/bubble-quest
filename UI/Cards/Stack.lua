@@ -242,8 +242,8 @@ function Stack:Layout()
     end
   end
 
-  -- Other zones' quests by zone (after Fill: nearestAnywhere's candidates that found no room join
-  -- them), nearest zone first (its nearest quest; zones without a distance after, by name).
+  -- Other zones' quests by zone, nearest zone first (its nearest quest; zones without a distance
+  -- after, by name).
   local function otherZones()
     local byZone, zones, nearest = {}, {}, {}
     for _, quest in ipairs(view.elsewhere) do
@@ -270,7 +270,7 @@ function Stack:Layout()
   -- This zone (Tracking rule 5): by count, or with a height set (resize grip) as many cards as fit
   -- above the section headers that follow, so those stay in view (an opened section below scrolls).
   local hereOpen = zoneOpen(zoneName)
-  if #view.here > 0 or #view.near > 0 then
+  if #view.here > 0 then
     placeSection(zoneName, #view.here, hereOpen, toggleZone(zoneName))
   end
   if hereOpen then
@@ -279,7 +279,6 @@ function Stack:Layout()
     if (cards.maxHeight or 0) > 0 then
       local zoneCount = {}
       for _, quest in ipairs(view.elsewhere) do zoneCount[ns.Zone:NameFor(quest)] = true end
-      for _, quest in ipairs(view.near) do zoneCount[ns.Zone:NameFor(quest)] = true end
       local below = #view.groups + (#view.hidden > 0 and 1 or 0) + (#view.here > 0 and 1 or 0)  -- "N more here"
       for _ in pairs(zoneCount) do below = below + 1 end
       local limit = self:MaxScrollHeight() - below * (SECTION_HEIGHT + 2 * HALF_GAP)
@@ -301,11 +300,6 @@ function Stack:Layout()
       else
         placeSection(("%d more here"):format(#overflow), nil, false, toggleGroup(char.overflow), true)
       end
-    end
-  else
-    -- Closed: the nearest outside quests it would have borrowed stay in their own zones.
-    for _, quest in ipairs(view.near) do
-      table.insert(view.elsewhere, quest)
     end
   end
 

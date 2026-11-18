@@ -2,7 +2,8 @@
 
 - Cards are sectioned by zone: your zone's section on top, then one per other zone, nearest first
   (this replaces "Elsewhere"). With Smart sorting, entering a zone opens its section and closes the
-  others; you can still open or close any by hand
+  others; you can still open or close any by hand. Other zones' quests always stay in their own
+  sections, whatever room is free: the "Always show nearest quests" setting is gone
 - Ready quests are back among the others, sorted by the distance to their turn-in (the separate
   "Ready to turn in" section is gone: the zone sections do its job). They keep their green "Turn in
   to ..." line

@@ -28,7 +28,6 @@ local PROFILE_DEFAULTS = {
     cap = 5,  -- most zone cards shown before "+ N more here" (pinned cards don't count)
     opacity = 25,  -- background panel opacity, percent
     clickOpensMap = true,  -- left-clicking a card highlights the quest and opens the map at it
-    nearestAnywhere = false,  -- free card slots take the nearest quests outside this zone
     sortMode = "smart",  -- key in Tracking.SORT_MODES
     arrowStyle = "classic",  -- key in Card.ARROW_STYLES
     arrowColorByDistance = true,  -- green close -> red far; off = gold

@@ -103,14 +103,6 @@ function Schema:Entries()
       get = function(p) return p.cards.sortMode end,
       set = function(p, v) p.cards.sortMode = v; ns.Tracking:ResetOrder() end,
     },
-    {
-      kind = "checkbox", id = "BUBBLEQUEST_NEAREST_ANYWHERE", column = 1, default = false,
-      label = "Always show nearest quests",
-      tooltip = "When this zone has fewer quests than the card limit, fill the free cards with your "
-        .. "nearest quests elsewhere on this continent, so the tracker is never empty.",
-      get = function(p) return p.cards.nearestAnywhere end,
-      set = function(p, v) p.cards.nearestAnywhere = v; ns.Bus:Fire("TrackingResortWanted") end,
-    },
 
     -- What a card shows (review: a card layout editor). The four "Show" toggles share one row in
     -- BubbleQuest's window; Blizzard's panel lists them with their full labels.

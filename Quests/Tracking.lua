@@ -12,10 +12,10 @@ local ADDON_NAME, ns = ...
 --      MOVE_YARDS since the last sort, or a zone quest the last sort didn't rank (HasUnranked).
 --      Never on a timer by itself, never in combat (the stack defers). Hysteresis: neighbours swap
 --      only when the lower one is HYSTERESIS times closer.
---   5. At most profile.cards.cap zone cards; the rest behind "+ N more here". With "Always show
---      nearest quests" (cards.nearestAnywhere), free slots take the nearest quests outside the zone
---      (same continent, by distance, ranked after every zone quest); the rest stay in their zones'
---      sections (UI/Cards/Stack.lua).
+--   5. At most profile.cards.cap zone cards; the rest behind "+ N more here". Quests of other zones
+--      stay in their own zones' sections, closed unless you're there (UI/Cards/Stack.lua), whatever
+--      room is free (review: "even if there's space"; the "Always show nearest quests" setting, which
+--      filled free slots with them, went with the zone sections).
 --      With a height set (resize grip), the stack fills that height instead of counting (UI/Cards/
 --      Stack.lua); View then hands over every candidate in order.
 --   6. Ignored quests are hidden until unhidden.
@@ -28,7 +28,7 @@ local MOVE_CHECK_SECONDS = 1
 
 local Tracking = {
   rank = {},           -- [questID] = position in the last sorted order (this zone's quests)
-  tier = {},           -- [questID] = 1 in the area, 2 the rest, 3 nearest outside (last sort)
+  tier = {},           -- [questID] = 1 in the area, 2 the rest (this zone's quests, last sort)
   sortedAt = nil,      -- { mapID, x, y } where the last sort happened
 }
 ns.Tracking = Tracking
@@ -140,14 +140,11 @@ function Tracking:Resort()
   -- Tiers, top first (decided in review):
   --   1. in the area right now (nameplate, or within the in-area radius of a spawn): the quest
   --      you're doing outranks one you'd walk to; or a running timer (urgent);
-  --   2. everything else in the zone, ready quests included (by the distance to their turn-in);
-  --   3. with nearestAnywhere, quests outside the zone that have a distance (same continent): only
-  --      used to fill free card slots (rule 5), after every zone quest.
+  --   2. everything else in the zone, ready quests included (by the distance to their turn-in).
   -- Each tier sorted by distance with hysteresis. Re-sorts happen only on events (100 yd moves), so
   -- crossing a tier line doesn't make cards jump. Those are the Smart mode's tiers; other modes
   -- (SORT_MODES) put zone quests in tiers 1-2 their own way, or in a fixed order.
-  local distance, tiers = {}, { {}, {}, {} }
-  local nearestAnywhere = ns.DB.profile.cards.nearestAnywhere
+  local distance, tiers = {}, { {}, {} }
   local mode = sortMode()
   wipe(self.tier)
   for questID, quest in pairs(ns.QuestLog.quests) do
@@ -160,9 +157,6 @@ function Tracking:Resort()
       -- zone-map marker.
       d = here and 0 or ns.Navigation:Distance(quest) or ns.Zone:DistanceTo(questID)
       tier = tierFor(mode, quest, here)
-    elseif shown and nearestAnywhere then
-      d = ns.Navigation:Distance(quest)
-      tier = d and 3
     end
     if tier then
       distance[questID] = d
@@ -172,9 +166,9 @@ function Tracking:Resort()
   end
 
   -- Settle against the previous order (hysteresis needs it), then replace it. Fixed-order modes
-  -- sort the zone's tiers by their key instead; tier 3 is always by distance.
-  for i, list in ipairs(tiers) do
-    if mode.fixed and i < 3 then
+  -- sort the zone's tiers by their key instead.
+  for _, list in ipairs(tiers) do
+    if mode.fixed then
       table.sort(list, mode.fixed)
     else
       settle(list, distance, self.rank)
@@ -197,7 +191,7 @@ end
 ---any other in rule 4. Happens when a quest joins the zone between sorts: a just-accepted quest whose
 ---map marker arrives after the QuestLogChanged sort (QUEST_POI_UPDATE), a subzone change, an unpin or
 ---unhide. Without this it sat at the bottom until the next 100 yd move (seen in review).
----Zone quests only: with nearestAnywhere, outside quests without a distance are never ranked.
+---Zone quests only: those are the ones ranked.
 ---@return boolean
 function Tracking:HasUnranked()
   for questID, quest in pairs(ns.QuestLog.quests) do
@@ -212,8 +206,8 @@ end
 
 ---What the stack should draw. Uses the order from the last Resort; quests it hasn't ranked yet
 ---(just pinned off, just unhidden) go after the ranked ones until the next re-sort.
----@return table view { pinned, here, near, groups, elsewhere, hidden }: lists of quests (here: this
----zone's quests in order, ready ones included; near: nearestAnywhere's candidates; split by Fill);
+---@return table view { pinned, here, groups, elsewhere, hidden }: lists of quests (here: this zone's
+---quests in order, ready ones included, split by Fill; elsewhere: other zones', in zone sections);
 ---groups is a list of { category, label, quests } in Categories.ORDER
 function Tracking:View()
   ns.Zone:Update()
@@ -260,24 +254,12 @@ function Tracking:View()
   table.sort(view.hidden, function(a, b) return (a.title or "") < (b.title or "") end)
 
   view.here = here
-  -- Rule 5, nearestAnywhere: candidates for free slots, the nearest ranked quests from Elsewhere (only
-  -- tier 3 quests are ranked there, and only while the setting is on).
-  view.near = {}
-  if ns.DB.profile.cards.nearestAnywhere then
-    local rest = {}
-    for _, quest in ipairs(view.elsewhere) do
-      table.insert(rank[quest.questID] and view.near or rest, quest)
-    end
-    table.sort(view.near, function(a, b) return rank[a.questID] < rank[b.questID] end)
-    view.elsewhere = rest
-  end
   return view
 end
 
----Rule 5: the zone's cards, in order, while they fit; the rest behind "+ N more here"; then free room
----goes to the nearest outside quests (nearestAnywhere), the rest of which stay in Elsewhere. `place`
----places one card if it fits (by count, or by height with one set: the stack decides) and says so.
----Once one doesn't fit, nothing after it is placed, so the order stays the order.
+---Rule 5: the zone's cards, in order, while they fit; the rest behind "+ N more here". `place` places
+---one card if it fits (by count, or by height with one set: the stack decides) and says so. Once one
+---doesn't fit, nothing after it is placed, so the order stays the order.
 ---@param view table from View
 ---@param place fun(quest: table, index: number): boolean
 ---@return table[] overflow quests behind "+ N more here"
@@ -288,15 +270,6 @@ function Tracking:Fill(view, place)
       placed = placed + 1
     else
       overflow[#overflow + 1] = quest
-    end
-  end
-  local full = #overflow > 0
-  for _, quest in ipairs(view.near) do
-    full = full or not place(quest, placed + 1)
-    if full then
-      table.insert(view.elsewhere, quest)
-    else
-      placed = placed + 1
     end
   end
   return overflow
@@ -353,8 +326,8 @@ function Tracking:OrderStale()
   for questID, tier in pairs(self.tier) do
     local quest = ns.QuestLog:Get(questID)
     if quest then
-      local here = tier ~= 3 and not quest.readyForTurnIn and ns.Navigation:InArea(quest)
-      if mode.key == "smart" and tier ~= 3 and (tier == 1) ~= (here or ns.Card.TimerEnd(questID) ~= nil) then
+      local here = not quest.readyForTurnIn and ns.Navigation:InArea(quest)
+      if mode.key == "smart" and (tier == 1) ~= (here or ns.Card.TimerEnd(questID) ~= nil) then
         return true  -- entered or left its area
       end
       -- Exactly Resort's distances (its marker fallback in the zone), or it would ask forever.
