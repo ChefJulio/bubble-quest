@@ -30,6 +30,7 @@ local ADDON_NAME, ns = ...
 --   minCircle, minIcon   smallest on-screen sizes, pixels (a far-out window keeps its marks visible)
 --   circleYards  function() -> an area circle's radius, yards (default: the map.size setting)
 --   tooltipName   a global name for the view's tooltip (default "BubbleQuestViewTooltip<n>")
+--   ctrlHides     false: holding Ctrl leaves the view showing (default: see-through while held)
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
 -- Pixels, not yards: a minimap is small (140 px across for 233 yd each way in review, 0.3 px a yard),
@@ -175,6 +176,27 @@ end
 local View = {}
 View.__index = View
 local viewCount = 0  -- for the views' tooltip names
+local views = {}     -- every view, for Ctrl's see-through
+
+-- Holding Ctrl makes a view see-through (review: "suppress the quest objectives on the minimap, so I can
+-- see through that layer"), as it hides our tooltips (UI/Tooltips.lua). By the layer's alpha, not
+-- hiding it: the minimap draws from the layer's own OnUpdate, which a hidden layer wouldn't run, and the
+-- window's owner redraws only when its map moves. Applied on the key's change and again on every Draw
+-- (a release missed while the game was in the background).
+function View:applyPeek()
+  local alpha = (self.options.ctrlHides ~= false and ns.Tooltips:Suppressed()) and 0 or 1
+  if self.layer:GetAlpha() ~= alpha then
+    self.layer:SetAlpha(alpha)
+  end
+end
+
+ns.Events:On("MODIFIER_STATE_CHANGED", function(key)
+  if key == "LCTRL" or key == "RCTRL" then
+    for _, view in ipairs(views) do
+      view:applyPeek()
+    end
+  end
+end)
 
 ---A view drawing into `parent` (its layer fills it).
 ---@param parent Frame
@@ -205,6 +227,8 @@ function QuestView.New(parent, options)
   -- Hidden, it keeps no anchors: nothing of ours stays tied to another frame (see updateHover).
   tooltip:HookScript("OnHide", function() tooltip:ClearAllPoints() end)
   layer:SetScript("OnHide", function() view.tooltip:Hide() end)
+  views[#views + 1] = view
+  view:applyPeek()
   return view
 end
 
@@ -562,6 +586,7 @@ function View:Draw(north, west, map, ppy, turn)
   -- For the diagnostics (/bq minimap): how often it's drawn, and with what.
   self.drawCount = (self.drawCount or 0) + 1
   self.lastDraw = { north = north, west = west, map = map, ppy = ppy, turn = turn }
+  self:applyPeek()
   local opts = self.options
   local mapSettings = settings()
   local showAreas = mapSettings and mapSettings[opts.areasSetting or "areas"]
