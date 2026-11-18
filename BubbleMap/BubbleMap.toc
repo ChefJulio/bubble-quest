@@ -8,8 +8,10 @@
 ## SavedVariables: BubbleMapDB
 
 Init.lua
+Data\Tiles.lua
 Compat.lua
 Minimap.lua
+Terrain.lua
 Around.lua
 Launchers.lua
 Settings.lua

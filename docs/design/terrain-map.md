@@ -23,31 +23,38 @@ the minimap, and in our own map window. One shared terrain layer, part of the co
 
 ## Data (build time)
 
-Generated per client build from the local Forever install; FileDataIDs change between builds, so the
-data is pinned to `tools/toolchain.json`'s `wow_ui_source.build` and regenerated when it changes.
+FileDataIDs can change between builds, so the data is pinned to `tools/toolchain.json`'s
+`wow_ui_source.build` and regenerated when it changes.
 
-| Table | Content | Size (TWM's, build 1.60.1) |
+| Table | Content | Size |
 |---|---|---|
-| Continent tiles | `[continent][col * 64 + row] = fileID`, plus which tiles exist | ~92 KB, ~3,460 tiles |
-| City WMO tiles | per capital uiMap: groups of `{fileID, cx, cy, w, h, yaw, z}` | ~574 KB, 828 groups |
-| Dungeon/raid WMO tiles | per instance map: same shape | ~2 MB, 2,724 groups |
+| Continent tiles (built) | `BubbleMap/Data/Tiles.lua`: `maps[mapID][col * 64 + row] = fileID` | 29 KB, 1,796 tiles (Azeroth 736, Kalimdor 988, Zephras Isle 72) |
+| City WMO tiles | per capital uiMap: groups of `{fileID, cx, cy, w, h, yaw, z}` | ~574 KB, 828 groups (TWM's) |
+| Dungeon/raid WMO tiles | per instance map: same shape | ~2 MB, 2,724 groups (TWM's) |
 
-**Pipeline:** `tools/terrain.py`, a Python port of TerrainWorldMap's MIT Node scripts (`parse_wdt`,
-`gen_wmo_tiles`, `gen_mapareas`; credit kept in the file header). Inputs:
+**Continent pipeline (built): `tools/terrain.py`.** Everything from wago.tools at the exact build, no
+extraction tool and no listfile:
 
-- CASCConsole (pinned version) extracts WDT, `_obj0.adt`, WMO root/group and BLP headers from the
-  install. The only non-Python piece; a Python CASC reader is its own project.
-- wago.tools DB2 CSVs for `product=wowf` at the pinned build: `WMOMinimapTexture`, `WMOAreaTable`,
-  `Map`, `UiMapAssignment`.
-- FileDataIDs come straight from the WDT's MAID chunk, so no 150 MB community listfile.
+- `Map.csv` (each map's `WdtFileDataID`) and `UiMapAssignment.csv` (which maps have zones), as
+  `https://wago.tools/db2/<Table>/csv?build=<build>`. Pinning trap: adding `product=wowf` makes
+  wago.tools ignore the build and serve the latest; the tool checks the build in the file's name.
+- Each continent's WDT, `https://wago.tools/api/casc/<fdid>?version=<build>`; its MAID chunk holds each
+  tile's minimap texture (field 8 of 8). Forever's WDTs also carry an undocumented `MAI2` chunk;
+  ignored.
+- Continents: TerrainWorldMap's rule (top-level world map with zones): Azeroth (0), Kalimdor (1),
+  Zephras Isle (2991).
+- Verified: the table matches TerrainWorldMap's listfile-based IDs for all 1,724 Azeroth and Kalimdor
+  tiles; known tiles (Elwynn 32,49; Duskwood 29,51; Stormwind 30,48) checked on every run.
+- `python tools/terrain.py --check` confirms the committed table matches the pinned build.
+- wago.tools is a third party with an undocumented API. If it goes, CASCConsole (TerrainWorldMap's
+  tool) reads the same files from the local install.
 
-Porting rather than vendoring Node: one toolchain, and we own the coordinate math (TWM's
-`gotchas.md` documents its hard-won pieces: axis swap, 90-degree WMO turn, yaw sign). Estimate 3-6
-days; vendoring is half a day but adds Node and .NET to a Python repo. Known data defects to carry
-over: WMO placements with pitch/roll are skipped; some `WMOMinimapTexture` rows are stale (Forever's
-rebuilt Orgrimmar).
+**WMO tables (later, steps 7-8):** a Python port of TerrainWorldMap's `gen_wmo_tiles` (MIT): WMO root
+and group files, `WMOMinimapTexture`, `WMOAreaTable`. These need thousands of files, so likely
+CASCConsole rather than wago.tools. Known data defects to carry over: WMO placements with pitch/roll are
+skipped; some `WMOMinimapTexture` rows are stale (Forever's rebuilt Orgrimmar).
 
-**Shipping:** the continent tile table (~92 KB) is in `BubbleMap`, since the minimap padding
+**Shipping:** the continent tile table (29 KB) is in `BubbleMap`, since the minimap padding
 needs it whenever the addon runs. The WMO tables (2.6 MB) live in a load-on-demand addon,
 `BubbleMap_Terrain` (`LoadOnDemand: 1`), loaded by `C_AddOns.LoadAddOn` the first time a city or
 dungeon is drawn. Packaging: [questmarker-map.md](questmarker-map.md#packaging).

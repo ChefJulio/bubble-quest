@@ -242,7 +242,7 @@ function Minimap_:Describe()
   end
   return ("column %dx%d, minimap %.0f (scale %.2f), shape %s, %s; %s"):format(outer:GetWidth(),
     outer:GetHeight(), Minimap:GetWidth(), Minimap:GetEffectiveScale(), GetMinimapShape(),
-    ns.Quest and "with the quest tracker" or "standalone", ns.Launchers:Describe())
+    ns.Quest and "with the quest tracker" or "standalone", ns.Launchers:Describe() .. "; " .. ns.Terrain:Describe())
 end
 
 -- /bmap: status; /bmap reset: back to Edit Mode's position. (Settings come with step 3.)
