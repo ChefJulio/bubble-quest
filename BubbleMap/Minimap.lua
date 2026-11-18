@@ -299,6 +299,27 @@ SlashCmdList.BUBBLEMAP = function(input)
     for _, line in ipairs(ns.Terrain:Report()) do
       print("|cffffd100BubbleMap|r " .. line)
     end
+  elseif command == "layers" then
+    -- What's drawn over the map, in what order (diagnosing a layer that draws but doesn't show).
+    local function describe(name, f)
+      local shown = 0
+      for _, region in ipairs({ f:GetRegions() }) do
+        if region:IsShown() then
+          shown = shown + 1
+        end
+      end
+      print(("|cffffd100BubbleMap|r %s: %s %d, visible %s, alpha %.2f, %dx%d, %d regions shown"):format(name,
+        f:GetFrameStrata(), f:GetFrameLevel(), tostring(f:IsVisible()), f:GetEffectiveAlpha(), f:GetWidth(),
+        f:GetHeight(), shown))
+    end
+    describe("Minimap", Minimap)
+    if outer then
+      describe("map frame", outer)
+      for i, child in ipairs({ outer:GetChildren() }) do
+        describe("  child " .. i, child)
+      end
+    end
+    print(("|cffffd100BubbleMap|r indoors %s, our map %s"):format(tostring(IsIndoors()), tostring(ns.Zoom.own)))
   else
     print("|cffffd100BubbleMap|r: " .. Minimap_:Describe() .. ". /bmap reset: back at the minimap's Edit "
       .. "Mode position.")
