@@ -78,6 +78,7 @@ local DEFAULTS = {
   worldTerrain = false, -- the real terrain on zone maps of the world map (WorldMap.lua)
   mapStyle = "terrain", -- what our map draws: "terrain" (the ground tiles) or "art" (the world map's art)
   groupNames = true,  -- party and raid members' names beside their dots (Group.lua)
+  revealMap = true,  -- map art: every zone's land pieces, explored or not (Data/Overlays.lua)
   windowStyle = "terrain", -- the same for the map window (MapWindow.lua), switched in its footer
   attachTracker = true, -- with the quest addon: its tracker hangs under the map (one column)
   width = 220,        -- the map's width when the tracker isn't attached under it

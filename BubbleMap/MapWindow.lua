@@ -221,20 +221,34 @@ local function drawLabels(slot, project, alpha)
   local count = 0
   if alpha > 0 then
     local halfW, halfH = content:GetWidth() / 2, content:GetHeight() / 2
+    -- A name that would overlap one already placed is left out (review: zoomed out they piled up), so
+    -- the first come first; placed: { left, right, bottom, top } of each shown.
+    local placed = {}
     for _, label in ipairs(labelsOf(slot.e)) do
       local x, y = project(label.north, label.west)
       if math.abs(x) <= halfW and math.abs(y) <= halfH then
-        count = count + 1
-        local s = strings[count]
+        local s = strings[count + 1]
         if not s then
           s = layers.labels:CreateFontString(nil, "OVERLAY", "GameFontNormalOutline")
-          strings[count] = s
+          strings[count + 1] = s
         end
         s:SetText(label.name)
-        s:ClearAllPoints()
-        s:SetPoint("CENTER", content, "CENTER", x, y)
-        s:SetAlpha(alpha)
-        s:Show()
+        local w, h = s:GetStringWidth() / 2 + 4, s:GetStringHeight() / 2 + 2
+        local free = true
+        for _, r in ipairs(placed) do
+          if x - w < r[2] and x + w > r[1] and y - h < r[4] and y + h > r[3] then
+            free = false
+            break
+          end
+        end
+        if free then
+          count = count + 1
+          placed[#placed + 1] = { x - w, x + w, y - h, y + h }
+          s:ClearAllPoints()
+          s:SetPoint("CENTER", content, "CENTER", x, y)
+          s:SetAlpha(alpha)
+          s:Show()
+        end
       end
     end
   end
@@ -320,7 +334,9 @@ local function redraw()
       -- A continent without a UI map (one the world map doesn't know) has no art: terrain at any zoom.
       if (style == "art" or ppy < TILES_FROM_PPY) and e.ui then
         slot.tiles:Draw(0, 0, -1, ppy)
-        slot.art:Draw(cn, cw, e.map, ppy, 0, nil, ppy < ZONE_ART_FROM_PPY)
+        -- The continent's art as the base, the zones as their land pieces over it (their own painted base
+        -- has faded borders that overlap their neighbours').
+        slot.art:Draw(cn, cw, e.map, ppy, 0, nil, ppy < ZONE_ART_FROM_PPY, true)
       else
         slot.art:Hide()
         slot.tiles:Draw(cn, cw, e.map, ppy)

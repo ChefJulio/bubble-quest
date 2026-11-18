@@ -21,15 +21,43 @@ local Art = {}
 Art.__index = Art
 ns.Art = Art
 
-local maps = {}        -- [uiMap] = { north0, west0, north1, west1, pieces } (false: no art there)
+local maps = {}        -- [uiMap] = { north0, west0, north1, west1, base, overlays } (false: no art there)
 local zonesOf = {}     -- [continent UI map] = { uiMap, ... }: its zones
 
 ns.On("MAP_EXPLORATION_UPDATED", function()
   wipe(maps)
 end)
 
+---Forget the built pieces (the reveal setting changed).
+function Art.Rebuild()
+  wipe(maps)
+end
+
+-- A map's overlays: every one in Data/Overlays.lua with the reveal setting on (the game's data, explored
+-- or not, as Leatrix Maps reveals), else the explored ones the game gives (and the mouse-over-only ones
+-- left out). Both as { textureWidth, textureHeight, offsetX, offsetY, fileDataIDs, wide, top }.
+local function overlaysOf(uiMap)
+  local list = {}
+  local all = ns.DB.revealMap and ns.Overlays.maps[uiMap]
+  if all then
+    for _, o in ipairs(all) do
+      list[#list + 1] = { textureWidth = o.w, textureHeight = o.h, offsetX = o.x, offsetY = o.y,
+        fileDataIDs = o.files, wide = o.cols, top = false }
+    end
+    return list
+  end
+  for _, o in ipairs(C_MapExplorationInfo.GetExploredMapTextures(uiMap) or {}) do
+    if not o.isShownByMouseOver then
+      list[#list + 1] = { textureWidth = o.textureWidth, textureHeight = o.textureHeight, offsetX = o.offsetX,
+        offsetY = o.offsetY, fileDataIDs = o.fileDataIDs, top = o.isDrawOnTopLayer }
+    end
+  end
+  return list
+end
+
 -- A map's art, as pieces in world yards: { file, north, west (centre), height, width (yards),
--- right, bottom (texcoords), sub (draw sublevel) }.
+-- right, bottom (texcoords), sub (draw sublevel) }, in two lists: base (the painted map) and overlays
+-- (the explored land pieces).
 local function build(uiMap)
   local layers = C_Map.GetMapArtLayers(uiMap)
   local layer = layers and layers[1]
@@ -40,7 +68,8 @@ local function build(uiMap)
   end
   local n0, w0 = topLeft.x, topLeft.y
   local yardsDown, yardsRight = (n0 - bottomRight.x) / layer.layerHeight, (w0 - bottomRight.y) / layer.layerWidth
-  local pieces = {}
+  local base, overlays = {}, {}
+  local pieces = base
   -- One piece: `w` x `h` layer pixels at (`x`, `y`) from the art's top left, shown from a file
   -- `fileW` x `fileH` pixels.
   local function add(file, x, y, w, h, fileW, fileH, sub)
@@ -75,9 +104,11 @@ local function build(uiMap)
     end
     return size
   end
-  for _, overlay in ipairs(C_MapExplorationInfo.GetExploredMapTextures(uiMap) or {}) do
-    if not overlay.isShownByMouseOver then
-      local wide, tall = math.ceil(overlay.textureWidth / tw), math.ceil(overlay.textureHeight / th)
+  pieces = overlays
+  for _, overlay in ipairs(overlaysOf(uiMap)) do
+    do
+      local wide = overlay.wide or math.ceil(overlay.textureWidth / tw)
+      local tall = math.ceil(overlay.textureHeight / th)
       for j = 1, tall do
         local h, fileH = th, th
         if j == tall then
@@ -93,15 +124,16 @@ local function build(uiMap)
             fileW = fileSize(w)
           end
           local file = overlay.fileDataIDs[(j - 1) * wide + k]
-          if file then
+          if file and file ~= 0 then
             add(file, overlay.offsetX + tw * (k - 1), overlay.offsetY + th * (j - 1), w, h, fileW, fileH,
-              overlay.isDrawOnTopLayer and 2 or 1)
+              overlay.top and 2 or 1)
           end
         end
       end
     end
   end
-  return { north0 = n0, west0 = w0, north1 = bottomRight.x, west1 = bottomRight.y, pieces = pieces }
+  return { north0 = n0, west0 = w0, north1 = bottomRight.x, west1 = bottomRight.y, base = base,
+    overlays = overlays }
 end
 
 local function artOf(uiMap)
@@ -172,7 +204,9 @@ end
 
 ---Draw around world (north, west) on instance map `map`, the point at the parent's centre, `s` pixels
 ---a yard, turned by `turn` radians (0: north up). `top`: the UI map drawn over the others (nil: none);
----`continentOnly`: the continent's art alone (far out: the zones' detail wouldn't show).
+---`continentOnly`: the continent's art alone (far out: the zones' detail wouldn't show); `landOnly`: the
+---zones around as their land pieces (overlays) only, not their painted base, whose faded borders overlap
+---their neighbours' (the map window: review, "this looks bad"; the continent's art is the base there).
 ---@param north number
 ---@param west number
 ---@param map number
@@ -180,7 +214,8 @@ end
 ---@param turn number
 ---@param top number?
 ---@param continentOnly boolean?
-function Art:Draw(north, west, map, s, turn, top, continentOnly)
+---@param landOnly boolean?
+function Art:Draw(north, west, map, s, turn, top, continentOnly, landOnly)
   local continent = ns.MapPoints.Continent(map, north, west)
   local w, h = self.parent:GetWidth(), self.parent:GetHeight()
   local reach = math.sqrt(w * w + h * h) / 2  -- pixels from the centre to a corner, whatever the turn
@@ -194,15 +229,18 @@ function Art:Draw(north, west, map, s, turn, top, continentOnly)
   local ranks = { {}, {}, {} }
   if continent then
     local art = artOf(continent)
-    if inView(art) then
-      ranks[1][1] = art
+    if art and inView(art) then
+      ranks[1][1] = { art.base, art.overlays }
     end
     if not continentOnly then
       for _, zone in ipairs(Art.Zones(continent)) do
         if zone ~= top then
           local zoneArt = artOf(zone)
-          if inView(zoneArt) then
-            ranks[2][#ranks[2] + 1] = zoneArt
+          if zoneArt and inView(zoneArt) then
+            if not landOnly then
+              ranks[2][#ranks[2] + 1] = zoneArt.base
+            end
+            ranks[2][#ranks[2] + 1] = zoneArt.overlays
           end
         end
       end
@@ -210,8 +248,8 @@ function Art:Draw(north, west, map, s, turn, top, continentOnly)
   end
   if top and top ~= continent and not continentOnly then
     local art = artOf(top)
-    if inView(art) then
-      ranks[3][1] = art
+    if art and inView(art) then
+      ranks[3][1] = { art.base, art.overlays }
     end
   end
 
@@ -221,8 +259,13 @@ function Art:Draw(north, west, map, s, turn, top, continentOnly)
   for rank = 1, 3 do
     local wanted = {}
     local frame, icons, free = self.frames[rank], self.icons[rank], self.free[rank]
-    for _, art in ipairs(ranks[rank]) do
-      for _, piece in ipairs(art.pieces) do
+    -- Rank 1 and 3 hold one map's { base, overlays }; rank 2 a list of piece lists.
+    local lists = ranks[rank]
+    if rank ~= 2 then
+      lists = lists[1] or {}
+    end
+    for _, pieces in ipairs(lists) do
+      for _, piece in ipairs(pieces) do
         local x, y = (west - piece.west) * s, (piece.north - north) * s
         local pw, ph = piece.width * s, piece.height * s
         -- Culled: nowhere near the view (the piece's centre farther than the corner plus its own size).

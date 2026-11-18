@@ -9,6 +9,7 @@
 
 Init.lua
 Data\Tiles.lua
+Data\Overlays.lua
 Compat.lua
 Minimap.lua
 Terrain.lua

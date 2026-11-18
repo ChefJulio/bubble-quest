@@ -57,6 +57,11 @@ local ENTRIES = {
     get = function() return ns.DB.mapStyle end,
     set = function(v) ns.DB.mapStyle = v; ns.Around:Apply() end },  -- the bar button's icon follows
 
+  { kind = "checkbox", id = "BUBBLEMAP_REVEAL", label = "Reveal the whole map", default = true,
+    tooltip = "Map art (the minimap's Map style and the map window's): every zone fully painted, as if "
+      .. "explored. Untick to see only the parts you've discovered, as on the world map.",
+    get = function() return ns.DB.revealMap end,
+    set = function(v) ns.DB.revealMap = v; ns.Art.Rebuild() end },
   { kind = "checkbox", id = "BUBBLEMAP_GROUP_NAMES", label = "Party members' names", default = true,
     tooltip = "Each party or raid member's name beside their dot, in their class colour, on the map and "
       .. "in the map window. Untick for dots only (hover one for its name).",
