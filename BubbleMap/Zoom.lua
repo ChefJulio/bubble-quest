@@ -30,6 +30,7 @@ local ARROW_SIZE = 32
 
 local Zoom = {
   own = false,        -- our map is showing (else Blizzard's minimap)
+  peeking = false,    -- Ctrl held in our map: the game's minimap for a look (Zoom:Update)
   step = DEFAULT_STEP,
   beyond = false,     -- gathering, but zoomed out past Blizzard's farthest level: our map until back in
 }
@@ -151,11 +152,14 @@ function Zoom:Update()
   -- The peek (user's idea): Ctrl held shows the game's minimap and its live blips at its farthest level,
   -- the widest its blips allow, whatever our zoom (user's call: a peek is "what's around me"); our terrain
   -- matched to it. No zooming while it's held (user's call): released, our map at exactly the zoom it
-  -- had. Any Ctrl, anywhere: a flicker during Ctrl keybinds is fine (user's call).
-  local peek = IsControlKeyDown()
-  local own = terrainHere() and not peek and (not gather or self.beyond)
+  -- had. Any Ctrl, anywhere: a flicker during Ctrl keybinds is fine (user's call). Only from our map: in
+  -- gather mode the game's minimap is already showing, and a Ctrl there did nothing at some zooms and
+  -- jumped at others (review), so there it does nothing at all and the wheel zooms as usual.
+  local ours = terrainHere() and (not gather or self.beyond)
+  self.peeking = ours and IsControlKeyDown()
+  local own = ours and not self.peeking
   if own ~= self.own then
-    if not own and peek then
+    if self.peeking then
       Minimap:SetZoom(0)
     end
     self.own = own
@@ -166,8 +170,8 @@ end
 ---One wheel notch or zoom button: delta > 0 zooms in, < 0 out.
 ---@param delta number
 function Zoom:Step(delta)
-  if IsControlKeyDown() then
-    return  -- the peek: no zooming while Ctrl is held
+  if self.peeking then
+    return  -- the peek: no zooming while it's held
   end
   if self.own then
     -- Gathering and zooming back in to Blizzard's range: gather mode, at its farthest level.
@@ -241,7 +245,7 @@ table.insert(ns.Minimap.onActivate, function(outer)
   -- our map.
   -- During the Ctrl peek Blizzard's handler zoomed: back to its farthest level, the peek's view.
   Minimap:HookScript("OnMouseWheel", function(_, delta)
-    if IsControlKeyDown() then
+    if Zoom.peeking then
       Minimap:SetZoom(0)
     elseif Zoom.own then
       Minimap:SetZoom(0)
