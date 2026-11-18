@@ -13,6 +13,7 @@ local ADDON_NAME, ns = ...
 --     in and out, STEPS times Blizzard's farthest view.
 --   - GATHER MODE: Blizzard's minimap shown, for its live blips, and the zoom is Blizzard's own levels
 --     only, so the blips are always right. Our terrain is the ground under it.
+--   - THE PEEK: Ctrl held, gather mode for as long as it's held (Zoom:Update).
 --
 -- Gather mode is a setting (BubbleMapDB.gatherMode): "auto" (while a tracking spell such as Find Herbs
 -- is on: the player is gathering), "always" or "never". Indoors and wherever our terrain doesn't reach
@@ -89,21 +90,12 @@ function Zoom:GatherSpell()
   return last or spells[1]
 end
 
----The bar's gather button: a tracking spell on turns it off (our map, all its zoom); none on turns the
----last used one on (gather mode, when its setting is automatic). Blizzard's own tracking menu sets
----tracking the same way, from ordinary UI code.
+---The bar's gather button: a hard toggle of the mode (user's call): gather mode on (the game's minimap
+---and its live blips) or off (our map only, whatever is tracked). Tracking itself is left alone.
 function Zoom:ToggleGather()
-  local spell = self:GatherSpell()
-  if not spell then
-    return
-  end
-  if spell.active then
-    C_Minimap.SetTracking(spell.index, false)
-  else
-    C_Minimap.SetTracking(spell.index, true)
-    ns.DB.lastGather = spell.name
-    self.beyond = false  -- on: straight to gather mode
-  end
+  ns.DB.gatherMode = self:Gathering() and "never" or "always"
+  self.beyond = false
+  self:Update()
 end
 
 local function gathering()
@@ -140,7 +132,29 @@ local function apply()
   end
 end
 
----Re-decide whose map shows (tracking changed, indoors, the setting, zoomed past Blizzard's levels).
+---Gather mode is on (the setting, and for "auto" a tracking spell).
+---@return boolean
+function Zoom:Gathering()
+  return gathering()
+end
+
+-- Blizzard's outdoor levels as shares of its farthest view [Inferred: classic's radii, 233.3 down to
+-- 66.7 yd; they matched the user's measurements at levels 0 and 1]. The peek picks the nearest.
+local LEVEL_SHARES = { 1, 6 / 7, 5 / 7, 4 / 7, 3 / 7, 2 / 7 }
+
+local function nearestLevel(k)
+  local best, bestDiff = 0, math.huge
+  for i, share in ipairs(LEVEL_SHARES) do
+    local diff = math.abs(share - k)
+    if diff < bestDiff and i - 1 < Minimap:GetZoomLevels() then
+      best, bestDiff = i - 1, diff
+    end
+  end
+  return best
+end
+
+---Re-decide whose map shows (tracking changed, indoors, the setting, zoomed past Blizzard's levels, the
+---Ctrl peek).
 ---Gathering, the map is Blizzard's at its zoom levels and ours beyond them (user's design): zooming out
 ---past Blizzard's farthest level leaves gather mode for our map, zooming back in returns to it. The
 ---tracking spell stays on throughout.
@@ -149,8 +163,16 @@ function Zoom:Update()
   if not gather then
     self.beyond = false
   end
-  local own = terrainHere() and (not gather or self.beyond)
+  -- The peek (user's idea): Ctrl held shows the game's minimap and its live blips at the nearest of its
+  -- zoom levels to ours (its farthest when ours is further out: its blips can't be scaled), our terrain
+  -- matched to it; released, our map at the zoom it had. Any Ctrl, anywhere: a flicker during Ctrl
+  -- keybinds is fine (user's call).
+  local peek = IsControlKeyDown()
+  local own = terrainHere() and not peek and (not gather or self.beyond)
   if own ~= self.own then
+    if not own and peek and self.own then
+      Minimap:SetZoom(nearestLevel(STEPS[self.step]))
+    end
     self.own = own
     apply()
   end

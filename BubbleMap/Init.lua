@@ -74,7 +74,9 @@ local DEFAULTS = {
   width = 220,        -- the map's width without the quest addon (with it: the tracker's width)
   heightPercent = 100,  -- the map's height, percent of its width
   lastGather = nil,   -- the tracking spell the gather button turns on (its name)
-  gatherMode = "auto", -- Blizzard's minimap for its blips: "auto" (a tracking spell on), "always", "never"
+  gatherMode = "never", -- Blizzard's minimap for its blips: "never" (our map only; Ctrl peeks), "auto" (a
+                       -- tracking spell on), "always"
+  gatherModeV2 = nil,  -- set once the default moved from "auto" to "never" (user's call, 2026-11-17)
   show = {            -- what's around the map (Around.lua); Blizzard's own versions are always hidden
     bar = true,       -- the bar along the map's top (zone, buttons, clock)
     zone = true,
@@ -108,5 +110,12 @@ ns.On("ADDON_LOADED", function(name)
   end
   BubbleMapDB = BubbleMapDB or {}
   fill(BubbleMapDB, DEFAULTS)
+  -- The default moved from "auto" to "never" (our map only, Ctrl peeks); saved before that, once.
+  if not BubbleMapDB.gatherModeV2 then
+    BubbleMapDB.gatherModeV2 = true
+    if BubbleMapDB.gatherMode == "auto" then
+      BubbleMapDB.gatherMode = "never"
+    end
+  end
   ns.DB = BubbleMapDB
 end)

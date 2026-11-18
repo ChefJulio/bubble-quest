@@ -201,17 +201,16 @@ local function createButtons()
   gather.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
   gather:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
   gather:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.2)
-  gather:SetScript("OnClick", function() ns.Zoom:ToggleGather() end)
+  gather:SetScript("OnClick", function()
+    ns.Zoom:ToggleGather()
+    Around:Apply()  -- the button's own look follows the mode
+  end)
   tooltip(gather, function()
-    local spell = ns.Zoom:GatherSpell()
-    if not spell then
-      return
-    end
-    GameTooltip:AddLine(spell.name .. (spell.active and ": on" or ": off"), 1, 1, 1)
-    GameTooltip:AddLine(spell.active
-      and "Gather mode: the game's minimap, for its live blips; zoom is limited to its levels. Click: off, "
-        .. "for BubbleMap's map and all its zoom."
-      or "BubbleMap's map, all its zoom. Click: on, for the game's live blips (gather mode).",
+    local on = ns.Zoom:Gathering()
+    GameTooltip:AddLine(on and "Gather mode: on" or "Gather mode: off", 1, 1, 1)
+    GameTooltip:AddLine(on
+      and "The game's minimap, for its live herb and ore blips; zoom is limited to its levels. Click: off."
+      or "BubbleMap's map, all its zoom. Hold Ctrl to peek at the game's blips. Click: on.",
       0.8, 0.8, 0.8, true)
   end)
   buttons.gather = gather
@@ -376,9 +375,10 @@ local function layoutBar()
   place(buttons.tracking, show.tracking)
   local spell = ns.Zoom:GatherSpell()
   if spell then
+    local on = ns.Zoom:Gathering()
     buttons.gather.icon:SetTexture(spell.texture)
-    buttons.gather.icon:SetDesaturated(not spell.active)
-    buttons.gather.icon:SetAlpha(spell.active and 1 or 0.6)
+    buttons.gather.icon:SetDesaturated(not on)
+    buttons.gather.icon:SetAlpha(on and 1 or 0.6)
   end
   place(buttons.gather, show.gather and spell ~= nil)
   place(buttons.launchers, ns.Launchers:Active())

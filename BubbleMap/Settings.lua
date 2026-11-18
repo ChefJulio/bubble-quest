@@ -30,12 +30,13 @@ local ENTRIES = {
     get = function() return ns.DB.heightPercent end,
     set = function(v) ns.DB.heightPercent = v; ns.Minimap:Refresh() end },
 
-  { kind = "dropdown", id = "BUBBLEMAP_GATHER_MODE", label = "Gather mode", default = "auto",
+  { kind = "dropdown", id = "BUBBLEMAP_GATHER_MODE", label = "Gather mode", default = "never",
     tooltip = "BubbleMap draws its own map, zooming in and out freely. Gather mode shows the game's own "
       .. "minimap instead, for its live herb, ore and tracking blips, which are only right at the game's "
-      .. "zoom levels: zoom is limited to those. Automatic: while a tracking spell such as Find Herbs is on.",
+      .. "zoom levels: zoom is limited to those. Off: hold Ctrl to peek at it. Automatic: while a tracking "
+      .. "spell such as Find Herbs is on. The bar's gather button switches it on and off.",
     options = function()
-      return { { "auto", "Automatic (while tracking)" }, { "always", "Always" }, { "never", "Never" } }
+      return { { "never", "Off (Ctrl peeks)" }, { "auto", "Automatic (while tracking)" }, { "always", "On" } }
     end,
     get = function() return ns.DB.gatherMode end,
     set = function(v) ns.DB.gatherMode = v; ns.Zoom:Update() end },
@@ -52,8 +53,8 @@ local ENTRIES = {
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_TRACKING", label = "Tracking button", default = true,
     tooltip = "What the minimap shows: flight masters, trainers, ..." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_GATHER", label = "Gather button", default = true,
-    tooltip = "Your tracking spell (Find Herbs, ...) on and off in one click: on is gather mode, the game's "
-      .. "minimap and its live blips; off is BubbleMap's map with all its zoom." },
+    tooltip = "Gather mode on and off in one click: on, the game's minimap and its live herb and ore blips; "
+      .. "off, BubbleMap's map with all its zoom (hold Ctrl to peek)." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_MAIL", label = "New mail", default = true,
     tooltip = "An envelope when there's new mail; hover it for the senders." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_COORDS", label = "Coordinates", default = false,
