@@ -117,20 +117,33 @@ local function onUnit(tooltip, data)
   -- Westfall Stew's Goretusk Snout, not Goretusk Liver Pie's liver, which it drops too): each
   -- unfinished item objective whose sources (forever-db, else learned: DoLine.ItemSources) name it,
   -- of a quest the game didn't list, in the game's own style, with the drop chance when known.
-  local drops = {}
+  -- For quests the game does list, its line is its own text (not ours to change: never modify Blizzard
+  -- UI), so the drop chance goes on a short line of ours after it (review: "it doesn't show the drop
+  -- chance for the quest item I need"). A tooltip only grows at the bottom.
+  local drops, chances = {}, {}
   for questID, quest in pairs(ns.QuestLog.quests) do
-    if not listed[questID] and not quest.isComplete then
+    if not quest.isComplete then
       for _, objective in ipairs(quest.objectives or {}) do
         if objective.type == "item" and not objective.finished then
           local itemName = ns.QuestLog.ObjectiveName(objective)
           local sources = ns.DoLine.ItemSources(questID, itemName)
           if sources and sources.kind == "npc" and tContains(sources.names, name) then
             local chance = sources.chances and sources.chances[name]
-            drops[#drops + 1] = { quest = quest, objective = objective, itemName = itemName, chance = chance }
+            if not listed[questID] then
+              drops[#drops + 1] = { quest = quest, objective = objective, itemName = itemName, chance = chance }
+            elseif chance then
+              chances[#chances + 1] = { itemName = itemName, chance = chance }
+            end
           end
         end
       end
     end
+  end
+  for _, c in ipairs(chances) do
+    tooltip:AddLine(("%s: %s drop chance"):format(c.itemName, ns.DoLine.ChanceText(c.chance)), 0.6, 0.6, 0.6)
+  end
+  if #chances > 0 and #drops == 0 then
+    tooltip:Show()
   end
   if #drops > 0 then
     local lastQuest
