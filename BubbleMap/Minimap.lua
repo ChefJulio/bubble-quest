@@ -212,6 +212,10 @@ function Minimap_:Activate()
     quest.RegisterCallback("TrackerResized", refresh)
     quest.RegisterCallback("ProfileChanged", refresh)
     quest.RegisterCallback("TrackerAttachMoved", function() Minimap_:SavePosition() end)
+    -- Its quest areas over the whole frame, padding included (an API 1 member added later: check).
+    if quest.SetMinimapView then
+      quest.SetMinimapView(outer)
+    end
   end
 
   self.outer = outer

@@ -24,6 +24,12 @@ local ADDON_NAME, ns = ...
 --   - Rotate Minimap on: every tile turns with the player's facing, as BubbleQuest's minimap areas do,
 --     and fills the corners Blizzard's turned square leaves empty.
 --   - Nothing at all while the map is square and north-up: Blizzard's minimap covers it all then.
+--   - One ground, no seam: while our tiles are drawn, Blizzard's ground is off
+--     (C_Minimap.SetDrawGroundTextures(false)) and ours shows through the minimap under its blips, as
+--     Blizzard's own HybridMinimap does (Blizzard_HybridMinimap.lua:44; its frame sits a strata under
+--     the minimap, as ours does). Its shading differed from the raw tiles: the edge showed (review).
+--     Indoors (caves, buildings: interior maps we don't have yet), off our data, or while HybridMinimap
+--     is up (it owns the setting then), Blizzard's ground is on.
 
 local TILE_YARDS = 1600 / 3   -- 533.33
 local GRID = 64
@@ -101,6 +107,21 @@ local function assign(tiles, col, row, span)
   end
 end
 
+-- Blizzard's ground: off while ours covers it (see the header). Only set on a change.
+local groundOff = false
+local function blizzardGround(on)
+  local hybrid = rawget(_G, "HybridMinimap")
+  if hybrid and hybrid:IsShown() then
+    groundOff = false  -- HybridMinimap's own; it turns ground back on when it hides
+    return
+  end
+  if groundOff == not on then
+    return
+  end
+  groundOff = not on
+  C_Minimap.SetDrawGroundTextures(on)
+end
+
 local function hideTiles()
   for _, t in pairs(slots) do
     t:Hide()
@@ -131,17 +152,20 @@ local function update()
   fill:SetShown(on)
   holder:SetShown(on)
   if not on then
+    blizzardGround(true)
     return
   end
   local px, py, _, mapID = UnitPosition("player")
   local tiles = mapID and ns.Tiles.maps[mapID]
   local s = scale()
-  if not (px and py and tiles and s and turn) then
+  if not (px and py and tiles and s and turn) or IsIndoors() then
+    blizzardGround(true)
     if lastMap then
       hideTiles()
     end
     return
   end
+  blizzardGround(false)
 
   local tilePixels = TILE_YARDS * s
   -- Enough slots to cover the frame's diagonal (it turns), plus the ring of one each side (odd, so the

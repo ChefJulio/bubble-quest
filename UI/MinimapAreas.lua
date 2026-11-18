@@ -7,7 +7,10 @@ local ADDON_NAME, ns = ...
 -- (decided in review): the card you're hovering, else your first pinned quest, else the top card.
 --
 -- How: our own mouse-disabled frame on the Minimap, textures placed by hand each frame (the minimap
--- moves and may rotate every frame). The view's size comes from C_Minimap.GetViewRadius (yards from
+-- moves and may rotate every frame). BubbleMap can point it at its whole map frame instead
+-- (BubbleQuestAPI.SetMinimapView): the frame is wider or taller than Blizzard's square and filled with
+-- terrain, so the areas draw over all of it, centred on the player as before; width and height are
+-- handled apart (halfW, halfH), as the frame needn't be square. The view's size comes from C_Minimap.GetViewRadius (yards from
 -- the centre to the edge), as Blizzard's HybridMinimap does. UnitPosition is nil in instances, which
 -- hides everything there.
 
@@ -158,18 +161,19 @@ local function acquireGiver(entry)
   return t
 end
 
-local function drawGivers(north, west, instanceMap, cos, sin, scale, half, square)
+local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
   local hits = MinimapAreas.giverHits
   local iconScale = ns.MapAreas.iconScale()
-  local reach = half + GIVER_SIZE * iconScale / 2
+  local pad = GIVER_SIZE * iconScale / 2
+  local reachW, reachH = halfW + pad, halfH + pad
   for _, p in ipairs(giverPoints) do
     if p.map == instanceMap then
       local x, y = project(p.x - north, p.y - west, cos, sin, scale)
       local inside
       if square then
-        inside = math.abs(x) <= reach and math.abs(y) <= reach
+        inside = math.abs(x) <= reachW and math.abs(y) <= reachH
       else
-        inside = x * x + y * y <= reach * reach
+        inside = x * x + y * y <= reachW * reachW
       end
       if inside then
         local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
@@ -239,10 +243,21 @@ local function markerNear(x, y)
   return false
 end
 
-local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square)
+-- Inside Blizzard's own minimap (not BubbleMap's padding around it): the game draws its "?" for many
+-- ready quests there, and only there, so ours is skipped there and drawn in the padding.
+local function inMinimap(x, y, square)
+  local half = Minimap:GetWidth() / 2
+  if square then
+    return math.abs(x) <= half and math.abs(y) <= half
+  end
+  return x * x + y * y <= half * half
+end
+
+local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
   local size = 2 * ns.MapAreas.blobYards() * scale
   local alpha = ns.MapAreas.blobAlpha()
-  local reach = half + size / 2  -- a circle partly inside still shows its inside part
+  -- A circle partly inside still shows its inside part.
+  local reachW, reachH = halfW + size / 2, halfH + size / 2
   local hits = MinimapAreas.hits
   wipe(hits)
   wipe(placedMarkers)
@@ -254,16 +269,17 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
       local x, y = project(p.x - north, p.y - west, cos, sin, scale)
       local inside
       if square then
-        inside = math.abs(x) <= reach and math.abs(y) <= reach
+        inside = math.abs(x) <= reachW and math.abs(y) <= reachH
       else
-        inside = x * x + y * y <= reach * reach
+        inside = x * x + y * y <= reachW * reachW
       end
       if inside and p.objective then
         local blob = acquire(blobs, "blobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
-      elseif inside and not ns.MapAreas.GameMarksTurnIn(p.questID) and not markerNear(x, y) then
+      elseif inside and not (inMinimap(x, y, square) and ns.MapAreas.GameMarksTurnIn(p.questID))
+          and not markerNear(x, y) then
         -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
         place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
         placedMarkers[#placedMarkers + 1] = x
@@ -274,7 +290,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, half, square
   end
 end
 
-local function drawGuide(north, west, instanceMap, cos, sin, scale, half, square, delta)
+local function drawGuide(north, west, instanceMap, cos, sin, scale, halfW, halfH, square, delta)
   guide.elapsed = guide.elapsed + delta
   if guide.elapsed >= TARGET_SECONDS then
     guide.elapsed = 0
@@ -290,7 +306,8 @@ local function drawGuide(north, west, instanceMap, cos, sin, scale, half, square
     return  -- under the player's arrow
   end
   -- Stop at the target, or at the edge when it's off the minimap.
-  local edge = square and half / math.max(math.abs(x), math.abs(y)) * length or half
+  local edge = square and math.min(halfW / math.max(math.abs(x), 1e-6), halfH / math.max(math.abs(y), 1e-6))
+    * length or halfW
   local stop = math.min(length, edge - DOT_SIZE)
   local dx, dy = x / length, y / length
   local color = ns.MapAreas:ColorFor(guide.questID)
@@ -315,13 +332,16 @@ local tooltip  -- created with the layer
 
 -- The cursor is on the minimap itself, not just inside its rectangle: a frame over it (BubbleMap's
 -- bar, an addon's minimap button) is what the mouse is on then, and the areas under it flashed their
--- tooltips through it (seen in review).
+-- tooltips through it (seen in review). Over BubbleMap's padding (outside Blizzard's square) nothing
+-- takes the mouse, so the game world is under it: that counts too.
 local function onMinimap()
-  if not Minimap:IsMouseOver() then
+  if not layer:IsMouseOver() then
     return false
   end
   local foci = GetMouseFoci()
-  return foci ~= nil and foci[1] == Minimap
+  local focus = foci and foci[1]
+  -- WorldFrame: the engine makes it (no XML), so lint has no declaration for it.
+  return focus == Minimap or focus == rawget(_G, "WorldFrame")
 end
 
 local hoverElapsed = 0
@@ -374,22 +394,24 @@ local function update(_, delta)
       MinimapAreas.square = square
       mask:SetTexture(square and SQUARE_MASK or ROUND_MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
     end
-    local half = Minimap:GetWidth() / 2
-    local scale = half / C_Minimap.GetViewRadius()  -- pixels per yard
+    -- Pixels per yard: Blizzard's minimap shows GetViewRadius yards from its centre to its edge. The
+    -- layer is the minimap's child, so in its units, but may be bigger (SetView).
+    local scale = Minimap:GetWidth() / 2 / C_Minimap.GetViewRadius()
+    local halfW, halfH = layer:GetWidth() / 2, layer:GetHeight() / 2
     local facing = rotation()
     local cos, sin = math.cos(facing), math.sin(facing)
     if showAreas then
-      drawAreas(north, west, instanceMap, cos, sin, scale, half, square)
+      drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
     end
     if showGivers then
       ns.MapAvailable:Entries()
       if giversBuiltFor ~= ns.MapAvailable.builtFor then
         rebuildGivers()
       end
-      drawGivers(north, west, instanceMap, cos, sin, scale, half, square)
+      drawGivers(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
     end
     if showGuide then
-      drawGuide(north, west, instanceMap, cos, sin, scale, half, square, delta)
+      drawGuide(north, west, instanceMap, cos, sin, scale, halfW, halfH, square, delta)
     end
   end
   MinimapAreas.dotsDrawn = used.dots  -- for /qm minimap (hideUnused resets the count)
@@ -405,7 +427,7 @@ local function create()
     return
   end
   layer = CreateFrame("Frame", nil, Minimap)
-  layer:SetAllPoints(Minimap)
+  layer:SetAllPoints(MinimapAreas.view or Minimap)
   layer:EnableMouse(false)
   layer:SetFrameLevel(Minimap:GetFrameLevel() + 2)
   mask = layer:CreateMaskTexture()
@@ -417,6 +439,17 @@ local function create()
 end
 
 ns.Events:On("PLAYER_LOGIN", create)
+
+---Draw over `frame` instead of the minimap alone (nil: back to the minimap). BubbleMap's map frame:
+---centred on the minimap, wider or taller, filled with terrain at the minimap's scale.
+---@param frame Frame?
+function MinimapAreas:SetView(frame)
+  self.view = frame
+  if layer then
+    layer:ClearAllPoints()
+    layer:SetAllPoints(frame or Minimap)
+  end
+end
 
 ---For /qm minimap: what the minimap layer sees right now, one frame run under pcall so an error shows.
 ---@return string[]

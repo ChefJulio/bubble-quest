@@ -64,6 +64,15 @@ function api.SetTrackerAttach(frame)
   end)
 end
 
+---Draw the minimap's quest areas, guide line and quest givers over `frame` instead of the minimap
+---alone (nil: back to the minimap). For a map frame centred on the minimap but wider or taller (the
+---padding around it shows terrain at the minimap's scale): the areas then cover all of it. Turn-ins
+---the game marks itself get our "?" only outside Blizzard's square, where the game draws none.
+---@param frame Frame?
+function api.SetMinimapView(frame)
+  ns.MinimapAreas:SetView(frame)
+end
+
 ---How the tracker looks, for matching it. A fresh table each call; changes come with ThemeChanged.
 ---@return table
 function api.Theme()
