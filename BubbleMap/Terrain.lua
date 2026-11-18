@@ -37,6 +37,7 @@ local FILL = { 0.05, 0.06, 0.07, 1 }
 
 local Terrain = {
   active = false,
+  zoom = 1,     -- the view reaches this many times further than Blizzard's minimap (Zoom.lua's overview)
   loaded = 0,   -- SetTexture calls (for /bmap)
   failed = 0,   -- SetTexture calls that returned false
 }
@@ -61,7 +62,7 @@ local function scale()
     return nil
   end
   local half = Minimap:GetWidth() / 2 * Minimap:GetEffectiveScale() / clip:GetEffectiveScale()
-  return half / radius
+  return half / (radius * Terrain.zoom)
 end
 
 local function slot(c, r, span)
@@ -148,7 +149,8 @@ local function update()
   -- Only the contents hide: `clip` runs this every frame, and a hidden frame gets no OnUpdate, so
   -- hiding it once (square, north-up at login) stopped the padding for good (seen in game: Rotate
   -- Minimap turned on later left the corners empty).
-  local on = not square or turn ~= 0
+  -- Overview (zoom above 1): Blizzard's minimap is faded out and ours is the whole map.
+  local on = not square or turn ~= 0 or Terrain.zoom > 1
   fill:SetShown(on)
   holder:SetShown(on)
   if not on then

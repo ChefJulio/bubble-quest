@@ -29,6 +29,8 @@ local ROUND_MASK = "Interface/CharacterFrame/TempPortraitAlphaMask"
 local SQUARE_MASK = "Interface/BUTTONS/WHITE8X8"
 
 local MinimapAreas = {
+  zoom = 1,         -- how many times further than Blizzard's minimap the view reaches (SetZoom); above 1,
+                    -- BubbleMap's overview: Blizzard's minimap is faded out, its own "?" and "!" with it
   version = -1,     -- MapAreas.version the point list was built for
   points = {},      -- { x, y (world yards), map, color, questID, objective (nil: turn-in) }
   hits = {},        -- circles drawn this frame: { x, y (pixels from the centre), questID, objective }
@@ -244,7 +246,8 @@ local function markerNear(x, y)
 end
 
 -- Inside Blizzard's own minimap (not BubbleMap's padding around it): the game draws its "?" for many
--- ready quests there, and only there, so ours is skipped there and drawn in the padding.
+-- ready quests there, and only there, so ours is skipped there and drawn in the padding. Not while
+-- BubbleMap's overview has Blizzard's minimap faded out (zoom above 1): ours then draws everywhere.
 local function inMinimap(x, y, square)
   local half = Minimap:GetWidth() / 2
   if square then
@@ -278,8 +281,8 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
-      elseif inside and not (inMinimap(x, y, square) and ns.MapAreas.GameMarksTurnIn(p.questID))
-          and not markerNear(x, y) then
+      elseif inside and not (MinimapAreas.zoom == 1 and inMinimap(x, y, square)
+          and ns.MapAreas.GameMarksTurnIn(p.questID)) and not markerNear(x, y) then
         -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
         place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
         placedMarkers[#placedMarkers + 1] = x
@@ -396,7 +399,7 @@ local function update(_, delta)
     end
     -- Pixels per yard: Blizzard's minimap shows GetViewRadius yards from its centre to its edge. The
     -- layer is the minimap's child, so in its units, but may be bigger (SetView).
-    local scale = Minimap:GetWidth() / 2 / C_Minimap.GetViewRadius()
+    local scale = Minimap:GetWidth() / 2 / (C_Minimap.GetViewRadius() * MinimapAreas.zoom)
     local halfW, halfH = layer:GetWidth() / 2, layer:GetHeight() / 2
     local facing = rotation()
     local cos, sin = math.cos(facing), math.sin(facing)
@@ -430,6 +433,8 @@ local function create()
   layer:SetAllPoints(MinimapAreas.view or Minimap)
   layer:EnableMouse(false)
   layer:SetFrameLevel(Minimap:GetFrameLevel() + 2)
+  -- BubbleMap's overview fades Blizzard's minimap out; our areas stay (SetZoom).
+  layer:SetIgnoreParentAlpha(true)
   mask = layer:CreateMaskTexture()
   mask:SetAllPoints(layer)
   -- Every frame while the minimap shows: it moves (and may turn) every frame.
@@ -439,6 +444,13 @@ local function create()
 end
 
 ns.Events:On("PLAYER_LOGIN", create)
+
+---The view reaches `factor` times further than Blizzard's minimap shows (BubbleMap's overview zoom,
+---Blizzard's minimap faded out); 1 is Blizzard's own view.
+---@param factor number
+function MinimapAreas:SetZoom(factor)
+  self.zoom = factor
+end
 
 ---Draw over `frame` instead of the minimap alone (nil: back to the minimap). BubbleMap's map frame:
 ---centred on the minimap, wider or taller, filled with terrain at the minimap's scale.

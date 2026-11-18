@@ -73,6 +73,14 @@ function api.SetMinimapView(frame)
   ns.MinimapAreas:SetView(frame)
 end
 
+---The minimap view reaches `factor` times further than Blizzard's minimap (an overview zoom past its
+---farthest level, Blizzard's minimap faded out): the quest areas scale to match, and turn-ins get our
+---"?" everywhere, as the game's own are hidden. 1: Blizzard's own view.
+---@param factor number
+function api.SetMinimapZoom(factor)
+  ns.MinimapAreas:SetZoom(factor)
+end
+
 ---How the tracker looks, for matching it. A fresh table each call; changes come with ThemeChanged.
 ---@return table
 function api.Theme()

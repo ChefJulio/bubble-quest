@@ -47,6 +47,7 @@ end
 local function overMap(frame)
   frame:SetFrameStrata(STRATA_ABOVE[Minimap:GetFrameStrata()] or "MEDIUM")
 end
+Around.OverMap = overMap  -- Zoom.lua's arrow
 
 local function tooltip(owner, fill)
   owner:SetScript("OnEnter", function(self)
@@ -394,12 +395,7 @@ local function zoomButton(outer, label, step)
   b.text:SetText(label)
   b:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
   b:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.15)
-  b:SetScript("OnClick", function()
-    local zoom = Minimap:GetZoom() + step
-    if zoom >= 0 and zoom < Minimap:GetZoomLevels() then
-      Minimap:SetZoom(zoom)
-    end
-  end)
+  b:SetScript("OnClick", function() ns.Zoom:Step(step) end)  -- into the overview too (Zoom.lua)
   return b
 end
 
