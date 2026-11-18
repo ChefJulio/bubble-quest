@@ -5,27 +5,34 @@ local ADDON_NAME, ns = ...
 --
 -- Blizzard's minimap blips (herbs, ore, tracking, party, the game's quest "?" and "!") are only right
 -- at Blizzard's own zoom levels and size: scaling its frame (behind a mask or a clipping parent) put
--- them in wrong places (experiments, 2026-11-17). So there are two modes, never a mix:
+-- them in wrong places (experiments, 2026-11-17), and at alpha 0 the engine still drew them. So the map
+-- is either ours (Blizzard's minimap hidden) or Blizzard's (shown, at one of its own levels), never a mix.
 --
---   - OUR MAP (the usual): Blizzard's minimap hidden (Hide: at alpha 0 its blips still drew) with its zoom fixed at its
---     farthest level, and BubbleMap draws the whole map: our terrain (Terrain.lua), our player arrow,
---     BubbleQuest's quest layer (told the game draws nothing: SetMinimapZoom(k, true)). Our own zoom,
---     in and out, STEPS times Blizzard's farthest view.
---   - GATHER MODE: Blizzard's minimap shown, for its live blips, and the zoom is Blizzard's own levels
---     only, so the blips are always right. Our terrain is the ground under it.
---   - THE PEEK: Ctrl held, gather mode for as long as it's held (Zoom:Update).
+-- ONE ZOOM SCALE for everything (review: gather mode on Blizzard's six levels and our map on its own
+-- steps gave a slider that lost track, less zoom-in in gather mode and uneven notches): STEPS, x1.5
+-- each, six in and six out of Blizzard's farthest view (the slider's gold middle notch).
 --
--- Gather mode is a setting (BubbleMapDB.gatherMode): "auto" (while a tracking spell such as Find Herbs
--- is on: the player is gathering), "always" or "never". Indoors and wherever our terrain doesn't reach
--- (instances, maps not in Data/Tiles.lua), Blizzard's minimap is shown too: it has the interior maps.
+--   - OUR MAP (the usual): Blizzard's minimap hidden, its zoom fixed at its farthest level; BubbleMap
+--     draws everything: terrain (Terrain.lua), our player arrow, BubbleQuest's quest layer (told the game
+--     draws nothing: SetMinimapZoom(k, true)).
+--   - GATHER MODE: at the steps where one of Blizzard's own levels matches ours (within MATCH: the
+--     middle step and three in, as it happens: 1, 0.67, 0.44, 0.30 against Blizzard's 1, 0.71, 0.43,
+--     0.29), Blizzard's minimap shows at that level, for its live blips, our terrain under it at its
+--     exact scale. At every other step, deeper in or out, our map: the blips would be wrong there.
+--   - THE PEEK: Ctrl held in our map shows Blizzard's minimap at its farthest level (the widest its blips
+--     allow); no zooming while it's held; released, our map at exactly the zoom it had. Any Ctrl,
+--     anywhere (a flicker during Ctrl keybinds is fine: user's call). Not in gather mode at a Blizzard
+--     step: its minimap already shows there.
+--   - INDOORS and off our data (instances, maps not in Data/Tiles.lua): Blizzard's minimap with its own
+--     zoom, untouched; it has the interior maps.
 --
--- The wheel: our map frame takes it over the padding. Over Blizzard's square, Blizzard's minimap takes it
--- (even at alpha 0, mouse off: the wheel is separate) and zooms its own level: in gather mode that's the
--- zoom; in our map a post-hook puts Blizzard's level back and steps ours (the blank-map bug, review).
+-- Gather mode is a setting (BubbleMapDB.gatherMode): "never" (default: our map; Ctrl peeks), "auto"
+-- (while a tracking spell such as Find Herbs is on) or "always"; the bar's gather button toggles it.
+--
+-- The wheel: our map frame takes it over the padding; over Blizzard's square, Blizzard's minimap takes it
+-- (the wheel isn't covered by turning its mouse off) and zooms its own level, so a post-hook puts the
+-- level back and steps ours instead. One path for both: Zoom:Step.
 
--- Our map: times Blizzard's farthest view, x1.5 a step, as many in as out, so Blizzard's farthest view
--- sits in the middle of the zoom slider (user's call). Six each way (user: further and closer): out to a
--- zone or so, in until the tiles go soft (256 px per 533 yd; quest markers stay sharp).
 local STEP_RATIO, STEPS_EACH_WAY = 1.5, 6
 local STEPS = {}
 for i = -STEPS_EACH_WAY, STEPS_EACH_WAY do
@@ -33,25 +40,23 @@ for i = -STEPS_EACH_WAY, STEPS_EACH_WAY do
 end
 local DEFAULT_STEP = STEPS_EACH_WAY + 1  -- 1: Blizzard's farthest view
 -- Blizzard's outdoor levels as shares of its farthest view [Inferred: classic's radii, 233.3 down to
--- 66.7 yd; they matched the user's measurements at levels 0 and 1]: where gather mode sits on the slider.
+-- 66.7 yd; they matched the user's measurements at levels 0 and 1].
 local LEVEL_SHARES = { 1, 6 / 7, 5 / 7, 4 / 7, 3 / 7, 2 / 7 }
+local MATCH = 1.1  -- a Blizzard level stands in for a step within this ratio
 
 local SLIDER_HOLD, SLIDER_FADE = 1.2, 0.4  -- seconds shown after the last zoom, then fading out
-local showSlider  -- set when the slider is created (below)
 local ARROW = "Interface\\Minimap\\MinimapArrow"
 local ARROW_SIZE = 32
 
 local Zoom = {
   own = false,        -- our map is showing (else Blizzard's minimap)
-  peeking = false,    -- Ctrl held in our map: the game's minimap for a look (Zoom:Update)
+  peeking = false,    -- Ctrl held in our map: Blizzard's minimap for a look
   step = DEFAULT_STEP,
-  beyond = false,     -- gathering, but zoomed out past Blizzard's farthest level: our map until back in
 }
-
-local lastLevel  -- Blizzard's zoom level as of the last frame (to see its wheel hit its farthest)
 ns.Zoom = Zoom
 
 local arrow, arrowTexture
+local showSlider  -- set when the slider is created (below)
 
 -- Our terrain is under the player: outdoors, on a continent we have tiles for.
 local function terrainHere()
@@ -104,14 +109,6 @@ function Zoom:GatherSpell()
   return last or spells[1]
 end
 
----The bar's gather button: a hard toggle of the mode (user's call): gather mode on (the game's minimap
----and its live blips) or off (our map only, whatever is tracked). Tracking itself is left alone.
-function Zoom:ToggleGather()
-  ns.DB.gatherMode = self:Gathering() and "never" or "always"
-  self.beyond = false
-  self:Update()
-end
-
 local function gathering()
   local mode = ns.DB.gatherMode
   if mode == "always" then
@@ -122,20 +119,61 @@ local function gathering()
   return trackingSpellOn()
 end
 
+---Gather mode is on (the setting, and for "auto" a tracking spell).
+---@return boolean
+function Zoom:Gathering()
+  return gathering()
+end
+
+---The bar's gather button: a hard toggle of the mode (user's call): gather mode on (the game's minimap
+---and its live blips) or off (our map only, whatever is tracked). Tracking itself is left alone.
+function Zoom:ToggleGather()
+  ns.DB.gatherMode = self:Gathering() and "never" or "always"
+  self:Update()
+end
+
+-- The Blizzard level (0 farthest) that stands in for a step, or nil when none is close enough.
+local function levelFor(step)
+  local k = STEPS[step]
+  for i, share in ipairs(LEVEL_SHARES) do
+    if i - 1 < Minimap:GetZoomLevels() and math.max(k / share, share / k) <= MATCH then
+      return i - 1
+    end
+  end
+  return nil
+end
+
+-- Whose map: "ours", "blizzard" (at a level), or "native" (indoors / no terrain: Blizzard's own zoom).
+local function mode()
+  if not terrainHere() then
+    return "native"
+  end
+  if gathering() and levelFor(Zoom.step) then
+    return "blizzard"
+  end
+  return "ours"
+end
+
 local function apply()
-  local own = Zoom.own
-  local k = own and STEPS[Zoom.step] or 1
+  local m = mode()
+  local own = m == "ours" and not Zoom.peeking
+  Zoom.own = own
+  local k = 1
   if own then
     Minimap:SetZoom(0)  -- our scale is relative to Blizzard's farthest view
+    k = STEPS[Zoom.step]
+  elseif Zoom.peeking then
+    Minimap:SetZoom(0)
+  elseif m == "blizzard" then
+    Minimap:SetZoom(levelFor(Zoom.step))
   end
-  -- Hidden, not faded: at alpha 0 the engine still drew its blips (herbs, the game's "?") over our map,
-  -- at its own scale (seen in game). A hidden frame isn't drawn at all. BubbleQuest's quest layer lives
-  -- on our map frame (its SetMinimapView), so it stays.
+  -- Hidden, not faded: at alpha 0 the engine still drew its blips over our map, at its own scale (seen
+  -- in game). BubbleQuest's quest layer lives on our map frame (its SetMinimapView), so it stays.
   Minimap:SetShown(not own)
+  -- Not own, our terrain follows Blizzard's actual radius at its level (zoom 1: its GetViewRadius).
   ns.Terrain.zoom = k
-  -- One ground in both modes: ours. In gather mode Blizzard's minimap then draws only its blips over it
-  -- (Terrain turns its ground off outdoors): its own ground was duller than our tiles, so the colour
-  -- changed with the mode (seen in game). Indoors and off our data, Terrain leaves Blizzard's ground on.
+  -- One ground in both: ours (Blizzard's was duller: the colour changed with the mode, seen in game).
+  -- Indoors and off our data Terrain leaves Blizzard's ground on.
   ns.Terrain.force = true
   if arrow then
     arrow:SetShown(own)
@@ -146,36 +184,15 @@ local function apply()
   end
 end
 
----Gather mode is on (the setting, and for "auto" a tracking spell).
----@return boolean
-function Zoom:Gathering()
-  return gathering()
-end
+local lastState  -- what apply() last ran for, so it runs only on a change
 
----Re-decide whose map shows (tracking changed, indoors, the setting, zoomed past Blizzard's levels, the
----Ctrl peek).
----Gathering, the map is Blizzard's at its zoom levels and ours beyond them (user's design): zooming out
----past Blizzard's farthest level leaves gather mode for our map, zooming back in returns to it. The
----tracking spell stays on throughout.
+---Re-decide whose map shows (tracking changed, indoors, the setting, the step, the Ctrl peek).
 function Zoom:Update()
-  local gather = gathering()
-  if not gather then
-    self.beyond = false
-  end
-  -- The peek (user's idea): Ctrl held shows the game's minimap and its live blips at its farthest level,
-  -- the widest its blips allow, whatever our zoom (user's call: a peek is "what's around me"); our terrain
-  -- matched to it. No zooming while it's held (user's call): released, our map at exactly the zoom it
-  -- had. Any Ctrl, anywhere: a flicker during Ctrl keybinds is fine (user's call). Only from our map: in
-  -- gather mode the game's minimap is already showing, and a Ctrl there did nothing at some zooms and
-  -- jumped at others (review), so there it does nothing at all and the wheel zooms as usual.
-  local ours = terrainHere() and (not gather or self.beyond)
-  self.peeking = ours and IsControlKeyDown()
-  local own = ours and not self.peeking
-  if own ~= self.own then
-    if self.peeking then
-      Minimap:SetZoom(0)
-    end
-    self.own = own
+  local m = mode()
+  self.peeking = m == "ours" and IsControlKeyDown()
+  local state = ("%s:%s:%d"):format(m, tostring(self.peeking), self.step)
+  if state ~= lastState then
+    lastState = state
     apply()
   end
 end
@@ -186,40 +203,25 @@ function Zoom:Step(delta)
   if self.peeking then
     return  -- the peek: no zooming while it's held
   end
-  if self.own then
-    -- Gathering and zooming back in to Blizzard's range: gather mode, at its farthest level.
-    if self.beyond and delta > 0 and STEPS[self.step - 1] and STEPS[self.step - 1] <= 1 then
-      self.beyond = false
-      self:Update()
-      return
-    end
-    local step = math.max(1, math.min(#STEPS, self.step - (delta > 0 and 1 or -1)))
-    if step ~= self.step then
-      self.step = step
-      apply()
-      showSlider()
+  if mode() == "native" then
+    local level = Minimap:GetZoom() + (delta > 0 and 1 or -1)
+    if level >= 0 and level < Minimap:GetZoomLevels() then
+      Minimap:SetZoom(level)
     end
     return
   end
-  -- Blizzard's map: out past its farthest level is our map (blips hidden: they'd be wrong there).
-  if delta < 0 and Minimap:GetZoom() == 0 and terrainHere() then
-    self.beyond = true
-    self.step = DEFAULT_STEP + 1  -- the first step out past Blizzard's farthest
+  local step = math.max(1, math.min(#STEPS, self.step - (delta > 0 and 1 or -1)))
+  if step ~= self.step then
+    self.step = step
     self:Update()
-    return
   end
-  local level = Minimap:GetZoom() + (delta > 0 and 1 or -1)
-  if level >= 0 and level < Minimap:GetZoomLevels() then
-    Minimap:SetZoom(level)
-    showSlider()
-  end
+  showSlider()
 end
 
--- Every frame: the arrow turns with the player; whose map, re-decided (cheap: a few API reads).
+-- Every frame: whose map, re-decided (cheap: a few API reads); the arrow turns with the player.
 local function update()
   Zoom:Update()
   if not Zoom.own then
-    lastLevel = Minimap:GetZoom()
     return
   end
   -- apiguard: allow the argument is a constant string, never a secret value
@@ -230,19 +232,19 @@ end
 ---One line for /bmap.
 ---@return string
 function Zoom:Describe()
-  if self.own then
-    return ("our map, zoom x%.2f of Blizzard's farthest (gather mode %s%s)"):format(STEPS[self.step],
-      ns.DB.gatherMode, self.beyond and ", zoomed out past it" or "")
+  local m = mode()
+  if m == "native" then
+    return ("Blizzard's minimap (no terrain here), level %d"):format(Minimap:GetZoom())
   end
-  return ("Blizzard's minimap, level %d of %d (gather mode %s%s)"):format(Minimap:GetZoom(),
-    Minimap:GetZoomLevels() - 1, ns.DB.gatherMode, terrainHere() and "" or ", no terrain here")
+  return ("zoom x%.2f of Blizzard's farthest: %s (gather mode %s)"):format(STEPS[self.step],
+    self.own and "our map" or ("Blizzard's minimap at level %d"):format(Minimap:GetZoom()), ns.DB.gatherMode)
 end
 
 -- The zoom slider (user's design): vertical, at the map's right edge while zooming, closer at the top.
--- A tick per step (in gather mode: per Blizzard level), the middle tick wider and gold: Blizzard's
--- farthest view. Placed on a log scale, so equal steps are equal gaps.
+-- A tick per step, the same in both modes; the middle tick wider and gold: Blizzard's farthest view.
+-- In gather mode the steps Blizzard's minimap shows at are marked with a dot. Log scale: equal gaps.
 local SLIDER_HEIGHT, SLIDER_INSET = 120, 8
-local slider, sliderTicks, sliderMarker, sliderShown = nil, {}, nil, 0
+local slider, sliderTicks, sliderDots, sliderMarker, sliderShown = nil, {}, {}, nil, 0
 local LOG_MIN, LOG_MAX = math.log(STEPS[1]), math.log(STEPS[#STEPS])
 
 local function sliderY(k)
@@ -250,53 +252,36 @@ local function sliderY(k)
   return (LOG_MAX - math.log(k)) / (LOG_MAX - LOG_MIN) * SLIDER_HEIGHT
 end
 
-local function sliderTick(frame, i)
-  local tick = sliderTicks[i]
-  if not tick then
-    tick = frame:CreateTexture(nil, "ARTWORK")
-    sliderTicks[i] = tick
-  end
-  return tick
-end
-
 local function layoutSlider(frame, marker)
-  -- Gathering, one picture across both modes (review: the ticks changed as the wheel crossed into our
-  -- map): Blizzard's levels above the middle, our steps out below it, where the wheel takes you next.
-  local shares = STEPS
-  if gathering() then
-    shares = {}
-    for _, k in ipairs(LEVEL_SHARES) do
-      shares[#shares + 1] = k
+  local gather = gathering()
+  for i, k in ipairs(STEPS) do
+    local tick = sliderTicks[i]
+    if not tick then
+      tick = frame:CreateTexture(nil, "ARTWORK")
+      sliderTicks[i] = tick
     end
-    for _, k in ipairs(STEPS) do
-      if k > 1 then
-        shares[#shares + 1] = k
-      end
+    local middle = i == DEFAULT_STEP
+    tick:SetSize(middle and 14 or 7, middle and 2 or 1)
+    if middle then
+      tick:SetColorTexture(1, 0.82, 0, 1)
+    else
+      tick:SetColorTexture(1, 1, 1, 0.6)
     end
-  end
-  local count = 0
-  for _, k in ipairs(shares) do
-    if k >= STEPS[1] then
-      count = count + 1
-      local tick = sliderTick(frame, count)
-      local middle = math.abs(k - 1) < 0.001
-      tick:SetSize(middle and 14 or 7, middle and 2 or 1)
-      if middle then
-        tick:SetColorTexture(1, 0.82, 0, 1)
-      else
-        tick:SetColorTexture(1, 1, 1, 0.6)
-      end
-      tick:ClearAllPoints()
-      tick:SetPoint("CENTER", frame, "BOTTOM", 0, sliderY(k))
-      tick:Show()
+    tick:ClearAllPoints()
+    tick:SetPoint("CENTER", frame, "BOTTOM", 0, sliderY(k))
+    local dot = sliderDots[i]
+    if not dot then
+      dot = frame:CreateTexture(nil, "ARTWORK", nil, 1)
+      dot:SetSize(3, 3)
+      dot:SetColorTexture(0.4, 0.9, 0.4, 1)
+      sliderDots[i] = dot
     end
+    dot:ClearAllPoints()
+    dot:SetPoint("CENTER", frame, "BOTTOM", -8, sliderY(k))
+    dot:SetShown(gather and levelFor(i) ~= nil)
   end
-  for i = count + 1, #sliderTicks do
-    sliderTicks[i]:Hide()
-  end
-  local k = Zoom.own and STEPS[Zoom.step] or (LEVEL_SHARES[Minimap:GetZoom() + 1] or 1)
   marker:ClearAllPoints()
-  marker:SetPoint("CENTER", frame, "BOTTOM", 0, sliderY(k))
+  marker:SetPoint("CENTER", frame, "BOTTOM", 0, sliderY(STEPS[Zoom.step]))
 end
 
 local function createSlider(outer)
@@ -306,7 +291,7 @@ local function createSlider(outer)
   slider:SetPoint("RIGHT", outer, "RIGHT", -SLIDER_INSET, 0)
   slider:SetAlpha(0)
   local back = slider:CreateTexture(nil, "BACKGROUND")
-  back:SetPoint("TOPLEFT", -2, 6)
+  back:SetPoint("TOPLEFT", -6, 6)
   back:SetPoint("BOTTOMRIGHT", 2, -6)
   back:SetColorTexture(0, 0, 0, 0.45)
   local track = slider:CreateTexture(nil, "BORDER")
@@ -331,12 +316,10 @@ end
 
 showSlider = function()
   local frame, marker = slider, sliderMarker
-  if not frame or not marker then
+  if not frame or not marker or mode() == "native" then
     return
   end
   layoutSlider(frame, marker)
-  -- Again next frame: Blizzard's zoom level may only read as changed then.
-  C_Timer.After(0, function() layoutSlider(frame, marker) end)
   sliderShown = 0
   frame:SetAlpha(1)
   frame:Show()
@@ -354,28 +337,19 @@ table.insert(ns.Minimap.onActivate, function(outer)
   arrowTexture:SetTexture(ARROW)
   arrow:Hide()
 
-  -- The wheel over our frame: all of it in our map, the padding in gather mode. (Created out of combat:
-  -- activation waits for it.)
+  -- The wheel over our frame (the padding; all of it while Blizzard's minimap is hidden). Created out
+  -- of combat: activation waits for it.
   outer:EnableMouseWheel(true)
   outer:SetScript("OnMouseWheel", function(_, delta) Zoom:Step(delta) end)
-  -- Over Blizzard's square its minimap takes the wheel even with its mouse off (the wheel is separate),
-  -- and zooms its own level. In our map that's not the zoom: put its level back (fixed at its farthest)
-  -- and step ours instead. A post-hook: Blizzard's handler runs untouched.
-  -- In gather mode Blizzard's handler zooms; at its farthest level already, the wheel out goes on into
-  -- our map.
-  -- During the Ctrl peek Blizzard's handler zoomed: back to its farthest level, the peek's view.
+  -- Over Blizzard's square its handler has zoomed its own level: put it back (apply) and step ours. Not
+  -- indoors / off our terrain: there its own zoom is the zoom. A post-hook: its handler runs untouched.
   Minimap:HookScript("OnMouseWheel", function(_, delta)
-    if Zoom.peeking then
-      Minimap:SetZoom(0)
-    elseif Zoom.own then
-      Minimap:SetZoom(0)
-      Zoom:Step(delta)
-    elseif delta < 0 and lastLevel == 0 then
-      Zoom:Step(delta)
-    else
-      showSlider()  -- gather mode: Blizzard's handler zoomed; the slider shows it (it didn't: review)
+    if mode() == "native" then
+      return
     end
-    lastLevel = Minimap:GetZoom()
+    lastState = nil  -- re-apply: Blizzard's level back where the step puts it
+    Zoom:Step(delta)
+    Zoom:Update()
   end)
 
   local driver = CreateFrame("Frame", nil, outer)
