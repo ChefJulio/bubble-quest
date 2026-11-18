@@ -178,6 +178,18 @@ end
 -- assumed the same until measured.
 local GAME_MARKER_SHARE = 0.795
 
+-- Yards from the minimap's centre to its edge at Blizzard's zoom. The last good value when the game
+-- gives none (BubbleMap hides Blizzard's minimap in its own map; it may not report while hidden), so
+-- the scale never divides by nothing. 233.33: Blizzard's farthest outdoor level, before any reading.
+local lastRadius = 233.33
+local function viewRadius()
+  local radius = C_Minimap.GetViewRadius()
+  if type(radius) == "number" and radius > 0 then
+    lastRadius = radius
+  end
+  return lastRadius
+end
+
 -- Half of Blizzard's minimap, in the layer's units: the layer may live on BubbleMap's frame (SetView),
 -- whose scale needn't be the minimap's (Edit Mode scales the minimap).
 local function minimapHalf()
@@ -503,7 +515,7 @@ local function update(_, delta)
     end
     -- Pixels per yard (layer units): Blizzard's minimap shows GetViewRadius yards from its centre to
     -- its edge, times BubbleMap's zoom. The layer may be BubbleMap's child and bigger (SetView).
-    local scale = minimapHalf() / (C_Minimap.GetViewRadius() * MinimapAreas.zoom)
+    local scale = minimapHalf() / (viewRadius() * MinimapAreas.zoom)
     local halfW, halfH = layer:GetWidth() / 2, layer:GetHeight() / 2
     local facing = rotation()
     local cos, sin = math.cos(facing), math.sin(facing)
