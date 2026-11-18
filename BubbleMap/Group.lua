@@ -152,7 +152,9 @@ function Layer:Hover(noHover)
     return
   end
   self.hovering = true
-  GameTooltip:SetOwner(frame, "ANCHOR_CURSOR")
+  -- Left of the cursor: BubbleQuest's quest tooltip takes its right (ANCHOR_CURSOR or _RIGHT), so a member
+  -- standing at a quest giver shows both side by side (review: they overlapped).
+  GameTooltip:SetOwner(frame, "ANCHOR_CURSOR_LEFT")
   for _, unit in ipairs(over) do
     -- apiguard: allow the name is checked with issecretvalue (readable) before it's shown
     local name = UnitName(unit)

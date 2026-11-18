@@ -156,10 +156,11 @@ local function redraw()
   if quests then
     quests:Draw(centre.north, centre.west, centre.map, ppy, 0)  -- north up: no turn
   end
-  -- One tooltip at a time: BubbleQuest's (a giver, service or quest area) first, then a member's name,
-  -- then a point's. IsHovering is newer than API 1's first handles: absent, ours just show too.
+  -- Tooltips: BubbleQuest's (a giver, service or quest area) right of the cursor, a member's name left of
+  -- it (both show); a point's only when neither is up (it's at the cursor too). IsHovering is newer than
+  -- API 1's first handles: absent, the point's shows too.
   local questTip = quests and quests.IsHovering and quests:IsHovering() or false
-  group:Draw(centre.map, project, questTip)
+  group:Draw(centre.map, project)
   points:Draw(centre.map, centre.north, centre.west, project, questTip or group:IsHovering())
 
   -- The player's arrow, where they are (hidden off this continent or out of view).
