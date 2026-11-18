@@ -81,7 +81,7 @@ local DEFAULTS = {
   width = 220,        -- the map's width when the tracker isn't attached under it
   heightPercent = 100,  -- the map's height, percent of its width
   lastGather = nil,   -- the tracking spell the gather button turns on (its name)
-  gatherMode = "never", -- Blizzard's minimap for its blips: "never" (our map only; Ctrl peeks), "auto" (a
+  gatherMode = "never", -- Blizzard's minimap for its blips: "never" (our map only), "auto" (a
                        -- tracking spell on), "always"
   gatherModeV2 = nil,  -- set once the default moved from "auto" to "never" (user's call, 2026-11-17)
   show = {            -- what's around the map (Around.lua); Blizzard's own versions are always hidden

@@ -217,7 +217,7 @@ local function createButtons()
     GameTooltip:AddLine(on and "Gather mode: on" or "Gather mode: off", 1, 1, 1)
     GameTooltip:AddLine(on
       and "The game's minimap, for its live herb and ore blips; zoom is limited to its levels. Click: off."
-      or "BubbleMap's map, all its zoom. Hold Ctrl to peek at the game's blips. Click: on.",
+      or "BubbleMap's map, all its zoom. Click: on, for the game's live herb and ore blips.",
       0.8, 0.8, 0.8, true)
   end)
   buttons.gather = gather

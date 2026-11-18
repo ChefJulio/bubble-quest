@@ -39,10 +39,10 @@ local ENTRIES = {
   { kind = "dropdown", id = "BUBBLEMAP_GATHER_MODE", label = "Gather mode", default = "never",
     tooltip = "BubbleMap draws its own map, zooming in and out freely. Gather mode shows the game's own "
       .. "minimap instead, for its live herb, ore and tracking blips, which are only right at the game's "
-      .. "zoom levels: zoom is limited to those. Off: hold Ctrl to peek at it. Automatic: while a tracking "
+      .. "zoom levels: zoom is limited to those. Automatic: while a tracking "
       .. "spell such as Find Herbs is on. The bar's gather button switches it on and off.",
     options = function()
-      return { { "never", "Off (Ctrl peeks)" }, { "auto", "Automatic (while tracking)" }, { "always", "On" } }
+      return { { "never", "Off" }, { "auto", "Automatic (while tracking)" }, { "always", "On" } }
     end,
     get = function() return ns.DB.gatherMode end,
     set = function(v) ns.DB.gatherMode = v; ns.Zoom:Update() end },
@@ -76,7 +76,7 @@ local ENTRIES = {
     tooltip = "What the minimap shows: flight masters, trainers, ..." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_GATHER", label = "Gather button", default = true,
     tooltip = "Gather mode on and off in one click: on, the game's minimap and its live herb and ore blips; "
-      .. "off, BubbleMap's map with all its zoom (hold Ctrl to peek)." },
+      .. "off, BubbleMap's map with all its zoom." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_STYLE", label = "Map style button", default = true,
     tooltip = "Switches the map between the terrain and the world map's art in one click (also the Map "
       .. "style setting above)." },

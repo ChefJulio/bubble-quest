@@ -105,8 +105,9 @@ Blizzard's, never a mix:
   three in: 1, 0.67, 0.44, 0.30 against Blizzard's 1, 0.71, 0.43, 0.29), Blizzard's minimap shows at
   that level for its live blips, our terrain under it at its exact scale (green dots on the slider).
   Every other step is our map.
-- **Ctrl peek** (in our map): Blizzard's minimap at its farthest level while Ctrl is held; no zooming
-  while held; released, our map at exactly the zoom it had.
+- **Ctrl:** hides BubbleQuest's quest layer while held, to see the ground under it (BubbleQuest's
+  side). Until 2026-11-18 Ctrl was a peek at Blizzard's minimap; dropped, user's call (gather mode is
+  the way to the game's blips).
 - **Indoors / no terrain** (instances, maps not in the table): Blizzard's minimap with its own zoom.
 - **Quest markers in gather mode:** the game draws its "?" and "!" within 0.8 of its view radius
   (measured: 186.5 of 233.3 yd and 159.5 of 200 yd); BubbleQuest skips its own "?" where the game's

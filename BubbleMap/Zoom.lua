@@ -19,14 +19,13 @@ local ADDON_NAME, ns = ...
 --     middle step and three in, as it happens: 1, 0.67, 0.44, 0.30 against Blizzard's 1, 0.71, 0.43,
 --     0.29), Blizzard's minimap shows at that level, for its live blips, our terrain under it at its
 --     exact scale. At every other step, deeper in or out, our map: the blips would be wrong there.
---   - THE PEEK: Ctrl held in our map shows Blizzard's minimap at its farthest level (the widest its blips
---     allow); no zooming while it's held; released, our map at exactly the zoom it had. Any Ctrl,
---     anywhere (a flicker during Ctrl keybinds is fine: user's call). Not in gather mode at a Blizzard
---     step: its minimap already shows there.
+--   - No Ctrl peek (there was one, Blizzard's minimap while Ctrl was held; dropped 2026-11-18, user's
+--     call: Ctrl hides BubbleQuest's quest layer instead, in that addon). Gather mode is the way to the
+--     game's blips.
 --   - INDOORS and off our data (instances, maps not in Data/Tiles.lua): Blizzard's minimap with its own
 --     zoom, untouched; it has the interior maps.
 --
--- Gather mode is a setting (BubbleMapDB.gatherMode): "never" (default: our map; Ctrl peeks), "auto"
+-- Gather mode is a setting (BubbleMapDB.gatherMode): "never" (default: our map), "auto"
 -- (while a tracking spell such as Find Herbs is on) or "always"; the bar's gather button toggles it.
 --
 -- The wheel: our map frame takes it over the padding; over Blizzard's square, Blizzard's minimap takes it
@@ -50,7 +49,6 @@ local ARROW_SIZE = 32
 
 local Zoom = {
   own = false,        -- our map is showing (else Blizzard's minimap)
-  peeking = false,    -- Ctrl held in our map: Blizzard's minimap for a look
   step = DEFAULT_STEP,
 }
 ns.Zoom = Zoom
@@ -156,14 +154,12 @@ end
 
 local function apply()
   local m = mode()
-  local own = m == "ours" and not Zoom.peeking
+  local own = m == "ours"
   Zoom.own = own
   local k = 1
   if own then
     Minimap:SetZoom(0)  -- our scale is relative to Blizzard's farthest view
     k = STEPS[Zoom.step]
-  elseif Zoom.peeking then
-    Minimap:SetZoom(0)
   elseif m == "blizzard" then
     Minimap:SetZoom(levelFor(Zoom.step))
   end
@@ -186,11 +182,10 @@ end
 
 local lastState  -- what apply() last ran for, so it runs only on a change
 
----Re-decide whose map shows (tracking changed, indoors, the setting, the step, the Ctrl peek).
+---Re-decide whose map shows (tracking changed, indoors, the setting, the step).
 function Zoom:Update()
   local m = mode()
-  self.peeking = m == "ours" and IsControlKeyDown()
-  local state = ("%s:%s:%d"):format(m, tostring(self.peeking), self.step)
+  local state = ("%s:%d"):format(m, self.step)
   if state ~= lastState then
     lastState = state
     apply()
@@ -200,9 +195,6 @@ end
 ---One wheel notch or zoom button: delta > 0 zooms in, < 0 out.
 ---@param delta number
 function Zoom:Step(delta)
-  if self.peeking then
-    return  -- the peek: no zooming while it's held
-  end
   if mode() == "native" then
     local level = Minimap:GetZoom() + (delta > 0 and 1 or -1)
     if level >= 0 and level < Minimap:GetZoomLevels() then
