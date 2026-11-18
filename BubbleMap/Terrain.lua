@@ -180,6 +180,38 @@ local function update()
   end
 end
 
+---Lines for /bmap tiles: where the player is in the tile grid and what's drawn around them, to
+---check the terrain against the minimap.
+---@return string[]
+function Terrain:Report()
+  local lines = {}
+  local px, py, _, mapID = UnitPosition("player")
+  if not px then
+    return { "no position (instance or loading)" }
+  end
+  local colF, rowF = 32 - py / TILE_YARDS, 32 - px / TILE_YARDS
+  lines[#lines + 1] = ("UnitPosition north %.1f, west %.1f, map %s; tile col %.3f, row %.3f"):format(px, py,
+    tostring(mapID), colF, rowF)
+  local s = clip and scale()
+  lines[#lines + 1] = ("view radius %s yd, %s px per yd, rotate %s, facing %s"):format(
+    tostring(C_Minimap.GetViewRadius()), s and ("%.3f"):format(s) or "-", tostring(rotating()),
+    tostring(GetPlayerFacing()))
+  local tiles = mapID and ns.Tiles.maps[mapID]
+  if not tiles then
+    lines[#lines + 1] = "no terrain data for this map"
+    return lines
+  end
+  local col, row = math.floor(colF), math.floor(rowF)
+  for r = row - 1, row + 1 do
+    local cells = {}
+    for c = col - 1, col + 1 do
+      cells[#cells + 1] = ("%d,%d=%s"):format(c, r, tostring(tiles[c * GRID + r] or "-"))
+    end
+    lines[#lines + 1] = table.concat(cells, "  ")
+  end
+  return lines
+end
+
 ---One line for /bmap.
 ---@return string
 function Terrain:Describe()
@@ -200,7 +232,7 @@ table.insert(ns.Minimap.onActivate, function(outer)
   Terrain.active = true
   clip = CreateFrame("Frame", nil, outer)
   clip:SetAllPoints()
-  clip:SetFrameLevel(outer:GetFrameLevel())
+  -- Under Blizzard's minimap by strata: `outer` is one strata below it (Minimap.lua).
   clip:SetClipsChildren(true)
   fill = clip:CreateTexture(nil, "BACKGROUND", nil, 0)
   fill:SetAllPoints()

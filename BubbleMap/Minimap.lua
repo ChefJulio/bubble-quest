@@ -146,8 +146,11 @@ end
 
 local function createOuter()
   local frame = CreateFrame("Frame", "BubbleMapFrame", UIParent)
-  frame:SetFrameStrata(Minimap:GetFrameStrata())
-  frame:SetFrameLevel(math.max(0, Minimap:GetFrameLevel() - 1))
+  -- One strata below the minimap's: our border and the terrain (Terrain.lua) must stay under it. Same
+  -- strata and a lower level wasn't enough: the terrain's frames tied the minimap's level and drew over
+  -- it (seen in game), and MinimapCluster is toplevel, so levels move whenever it's clicked.
+  local below = { LOW = "BACKGROUND", MEDIUM = "LOW", HIGH = "MEDIUM", DIALOG = "HIGH" }
+  frame:SetFrameStrata(below[Minimap:GetFrameStrata()] or "BACKGROUND")
   frame:EnableMouse(false)
   frame:SetMovable(true)  -- dragged by the quest addon's tracker header (TrackerAttachMoved) or our bar
   frame:SetClampedToScreen(true)
@@ -253,6 +256,10 @@ SlashCmdList.BUBBLEMAP = function(input)
   if command == "reset" then
     Minimap_:ResetPosition()
     print("|cffffd100BubbleMap|r: back at the minimap's Edit Mode position.")
+  elseif command == "tiles" then
+    for _, line in ipairs(ns.Terrain:Report()) do
+      print("|cffffd100BubbleMap|r " .. line)
+    end
   else
     print("|cffffd100BubbleMap|r: " .. Minimap_:Describe() .. ". /bmap reset: back at the minimap's Edit "
       .. "Mode position.")
