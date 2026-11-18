@@ -172,13 +172,20 @@ end
 -- the corners and in BubbleMap's padding, and everywhere while BubbleMap draws its own map with
 -- Blizzard's minimap hidden (gameDraws).
 -- Not the whole view circle: the game's own turn-in "?" vanished at 186.5 yd with a 233.3 yd view
--- radius and at 159.5 yd with 200 yd (measured in game, two zoom levels): 0.80 of the radius both
--- times. Ours goes a little inside that, as a marker shown twice at the edge beats none (review: the
--- full radius left a ring where neither showed). Quest givers' "!" assumed the same until measured.
-local GAME_MARKER_SHARE = 0.78
+-- radius and at 159.5 yd with 200 yd (measured in game, two zoom levels): 0.799 and 0.7975 of the
+-- radius. Ours goes just inside that, as a marker shown twice at the edge beats none (review: the full
+-- radius left a ring where neither showed; 0.78 still doubled one at 183 yd). Quest givers' "!"
+-- assumed the same until measured.
+local GAME_MARKER_SHARE = 0.795
+
+-- Half of Blizzard's minimap, in the layer's units: the layer may live on BubbleMap's frame (SetView),
+-- whose scale needn't be the minimap's (Edit Mode scales the minimap).
+local function minimapHalf()
+  return Minimap:GetWidth() / 2 * Minimap:GetEffectiveScale() / layer:GetEffectiveScale()
+end
 
 local function inGameView(x, y)
-  local reach = Minimap:GetWidth() / 2 * GAME_MARKER_SHARE
+  local reach = minimapHalf() * GAME_MARKER_SHARE
   return x * x + y * y <= reach * reach
 end
 
@@ -494,9 +501,9 @@ local function update(_, delta)
       MinimapAreas.square = square
       mask:SetTexture(square and SQUARE_MASK or ROUND_MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
     end
-    -- Pixels per yard: Blizzard's minimap shows GetViewRadius yards from its centre to its edge. The
-    -- layer is the minimap's child, so in its units, but may be bigger (SetView).
-    local scale = Minimap:GetWidth() / 2 / (C_Minimap.GetViewRadius() * MinimapAreas.zoom)
+    -- Pixels per yard (layer units): Blizzard's minimap shows GetViewRadius yards from its centre to
+    -- its edge, times BubbleMap's zoom. The layer may be BubbleMap's child and bigger (SetView).
+    local scale = minimapHalf() / (C_Minimap.GetViewRadius() * MinimapAreas.zoom)
     local halfW, halfH = layer:GetWidth() / 2, layer:GetHeight() / 2
     local facing = rotation()
     local cos, sin = math.cos(facing), math.sin(facing)
@@ -527,17 +534,16 @@ local function create()
     return
   end
   layer = CreateFrame("Frame", nil, Minimap)
-  layer:SetAllPoints(MinimapAreas.view or Minimap)
   layer:EnableMouse(false)
-  layer:SetFrameLevel(Minimap:GetFrameLevel() + 2)
-  -- BubbleMap's own map hides Blizzard's minimap (alpha 0); our areas stay (SetZoom).
+  -- Blizzard's minimap faded out (alpha) mustn't take our areas with it.
   layer:SetIgnoreParentAlpha(true)
   mask = layer:CreateMaskTexture()
   mask:SetAllPoints(layer)
-  -- Every frame while the minimap shows: it moves (and may turn) every frame.
+  -- Every frame while the map shows: it moves (and may turn) every frame.
   layer:SetScript("OnUpdate", update)
   tooltip = CreateFrame("GameTooltip", "BubbleQuestMinimapTooltip", UIParent, "GameTooltipTemplate")
   layer:SetScript("OnHide", function() tooltip:Hide() end)
+  MinimapAreas:SetView(MinimapAreas.view)
 end
 
 ns.Events:On("PLAYER_LOGIN", create)
@@ -561,8 +567,14 @@ end
 function MinimapAreas:SetView(frame)
   self.view = frame
   if layer then
+    -- The view's child, not the minimap's: BubbleMap's own map hides Blizzard's minimap outright
+    -- (at alpha 0 the game's blips still drew), which would hide a child of it. Above the view's own
+    -- textures (its terrain), as above the minimap's.
+    local parent = frame or Minimap
+    layer:SetParent(parent)
     layer:ClearAllPoints()
-    layer:SetAllPoints(frame or Minimap)
+    layer:SetAllPoints(parent)
+    layer:SetFrameLevel(parent:GetFrameLevel() + 2)
   end
 end
 
