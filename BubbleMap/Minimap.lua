@@ -260,6 +260,10 @@ SlashCmdList.BUBBLEMAP = function(input)
   if command == "reset" then
     Minimap_:ResetPosition()
     print("|cffffd100BubbleMap|r: back at the minimap's Edit Mode position.")
+  elseif command == "tracking" then
+    for _, line in ipairs(ns.QuestMarkers:Report()) do
+      print("|cffffd100BubbleMap|r " .. line)
+    end
   elseif command == "tiles" then
     for _, line in ipairs(ns.Terrain:Report()) do
       print("|cffffd100BubbleMap|r " .. line)

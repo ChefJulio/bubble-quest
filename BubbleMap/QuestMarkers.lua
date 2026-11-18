@@ -72,6 +72,27 @@ function QuestMarkers:Apply()
   end
 end
 
+---Lines for /bmap tracking: every tracking type the game reports, with its filter and state (to see
+---which one draws the quest markers).
+---@return string[]
+function QuestMarkers:Report()
+  local names = {}
+  for name, value in pairs(Enum.MinimapTrackingFilter) do
+    names[value] = name
+  end
+  local lines = {}
+  for index = 1, C_Minimap.GetNumTrackingTypes() do
+    local filter = C_Minimap.GetTrackingFilter(index)
+    local info = C_Minimap.GetTrackingInfo(index)
+    lines[#lines + 1] = ("%d. %s: filter %s (%s), %s"):format(index, info and info.name or "?",
+      filter and tostring(filter.filterID) or "-", filter and names[filter.filterID] or "-",
+      info and (info.active and "ON" or "off") or "?")
+  end
+  lines[#lines + 1] = ("QuestPOIs filtered out: %s"):format(
+    tostring(C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.QuestPOIs)))
+  return lines
+end
+
 ---One line for /bmap.
 ---@return string
 function QuestMarkers:Describe()
