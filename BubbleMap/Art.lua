@@ -1,32 +1,28 @@
 local ADDON_NAME, ns = ...
 
--- The minimap's "Map art" style (setting mapStyle): the world map's painted art instead of the terrain
--- tiles, at our map's exact scale and turn, with the explored-area overlays, so unexplored parts look as
--- they do on the world map. Terrain.lua decides when the map is drawn at all and calls Draw instead of
--- placing its tiles.
+-- The world map's painted art drawn at any scale and turn, with the explored-area overlays, so
+-- unexplored parts look as they do on the world map. Views: the minimap's "Map art" style (Terrain.lua
+-- calls Draw instead of placing its tiles) and the map window (MapWindow.lua: its Map art style, and
+-- whole continents when zoomed far out, where terrain tiles would be thousands of textures).
 --
 -- Three layers, bottom up: the continent's art (it paints the sea and fills anything no zone covers),
--- the zones around, the zone you're in (its art outside its border is the faded neighbourhood the world
--- map shows). Laid out as Blizzard's world map lays them out: a zone's art is a grid of tiles
--- (C_Map.GetMapArtLayers / GetMapArtLayerTextures, Blizzard_MapCanvasDetailLayer.lua), its explored
--- overlays pieces at pixel offsets on the same grid (C_MapExplorationInfo.GetExploredMapTextures,
--- MapExplorationDataProvider.lua; the mouse-over-only ones left out). A map's art spans its rectangle
--- in the world (C_Map.GetWorldPosFromMapPos at its corners), so each piece gets a world centre and size
--- once, and every frame only positions change, as with the terrain tiles.
+-- the zones around, and one zone on top (the minimap: the zone you're in; its art outside its border is
+-- the faded neighbourhood the world map shows). Laid out as Blizzard's world map lays them out: a zone's
+-- art is a grid of tiles (C_Map.GetMapArtLayers / GetMapArtLayerTextures,
+-- Blizzard_MapCanvasDetailLayer.lua), its explored overlays pieces at pixel offsets on the same grid
+-- (C_MapExplorationInfo.GetExploredMapTextures, MapExplorationDataProvider.lua; the mouse-over-only
+-- ones left out). A map's art spans its rectangle in the world (C_Map.GetWorldPosFromMapPos at its
+-- corners), so each piece gets a world centre and size once, and every frame only positions change.
 --
--- Rebuilt for a map when its exploration changes (MAP_EXPLORATION_UPDATED: the piece tables are
--- replaced, their textures go back to the pool).
+-- The pieces are shared by every view; each view has its own textures. Rebuilt when exploration
+-- changes (MAP_EXPLORATION_UPDATED: the piece tables are replaced, views return their textures).
 
-local Art = {
-  drawn = 0,  -- pieces drawn last frame (for /bmap)
-}
+local Art = {}
+Art.__index = Art
 ns.Art = Art
 
 local maps = {}        -- [uiMap] = { north0, west0, north1, west1, pieces } (false: no art there)
 local zonesOf = {}     -- [continent UI map] = { uiMap, ... }: its zones
-local frames = {}      -- [rank] = frame: 1 continent, 2 zones around, 3 your zone
-local icons = {}       -- [rank] = { [piece] = texture }
-local free = {}        -- [rank] = { texture, ... }
 
 ns.On("MAP_EXPLORATION_UPDATED", function()
   wipe(maps)
@@ -117,8 +113,10 @@ local function artOf(uiMap)
   return art or nil
 end
 
--- The zones on a continent's map (any depth: some sit under a region map), once.
-local function zones(continent)
+---The zones on a continent's UI map (any depth: some sit under a region map), once.
+---@param continent number
+---@return number[]
+function Art.Zones(continent)
   local list = zonesOf[continent]
   if not list then
     list = {}
@@ -130,28 +128,31 @@ local function zones(continent)
   return list
 end
 
----Draw into `parent` (Terrain.lua's tile frame, which shows and hides it). Once.
+---A view drawing into `parent` (which shows, hides and clips it).
 ---@param parent Frame
-function Art:Attach(parent)
+---@return table
+function Art.New(parent)
+  local view = setmetatable({ parent = parent, frames = {}, icons = {}, free = {}, drawn = 0 }, Art)
   for rank = 1, 3 do
     local frame = CreateFrame("Frame", nil, parent)
     frame:SetAllPoints()
     frame:SetFrameLevel(parent:GetFrameLevel() + rank)
-    frames[rank], icons[rank], free[rank] = frame, {}, {}
+    view.frames[rank], view.icons[rank], view.free[rank] = frame, {}, {}
   end
+  return view
 end
 
 -- Texture of a piece in a rank's frame, set up once.
-local function texture(rank, piece)
-  local t = icons[rank][piece]
+function Art:Texture(rank, piece)
+  local t = self.icons[rank][piece]
   if not t then
-    t = table.remove(free[rank]) or frames[rank]:CreateTexture(nil, "BACKGROUND")
+    t = table.remove(self.free[rank]) or self.frames[rank]:CreateTexture(nil, "BACKGROUND")
     t:SetSnapToPixelGrid(false)
     t:SetTexelSnappingBias(0)
     t:SetDrawLayer("BACKGROUND", piece.sub)
     t:SetTexture(piece.file, nil, nil, "TRILINEAR")
     t:SetTexCoord(0, piece.right, 0, piece.bottom)
-    icons[rank][piece] = t
+    self.icons[rank][piece] = t
   end
   return t
 end
@@ -159,30 +160,29 @@ end
 ---Hide everything (the terrain style, or nothing to draw).
 function Art:Hide()
   for rank = 1, 3 do
-    for piece, t in pairs(icons[rank] or {}) do
+    local icons, free = self.icons[rank], self.free[rank]
+    for piece, t in pairs(icons) do
       t:Hide()
-      table.insert(free[rank], t)
-      icons[rank][piece] = nil
+      free[#free + 1] = t
+      icons[piece] = nil
     end
   end
   self.drawn = 0
 end
 
----Draw around the player at world (north, west) on instance map `map`, `s` pixels a yard, turned by
----`turn` radians (0: north up).
+---Draw around world (north, west) on instance map `map`, the point at the parent's centre, `s` pixels
+---a yard, turned by `turn` radians (0: north up). `top`: the UI map drawn over the others (nil: none);
+---`continentOnly`: the continent's art alone (far out: the zones' detail wouldn't show).
 ---@param north number
 ---@param west number
 ---@param map number
 ---@param s number
 ---@param turn number
-function Art:Draw(north, west, map, s, turn)
-  if not frames[1] then
-    return
-  end
+---@param top number?
+---@param continentOnly boolean?
+function Art:Draw(north, west, map, s, turn, top, continentOnly)
   local continent = ns.MapPoints.Continent(map, north, west)
-  local here = C_Map.GetBestMapForUnit("player")
-  local parent = frames[1]:GetParent()
-  local w, h = parent:GetWidth(), parent:GetHeight()
+  local w, h = self.parent:GetWidth(), self.parent:GetHeight()
   local reach = math.sqrt(w * w + h * h) / 2  -- pixels from the centre to a corner, whatever the turn
   local reachYards = reach / s
 
@@ -197,17 +197,19 @@ function Art:Draw(north, west, map, s, turn)
     if inView(art) then
       ranks[1][1] = art
     end
-    for _, zone in ipairs(zones(continent)) do
-      if zone ~= here then
-        local zoneArt = artOf(zone)
-        if inView(zoneArt) then
-          ranks[2][#ranks[2] + 1] = zoneArt
+    if not continentOnly then
+      for _, zone in ipairs(Art.Zones(continent)) do
+        if zone ~= top then
+          local zoneArt = artOf(zone)
+          if inView(zoneArt) then
+            ranks[2][#ranks[2] + 1] = zoneArt
+          end
         end
       end
     end
   end
-  if here and here ~= continent then
-    local art = artOf(here)
+  if top and top ~= continent and not continentOnly then
+    local art = artOf(top)
     if inView(art) then
       ranks[3][1] = art
     end
@@ -218,14 +220,14 @@ function Art:Draw(north, west, map, s, turn)
   local drawn = 0
   for rank = 1, 3 do
     local wanted = {}
-    local frame = frames[rank]
+    local frame, icons, free = self.frames[rank], self.icons[rank], self.free[rank]
     for _, art in ipairs(ranks[rank]) do
       for _, piece in ipairs(art.pieces) do
         local x, y = (west - piece.west) * s, (piece.north - north) * s
         local pw, ph = piece.width * s, piece.height * s
         -- Culled: nowhere near the view (the piece's centre farther than the corner plus its own size).
         if math.abs(x) - pw <= reach and math.abs(y) - ph <= reach then
-          local t = texture(rank, piece)
+          local t = self:Texture(rank, piece)
           wanted[piece] = true
           t:SetSize(pw + overlap, ph + overlap)
           t:SetRotation(-turn)
@@ -236,11 +238,11 @@ function Art:Draw(north, west, map, s, turn)
         end
       end
     end
-    for piece, t in pairs(icons[rank]) do
+    for piece, t in pairs(icons) do
       if not wanted[piece] then
         t:Hide()
-        table.insert(free[rank], t)
-        icons[rank][piece] = nil
+        free[#free + 1] = t
+        icons[piece] = nil
       end
     end
   end

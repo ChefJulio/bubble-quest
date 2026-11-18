@@ -320,9 +320,13 @@ SlashCmdList.BUBBLEMAP = function(input)
       end
     end
     print(("|cffffd100BubbleMap|r indoors %s, our map %s"):format(tostring(IsIndoors()), tostring(ns.Zoom.own)))
+  elseif command == "clear" then
+    ns.Waypoints:Clear()
+    print("|cffffd100BubbleMap|r: waypoint cleared.")
   else
     print("|cffffd100BubbleMap|r: " .. Minimap_:Describe() .. ". /bmap reset: back at the minimap's Edit "
       .. "Mode position.")
+    print("|cffffd100BubbleMap|r " .. ns.Waypoints:Describe() .. " /bmap clear: clear yours.")
   end
 end
 

@@ -45,6 +45,7 @@ local Terrain = {
 ns.Terrain = Terrain
 
 local clip, holder, fill
+local art  -- the "Map art" style's view (Art.lua)
 local slots = {}        -- [slotKey] = texture
 local slotTile = {}     -- [slotKey] = tile key it holds
 local slotCol, slotRow = {}, {}  -- [texture] = the grid column and row it shows
@@ -174,7 +175,7 @@ local function update()
     if lastMap then
       hideTiles()
     end
-    ns.Art:Hide()
+    art:Hide()
     return
   end
   blizzardGround(false)
@@ -184,10 +185,10 @@ local function update()
     if lastMap then
       hideTiles()
     end
-    ns.Art:Draw(px, py, mapID, s, turn)
+    art:Draw(px, py, mapID, s, turn, C_Map.GetBestMapForUnit("player"))  -- your zone on top
     return
   end
-  ns.Art:Hide()
+  art:Hide()
 
   local tilePixels = TILE_YARDS * s
   -- Enough slots to cover the frame's diagonal (it turns), plus the ring of one each side (odd, so the
@@ -286,7 +287,7 @@ function Terrain:Describe()
     end
   end
   return ("terrain (style %s): %d tiles shown, %d loaded, %d failed (data for build %s); map art: %d pieces")
-    :format(ns.DB.mapStyle, shown, self.loaded, self.failed, ns.Tiles.build, ns.Art.drawn)
+    :format(ns.DB.mapStyle, shown, self.loaded, self.failed, ns.Tiles.build, art and art.drawn or 0)
 end
 
 table.insert(ns.Minimap.onActivate, function(outer)
@@ -301,7 +302,7 @@ table.insert(ns.Minimap.onActivate, function(outer)
   -- The tiles' frame: centred on the minimap (the player), which is centred on `outer`.
   holder = CreateFrame("Frame", nil, clip)
   holder:SetAllPoints()
-  ns.Art:Attach(holder)
+  art = ns.Art.New(holder)
   clip:SetScript("OnUpdate", update)
 
   -- The data is for one client build; FileDataIDs rarely change, so a different build only warns.

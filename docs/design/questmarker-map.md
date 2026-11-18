@@ -192,6 +192,21 @@ buttons are put away.
   points (MapPoints.lua: flight masters with their discovered state, dungeon entrances, area points,
   gathered from the continent's UI map and every zone under it), group members, the player's arrow.
   The hovered zone is named in the title.
+- **One map for every continent** (World.lua, 2026-11-18): continents have no shared coordinates, so
+  they're placed on a plane (X east, Y south, yards) the way the world map places them
+  (`C_Map.GetMapRectOnMap` on the world UI map, one common scale, yards true within each); the world
+  map isn't to scale, so an overlapping one is pushed right; one the world map doesn't show goes right of
+  the others. Each continent in view draws through its own "slot" (tiles, art, quest view, points,
+  group). Far out (under 0.012 px/yd) the continents' painted art replaces the tiles (thousands
+  otherwise); a continent without a UI map keeps its tiles. Zone names show when zoomed out.
+- **Footer:** your coordinates and the cursor's (zone %), and the window's own Terrain / Map art switch
+  (setting windowStyle).
+- **Waypoints** (Waypoints.lua): one of yours plus one per group member with BubbleMap. Click drops
+  yours (private), Shift+click shares it, right-click a waypoint clears it (someone else's: hidden for
+  you). Yours clears within 12 yd. Shown in the window and on the minimap (out of view: at its edge).
+  Shared by addon messages to PARTY/RAID ("1:SET:map:north:west", "1:CLR", "1:REQ" on joining); a refused
+  send (throttle, lockdown) is retried every 2 s. Message flow checked in a two-client simulation
+  (lupa, mocked API); not yet with a second player in game.
 
 ## Other minimap addons
 

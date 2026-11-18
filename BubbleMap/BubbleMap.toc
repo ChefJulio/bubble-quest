@@ -20,6 +20,8 @@ Group.lua
 WorldMap.lua
 TileView.lua
 MapPoints.lua
+World.lua
 MapWindow.lua
+Waypoints.lua
 QuestMarkers.lua
 Settings.lua
