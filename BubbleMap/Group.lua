@@ -14,7 +14,7 @@ local ADDON_NAME, ns = ...
 
 local DOT_SIZE = 9
 local RING = { 0, 0, 0, 0.9 }      -- a dark ring, so the dot reads on any ground
-local MASK = "Interface\\CharacterFrame\\TempPortraitAlphaMask"
+local DISC = "Interface\\CharacterFrame\\TempPortraitAlphaMask"  -- a white disc (its alpha is the circle)
 local HOVER_RADIUS = 7             -- pixels
 local UPDATE_SECONDS = 0.05
 
@@ -65,18 +65,16 @@ function Layer:Dot(i)
   if not d then
     local frame = self.frame
     d = {}
+    -- Round: a white disc texture, tinted. Not a mask per dot (review: the minimap's dot drew as a square
+    -- now and then; masks on textures in a clipping frame have failed before, see questmarker-map.md).
     d.ring = frame:CreateTexture(nil, "ARTWORK", nil, 1)
-    d.ring:SetSize(DOT_SIZE + 2, DOT_SIZE + 2)
-    d.ring:SetColorTexture(RING[1], RING[2], RING[3], RING[4])
+    d.ring:SetSize(DOT_SIZE + 3, DOT_SIZE + 3)
+    d.ring:SetTexture(DISC)
+    d.ring:SetVertexColor(RING[1], RING[2], RING[3], RING[4])
     d.fill = frame:CreateTexture(nil, "ARTWORK", nil, 2)
     d.fill:SetSize(DOT_SIZE, DOT_SIZE)
     d.fill:SetPoint("CENTER", d.ring)
-    -- Round: a mask per dot, the size of its ring, where it sits.
-    d.mask = frame:CreateMaskTexture()
-    d.mask:SetTexture(MASK, "CLAMPTOBLACKADDITIVE", "CLAMPTOBLACKADDITIVE")
-    d.mask:SetAllPoints(d.ring)
-    d.ring:AddMaskTexture(d.mask)
-    d.fill:AddMaskTexture(d.mask)
+    d.fill:SetTexture(DISC)
     self.dots[i] = d
   end
   return d
@@ -114,9 +112,9 @@ function Layer:Draw(map, project, noHover)
         local d = self:Dot(count)
         local color = classColor(unit)
         if color then
-          d.fill:SetColorTexture(color.r, color.g, color.b, 1)
+          d.fill:SetVertexColor(color.r, color.g, color.b, 1)
         else
-          d.fill:SetColorTexture(0.8, 0.8, 0.8, 1)
+          d.fill:SetVertexColor(0.8, 0.8, 0.8, 1)
         end
         d.ring:ClearAllPoints()
         d.ring:SetPoint("CENTER", frame, "CENTER", x, y)
@@ -184,6 +182,12 @@ table.insert(ns.Minimap.onActivate, function(outer)
       return
     end
     elapsed = 0
+    -- Over BubbleQuest's quest layer, which puts itself 2 over the higher of our frame and the minimap
+    -- (review: its areas, 0.6 alpha, covered the dots: "not showing consistently").
+    local level = math.max(outer:GetFrameLevel(), Minimap:GetFrameLevel()) + 4
+    if layer.frame:GetFrameLevel() ~= level then
+      layer.frame:SetFrameLevel(level)
+    end
     if not ns.Zoom.own then
       layer:Draw(nil, nil)
       return
