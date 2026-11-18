@@ -260,7 +260,20 @@ local function sliderTick(frame, i)
 end
 
 local function layoutSlider(frame, marker)
-  local shares = Zoom.own and STEPS or LEVEL_SHARES
+  -- Gathering, one picture across both modes (review: the ticks changed as the wheel crossed into our
+  -- map): Blizzard's levels above the middle, our steps out below it, where the wheel takes you next.
+  local shares = STEPS
+  if gathering() then
+    shares = {}
+    for _, k in ipairs(LEVEL_SHARES) do
+      shares[#shares + 1] = k
+    end
+    for _, k in ipairs(STEPS) do
+      if k > 1 then
+        shares[#shares + 1] = k
+      end
+    end
+  end
   local count = 0
   for _, k in ipairs(shares) do
     if k >= STEPS[1] then
@@ -322,6 +335,8 @@ showSlider = function()
     return
   end
   layoutSlider(frame, marker)
+  -- Again next frame: Blizzard's zoom level may only read as changed then.
+  C_Timer.After(0, function() layoutSlider(frame, marker) end)
   sliderShown = 0
   frame:SetAlpha(1)
   frame:Show()
@@ -357,6 +372,8 @@ table.insert(ns.Minimap.onActivate, function(outer)
       Zoom:Step(delta)
     elseif delta < 0 and lastLevel == 0 then
       Zoom:Step(delta)
+    else
+      showSlider()  -- gather mode: Blizzard's handler zoomed; the slider shows it (it didn't: review)
     end
     lastLevel = Minimap:GetZoom()
   end)
