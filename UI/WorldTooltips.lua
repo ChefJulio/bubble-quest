@@ -139,8 +139,12 @@ local function onUnit(tooltip, data)
       end
     end
   end
+  -- Every chance in one right-hand column (review: "we can't make that more readable?"; a sentence
+  -- under one quest and brackets inside the other's line read badly): under the game's line, an
+  -- indented grey "drop chance" (naming the item only when several are listed) and the percentage.
   for _, c in ipairs(chances) do
-    tooltip:AddLine(("%s: %s drop chance"):format(c.itemName, ns.DoLine.ChanceText(c.chance)), 0.6, 0.6, 0.6)
+    local label = #chances > 1 and ("     %s drop chance"):format(c.itemName) or "     drop chance"
+    tooltip:AddDoubleLine(label, ns.DoLine.ChanceText(c.chance), 0.6, 0.6, 0.6, 1, 1, 1)
   end
   if #chances > 0 and #drops == 0 then
     tooltip:Show()
@@ -152,13 +156,11 @@ local function onUnit(tooltip, data)
         tooltip:AddLine(drop.quest.title or "?", 1, 0.82, 0)
         lastQuest = drop.quest
       end
+      -- The game's own objective style (" - 2/3 Goretusk Snout"), the chance in the right column.
       local counted = drop.objective.required and drop.objective.required > 0
-      local text = counted and ("  %d/%d %s"):format(drop.objective.fulfilled or 0, drop.objective.required, drop.itemName)
-        or ("  " .. drop.itemName)
-      if drop.chance then
-        text = text .. " |cff999999(" .. ns.DoLine.ChanceText(drop.chance) .. ")|r"
-      end
-      tooltip:AddLine(text, 1, 1, 1)
+      local text = counted and (" - %d/%d %s"):format(drop.objective.fulfilled or 0, drop.objective.required, drop.itemName)
+        or (" - " .. drop.itemName)
+      tooltip:AddDoubleLine(text, drop.chance and ns.DoLine.ChanceText(drop.chance) or "", 1, 1, 1, 1, 1, 1)
     end
     tooltip:Show()
   end
