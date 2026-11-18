@@ -17,6 +17,7 @@ local ADDON_NAME, ns = ...
 local LINE_UNIT_NAME = Enum.TooltipDataLineType.UnitName  -- 2
 local HEADER = { 0.4, 0.8, 1 }       -- "BubbleQuest" blue, as the tracker's Share next
 local DONE_COLOR = { 0.5, 0.5, 0.5 }
+local WARN = { 1, 0.5, 0.15 }        -- "Keep for ...: don't sell", the orange of a warning
 
 local WorldTooltips = {}
 ns.WorldTooltips = WorldTooltips
@@ -176,17 +177,28 @@ local function onItem(tooltip, data)
   end
   -- Quests in your log that need it: an item objective named as the item, finished ones too (review:
   -- a Waterlogged Axe at 1/1 said nothing, and that's when you wonder what it's for); the count green
-  -- when done.
+  -- when done. An item a vendor would buy (a Goretusk Snout, a pelt) gets a warning instead (review:
+  -- "shouldn't the tooltip be more upfront that you should not sell this"): selling it, even at 3/3,
+  -- takes the count down and the quest back from ready. Grey quest items can't be sold: plain "For:".
   local itemName = C_Item.GetItemNameByID(itemID)
   if readable(itemName) and itemName then
+    -- apiguard: allow the item ID comes from the tooltip's data, read only when not secret (readable)
+    local sellPrice = select(11, C_Item.GetItemInfo(itemID))
+    local sellable = readable(sellPrice) and sellPrice > 0
     for questID, quest in pairs(ns.QuestLog.quests) do
       for _, objective in ipairs(quest.objectives or {}) do
         if objective.type == "item" and ns.QuestLog.ObjectiveName(objective) == itemName then
           header()
           local count = objective.finished and { 0.3, 1, 0.3 } or { 1, 1, 1 }
-          tooltip:AddDoubleLine(("For: [%d] %s"):format(level(questID, quest.level), quest.title or "?"),
-            ("%d/%d"):format(objective.fulfilled or 0, objective.required or 0), HEADER[1], HEADER[2], HEADER[3],
-            count[1], count[2], count[3])
+          local title = ("[%d] %s"):format(level(questID, quest.level), quest.title or "?")
+          local progress = ("%d/%d"):format(objective.fulfilled or 0, objective.required or 0)
+          if sellable then
+            tooltip:AddDoubleLine(("Keep for %s: don't sell"):format(title), progress, WARN[1], WARN[2], WARN[3],
+              count[1], count[2], count[3])
+          else
+            tooltip:AddDoubleLine("For: " .. title, progress, HEADER[1], HEADER[2], HEADER[3],
+              count[1], count[2], count[3])
+          end
         end
       end
     end
