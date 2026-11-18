@@ -16,5 +16,6 @@ Around.lua
 Launchers.lua
 Zoom.lua
 Group.lua
+WorldMap.lua
 QuestMarkers.lua
 Settings.lua

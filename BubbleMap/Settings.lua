@@ -47,6 +47,12 @@ local ENTRIES = {
     get = function() return ns.DB.gatherMode end,
     set = function(v) ns.DB.gatherMode = v; ns.Zoom:Update() end },
 
+  { kind = "checkbox", id = "BUBBLEMAP_WORLD_TERRAIN", label = "Terrain on the world map", default = false,
+    tooltip = "Zone maps on the world map show the real terrain (the minimap's own ground) instead of the "
+      .. "painted art. Also the button at the world map's top right.",
+    get = function() return ns.DB.worldTerrain end,
+    set = function(v) ns.WorldMap:SetEnabled(v) end },
+
   { kind = "section", label = "Around the map" },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_BAR", label = "Top bar", default = true,
     tooltip = "The bar along the map's top: zone name, buttons and clock. Untick to hide all of it." },
