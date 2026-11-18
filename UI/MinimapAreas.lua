@@ -173,10 +173,10 @@ end
 -- Blizzard's minimap hidden (gameDraws).
 -- Not the whole view circle: the game's own turn-in "?" vanished at 186.5 yd with a 233.3 yd view
 -- radius and at 159.5 yd with 200 yd (measured in game, two zoom levels): 0.799 and 0.7975 of the
--- radius. Ours goes just inside that, as a marker shown twice at the edge beats none (review: the full
--- radius left a ring where neither showed; 0.78 still doubled one at 183 yd). Quest givers' "!"
--- assumed the same until measured.
-local GAME_MARKER_SHARE = 0.795
+-- radius. Ours goes between the two (review: the full radius left a ring where neither showed; 0.78
+-- doubled one at 183 yd, 0.795 still overlapped about a yard). Quest givers' "!" assumed the same
+-- until measured.
+local GAME_MARKER_SHARE = 0.798
 
 -- Yards from the minimap's centre to its edge at Blizzard's zoom. The last good value when the game
 -- gives none (BubbleMap hides Blizzard's minimap in its own map; it may not report while hidden), so
