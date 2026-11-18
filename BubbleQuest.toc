@@ -63,6 +63,7 @@ UI\Cards\ItemButtons.lua
 UI\Cards\Stack.lua
 UI\MapFan.lua
 UI\MapAreas.lua
+UI\QuestView.lua
 UI\MinimapAreas.lua
 UI\MapAvailable.lua
 UI\MapServices.lua

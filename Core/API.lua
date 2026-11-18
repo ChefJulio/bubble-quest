@@ -84,6 +84,37 @@ function api.SetMinimapZoom(factor, gameHidden)
   ns.MinimapAreas:SetZoom(factor, gameHidden)
 end
 
+---A quest view in `frame`: BubbleQuest's quest areas, turn-in "?", quest givers' "!" and (option
+---`guide`) the guide line, drawn around any world point at any scale (UI/QuestView.lua, the minimap's
+---renderer too, so they match). The view fills `frame`; the owner clips it (no mask). Returns a handle:
+---  :Draw(north, west, instanceMap, pixelsPerYard, turn)  north/west: world yards (UnitPosition's), the
+---      point at the frame's centre; turn: radians (0: north up). Call when what the frame shows changes.
+---  :Hide(), :Show()
+---  :GetFrame()  the view's own frame (a child of `frame`, mouse off): for its frame level over terrain
+---What shows follows the Map settings: areas with "Show quest areas on the world map", quest givers with
+---"Show quests you can pick up". Options (all optional): guide (bool), hover (bool, default true: tooltips from the cursor while the
+---mouse focus is `frame` or the game world), minCircle / minIcon (smallest sizes on screen, pixels;
+---default 4 / 8, so marks stay visible zoomed far out). The game's own minimap markers are never assumed
+---here: every "?" and "!" is ours.
+---@param frame Frame
+---@param options table?
+---@return table
+function api.CreateQuestView(frame, options)
+  options = options or {}
+  local view = ns.QuestView.New(frame, {
+    guide = options.guide == true,
+    focus = options.hover ~= false and function(focus) return focus == frame end or function() return false end,
+    minCircle = options.minCircle or 4,
+    minIcon = options.minIcon or 8,
+  })
+  return {
+    Draw = function(_, north, west, instanceMap, ppy, turn) view:Draw(north, west, instanceMap, ppy, turn) end,
+    Hide = function() view:Hide() end,
+    Show = function() view:Show() end,
+    GetFrame = function() return view.layer end,
+  }
+end
+
 ---How the tracker looks, for matching it. A fresh table each call; changes come with ThemeChanged.
 ---@return table
 function api.Theme()
