@@ -124,8 +124,13 @@ local function update()
   -- Square and north-up, Blizzard's minimap covers the whole frame. Rotating, its square ground image
   -- turns and leaves the corners empty (seen in game): ours fills them, so the layer is on then too.
   local square = math.abs(outer:GetWidth() - outer:GetHeight()) < 1
-  clip:SetShown(not square or turn ~= 0)
-  if not clip:IsShown() then
+  -- Only the contents hide: `clip` runs this every frame, and a hidden frame gets no OnUpdate, so
+  -- hiding it once (square, north-up at login) stopped the padding for good (seen in game: Rotate
+  -- Minimap turned on later left the corners empty).
+  local on = not square or turn ~= 0
+  fill:SetShown(on)
+  holder:SetShown(on)
+  if not on then
     return
   end
   local px, py, _, mapID = UnitPosition("player")
