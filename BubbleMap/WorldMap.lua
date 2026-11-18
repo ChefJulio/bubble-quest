@@ -173,11 +173,20 @@ local function createButton()
   border:SetSize(54, 54)
   border:SetPoint("TOPLEFT")
   button:SetHighlightTexture("Interface\\Minimap\\UI-Minimap-ZoomButton-Highlight", "ADD")
-  button:SetScript("OnClick", function() WorldMap:SetEnabled(not ns.DB.worldTerrain) end)
+  button:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+  button:SetScript("OnClick", function(_, mouse)
+    if mouse == "RightButton" then
+      ns.MapWindow:Toggle()  -- BubbleMap's own map: whole continents, pan and deep zoom
+    else
+      WorldMap:SetEnabled(not ns.DB.worldTerrain)
+    end
+  end)
   button:SetScript("OnEnter", function(self)
     GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
     GameTooltip:AddLine("Terrain: " .. (ns.DB.worldTerrain and "on" or "off"), 1, 1, 1)
-    GameTooltip:AddLine("The real terrain on zone maps instead of the painted art (BubbleMap).", 0.8, 0.8,
+    GameTooltip:AddLine("Left-click: the real terrain on zone maps instead of the painted art.", 0.8, 0.8,
+      0.8, true)
+    GameTooltip:AddLine("Right-click: BubbleMap's own map (drag to pan across zones, deep zoom).", 0.8, 0.8,
       0.8, true)
     GameTooltip:Show()
   end)

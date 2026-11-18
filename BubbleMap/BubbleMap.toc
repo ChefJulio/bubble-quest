@@ -17,5 +17,7 @@ Launchers.lua
 Zoom.lua
 Group.lua
 WorldMap.lua
+TileView.lua
+MapWindow.lua
 QuestMarkers.lua
 Settings.lua

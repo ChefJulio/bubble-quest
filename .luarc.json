@@ -48,7 +48,10 @@
     "BubbleMapDB",
     "GetMinimapShape",
     "SLASH_BUBBLEMAP1",
-    "SLASH_BUBBLEMAP2"
+    "SLASH_BUBBLEMAP2",
+    "BubbleMap_ToggleMap",
+    "BINDING_HEADER_BUBBLEMAP",
+    "BINDING_NAME_BUBBLEMAP_TOGGLE_MAP"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {

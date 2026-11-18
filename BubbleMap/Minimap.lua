@@ -282,7 +282,7 @@ function Minimap_:Describe()
   end
   return ("column %dx%d, minimap %.0f (scale %.2f), shape %s, %s; %s"):format(outer:GetWidth(),
     outer:GetHeight(), Minimap:GetWidth(), Minimap:GetEffectiveScale(), GetMinimapShape(),
-    ns.Quest and "with the quest tracker" or "standalone", ns.Launchers:Describe() .. "; " .. ns.Terrain:Describe() .. "; " .. ns.Zoom:Describe() .. "; " .. ns.WorldMap:Describe())
+    ns.Quest and "with the quest tracker" or "standalone", ns.Launchers:Describe() .. "; " .. ns.Terrain:Describe() .. "; " .. ns.Zoom:Describe() .. "; " .. ns.WorldMap:Describe() .. "; " .. ns.MapWindow:Describe())
 end
 
 -- /bmap: status; /bmap reset: back to Edit Mode's position. (Settings come with step 3.)
@@ -293,6 +293,8 @@ SlashCmdList.BUBBLEMAP = function(input)
   if command == "reset" then
     Minimap_:ResetPosition()
     print("|cffffd100BubbleMap|r: back at the minimap's Edit Mode position.")
+  elseif command == "map" then
+    ns.MapWindow:Toggle()
   elseif command == "tiles" then
     for _, line in ipairs(ns.Terrain:Report()) do
       print("|cffffd100BubbleMap|r " .. line)
