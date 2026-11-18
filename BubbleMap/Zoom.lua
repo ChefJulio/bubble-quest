@@ -138,21 +138,6 @@ function Zoom:Gathering()
   return gathering()
 end
 
--- Blizzard's outdoor levels as shares of its farthest view [Inferred: classic's radii, 233.3 down to
--- 66.7 yd; they matched the user's measurements at levels 0 and 1]. The peek picks the nearest.
-local LEVEL_SHARES = { 1, 6 / 7, 5 / 7, 4 / 7, 3 / 7, 2 / 7 }
-
-local function nearestLevel(k)
-  local best, bestDiff = 0, math.huge
-  for i, share in ipairs(LEVEL_SHARES) do
-    local diff = math.abs(share - k)
-    if diff < bestDiff and i - 1 < Minimap:GetZoomLevels() then
-      best, bestDiff = i - 1, diff
-    end
-  end
-  return best
-end
-
 ---Re-decide whose map shows (tracking changed, indoors, the setting, zoomed past Blizzard's levels, the
 ---Ctrl peek).
 ---Gathering, the map is Blizzard's at its zoom levels and ours beyond them (user's design): zooming out
@@ -163,15 +148,15 @@ function Zoom:Update()
   if not gather then
     self.beyond = false
   end
-  -- The peek (user's idea): Ctrl held shows the game's minimap and its live blips at the nearest of its
-  -- zoom levels to ours (its farthest when ours is further out: its blips can't be scaled), our terrain
-  -- matched to it; released, our map at the zoom it had. Any Ctrl, anywhere: a flicker during Ctrl
-  -- keybinds is fine (user's call).
+  -- The peek (user's idea): Ctrl held shows the game's minimap and its live blips at its farthest level,
+  -- the widest its blips allow, whatever our zoom (user's call: a peek is "what's around me"); our terrain
+  -- matched to it. No zooming while it's held (user's call): released, our map at exactly the zoom it
+  -- had. Any Ctrl, anywhere: a flicker during Ctrl keybinds is fine (user's call).
   local peek = IsControlKeyDown()
   local own = terrainHere() and not peek and (not gather or self.beyond)
   if own ~= self.own then
-    if not own and peek and self.own then
-      Minimap:SetZoom(nearestLevel(STEPS[self.step]))
+    if not own and peek then
+      Minimap:SetZoom(0)
     end
     self.own = own
     apply()
@@ -181,6 +166,9 @@ end
 ---One wheel notch or zoom button: delta > 0 zooms in, < 0 out.
 ---@param delta number
 function Zoom:Step(delta)
+  if IsControlKeyDown() then
+    return  -- the peek: no zooming while Ctrl is held
+  end
   if self.own then
     -- Gathering and zooming back in to Blizzard's range: gather mode, at its farthest level.
     if self.beyond and delta > 0 and STEPS[self.step - 1] and STEPS[self.step - 1] <= 1 then
@@ -251,8 +239,11 @@ table.insert(ns.Minimap.onActivate, function(outer)
   -- and step ours instead. A post-hook: Blizzard's handler runs untouched.
   -- In gather mode Blizzard's handler zooms; at its farthest level already, the wheel out goes on into
   -- our map.
+  -- During the Ctrl peek Blizzard's handler zoomed: back to its farthest level, the peek's view.
   Minimap:HookScript("OnMouseWheel", function(_, delta)
-    if Zoom.own then
+    if IsControlKeyDown() then
+      Minimap:SetZoom(0)
+    elseif Zoom.own then
       Minimap:SetZoom(0)
       Zoom:Step(delta)
     elseif delta < 0 and lastLevel == 0 then
