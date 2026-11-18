@@ -64,8 +64,17 @@ local function zoneName(north, west)
   if not centre.map then
     return nil
   end
-  local uiMap = C_Map.GetMapPosFromWorldPos(centre.map, CreateVector2D(north, west))
-  local info = uiMap and C_Map.GetMapInfo(uiMap)
+  -- Without an override GetMapPosFromWorldPos answers with the continent (seen: "Eastern Kingdoms"
+  -- over Westfall), so the zone is looked up on the continent's map at that place.
+  local continent = ns.MapPoints.Continent(centre.map, north, west)
+  if not continent then
+    return nil
+  end
+  local _, pos = C_Map.GetMapPosFromWorldPos(centre.map, CreateVector2D(north, west), continent)
+  local info = pos and C_Map.GetMapInfoAtPosition(continent, pos.x, pos.y)
+  if not info or info.mapID == continent then
+    info = C_Map.GetMapInfo(continent)
+  end
   return info and info.name
 end
 
@@ -349,7 +358,11 @@ function MapWindow:Describe()
   if not view then
     return "map window not opened yet"
   end
-  return ("map window: %d tiles loaded, %d failed, %.3f px/yd"):format(view.loaded, view.failed, ppy)
+  local continent = centre.map and ns.MapPoints.Continent(centre.map, centre.north, centre.west)
+  local count = continent and #ns.MapPoints.For(centre.map, centre.north, centre.west) or 0
+  return ("map window: %d tiles loaded, %d failed, %.3f px/yd; map %s, continent UI map %s, %d points, "
+    .. "zone highlight %s"):format(view.loaded, view.failed, ppy, tostring(centre.map), tostring(continent),
+    count, highlight.key and tostring(highlight.key) or "never shown")
 end
 
 -- The key binding (Bindings.xml): Options > Keybindings > AddOns > BubbleMap.
