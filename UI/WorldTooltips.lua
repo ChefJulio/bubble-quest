@@ -174,16 +174,19 @@ local function onItem(tooltip, data)
     tooltip:AddDoubleLine(("Starts a quest: [%d] %s"):format(level(r.questID, r.level), r.name or "?"),
       done and "Done" or "", color[1], color[2], color[3], 0.5, 0.5, 0.5)
   end
-  -- Quests in your log that need it: an unfinished item objective named as the item.
+  -- Quests in your log that need it: an item objective named as the item, finished ones too (review:
+  -- a Waterlogged Axe at 1/1 said nothing, and that's when you wonder what it's for); the count green
+  -- when done.
   local itemName = C_Item.GetItemNameByID(itemID)
   if readable(itemName) and itemName then
     for questID, quest in pairs(ns.QuestLog.quests) do
       for _, objective in ipairs(quest.objectives or {}) do
-        if objective.type == "item" and not objective.finished and ns.QuestLog.ObjectiveName(objective) == itemName then
+        if objective.type == "item" and ns.QuestLog.ObjectiveName(objective) == itemName then
           header()
-          tooltip:AddDoubleLine(("Needed for: [%d] %s"):format(level(questID, quest.level), quest.title or "?"),
+          local count = objective.finished and { 0.3, 1, 0.3 } or { 1, 1, 1 }
+          tooltip:AddDoubleLine(("For: [%d] %s"):format(level(questID, quest.level), quest.title or "?"),
             ("%d/%d"):format(objective.fulfilled or 0, objective.required or 0), HEADER[1], HEADER[2], HEADER[3],
-            1, 1, 1)
+            count[1], count[2], count[3])
         end
       end
     end
