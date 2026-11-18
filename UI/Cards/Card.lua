@@ -570,17 +570,29 @@ function Card:SetQuest(quest, collapsed, options)
   return y
 end
 
+-- A target in another zone shows that zone's name instead of yards only when it's far (review: from
+-- Darnassus every Teldrassil quest 300-1500 yd away said "Teldrassil" with no distance): within
+-- ZONE_LABEL_YARDS the yards say more. The cards and their objective rows use the same rule.
+local ZONE_LABEL_YARDS = 2000
+
+-- The zone to name for a target, or nil when yards should show.
+local function farZone(nav)
+  return nav.zone and (not nav.distance or nav.distance > ZONE_LABEL_YARDS) and nav.zone or nil
+end
+
 ---Show the arrow state from ns.Navigation:Compute (nil = nothing to show). Called 10 times a
 ---second, so it only touches what changed.
 ---@param nav table?
 function Card:SetNavigation(nav)
   local text, arrow, inArea, highlight = "", false, false, nil
+  local zone
   if nav then
     if nav.inArea then
       inArea, text, highlight = true, "here", nav.objective
     else
       arrow = nav.angle ~= nil
-      text = nav.zone or (nav.distance and ("%d yd"):format(nav.distance)) or ""
+      zone = farZone(nav)
+      text = zone or (nav.distance and ("%d yd"):format(nav.distance)) or ""
     end
   end
   -- Card settings: "Arrow" is the arrow and the in-area marker; "Distance" the text beside them.
@@ -610,7 +622,7 @@ function Card:SetNavigation(nav)
     self.arrow:SetRotation(nav.angle)
     if self.arrowTintable then
       if ns.DB.profile.cards.arrowColorByDistance then
-        self.arrow:SetVertexColor(distanceColor(not nav.zone and nav.distance or nil))
+        self.arrow:SetVertexColor(distanceColor(not zone and nav.distance or nil))
       else
         self.arrow:SetVertexColor(GOLD[1], GOLD[2], GOLD[3])
       end
@@ -635,8 +647,9 @@ function Card:UpdateObjectiveNavigation(quest)
       local nav = ns.Navigation:ObjectiveNav(quest, i)
       local text, arrow = "", false
       if nav then
-        if nav.zone then
-          text = nav.zone
+        local zone = farZone(nav)
+        if zone then
+          text = zone
         elseif nav.inArea then
           text = "|cff33ff33here|r"
         else
