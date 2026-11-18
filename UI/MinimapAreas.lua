@@ -513,6 +513,61 @@ local function updateHover(delta)
   end
 end
 
+---For /bq turnin: one quest's minimap "?", every input and decision of drawAreas, as of now.
+---@param quest table
+---@return string[]
+function MinimapAreas:DiagnoseTurnin(quest)
+  local lines = {}
+  local function add(text, ...)
+    lines[#lines + 1] = text:format(...)
+  end
+  local questID = quest.questID
+  add("Quest %d %s, ready=%s, on a card=%s", questID, tostring(quest.title), tostring(quest.isComplete),
+    tostring(ns.Stack.visible[questID] ~= nil))
+  local north, west, instanceMap = ns.Navigation:PlayerPosition()
+  if not north or not layer then
+    add("No player position or no layer.")
+    return lines
+  end
+  local radius, rawRadius = viewRadius(), C_Minimap.GetViewRadius()
+  local half = minimapHalf()
+  local scale = half / (radius * self.zoom)
+  add("View: radius %s (game reports %s), zoom %s, gameHidden=%s -> gameDraws=%s", tostring(radius),
+    tostring(rawRadius), tostring(self.zoom), tostring(self.gameHidden), tostring(gameDraws()))
+  add("Minimap half %.1f px (layer units), %.3f px/yd, game circle %.1f px = %.1f yd", half, scale,
+    half * GAME_MARKER_SHARE, half * GAME_MARKER_SHARE / scale)
+  add("Layer %.0f x %.0f, parent %s, view %s", layer:GetWidth(), layer:GetHeight(),
+    tostring(layer:GetParent() and layer:GetParent():GetName()), tostring(self.view and self.view:GetName()))
+  local facing = rotation()
+  local cos, sin = math.cos(facing), math.sin(facing)
+  local marks = ns.MapAreas.GameMarksTurnIn(questID)
+  local marker = ns.Navigation:MarkerPoint(questID)
+  if marker then
+    local mx, my = project(marker.x - north, marker.y - west, cos, sin, scale)
+    add("Game marker: marks=%s, %.1f yd away (map %s, player map %s), %.1f px from centre, inGameView=%s",
+      tostring(marks), math.sqrt((marker.x - north) ^ 2 + (marker.y - west) ^ 2), tostring(marker.map),
+      tostring(instanceMap), math.sqrt(mx * mx + my * my), tostring(inGameView(mx, my)))
+  else
+    add("Game marker: marks=%s, no marker point", tostring(marks))
+  end
+  add("Skip ours (gameDraws and gameShowsTurnIn): %s",
+    tostring(gameDraws() and gameShowsTurnIn(questID, north, west, instanceMap, cos, sin, scale)))
+  local count = 0
+  for _, p in ipairs(self.points) do
+    if p.questID == questID and not p.objective then
+      count = count + 1
+      local x, y = project(p.x - north, p.y - west, cos, sin, scale)
+      add("Our spot %d: %.1f yd (map %s), at %.0f, %.0f px, markerNear=%s", count,
+        math.sqrt((p.x - north) ^ 2 + (p.y - west) ^ 2), tostring(p.map), x, y, tostring(markerNear(x, y)))
+    end
+  end
+  if count == 0 then
+    add("No turn-in spots of ours for this quest (not ready, no card, or areas off).")
+  end
+  add("Markers drawn this frame: %d", used.markers)
+  return lines
+end
+
 local function update(_, delta)
   local map = settings()
   local showAreas, showGuide = map and map.minimapAreas, map and map.guide

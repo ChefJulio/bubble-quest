@@ -252,6 +252,27 @@ commands.givers = {
   end,
 }
 
+-- Why a quest's turn-in "?" shows on the minimap or not (ours, or left to the game's).
+commands.turnin = {
+  help = "<questID or title part>: a quest's minimap turn-in \"?\", every input and decision (copy window)",
+  run = function(arg)
+    local quest = ns.QuestLog:Get(tonumber(arg) or -1)
+    if not quest and arg ~= "" then
+      for _, q in pairs(ns.QuestLog.quests) do
+        if (q.title or ""):lower():find(arg:lower(), 1, true) then
+          quest = q
+          break
+        end
+      end
+    end
+    if not quest then
+      print("Usage: /bq turnin <questID or part of the title>")
+      return
+    end
+    ns.CopyWindow:Show("BubbleQuest: turn-in", ns.MinimapAreas:DiagnoseTurnin(quest))
+  end,
+}
+
 commands.minimap = {
   help = "minimap areas, guide line and hover state (copy window)",
   run = function()
