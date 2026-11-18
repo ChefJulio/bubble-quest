@@ -38,6 +38,7 @@ local FILL = { 0.05, 0.06, 0.07, 1 }
 local Terrain = {
   active = false,
   zoom = 1,     -- the view reaches this many times further than Blizzard's minimap (Zoom.lua's overview)
+  force = false,  -- drawn whatever the shape and zoom: BubbleMap's own map is showing (Zoom.lua)
   loaded = 0,   -- SetTexture calls (for /bmap)
   failed = 0,   -- SetTexture calls that returned false
 }
@@ -150,7 +151,8 @@ local function update()
   -- hiding it once (square, north-up at login) stopped the padding for good (seen in game: Rotate
   -- Minimap turned on later left the corners empty).
   -- Overview (zoom above 1): Blizzard's minimap is faded out and ours is the whole map.
-  local on = not square or turn ~= 0 or Terrain.zoom > 1
+  -- Our map (Zoom.lua's force): ours is the whole map, whatever its shape or zoom.
+  local on = not square or turn ~= 0 or Terrain.zoom ~= 1 or Terrain.force
   fill:SetShown(on)
   holder:SetShown(on)
   if not on then

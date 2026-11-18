@@ -18,9 +18,9 @@ local ADDON_NAME, ns = ...
 -- is on: the player is gathering), "always" or "never". Indoors and wherever our terrain doesn't reach
 -- (instances, maps not in Data/Tiles.lua), Blizzard's minimap is shown too: it has the interior maps.
 --
--- The wheel: in our map Blizzard's minimap takes no mouse, so our map frame gets the wheel everywhere;
--- in gather mode Blizzard's minimap zooms itself (its OnMouseWheel), and the padding around it steps
--- Blizzard's levels the same way.
+-- The wheel: our map frame takes it over the padding. Over Blizzard's square, Blizzard's minimap takes it
+-- (even at alpha 0, mouse off: the wheel is separate) and zooms its own level: in gather mode that's the
+-- zoom; in our map a post-hook puts Blizzard's level back and steps ours (the blank-map bug, review).
 
 local STEPS = { 0.35, 0.5, 0.7, 1, 1.4, 2, 3, 4.5, 6 }  -- our map: times Blizzard's farthest view
 local DEFAULT_STEP = 4                                -- 1: Blizzard's farthest view
@@ -148,6 +148,15 @@ table.insert(ns.Minimap.onActivate, function(outer)
   -- activation waits for it.)
   outer:EnableMouseWheel(true)
   outer:SetScript("OnMouseWheel", function(_, delta) Zoom:Step(delta) end)
+  -- Over Blizzard's square its minimap takes the wheel even with its mouse off (the wheel is separate),
+  -- and zooms its own level. In our map that's not the zoom: put its level back (fixed at its farthest)
+  -- and step ours instead. A post-hook: Blizzard's handler runs untouched.
+  Minimap:HookScript("OnMouseWheel", function(_, delta)
+    if Zoom.own then
+      Minimap:SetZoom(0)
+      Zoom:Step(delta)
+    end
+  end)
 
   local driver = CreateFrame("Frame", nil, outer)
   driver:SetScript("OnUpdate", update)
