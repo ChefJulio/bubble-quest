@@ -66,6 +66,7 @@ local function applySize()
   outer:SetSize(width, height)
   -- Minimap's units differ from ours by Edit Mode's scale on its container.
   local side = math.min(width, height) * outer:GetEffectiveScale() / Minimap:GetEffectiveScale()
+  side = side * (Minimap_.clipFactor or 1)  -- the clip experiment (below)
   local resized = math.abs(Minimap:GetWidth() - side) > 0.5
   Minimap:SetSize(side, side)
   Minimap_.appliedScale = Minimap:GetEffectiveScale()
@@ -133,6 +134,45 @@ local function refresh()
     applyAnchor()
     applySize()
   end)
+end
+
+-- EXPERIMENT (/bmap clip N, user's zoom design, 2026-11-17): Blizzard's zoom pinned at its farthest
+-- level and all zoom ours, by sizing Blizzard's Minimap frame N times: N > 1 zooms in, N < 1 out (our
+-- terrain around it). Magnifying behind a mask failed: blips aren't masked and spilled outside the map.
+-- Here the Minimap is reparented into a clipping frame of ours (SetClipsChildren): do the engine's
+-- ground and blips clip at its edges, and does the arrow stay centred? Reparenting takes the minimap
+-- out of Edit Mode's container (what SexyMap does): Edit Mode's minimap scale stops applying. Not saved:
+-- off after /reload; /bmap clip 1 puts it back.
+local clipFrame, homeParent
+
+function Minimap_:SetClip(k)
+  if not self.active or k <= 0 or k > 4 then
+    return false
+  end
+  if k == 1 then
+    if homeParent then
+      Minimap:SetParent(homeParent)
+      homeParent = nil
+    end
+    self.clipFactor = nil
+  else
+    if not clipFrame then
+      clipFrame = CreateFrame("Frame", nil, outer)
+      clipFrame:SetAllPoints(outer)
+      clipFrame:SetFrameStrata(Minimap:GetFrameStrata())
+      clipFrame:SetClipsChildren(true)
+    end
+    if not homeParent then
+      homeParent = Minimap:GetParent()
+      Minimap:SetParent(clipFrame)
+    end
+    self.clipFactor = k
+  end
+  ns.Terrain.force = self.clipFactor ~= nil  -- our terrain around a shrunken map, under a grown one
+  Minimap:ClearAllPoints()
+  Minimap:SetPoint("CENTER", outer, "CENTER")
+  refresh()
+  return true
 end
 
 ---Size or position settings changed.
@@ -260,6 +300,14 @@ SlashCmdList.BUBBLEMAP = function(input)
   if command == "reset" then
     Minimap_:ResetPosition()
     print("|cffffd100BubbleMap|r: back at the minimap's Edit Mode position.")
+  elseif command == "clip" then
+    local k = tonumber((input or ""):match("clip%s+([%d%.]+)") or "")
+    if k and Minimap_:SetClip(k) then
+      print(("|cffffd100BubbleMap|r: clip x%s (experiment; /bmap clip 1 to end). Blizzard zoom level %d."):format(
+        tostring(k), Minimap:GetZoom()))
+    else
+      print("|cffffd100BubbleMap|r: /bmap clip <factor>, e.g. 0.5, 2, 3; 1 ends it.")
+    end
   elseif command == "tiles" then
     for _, line in ipairs(ns.Terrain:Report()) do
       print("|cffffd100BubbleMap|r " .. line)
