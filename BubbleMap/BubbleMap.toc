@@ -18,6 +18,7 @@ Zoom.lua
 Group.lua
 WorldMap.lua
 TileView.lua
+MapPoints.lua
 MapWindow.lua
 QuestMarkers.lua
 Settings.lua

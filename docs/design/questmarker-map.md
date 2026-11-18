@@ -114,9 +114,11 @@ Blizzard's, never a mix:
   has loaded that NPC, which no addon API can tell).
 - **One ground:** our terrain in both modes outdoors (Blizzard's ground off), so the colour never
   changes with the mode.
-- **Later:** what Blizzard's minimap showed that we can draw ourselves in our map (group members,
-  corpse and graveyards, rares and treasures, flight masters, town services, pings), and a gathering
-  database (GatherMate2 and the like) for possible node spots.
+- **Drawn ourselves in our map** (Blizzard's minimap is hidden, its blips with it): group members
+  (Group.lua) and BubbleQuest's town services (its QuestView draws them while SetMinimapZoom says the
+  game's minimap is hidden; docs/design/town-services.md).
+- **Later:** the rest of what Blizzard's minimap showed (corpse and graveyards, rares and treasures,
+  flight masters, pings), and a gathering database (GatherMate2 and the like) for possible node spots.
 
 ## Around the minimap (built, step 3)
 
@@ -176,8 +178,15 @@ buttons are put away.
 - **Deep zoom isn't possible on Blizzard's world map** without tainting it: its zoom levels are rebuilt
   from map art data on every canvas resize (`MapCanvas_ScrollContainerMixin.lua:485-516`); appending a
   level puts our table before many Blizzard readers, and pin acquisition reaches a protected call. So
-  deep zoom lives in **our own map window**, a `MapCanvasFrameTemplate` instance we own (our pins
-  override `CheckMouseButtonPassthrough`). BubbleQuest's phase 11 quest log window may share it.
+  deep zoom lives in **our own map window** (MapWindow.lua; built as plain frames over TileView, not
+  a `MapCanvasFrameTemplate`). BubbleQuest's phase 11 quest log window may share it.
+- **In the window**, bottom up: the sea's colour where there's no tile (`ns.SEA`, sampled from the
+  tiles' own sea, so the coast's tile grid doesn't show), terrain, the hovered zone's highlight
+  (Blizzard's continent-map glow, `C_Map.GetMapHighlightInfoAtPosition`, its rectangle turned into
+  world yards), BubbleQuest's QuestView (quests and town services less flight masters), Blizzard's map
+  points (MapPoints.lua: flight masters with their discovered state, dungeon entrances, area points,
+  gathered from the continent's UI map and every zone under it), group members, the player's arrow.
+  The hovered zone is named in the title.
 
 ## Other minimap addons
 

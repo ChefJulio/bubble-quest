@@ -10,8 +10,15 @@ local ADDON_NAME, ns = ...
 -- under the cursor (or the centre) is named in the title (C_Map.GetMapPosFromWorldPos gives the map
 -- there). Opened with /bmap map, a key binding, and a right-click on the world map's terrain button.
 --
--- Drawn: terrain, BubbleQuest's quest layer (when it's loaded), the player's arrow, zone names. Next
--- (docs): Blizzard-style points (flight masters, dungeon entrances, area events), group members.
+-- Drawn, bottom up: the sea's colour where there's no tile (ns.SEA: the coast's tile grid doesn't
+-- show), terrain, the hovered zone's highlight, BubbleQuest's quest layer (when it's loaded), Blizzard's
+-- map points (MapPoints.lua), group members (Group.lua), the player's arrow; the hovered zone named in
+-- the title.
+--
+-- The zone highlight is Blizzard's own, the glow its world map shows over a zone on a continent map
+-- (C_Map.GetMapHighlightInfoAtPosition, as MapHighlightDataProvider.lua): asked at the cursor's place
+-- on the continent's UI map, its rectangle (0..1 on that map) turned into world yards and so drawn at
+-- our scale.
 
 local TILE_YARDS = 1600 / 3
 local MIN_PPY, MAX_PPY = 0.015, 4   -- a whole continent .. a few yards a tile pixel
@@ -25,7 +32,9 @@ local MapWindow = {
 }
 ns.MapWindow = MapWindow
 
-local window, content, view, arrow, title
+local HIGHLIGHT_ALPHA = 0.7
+
+local window, content, view, arrow, title, highlight, points, group
 local quests  -- BubbleQuest's quest view on our map, when BubbleQuest is loaded (BubbleQuestAPI.CreateQuestView)
 local centre = { north = 0, west = 0, map = nil }
 local ppy = DEFAULT_PPY
@@ -60,6 +69,56 @@ local function zoneName(north, west)
   return info and info.name
 end
 
+-- Screen offset (from the content's centre) of a world point.
+local function project(north, west)
+  return (centre.west - west) * ppy, (north - centre.north) * ppy
+end
+
+-- Screen offset of a point on UI map `uiMap` (0..1), or nil when it isn't on this continent.
+local function projectMapPos(uiMap, x, y)
+  local cont, world = C_Map.GetWorldPosFromMapPos(uiMap, CreateVector2D(x, y))
+  if cont ~= centre.map or not world then
+    return nil
+  end
+  return project(world.x, world.y)
+end
+
+-- The zone under the cursor, highlighted as Blizzard's continent map does it.
+local function drawHighlight(north, west)
+  local continent = north and ns.MapPoints.Continent(centre.map, north, west)
+  local _, pos
+  if continent then
+    _, pos = C_Map.GetMapPosFromWorldPos(centre.map, CreateVector2D(north, west), continent)
+  end
+  local fileID, atlas, texX, texY, w, h, left, top
+  if pos then
+    fileID, atlas, texX, texY, w, h, left, top = C_Map.GetMapHighlightInfoAtPosition(continent, pos.x, pos.y)
+  end
+  local x1, y1, x2, y2
+  if ((fileID and fileID > 0) or atlas) and w and w > 0 and h > 0 then
+    x1, y1 = projectMapPos(continent, left, top)
+    x2, y2 = projectMapPos(continent, left + w, top + h)
+  end
+  if not (x1 and x2) then
+    highlight:Hide()
+    return
+  end
+  local key = atlas or fileID
+  if highlight.key ~= key then
+    highlight.key = key
+    if atlas then
+      highlight:SetAtlas(atlas)
+    else
+      highlight:SetTexture(fileID, nil, nil, "TRILINEAR")
+      highlight:SetTexCoord(0, texX, 0, texY)
+    end
+  end
+  highlight:ClearAllPoints()
+  highlight:SetPoint("TOPLEFT", content, "CENTER", x1, y1)
+  highlight:SetPoint("BOTTOMRIGHT", content, "CENTER", x2, y2)
+  highlight:Show()
+end
+
 local function redraw()
   if not window:IsShown() then
     return
@@ -72,17 +131,30 @@ local function redraw()
   end
   if not centre.map then
     title:SetText("BubbleMap")
+    highlight:Hide()
+    points:Draw(nil, 0, 0)
+    group:Draw(nil)
     return
   end
+  -- The world point under the cursor, while it's over the map and not dragging it.
+  local hoverNorth, hoverWest
+  if content:IsMouseOver() and not drag then
+    hoverNorth, hoverWest = worldAt(cursorOffset())
+  end
+
   view:Draw(centre.north, centre.west, centre.map, ppy)
+  drawHighlight(hoverNorth, hoverWest)
   if quests then
     quests:Draw(centre.north, centre.west, centre.map, ppy, 0)  -- north up: no turn
   end
+  -- One tooltip at a time: a member's name wins over a point's.
+  group:Draw(centre.map, project)
+  points:Draw(centre.map, centre.north, centre.west, project, group:IsHovering())
 
   -- The player's arrow, where they are (hidden off this continent or out of view).
   local north, west, map = playerPosition()
   if north and map == centre.map then
-    local x, y = (centre.west - west) * ppy, (north - centre.north) * ppy
+    local x, y = project(north, west)
     local halfW, halfH = content:GetWidth() / 2, content:GetHeight() / 2
     arrow:SetShown(math.abs(x) <= halfW and math.abs(y) <= halfH)
     arrow:ClearAllPoints()
@@ -92,10 +164,7 @@ local function redraw()
     arrow:Hide()
   end
 
-  local name
-  if content:IsMouseOver() then
-    name = zoneName(worldAt(cursorOffset()))
-  end
+  local name = hoverNorth and zoneName(hoverNorth, hoverWest)
   title:SetText(name or zoneName(centre.north, centre.west) or "BubbleMap")
 end
 
@@ -138,7 +207,7 @@ local function create()
   window:SetBackdrop({
     bgFile = "Interface\\BUTTONS\\WHITE8X8", edgeFile = "Interface\\BUTTONS\\WHITE8X8", edgeSize = 1,
   })
-  window:SetBackdropColor(0.05, 0.06, 0.07, 1)
+  window:SetBackdropColor(ns.SEA[1], ns.SEA[2], ns.SEA[3], ns.SEA[4])
   window:SetBackdropBorderColor(0, 0, 0, 1)
   window:Hide()
   tinsert(UISpecialFrames, "BubbleMapWindow")  -- Escape closes it
@@ -181,6 +250,13 @@ local function create()
   content:EnableMouse(true)
   content:EnableMouseWheel(true)
   view = ns.TileView.New(content)
+  local highlightFrame = CreateFrame("Frame", nil, content)
+  highlightFrame:SetAllPoints()
+  highlightFrame:SetFrameLevel(content:GetFrameLevel() + 1)
+  highlight = highlightFrame:CreateTexture(nil, "ARTWORK")
+  highlight:SetBlendMode("ADD")  -- as Blizzard's (MapHighlightDataProvider.xml)
+  highlight:SetAlpha(HIGHLIGHT_ALPHA)
+  highlight:Hide()
   content:SetScript("OnMouseWheel", function(_, delta) zoomAt(delta) end)
   content:SetScript("OnMouseDown", function(_, button)
     if button == "LeftButton" then
@@ -195,13 +271,21 @@ local function create()
   -- takes `content` as the frame under the cursor (content takes the mouse for drag and wheel).
   local quest = ns.Quest
   if quest and quest.CreateQuestView then
-    quests = quest.CreateQuestView(content, { guide = true, hover = true })
+    -- Town services too (its Town services toggles), less flight masters: MapPoints draws those, with
+    -- their discovered state.
+    quests = quest.CreateQuestView(content, { guide = true, hover = true, services = { exclude = { flight = true } } })
     quests:GetFrame():SetFrameLevel(content:GetFrameLevel() + 3)
   end
 
+  -- Blizzard's map points and the group's dots, over the quest layer (their icons are small and few).
+  points = ns.MapPoints.NewLayer(content)
+  points.frame:SetFrameLevel(content:GetFrameLevel() + 4)
+  group = ns.Group.NewLayer(content)
+  group.frame:SetFrameLevel(content:GetFrameLevel() + 5)
+
   local arrowFrame = CreateFrame("Frame", nil, content)
   arrowFrame:SetAllPoints()
-  arrowFrame:SetFrameLevel(content:GetFrameLevel() + 5)
+  arrowFrame:SetFrameLevel(content:GetFrameLevel() + 6)
   arrow = arrowFrame:CreateTexture(nil, "OVERLAY")
   arrow:SetSize(28, 28)
   arrow:SetTexture(ARROW)
@@ -236,12 +320,15 @@ local function create()
   end)
   window:SetScript("OnShow", function()
     MapWindow.following = true
+    ns.MapPoints.Refresh()  -- flight points learned, events begun since it was last open
     if quests then
       quests:Show()
     end
     redraw()
   end)
   window:SetScript("OnHide", function()
+    points:Draw(nil, 0, 0)  -- drops their tooltips, if up
+    group:Draw(nil)
     if quests then
       quests:Hide()
     end

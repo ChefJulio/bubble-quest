@@ -15,6 +15,10 @@ if quest and quest.API < QUEST_API_NEEDED then
 end
 ns.Quest = quest  ---@type table?
 
+-- The open sea's colour in the terrain tiles (sampled from coastal tiles' sea edges: about 5, 6, 7 of
+-- 255), for the fill where there's no tile, so the coast's tile grid doesn't show.
+ns.SEA = { 0.02, 0.024, 0.028, 1 }
+
 -- Events: one frame, handlers per event (errors reported without stopping the others).
 local handlers = {}
 local frame = CreateFrame("Frame")

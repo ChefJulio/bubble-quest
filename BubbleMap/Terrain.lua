@@ -33,7 +33,7 @@ local ADDON_NAME, ns = ...
 
 local TILE_YARDS = 1600 / 3   -- 533.33
 local GRID = 64
-local FILL = { 0.05, 0.06, 0.07, 1 }
+local FILL = ns.SEA
 
 local Terrain = {
   active = false,
