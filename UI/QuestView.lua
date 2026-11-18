@@ -41,6 +41,11 @@ local HOVER_SECONDS = 0.05   -- how often the hover is checked while the cursor 
 local ROUND_MASK = "Interface/CharacterFrame/TempPortraitAlphaMask"
 local SQUARE_MASK = "Interface/BUTTONS/WHITE8X8"
 local MERGE_SHARE = 0.8      -- icons closer than this share of their size merge into one (givers' "!")
+-- Below this scale a view shows a continent's worth: quest givers' "!" only with the setting for
+-- continent maps (map.continentIcons), as on the world map (UI/MapAreas.lua ShowsIcons), where
+-- thousands of them were clutter; and slow to merge every frame. Zone maps and the minimap are well
+-- above it (a zone ~0.3-1 px a yard, the minimap ~0.3+).
+local GIVER_MIN_PPY = 0.08
 
 -- Quest givers' "!": pixels at 100% (setting map.iconSize), times the view's iconScale. Matched on the
 -- minimap to the game's own blips in two side-by-sides (UI/MinimapAreas.lua says how); the "?" box is
@@ -483,7 +488,8 @@ function View:Draw(north, west, map, ppy, turn)
   local mapSettings = settings()
   local showAreas = mapSettings and mapSettings[opts.areasSetting or "areas"]
   local showGuide = opts.guide and (not opts.guideSetting or (mapSettings and mapSettings[opts.guideSetting]))
-  local showGivers = ns.MapAvailable:Enabled()
+  local showGivers = ns.MapAvailable:Enabled() and ppy ~= nil
+    and (ppy >= GIVER_MIN_PPY or (mapSettings and mapSettings.continentIcons))
   wipe(self.hits)
   wipe(self.giverHits)
   if north and ppy and ppy > 0 and (showAreas or showGuide or showGivers) then
