@@ -20,9 +20,10 @@ local ADDON_NAME, ns = ...
 --   - Every frame only positions change: the pixels-per-yard scale (Blizzard's zoom, indoors and out,
 --     C_Minimap.GetViewRadius) and the player's position. The set of tiles is worked out again only when
 --     the player crosses a tile edge or the scale changes.
---   - Off a continent in the table (instances, unknown maps), or north-up not drawn (Rotate Minimap
---     on: rotated ground is the next part of this step), the padding is just the dark fill.
---   - Nothing at all while the map is square: Blizzard's minimap covers the whole frame then.
+--   - Off a continent in the table (instances, unknown maps), the padding is just the dark fill.
+--   - Rotate Minimap on: every tile turns with the player's facing, as BubbleQuest's minimap areas do,
+--     and fills the corners Blizzard's turned square leaves empty.
+--   - Nothing at all while the map is square and north-up: Blizzard's minimap covers it all then.
 
 local TILE_YARDS = 1600 / 3   -- 533.33
 local GRID = 64
@@ -108,17 +109,29 @@ local function hideTiles()
   lastCol, lastRow, lastMap, lastSpan = nil, nil, nil, nil
 end
 
+-- The angle the ground turns by: the player's facing with Rotate Minimap on (BubbleQuest's
+-- MinimapAreas turns its areas the same way), else 0. nil when it can't be known (no facing).
+local function angle()
+  if not rotating() then
+    return 0
+  end
+  return GetPlayerFacing()
+end
+
 local function update()
   local outer = ns.Minimap.outer
+  local turn = angle()
+  -- Square and north-up, Blizzard's minimap covers the whole frame. Rotating, its square ground image
+  -- turns and leaves the corners empty (seen in game): ours fills them, so the layer is on then too.
   local square = math.abs(outer:GetWidth() - outer:GetHeight()) < 1
-  clip:SetShown(not square)
-  if square then
+  clip:SetShown(not square or turn ~= 0)
+  if not clip:IsShown() then
     return
   end
   local px, py, _, mapID = UnitPosition("player")
   local tiles = mapID and ns.Tiles.maps[mapID]
   local s = scale()
-  if not (px and py and tiles and s) or rotating() then
+  if not (px and py and tiles and s and turn) then
     if lastMap then
       hideTiles()
     end
@@ -126,9 +139,10 @@ local function update()
   end
 
   local tilePixels = TILE_YARDS * s
-  -- Enough slots to cover the frame's longer side, plus the ring of one each side (odd, so the
+  -- Enough slots to cover the frame's diagonal (it turns), plus the ring of one each side (odd, so the
   -- player's tile is the middle one).
-  local span = math.ceil(math.max(clip:GetWidth(), clip:GetHeight()) / tilePixels) + 3
+  local w, h = clip:GetWidth(), clip:GetHeight()
+  local span = math.ceil(math.sqrt(w * w + h * h) / tilePixels) + 3
   if span % 2 == 0 then
     span = span + 1
   end
@@ -142,14 +156,21 @@ local function update()
     lastCol, lastRow, lastMap, lastSpan = col, row, mapID, span
   end
 
-  -- Positions: tile (c, r)'s top-left corner is at world (x = (32 - r) * T, y = (32 - c) * T).
+  -- Positions, by each tile's centre: tile (c, r) spans world x from (32 - r) * T down and y from
+  -- (32 - c) * T down, so its centre sits (c + 0.5 - colF) tiles east and (rowF - r - 0.5) tiles north
+  -- of the player. Turned: the same rotation as MinimapAreas' project(); each texture turns with it
+  -- (SetRotation is counter-clockwise, the map turns clockwise as the player turns left). Rotated tiles
+  -- get a pixel of overlap so no hairline shows between them.
+  local cos, sin = math.cos(turn), math.sin(turn)
+  local size = turn ~= 0 and tilePixels + 1 or tilePixels
   for _, t in pairs(slots) do
     if t:IsShown() then
-      local left = (slotCol[t] - colF) * tilePixels
-      local top = (rowF - slotRow[t]) * tilePixels
-      t:SetSize(tilePixels, tilePixels)
+      local x = (slotCol[t] + 0.5 - colF) * tilePixels
+      local y = (rowF - slotRow[t] - 0.5) * tilePixels
+      t:SetSize(size, size)
+      t:SetRotation(-turn)
       t:ClearAllPoints()
-      t:SetPoint("TOPLEFT", holder, "CENTER", left, top)
+      t:SetPoint("CENTER", holder, "CENTER", x * cos + y * sin, -x * sin + y * cos)
     end
   end
 end
