@@ -108,6 +108,13 @@ local function gameDraws()
   return not MinimapAreas.gameHidden
 end
 
+-- An area circle's radius: the setting (map.size), halved indoors (review, a cave: the minimap zooms in
+-- a long way indoors and mobs stand close, so outdoor-sized circles merged into one blob).
+local INDOOR_SHARE = 0.5
+local function circleYards()
+  return ns.MapAreas.blobYards() * (IsIndoors() and INDOOR_SHARE or 1)
+end
+
 -- For the view: how far from the centre the game draws (pixels; nil: nowhere), and whether it hides
 -- low-level quest givers (its "Low-level quests" tracking off: ours show for those).
 local function gameMarkers()
@@ -161,6 +168,7 @@ local function create()
     services = function() return MinimapAreas.gameHidden end,
     guide = true,
     areasSetting = "minimapAreas",
+    circleYards = circleYards,
     guideSetting = "guide",
     -- The minimap itself, or BubbleMap's map frame (it takes the mouse wheel for its zoom, so it's the
     -- mouse focus over its map).

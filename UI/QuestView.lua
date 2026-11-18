@@ -28,6 +28,7 @@ local ADDON_NAME, ns = ...
 --   servicesExclude   { [MapServices key] = true }: services left out (the owner draws its own)
 --   focus         function(focus) -> true when the mouse focus counts as being on the view
 --   minCircle, minIcon   smallest on-screen sizes, pixels (a far-out window keeps its marks visible)
+--   circleYards  function() -> an area circle's radius, yards (default: the map.size setting)
 --   tooltipName   a global name for the view's tooltip (default "BubbleQuestViewTooltip<n>")
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
@@ -320,7 +321,8 @@ end
 
 function View:drawAreas()
   local scale, north, west = self.scale, self.north, self.west
-  local size = math.max(2 * ns.MapAreas.blobYards() * scale, self.options.minCircle or 0)
+  local radius = self.options.circleYards and self.options.circleYards() or ns.MapAreas.blobYards()
+  local size = math.max(2 * radius * scale, self.options.minCircle or 0)
   local alpha = ns.MapAreas.blobAlpha()
   local hits = self.hits
   wipe(self.placed)
