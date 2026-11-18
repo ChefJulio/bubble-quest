@@ -18,7 +18,8 @@ local LINE_UNIT_NAME = Enum.TooltipDataLineType.UnitName  -- 2
 local LINE_QUEST_TITLE = Enum.TooltipDataLineType.QuestTitle  -- 17
 local HEADER = { 0.4, 0.8, 1 }       -- "BubbleQuest" blue, as the tracker's Share next
 local DONE_COLOR = { 0.5, 0.5, 0.5 }
-local WARN = { 1, 0.5, 0.15 }        -- "Keep for ...: don't sell", the orange of a warning
+local WARN = { 1, 0.5, 0.15 }        -- "DON'T SELL for ...", the orange of a warning
+local ALERT_ICON = "|TInterface\\DialogFrame\\UI-Dialog-Icon-AlertNew:16|t "  -- the game's dialog alert
 
 local WorldTooltips = {}
 ns.WorldTooltips = WorldTooltips
@@ -254,8 +255,10 @@ local function onItem(tooltip, data)
           local title = ("[%d] %s"):format(level(questID, quest.level), quest.title or "?")
           local progress = ("%d/%d"):format(objective.fulfilled or 0, objective.required or 0)
           if sellable then
-            tooltip:AddDoubleLine(("Keep for %s: don't sell"):format(title), progress, WARN[1], WARN[2], WARN[3],
-              count[1], count[2], count[3])
+            -- "DON'T SELL" first, in capitals and bright red behind the game's alert icon (review: "make
+            -- 'don't sell' even more prominent"); what it's for after, in the softer orange.
+            tooltip:AddDoubleLine(("%s|cffff2020DON'T SELL|r  for %s"):format(ALERT_ICON, title), progress,
+              WARN[1], WARN[2], WARN[3], count[1], count[2], count[3])
           else
             tooltip:AddDoubleLine("For: " .. title, progress, HEADER[1], HEADER[2], HEADER[3],
               count[1], count[2], count[3])
