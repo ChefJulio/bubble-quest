@@ -127,7 +127,10 @@ local function apply()
   -- on our map frame (its SetMinimapView), so it stays.
   Minimap:SetShown(not own)
   ns.Terrain.zoom = k
-  ns.Terrain.force = own
+  -- One ground in both modes: ours. In gather mode Blizzard's minimap then draws only its blips over it
+  -- (Terrain turns its ground off outdoors): its own ground was duller than our tiles, so the colour
+  -- changed with the mode (seen in game). Indoors and off our data, Terrain leaves Blizzard's ground on.
+  ns.Terrain.force = true
   if arrow then
     arrow:SetShown(own)
   end
