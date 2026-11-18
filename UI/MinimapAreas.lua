@@ -171,9 +171,15 @@ end
 -- game no longer drew it and a square test still skipped ours). Ours is skipped only there: drawn in
 -- the corners and in BubbleMap's padding, and everywhere while BubbleMap draws its own map with
 -- Blizzard's minimap hidden (gameDraws).
+-- Not the whole view circle: the game's own turn-in "?" vanished at 186.5 yd with a 233.3 yd view
+-- radius and at 159.5 yd with 200 yd (measured in game, two zoom levels): 0.80 of the radius both
+-- times. Ours goes a little inside that, as a marker shown twice at the edge beats none (review: the
+-- full radius left a ring where neither showed). Quest givers' "!" assumed the same until measured.
+local GAME_MARKER_SHARE = 0.78
+
 local function inGameView(x, y)
-  local half = Minimap:GetWidth() / 2
-  return x * x + y * y <= half * half
+  local reach = Minimap:GetWidth() / 2 * GAME_MARKER_SHARE
+  return x * x + y * y <= reach * reach
 end
 
 -- Whether the game draws its quest markers on the minimap at all: not while BubbleMap draws its own map
