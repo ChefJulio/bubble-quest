@@ -7,7 +7,7 @@ local ADDON_NAME, ns = ...
 -- at Blizzard's own zoom levels and size: scaling its frame (behind a mask or a clipping parent) put
 -- them in wrong places (experiments, 2026-11-17). So there are two modes, never a mix:
 --
---   - OUR MAP (the usual): Blizzard's minimap hidden (alpha 0, mouse off) with its zoom fixed at its
+--   - OUR MAP (the usual): Blizzard's minimap hidden (Hide: at alpha 0 its blips still drew) with its zoom fixed at its
 --     farthest level, and BubbleMap draws the whole map: our terrain (Terrain.lua), our player arrow,
 --     BubbleQuest's quest layer (told the game draws nothing: SetMinimapZoom(k, true)). Our own zoom,
 --     in and out, STEPS times Blizzard's farthest view.
@@ -122,8 +122,10 @@ local function apply()
   if own then
     Minimap:SetZoom(0)  -- our scale is relative to Blizzard's farthest view
   end
-  Minimap:SetAlpha(own and 0 or 1)
-  Minimap:EnableMouse(not own)
+  -- Hidden, not faded: at alpha 0 the engine still drew its blips (herbs, the game's "?") over our map,
+  -- at its own scale (seen in game). A hidden frame isn't drawn at all. BubbleQuest's quest layer lives
+  -- on our map frame (its SetMinimapView), so it stays.
+  Minimap:SetShown(not own)
   ns.Terrain.zoom = k
   ns.Terrain.force = own
   if arrow then

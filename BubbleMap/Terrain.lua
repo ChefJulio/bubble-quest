@@ -57,9 +57,16 @@ end
 
 -- Pixels (in `clip`'s units) per yard: Blizzard's minimap shows GetViewRadius yards from its centre to
 -- its edge.
+local lastRadius  -- the last view radius the game reported (BubbleMap's own map hides the minimap)
+
 local function scale()
   local radius = C_Minimap.GetViewRadius()
-  if not radius or radius <= 0 then
+  if radius and radius > 0 then
+    lastRadius = radius
+  else
+    radius = lastRadius
+  end
+  if not radius then
     return nil
   end
   local half = Minimap:GetWidth() / 2 * Minimap:GetEffectiveScale() / clip:GetEffectiveScale()
