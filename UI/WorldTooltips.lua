@@ -15,6 +15,7 @@ local ADDON_NAME, ns = ...
 -- Holding Ctrl leaves these lines out, as with BubbleQuest's own tooltips (UI/Tooltips.lua).
 
 local LINE_UNIT_NAME = Enum.TooltipDataLineType.UnitName  -- 2
+local LINE_QUEST_TITLE = Enum.TooltipDataLineType.QuestTitle  -- 17
 local HEADER = { 0.4, 0.8, 1 }       -- "BubbleQuest" blue, as the tracker's Share next
 local DONE_COLOR = { 0.5, 0.5, 0.5 }
 local WARN = { 1, 0.5, 0.15 }        -- "Keep for ...: don't sell", the orange of a warning
@@ -94,14 +95,59 @@ local function onUnit(tooltip, data)
     return
   end
   local name
+  local listed = {}  -- quests the game's own lines already name (QuestTitle lines carry the quest's id)
   for _, line in ipairs(data.lines) do
-    if readable(line.type) and line.type == LINE_UNIT_NAME then
-      name = readable(line.leftText) and line.leftText or nil
-      break
+    local lineType = line.type
+    if readable(lineType) then
+      if lineType == LINE_UNIT_NAME and not name then
+        name = readable(line.leftText) and line.leftText or nil
+      elseif lineType == LINE_QUEST_TITLE then
+        -- `id` on a QuestTitle line is a real field the annotations don't declare (Quests/Nearby.lua).
+        local id = (line --[[@as table]]).id
+        if readable(id) then
+          listed[id] = true
+        end
+      end
     end
   end
   if not name then
     return  -- secret (combat), or no name line
+  end
+  -- Quest items this mob drops that the game's own lines leave out (review: a Young Goretusk listed
+  -- Westfall Stew's Goretusk Snout, not Goretusk Liver Pie's liver, which it drops too): each
+  -- unfinished item objective whose sources (forever-db, else learned: DoLine.ItemSources) name it,
+  -- of a quest the game didn't list, in the game's own style, with the drop chance when known.
+  local drops = {}
+  for questID, quest in pairs(ns.QuestLog.quests) do
+    if not listed[questID] and not quest.isComplete then
+      for _, objective in ipairs(quest.objectives or {}) do
+        if objective.type == "item" and not objective.finished then
+          local itemName = ns.QuestLog.ObjectiveName(objective)
+          local sources = ns.DoLine.ItemSources(questID, itemName)
+          if sources and sources.kind == "npc" and tContains(sources.names, name) then
+            local chance = sources.chances and sources.chances[name]
+            drops[#drops + 1] = { quest = quest, objective = objective, itemName = itemName, chance = chance }
+          end
+        end
+      end
+    end
+  end
+  if #drops > 0 then
+    local lastQuest
+    for _, drop in ipairs(drops) do
+      if drop.quest ~= lastQuest then
+        tooltip:AddLine(drop.quest.title or "?", 1, 0.82, 0)
+        lastQuest = drop.quest
+      end
+      local counted = drop.objective.required and drop.objective.required > 0
+      local text = counted and ("  %d/%d %s"):format(drop.objective.fulfilled or 0, drop.objective.required, drop.itemName)
+        or ("  " .. drop.itemName)
+      if drop.chance then
+        text = text .. " |cff999999(" .. ns.DoLine.ChanceText(drop.chance) .. ")|r"
+      end
+      tooltip:AddLine(text, 1, 1, 1)
+    end
+    tooltip:Show()
   end
   -- Ready quests turned in to this NPC.
   local ready = {}

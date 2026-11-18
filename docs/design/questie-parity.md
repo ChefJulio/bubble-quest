@@ -23,7 +23,7 @@ agreed), **skip** (not worth it, or the client already does it).
 
 | Questie | Status | Questmarker / notes |
 | --- | --- | --- |
-| World tooltips: quest progress on mobs and objects | planned | The client adds quest lines to unit tooltips itself (TooltipDataLineType QuestObjective/QuestTitle/QuestPlayer): add only what's missing |
+| World tooltips: quest progress on mobs and objects | have (mobs) | The client adds quest lines to unit tooltips itself; UI/WorldTooltips.lua adds the item objectives it leaves out (by source name), with drop chance. Objects: still the game's lines only |
 | Quests in NPC tooltips (what a quest giver offers) | have | UI/WorldTooltips.lua: offers and ready turn-ins, by NPC name (IDs are secret outside your group); not in combat |
 | Quest level in tooltips | have | "[level]" on every quest line BubbleQuest adds |
 | Next quests in chain | planned | QuestieDB nextQuestInChain |

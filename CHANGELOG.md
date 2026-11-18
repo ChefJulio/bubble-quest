@@ -14,8 +14,10 @@
 - Quests on the game's tooltips. Hover a quest giver to see the quests it offers you (the same ones
   as the map's "!"), or the NPC a ready quest goes to for "? [10] Downstream  Ready". Items say which
   quest they start ("Starts a quest", greyed once done) and which quest in your log needs them, with
-  your count. Each has a toggle under Tooltips in the settings. Not in combat: the game hides that
-  data then
+  your count; one a vendor would buy says "Keep for [quest]: don't sell". Mobs add the quest items
+  they drop that the game's own lines leave out (a Young Goretusk now lists Goretusk Liver Pie as
+  well as Westfall Stew), with the drop chance. Each has a toggle under Tooltips in the settings. Not
+  in combat: the game hides that data then
 
 - Quest colours on the maps are picked against the quests around them: a new quest takes the colour
   most unlike its neighbours' (quests far apart can share one), keeps it, and keeps it across logins.

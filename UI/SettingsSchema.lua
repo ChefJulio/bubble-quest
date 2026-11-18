@@ -205,7 +205,8 @@ function Schema:Entries()
       kind = "checkbox", id = "BUBBLEQUEST_TOOLTIP_NPCS", column = 1, default = true,
       label = "Quests on NPC tooltips",
       tooltip = "Hovering a quest giver lists the quests it offers you; hovering the NPC a ready quest is "
-        .. "turned in to lists those quests. Not in combat (the game hides that data then).",
+        .. "turned in to lists those quests; hovering a mob adds the quest items it drops that the game's "
+        .. "own lines leave out, with the drop chance. Not in combat (the game hides that data then).",
       get = function(p) return p.tooltips.npcs end,
       set = function(p, v) p.tooltips.npcs = v end,
     },
