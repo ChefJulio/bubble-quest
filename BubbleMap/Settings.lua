@@ -55,7 +55,7 @@ local ENTRIES = {
       return { { "terrain", "Terrain" }, { "art", "Map art" } }
     end,
     get = function() return ns.DB.mapStyle end,
-    set = function(v) ns.DB.mapStyle = v end },
+    set = function(v) ns.DB.mapStyle = v; ns.Around:Apply() end },  -- the bar button's icon follows
 
   { kind = "checkbox", id = "BUBBLEMAP_WORLD_TERRAIN", label = "Terrain on the world map", default = false,
     tooltip = "Zone maps on the world map show the real terrain (the minimap's own ground) instead of the "
@@ -77,6 +77,9 @@ local ENTRIES = {
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_GATHER", label = "Gather button", default = true,
     tooltip = "Gather mode on and off in one click: on, the game's minimap and its live herb and ore blips; "
       .. "off, BubbleMap's map with all its zoom (hold Ctrl to peek)." },
+  { kind = "checkbox", id = "BUBBLEMAP_SHOW_STYLE", label = "Map style button", default = true,
+    tooltip = "Switches the map between the terrain and the world map's art in one click (also the Map "
+      .. "style setting above)." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_MAIL", label = "New mail", default = true,
     tooltip = "An envelope when there's new mail; hover it for the senders." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_COORDS", label = "Coordinates", default = false,
@@ -92,7 +95,7 @@ local ENTRIES = {
 local SHOW_KEYS = {
   BUBBLEMAP_SHOW_BAR = "bar", BUBBLEMAP_SHOW_ZONE = "zone", BUBBLEMAP_SHOW_CLOCK = "clock",
   BUBBLEMAP_SHOW_CALENDAR = "calendar", BUBBLEMAP_SHOW_TRACKING = "tracking",
-  BUBBLEMAP_SHOW_MAIL = "mail", BUBBLEMAP_SHOW_GATHER = "gather", BUBBLEMAP_SHOW_COORDS = "coords", BUBBLEMAP_SHOW_ZOOM = "zoom",
+  BUBBLEMAP_SHOW_MAIL = "mail", BUBBLEMAP_SHOW_GATHER = "gather", BUBBLEMAP_SHOW_STYLE = "style", BUBBLEMAP_SHOW_COORDS = "coords", BUBBLEMAP_SHOW_ZOOM = "zoom",
   BUBBLEMAP_LAUNCHERS = "launchers",
 }
 

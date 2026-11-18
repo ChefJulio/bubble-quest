@@ -25,6 +25,8 @@ local BAR_BAND = { 0, 0, 0, 0.45 }
 local ICON = 15
 local GAP = 4
 local PAD = 6
+local ART_ICON = "Interface\\Icons\\INV_Misc_Map_01"  -- the map style button, showing the art
+local TERRAIN_ICON_TILE = 32 * 64 + 49  -- ... showing terrain: an Elwynn tile (as WorldMap.lua's button)
 local CLOCK_SECONDS = 1
 local COORDS_SECONDS = 0.2
 
@@ -220,6 +222,29 @@ local function createButtons()
   end)
   buttons.gather = gather
 
+  -- Map style: terrain or the world map's art (Art.lua), flipped in one click. Its icon is the style
+  -- showing: a terrain tile, or a map.
+  local style = CreateFrame("Button", nil, bar)
+  style:SetSize(ICON, ICON)
+  style.icon = style:CreateTexture(nil, "ARTWORK")
+  style.icon:SetAllPoints()
+  style:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
+  style:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.2)
+  style:SetScript("OnClick", function()
+    ns.DB.mapStyle = ns.DB.mapStyle == "art" and "terrain" or "art"
+    Around:Apply()
+    if GameTooltip:GetOwner() == style then
+      style:GetScript("OnEnter")(style)  -- the tooltip follows the new style
+    end
+  end)
+  tooltip(style, function()
+    local art = ns.DB.mapStyle == "art"
+    GameTooltip:AddLine(art and "Map style: map art" or "Map style: terrain", 1, 1, 1)
+    GameTooltip:AddLine(art and "The world map's painted art, explored areas as on the world map. Click: terrain."
+      or "The real terrain, the game's own minimap ground. Click: the world map's art.", 0.8, 0.8, 0.8, true)
+  end)
+  buttons.style = style
+
   local tracking = iconButton("ui-hud-minimap-tracking-button")
   tracking:SetScript("OnClick", function(self) trackingMenu(self) end)
   tooltip(tracking, function() GameTooltip:AddLine("Tracking", 1, 1, 1) end)
@@ -386,6 +411,14 @@ local function layoutBar()
     buttons.gather.icon:SetAlpha(on and 1 or 0.6)
   end
   place(buttons.gather, show.gather and spell ~= nil)
+  if ns.DB.mapStyle == "art" then
+    buttons.style.icon:SetTexture(ART_ICON)
+    buttons.style.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  else
+    buttons.style.icon:SetTexture(ns.Tiles.maps[0] and ns.Tiles.maps[0][TERRAIN_ICON_TILE] or ART_ICON)
+    buttons.style.icon:SetTexCoord(0, 1, 0, 1)
+  end
+  place(buttons.style, show.style)
   place(buttons.launchers, ns.Launchers:Active())
   zone:SetShown(show.zone)
   if anchor then

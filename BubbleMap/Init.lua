@@ -91,6 +91,7 @@ local DEFAULTS = {
     calendar = true,
     tracking = true,
     gather = true,    -- the gather button (a tracking spell on/off; Zoom.lua)
+    style = true,     -- the map style button (terrain or the world map's art; Art.lua)
     mail = true,
     coords = false,   -- the quest addon's header shows them already
     zoom = false,     -- the mouse wheel zooms
