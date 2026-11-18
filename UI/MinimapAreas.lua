@@ -208,50 +208,14 @@ local function gameDraws()
   return not MinimapAreas.gameHidden
 end
 
--- The game's quest-giver "!" (review: two "!" a few pixels apart): drawn by the client, not readable
--- by addons (no API lists them, and the minimap blips aren't frames), for the givers it knows about:
--- those the server has sent, within its visibility range of the player. That range isn't documented
--- (players report 40-70 yd in the open world on classic-era clients), so this errs short: too short
--- leaves a few doubled "!" near its edge, too long would hide givers the game doesn't mark at all.
--- Tune with /bq givers. Low-level givers only while the game's "Low-level quests" tracking is on.
--- Drop-started quests have no giver for the game to mark.
-local GAME_GIVER_YARDS = 50
-
-local function gameMarksGiver(p, dNorth, dWest, x, y, trivialHidden)
-  return not p.drop and inGameView(x, y) and dNorth * dNorth + dWest * dWest <= GAME_GIVER_YARDS ^ 2
-    and not (p.entry.trivial and trivialHidden)
-end
-
----For /bq givers: the `count` nearest quest givers on this map, nearest first, as lines "name: N yd",
----marked when within GAME_GIVER_YARDS (ours hidden there, inside the game's view). Measuring: walk
----away from a giver and note the distance at which the game's own "!" vanishes.
----@param count number
----@return string[]
-function MinimapAreas:NearestGivers(count)
-  local north, west, instanceMap = ns.Navigation:PlayerPosition()
-  local nearest = {}
-  if north then
-    for _, p in ipairs(giverPoints) do
-      if p.map == instanceMap and not p.drop then
-        local yards = math.sqrt((p.x - north) ^ 2 + (p.y - west) ^ 2)
-        nearest[#nearest + 1] = { yards = yards, name = p.entry.giver.name or "?" }
-      end
-    end
-  end
-  table.sort(nearest, function(a, b) return a.yards < b.yards end)
-  local lines = { gameDraws()
-    and ("Leaving the \"!\" to the game within %d yd (GAME_GIVER_YARDS)."):format(GAME_GIVER_YARDS)
-    or "BubbleMap is drawing its own map: the game's minimap markers are hidden and every \"!\" is "
-      .. "ours. To measure the game's range, use BubbleMap's gather mode (Blizzard's minimap shown)." }
-  for i = 1, math.min(count, #nearest) do
-    local g = nearest[i]
-    lines[#lines + 1] = ("%s: %d yd%s"):format(g.name, g.yards + 0.5,
-      gameDraws() and g.yards <= GAME_GIVER_YARDS and " (game's \"!\")" or "")
-  end
-  if #nearest == 0 then
-    lines[#lines + 1] = "No quest givers known on this map (minimap layer off, or none)."
-  end
-  return lines
+-- The game's quest-giver "!" (review: two "!" a few pixels apart): drawn by the client for the givers
+-- it has loaded (those it renders in the world), which isn't a set distance, and no addon API lists
+-- them. So inside the circle where the game draws (inGameView) the "!" is left to the game entirely,
+-- as on Blizzard's own minimap: a giver not loaded yet has none until it is (decided in review).
+-- Ours still draws there for quests the game never marks: started by a drop, or low-level while the
+-- game's "Low-level quests" tracking is off.
+local function gameMarksGiver(p, x, y, trivialHidden)
+  return not p.drop and inGameView(x, y) and not (p.entry.trivial and trivialHidden)
 end
 
 local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
@@ -263,15 +227,14 @@ local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, half
   local trivialHidden = dedupe and C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.TrivialQuests)
   for _, p in ipairs(giverPoints) do
     if p.map == instanceMap then
-      local dNorth, dWest = p.x - north, p.y - west
-      local x, y = project(dNorth, dWest, cos, sin, scale)
+      local x, y = project(p.x - north, p.y - west, cos, sin, scale)
       local inside
       if square then
         inside = math.abs(x) <= reachW and math.abs(y) <= reachH
       else
         inside = x * x + y * y <= reachW * reachW
       end
-      if inside and not (dedupe and gameMarksGiver(p, dNorth, dWest, x, y, trivialHidden)) then
+      if inside and not (dedupe and gameMarksGiver(p, x, y, trivialHidden)) then
         local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
         -- One "!" per spot (review: doubled "!" zoomed out): a giver's spawns, or givers side by side,
         -- that would overlap on screen share the first one drawn; its tooltip lists all their quests.
