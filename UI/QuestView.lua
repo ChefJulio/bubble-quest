@@ -23,6 +23,9 @@ local ADDON_NAME, ns = ...
 --   areasSetting  the Map setting that turns the areas on (default "areas", the world map's; the
 --                 minimap: "minimapAreas")
 --   guideSetting  the Map setting the guide line also needs (the minimap: "guide"; default none)
+--   services      function(view) -> true to draw the town services switched on (UI/MapServices.lua):
+--                 where the game's own tracking doesn't draw them (BubbleMap's window, its own minimap)
+--   servicesExclude   { [MapServices key] = true }: services left out (the owner draws its own)
 --   focus         function(focus) -> true when the mouse focus counts as being on the view
 --   minCircle, minIcon   smallest on-screen sizes, pixels (a far-out window keeps its marks visible)
 --   tooltipName   a global name for the view's tooltip
@@ -175,9 +178,10 @@ View.__index = View
 ---@param options table? see the top of this file
 ---@return table
 function QuestView.New(parent, options)
-  local view = setmetatable({ options = options or {}, hits = {}, giverHits = {}, radius = 0,
-    placed = {}, markerSize = 0, used = { blobs = 0, markers = 0, dots = 0, givers = 0 },
-    pools = { blobs = {}, markers = {}, dots = {}, givers = {} }, hoverAt = 0 }, View)
+  local view = setmetatable({ options = options or {}, hits = {}, giverHits = {}, serviceHits = {},
+    radius = 0, placed = {}, markerSize = 0,
+    used = { blobs = 0, markers = 0, dots = 0, givers = 0, services = 0 },
+    pools = { blobs = {}, markers = {}, dots = {}, givers = {}, services = {} }, hoverAt = 0 }, View)
   local layer = CreateFrame("Frame", nil, parent)
   layer:SetAllPoints(parent)
   layer:EnableMouse(false)
@@ -393,6 +397,44 @@ function View:drawGivers()
   end
 end
 
+-- Town services (UI/MapServices.lua), under the quest marks as on the world map. Spawns of one service
+-- that would overlap on screen merge into the first drawn (the world map's rule), so a far-out view
+-- isn't carpeted with mailboxes; different services side by side both show.
+function View:drawServices()
+  local points = ns.MapServices:WorldPoints()[self.map]
+  if not points then
+    return
+  end
+  local hits = self.serviceHits
+  local exclude = self.options.servicesExclude
+  local size = math.max(ns.MapServices.ICON_SIZE * self:iconScale(), self.options.minIcon or 0)
+  local near = size * MERGE_SHARE
+  local radius = math.max(size / 2, HOVER_MIN)
+  for _, p in ipairs(points) do
+    if not (exclude and exclude[p.key]) then
+      local x, y = project(p.x - self.north, p.y - self.west, self.cos, self.sin, self.scale)
+      if self:inside(x, y, size / 2) then
+        local merged = false
+        for _, hit in ipairs(hits) do
+          if hit.key == p.key and math.abs(hit.x - x) < near and math.abs(hit.y - y) < near then
+            merged = true
+            break
+          end
+        end
+        if not merged then
+          local t = self:acquire("services", nil, "OVERLAY", -1)
+          if t.icon ~= p.icon then
+            t.icon = p.icon
+            t:SetTexture(p.icon)
+          end
+          self:place(t, x, y, size)
+          hits[#hits + 1] = { x = x, y = y, radius = radius, key = p.key, entry = p.entry }
+        end
+      end
+    end
+  end
+end
+
 -- The guide: dots drifting from the player toward one quest's target (see currentGuide), where they
 -- fall inside the view (the player may be anywhere in a window, or outside it).
 function View:drawGuide()
@@ -449,17 +491,26 @@ function View:updateHover()
   end
   self.hoverAt = now
   local tooltip = self.tooltip
-  -- A quest giver under the cursor first (its icon sits on top), else the quest areas.
-  local found, offers
-  if (#self.hits > 0 or #self.giverHits > 0) and self:onView() then
+  -- A quest giver under the cursor first (its icon sits on top), then town services, else the quest
+  -- areas (the world map's order).
+  local found, offers, services
+  if (#self.hits > 0 or #self.giverHits > 0 or #self.serviceHits > 0) and self:onView() then
     local cx, cy = GetCursorPosition()
     local scale = self.layer:GetEffectiveScale()
     local mx, my = self.layer:GetCenter()
     local x, y = cx / scale - mx, cy / scale - my
     offers = ns.MapAvailable.Under(self.giverHits, x, y)
-    found = not offers and ns.MapAreas.Under(self.hits, self.radius, x, y) or nil
+    if not offers then
+      for _, hit in ipairs(self.serviceHits) do
+        if (hit.x - x) ^ 2 + (hit.y - y) ^ 2 <= hit.radius * hit.radius then
+          services = services or {}
+          services[#services + 1] = hit
+        end
+      end
+    end
+    found = not (offers or services) and ns.MapAreas.Under(self.hits, self.radius, x, y) or nil
   end
-  if not (found or offers) or ns.Tooltips:Suppressed() then  -- Ctrl hides our tooltips (UI/Tooltips.lua)
+  if not (found or offers or services) or ns.Tooltips:Suppressed() then  -- Ctrl hides ours (UI/Tooltips.lua)
     tooltip:Hide()
     return
   end
@@ -477,6 +528,8 @@ function View:updateHover()
   end
   if offers then
     ns.MapAvailable.FillTooltip(tooltip, offers)
+  elseif services then
+    ns.MapServices.FillTooltip(tooltip, services)
   else
     ns.MapAreas.FillTooltip(tooltip, found)
   end
@@ -486,7 +539,8 @@ end
 
 ---Draw around the world point (`north`, `west` yards) on instance map `map`, at `ppy` pixels a yard
 ---(the layer's units), turned by `turn` radians (a rotating minimap; 0: north up). What shows follows
----the Map settings: areas (options.areasSetting), the guide (options.guide and guideSetting), givers.
+---the Map settings: areas (options.areasSetting), the guide (options.guide and guideSetting), givers,
+---town services (options.services, and which are switched on).
 ---@param north number
 ---@param west number
 ---@param map number
@@ -497,11 +551,14 @@ function View:Draw(north, west, map, ppy, turn)
   local mapSettings = settings()
   local showAreas = mapSettings and mapSettings[opts.areasSetting or "areas"]
   local showGuide = opts.guide and (not opts.guideSetting or (mapSettings and mapSettings[opts.guideSetting]))
-  local showGivers = ns.MapAvailable:Enabled() and ppy ~= nil
-    and (ppy >= GIVER_MIN_PPY or (mapSettings and mapSettings.continentIcons))
+  -- A continent's worth of icons only with map.continentIcons, as the world map (ShowsIcons).
+  local iconsHere = ppy ~= nil and (ppy >= GIVER_MIN_PPY or (mapSettings and mapSettings.continentIcons))
+  local showGivers = iconsHere and ns.MapAvailable:Enabled()
+  local showServices = iconsHere and opts.services ~= nil and opts.services(self) and ns.MapServices.lists ~= nil
   wipe(self.hits)
   wipe(self.giverHits)
-  if north and ppy and ppy > 0 and (showAreas or showGuide or showGivers) then
+  wipe(self.serviceHits)
+  if north and ppy and ppy > 0 and (showAreas or showGuide or showGivers or showServices) then
     turn = turn or 0
     self.north, self.west, self.map, self.scale = north, west, map, ppy
     self.cos, self.sin = math.cos(turn), math.sin(turn)
@@ -538,6 +595,9 @@ function View:Draw(north, west, map, ppy, turn)
         rebuildGivers()
       end
       self:drawGivers()
+    end
+    if showServices then
+      self:drawServices()
     end
     if showGuide then
       self:drawGuide()

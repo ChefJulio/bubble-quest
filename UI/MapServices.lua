@@ -8,9 +8,11 @@ local ADDON_NAME, ns = ...
 -- Master": the in-game title, so every trainer in the data counts, no hand-kept lists), forever-db
 -- objects named Mailbox. Friendly NPCs only.
 --
--- World map only (the minimap has Blizzard's own tracking for these). Same approach as the other
--- layers: our own mouse-disabled frame on the canvas, hover from the cursor; an available-quest "!"
--- under the cursor wins (UI/MapAvailable.lua), and the quest areas yield to both.
+-- On the world map, as the other layers: our own mouse-disabled frame on the canvas, hover from the
+-- cursor; an available-quest "!" under the cursor wins (UI/MapAvailable.lua), and the quest areas yield
+-- to both. Quest views (UI/QuestView.lua, option services) draw the same icons from WorldPoints: BubbleMap's
+-- map window, and the minimap only while BubbleMap has Blizzard's hidden (with it showing, Blizzard's own
+-- tracking draws these there).
 
 local ICON_SIZE = 14          -- pixels at 100% (setting map.iconSize)
 local MERGE_PIXELS = 10
@@ -69,10 +71,12 @@ local MapServices = {
   icons = {},
   fanItems = {},    -- the icons for fanning out (UI/MapFan.lua)
   hovering = false,
+  version = 0,      -- up on every MarkDirty: what's on or in the lists may have changed (quest views)
 }
 ns.MapServices = MapServices
 MapServices.SERVICES = SERVICES
 MapServices.PROFESSIONS = PROFESSIONS
+MapServices.ICON_SIZE = ICON_SIZE
 
 ---The classes for the menu: those with trainers in the data once it's built, else every class.
 ---@return string[]
@@ -279,6 +283,38 @@ local function iconOf(key)
   return key:find("^class:") and TRACKING .. "class" or TRACKING .. "profession"
 end
 
+-- Quest views ------------------------------------------------------------------------------------
+
+local worldPoints, worldPointsFor = {}, nil
+
+---Every spawn of the services switched on, for quest views: [instance map] = { { x, y (world yards,
+---as UnitPosition's), key, entry, icon } }. Shared and read-only; rebuilt when `version` changes. Empty
+---until the lists are built.
+---@return table
+function MapServices:WorldPoints()
+  if worldPointsFor == self.version then
+    return worldPoints
+  end
+  worldPointsFor = self.version
+  wipe(worldPoints)
+  for key, entries in pairs(self.lists or {}) do
+    if self:IsOn(key) then
+      local icon = iconOf(key)
+      for _, entry in ipairs(entries) do
+        for _, p in ipairs(pointsOf(entry) or {}) do
+          local list = worldPoints[p.map]
+          if not list then
+            list = {}
+            worldPoints[p.map] = list
+          end
+          list[#list + 1] = { x = p.x, y = p.y, key = key, entry = entry, icon = icon }
+        end
+      end
+    end
+  end
+  return worldPoints
+end
+
 -- World map ---------------------------------------------------------------------------------------
 
 local layer, iconPool, vector
@@ -443,6 +479,7 @@ end
 
 function MapServices:MarkDirty()
   self.drawnFor = nil
+  self.version = self.version + 1
 end
 
 ns.Events:On("PLAYER_LOGIN", function()

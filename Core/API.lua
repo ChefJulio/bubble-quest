@@ -77,7 +77,8 @@ end
 ---farthest level, Blizzard's minimap faded out): the quest areas scale to match, and turn-ins get our
 ---"?" everywhere, as the game's own are hidden. 1: Blizzard's own view.
 ---`gameHidden`: Blizzard's minimap is hidden (BubbleMap drawing its own map), so the game draws none of
----its own "?" and "!" and ours draw everywhere. Defaults to factor ~= 1.
+---its own "?" and "!" and ours draw everywhere, and none of its tracking icons, so the town services
+---switched on in the map button's menu draw too. Defaults to factor ~= 1.
 ---@param factor number
 ---@param gameHidden boolean?
 function api.SetMinimapZoom(factor, gameHidden)
@@ -94,15 +95,20 @@ end
 ---What shows follows the Map settings: areas with "Show quest areas on the world map", quest givers with
 ---"Show quests you can pick up". Options (all optional): guide (bool), hover (bool, default true: tooltips from the cursor while the
 ---mouse focus is `frame` or the game world), minCircle / minIcon (smallest sizes on screen, pixels;
----default 4 / 8, so marks stay visible zoomed far out). The game's own minimap markers are never assumed
----here: every "?" and "!" is ours.
+---default 4 / 8, so marks stay visible zoomed far out), services (true, or { exclude = { [key] = true } }:
+---the town services switched on in the map button's menu, minus the excluded; keys "flight", "inn",
+---"bank", "auction", "repair", "mailbox", "weapon", "stable", "battle", "trainer:<profession>",
+---"class:<class>"). The game's own minimap markers are never assumed here: every "?" and "!" is ours.
 ---@param frame Frame
 ---@param options table?
 ---@return table
 function api.CreateQuestView(frame, options)
   options = options or {}
+  local services = options.services
   local view = ns.QuestView.New(frame, {
     guide = options.guide == true,
+    services = services and function() return true end or nil,
+    servicesExclude = type(services) == "table" and services.exclude or nil,
     focus = options.hover ~= false and function(focus) return focus == frame end or function() return false end,
     minCircle = options.minCircle or 4,
     minIcon = options.minIcon or 8,

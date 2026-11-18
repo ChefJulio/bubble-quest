@@ -12,6 +12,7 @@ local ADDON_NAME, ns = ...
 --   - BubbleMap can point it at its whole map frame (BubbleQuestAPI.SetMinimapView): wider or taller
 --     than Blizzard's square, filled with terrain at the minimap's scale;
 --   - the game draws its own "?" and "!" on the minimap, so ours stand aside where it does;
+--   - town services (UI/MapServices.lua) only with Blizzard's minimap hidden (its tracking draws them);
 --   - icons sized as the game's blips are.
 -- UnitPosition is nil in instances, which hides everything there.
 
@@ -156,6 +157,8 @@ local function create()
     round = function() return not isSquare() end,
     iconScale = iconScale,
     gameMarkers = gameMarkers,
+    -- Town services only while Blizzard's minimap is hidden: showing, its own tracking draws them.
+    services = function() return MinimapAreas.gameHidden end,
     guide = true,
     areasSetting = "minimapAreas",
     guideSetting = "guide",

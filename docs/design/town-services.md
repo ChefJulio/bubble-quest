@@ -20,8 +20,12 @@ only once a service is switched on.
 
 ## How it's shown
 
-World map only: the minimap has Blizzard's own tracking for these (its tracking menu). Blizzard's
-minimap-tracking icons (`Interface\Minimap\tracking\*`), close spawns merged, a tooltip with the NPC's
+On the world map, and in quest views (UI/QuestView.lua) wherever Blizzard's own tracking doesn't draw
+them: BubbleMap's map window (`BubbleQuestAPI.CreateQuestView(frame, { services = true })`, or
+`{ services = { exclude = { flight = true } } }` where BubbleMap draws its own flight points), and the
+minimap only while BubbleMap has Blizzard's hidden (`SetMinimapZoom`'s `gameHidden`; review: "the
+townsfolk POI aren't visible at all on our in-house map"). With Blizzard's minimap showing, its tracking
+menu handles them there, as before. Blizzard's minimap-tracking icons (`Interface\Minimap\tracking\*`), close spawns merged, a tooltip with the NPC's
 name and title. Toggled from the map button's menu ("Town services" submenu). On by default (review):
 flight master, innkeeper, auctioneer, mailbox, class trainer. Profession trainers are per character:
 each profession you have switches its trainers on the first time it's seen (login, or learning one:
