@@ -564,8 +564,32 @@ function MinimapAreas:DiagnoseTurnin(quest)
   if count == 0 then
     add("No turn-in spots of ours for this quest (not ready, no card, or areas off).")
   end
-  add("Markers drawn this frame: %d", used.markers)
+  add("Turn-in markers drawn last frame: %d", self.markersDrawn or 0)
+  add("Layer strata %s level %d; view %s %d; Minimap %s %d, shown=%s", layer:GetFrameStrata(),
+    layer:GetFrameLevel(), self.view and self.view:GetFrameStrata() or "-",
+    self.view and self.view:GetFrameLevel() or 0, Minimap:GetFrameStrata(), Minimap:GetFrameLevel(),
+    tostring(Minimap:IsShown()))
   return lines
+end
+
+-- Above Blizzard's minimap as well as the view (review, /bq turnin: a "?" was drawn, but under
+-- Blizzard's minimap, shown again in BubbleMap's gather mode, as the layer sat just above the view).
+-- Rechecked every frame: Edit Mode and BubbleMap's modes can change either level.
+local STRATA_RANK = { BACKGROUND = 1, LOW = 2, MEDIUM = 3, HIGH = 4, DIALOG = 5, FULLSCREEN = 6,
+  FULLSCREEN_DIALOG = 7, TOOLTIP = 8 }
+local function raiseLayer()
+  local parent = layer:GetParent()
+  local strata = parent:GetFrameStrata()
+  if (STRATA_RANK[Minimap:GetFrameStrata()] or 0) > (STRATA_RANK[strata] or 0) then
+    strata = Minimap:GetFrameStrata()
+  end
+  local level = math.max(parent:GetFrameLevel(), Minimap:GetFrameLevel()) + 2
+  if layer:GetFrameStrata() ~= strata then
+    layer:SetFrameStrata(strata)
+  end
+  if layer:GetFrameLevel() ~= level then
+    layer:SetFrameLevel(level)
+  end
 end
 
 local function update(_, delta)
@@ -573,6 +597,7 @@ local function update(_, delta)
   local showAreas, showGuide = map and map.minimapAreas, map and map.guide
   local showGivers = ns.MapAvailable:Enabled()
   local north, west, instanceMap = ns.Navigation:PlayerPosition()
+  raiseLayer()
   wipe(MinimapAreas.hits)
   wipe(MinimapAreas.giverHits)
   if north and (showAreas or showGuide or showGivers) then
@@ -604,7 +629,8 @@ local function update(_, delta)
       drawGuide(north, west, instanceMap, cos, sin, scale, halfW, halfH, square, delta)
     end
   end
-  MinimapAreas.dotsDrawn = used.dots  -- for /qm minimap (hideUnused resets the count)
+  MinimapAreas.dotsDrawn = used.dots  -- for /bq minimap (hideUnused resets the count)
+  MinimapAreas.markersDrawn = used.markers  -- for /bq turnin
   hideUnused(blobs, "blobs")
   hideUnused(markers, "markers")
   hideUnused(dots, "dots")
@@ -657,7 +683,7 @@ function MinimapAreas:SetView(frame)
     layer:SetParent(parent)
     layer:ClearAllPoints()
     layer:SetAllPoints(parent)
-    layer:SetFrameLevel(parent:GetFrameLevel() + 2)
+    raiseLayer()
   end
 end
 
