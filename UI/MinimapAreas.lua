@@ -124,7 +124,32 @@ end
 -- Quest givers' "!" at their spawns; quests from drops as the uniform bronze "!" at each droppers'
 -- cluster centre (no areas here: the minimap is small). Rebuilt when the entries are.
 
-local GIVER_SIZE, DROP_ICON_SIZE = 12, 9  -- pixels at 100% (setting map.iconSize)
+-- Pixels in the minimap's own units at 100% (setting map.iconSize). Our icons are meant to look like
+-- the game's minimap blips (review: "exactly the same size as Blizzard's"), so they're sized as those
+-- are: in the minimap's units, times Edit Mode's minimap "Icon Scale" (iconScale, below). Matched to
+-- a side-by-side in game (minimap scale 0.64): the game's "!" and "?" both ~16 px on screen, 1.3x and
+-- 1.6x ours at the old 12 (in UIParent units). TURNIN_SHARE: the "?" art fills less of its square.
+local GIVER_SIZE, DROP_ICON_SIZE = 25, 19
+local TURNIN_SHARE = 1.2
+
+-- Our icons' size factor, as the game's blips get it: the minimap's scale (Edit Mode's minimap Size;
+-- the layer may live on BubbleMap's frame, at another scale) times Edit Mode's minimap "Icon Scale"
+-- (Minimap:SetIconScale, from the minimap system's setting: EditModeSystemTemplates.lua:1811-1813;
+-- the minimap has no getter), times our own setting (map.iconSize).
+local function iconScale()
+  local scale = Minimap:GetEffectiveScale() / layer:GetEffectiveScale() * ns.MapAreas.iconScale()
+  local cluster = rawget(_G, "MinimapCluster")
+  -- IconScale (3) is in Forever's API docs (EditModeManagerConstantsDocumentation.lua:583), not in the
+  -- annotations lint uses.
+  local setting = Enum.EditModeMinimapSetting and rawget(Enum.EditModeMinimapSetting, "IconScale")
+  if cluster and setting and type(cluster.GetSettingValue) == "function" then
+    local ok, percent = pcall(cluster.GetSettingValue, cluster, setting)
+    if ok and type(percent) == "number" and percent > 0 then  -- 0: Edit Mode not initialised yet
+      scale = scale * percent / 100
+    end
+  end
+  return scale
+end
 local MERGE_SHARE = 0.8  -- icons closer than this share of their size merge into one (givers' "!")
 local giverPoints, giversBuiltFor = {}, nil
 MinimapAreas.giverHits = {}
@@ -220,8 +245,8 @@ end
 
 local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
   local hits = MinimapAreas.giverHits
-  local iconScale = ns.MapAreas.iconScale()
-  local pad = GIVER_SIZE * iconScale / 2
+  local sizeScale = iconScale()
+  local pad = GIVER_SIZE * sizeScale / 2
   local reachW, reachH = halfW + pad, halfH + pad
   local dedupe = gameDraws()
   local trivialHidden = dedupe and C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.TrivialQuests)
@@ -235,7 +260,7 @@ local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, half
         inside = x * x + y * y <= reachW * reachW
       end
       if inside and not (dedupe and gameMarksGiver(p, x, y, trivialHidden)) then
-        local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
+        local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * sizeScale
         -- One "!" per spot (review: doubled "!" zoomed out): a giver's spawns, or givers side by side,
         -- that would overlap on screen share the first one drawn; its tooltip lists all their quests.
         local merged
@@ -344,7 +369,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
   local hits = MinimapAreas.hits
   wipe(hits)
   wipe(placedMarkers)
-  markerSize = ns.MapAreas.turninSize(GIVER_SIZE) * ns.MapAreas.iconScale()  -- matches the givers' "!"
+  markerSize = ns.MapAreas.turninSize(GIVER_SIZE) * TURNIN_SHARE * iconScale()  -- as the game's "?"
   -- The whole circle: on the minimap they're small (the world map's 70% core was too fiddly in review).
   MinimapAreas.radius = math.max(size / 2, HOVER_MIN)
   local skipMarked = gameDraws()  -- once per frame, not per point
