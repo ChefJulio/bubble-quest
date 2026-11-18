@@ -188,7 +188,11 @@ function QuestView.New(parent, options)
     view.mask = layer:CreateMaskTexture()
     view.mask:SetAllPoints(layer)
   end
-  view.tooltip = CreateFrame("GameTooltip", view.options.tooltipName, UIParent, "GameTooltipTemplate")
+  local tooltip = CreateFrame("GameTooltip", view.options.tooltipName, UIParent, "GameTooltipTemplate")
+  ---@cast tooltip GameTooltip
+  view.tooltip = tooltip
+  -- Hidden, it keeps no anchors: nothing of ours stays tied to another frame (see updateHover).
+  tooltip:HookScript("OnHide", function() tooltip:ClearAllPoints() end)
   layer:SetScript("OnHide", function() view.tooltip:Hide() end)
   return view
 end
@@ -459,12 +463,17 @@ function View:updateHover()
     tooltip:Hide()
     return
   end
-  -- When a blip's tooltip (GameTooltip) is up too, ours hangs under it instead of covering it.
-  local blip = GameTooltip:IsShown()
+  -- When a blip's tooltip (GameTooltip) is up too, ours hangs under it instead of covering it: placed
+  -- at its screen position, never anchored to it (review, error: anchored to GameTooltip, ours joined
+  -- its anchor family, and Blizzard re-anchoring GameTooltip for the player frame then failed with
+  -- "SetPoint would result in anchor family connection").
+  local left, bottom = GameTooltip:GetLeft(), GameTooltip:GetBottom()
+  local blip = GameTooltip:IsShown() and left ~= nil and bottom ~= nil
   ns.Tooltips:Take(self.layer, blip and "ANCHOR_NONE" or "ANCHOR_CURSOR", nil, tooltip)
   if blip then
+    local ratio = GameTooltip:GetEffectiveScale() / tooltip:GetEffectiveScale()
     tooltip:ClearAllPoints()
-    tooltip:SetPoint("TOPLEFT", GameTooltip, "BOTTOMLEFT", 0, -2)
+    tooltip:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left * ratio, bottom * ratio - 2)
   end
   if offers then
     ns.MapAvailable.FillTooltip(tooltip, offers)
