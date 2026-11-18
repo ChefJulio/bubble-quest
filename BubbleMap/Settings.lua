@@ -46,12 +46,17 @@ local ENTRIES = {
     tooltip = "Your position, bottom left of the map. (BubbleQuest's header shows them too.)" },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_ZOOM", label = "Zoom buttons", default = false,
     tooltip = "+ and - at the map's bottom right. The mouse wheel zooms either way." },
+  { kind = "checkbox", id = "BUBBLEMAP_LAUNCHERS", label = "Collect addon buttons", default = true,
+    tooltip = "Every addon's minimap button and addon-menu entry in one list, opened from the bar; their "
+      .. "buttons are put away. Another button collector (ForeverCleanButtons, ...) turns this off. Takes "
+      .. "effect after /reload." },
 }
 
 local SHOW_KEYS = {
   BUBBLEMAP_SHOW_BAR = "bar", BUBBLEMAP_SHOW_ZONE = "zone", BUBBLEMAP_SHOW_CLOCK = "clock",
   BUBBLEMAP_SHOW_CALENDAR = "calendar", BUBBLEMAP_SHOW_TRACKING = "tracking",
   BUBBLEMAP_SHOW_MAIL = "mail", BUBBLEMAP_SHOW_COORDS = "coords", BUBBLEMAP_SHOW_ZOOM = "zoom",
+  BUBBLEMAP_LAUNCHERS = "launchers",
 }
 
 local VAR_TYPE = { checkbox = "Boolean", slider = "Number" }

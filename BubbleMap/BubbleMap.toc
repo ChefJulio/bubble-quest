@@ -11,4 +11,5 @@ Init.lua
 Compat.lua
 Minimap.lua
 Around.lua
+Launchers.lua
 Settings.lua

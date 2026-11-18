@@ -82,6 +82,7 @@ local DEFAULTS = {
     mail = true,
     coords = false,   -- the quest addon's header shows them already
     zoom = false,     -- the mouse wheel zooms
+    launchers = true, -- addons' minimap buttons collected into one list (Launchers.lua)
   },
 }
 

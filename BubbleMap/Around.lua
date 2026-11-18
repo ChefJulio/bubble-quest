@@ -12,8 +12,8 @@ local ADDON_NAME, ns = ...
 -- Edit Mode's selection box; alpha leaves it alone. None of these frames is secure.
 --
 -- Not replaced (Forever has no such frame): crafting orders, instance difficulty. Left alone: the
--- queue eye (QueueStatusButton), its own Edit Mode system; the addon compartment ("13", the addon
--- count) until the launcher list replaces it (build step 4).
+-- queue eye (QueueStatusButton), its own Edit Mode system. The addon compartment ("13", the addon
+-- count) and addons' minimap buttons: Launchers.lua.
 
 -- One strata above the minimap's. MinimapCluster is toplevel (Minimap.xml:3): a click on the map
 -- raises it, Minimap and all, over anything at its strata, and the bar vanished under the map after a
@@ -215,6 +215,14 @@ local function createButtons()
   end)
   buttons.calendar = calendar
 
+  local launchers = iconButton("ui-hud-minimap-addon-indicator")
+  launchers:SetScript("OnClick", function(self) ns.Launchers:Toggle(self) end)
+  tooltip(launchers, function()
+    GameTooltip:AddLine("Addons", 1, 1, 1)
+    GameTooltip:AddLine("Every addon's minimap button, in one list.", 0.8, 0.8, 0.8, true)
+  end)
+  buttons.launchers = launchers
+
   local mail = iconButton("ui-hud-minimap-mail-icon")
   mail:SetScript("OnClick", nil)
   tooltip(mail, function()
@@ -302,7 +310,8 @@ local function createBar(outer)
   createClock()
 end
 
--- Right to left: clock, mail (when there is mail), calendar, tracking; the zone name takes the rest.
+-- Right to left: clock, mail (when there is mail), calendar, tracking, addons; the zone name takes the
+-- rest.
 local function layoutBar()
   local show = ns.DB.show
   bar:SetShown(show.bar)
@@ -328,6 +337,7 @@ local function layoutBar()
   place(buttons.mail, show.mail and buttons.mail.has)
   place(buttons.calendar, show.calendar)
   place(buttons.tracking, show.tracking)
+  place(buttons.launchers, ns.Launchers:Active())
   zone:SetShown(show.zone)
   if anchor then
     zone:SetPoint("RIGHT", anchor, "LEFT", -GAP, 0)
