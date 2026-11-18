@@ -279,8 +279,45 @@ function MinimapAreas:Diagnose()
   if not layer then
     return lines
   end
+  -- The frames' own draws, before ours below (review: blank in a cave while this frame drew 50).
+  local last = view.lastDraw
+  add("Frame draws so far %d; last: north %s west %s map %s ppy %s turn %s", view.drawCount or 0,
+    tostring(last and last.north), tostring(last and last.west), tostring(last and last.map),
+    tostring(last and last.ppy), tostring(last and last.turn))
   local ok, err = pcall(update)
   add("One frame: %s", ok and "ok" or ("ERROR " .. tostring(err)))
+  -- What the textures actually are after it: shown, visible, where, how big, how opaque, masked.
+  add("Layer alpha %.2f (effective %.2f), scale %.2f, mask %s (shape %s, shown %s), regions %d",
+    layer:GetAlpha(), layer:GetEffectiveAlpha(), layer:GetEffectiveScale(), tostring(view.mask ~= nil),
+    tostring(view.maskShape), tostring(view.mask and view.mask:IsShown()), layer:GetNumRegions())
+  local layerX, layerY = layer:GetCenter()
+  local mask = view.mask
+  local maskX, maskY
+  if mask then
+    maskX, maskY = mask:GetCenter()
+  end
+  add("Layer %.0fx%.0f at %s; view half %s x %s; mask %s at %s", layer:GetWidth(), layer:GetHeight(),
+    layerX and ("%.0f, %.0f"):format(layerX, layerY) or "nil", tostring(view.halfW), tostring(view.halfH),
+    mask and ("%.0fx%.0f"):format(mask:GetWidth(), mask:GetHeight()) or "-",
+    maskX and ("%.0f, %.0f"):format(maskX, maskY) or "nil")
+  for kind, pool in pairs(view.pools) do
+    local shown, visible = 0, 0
+    for _, t in ipairs(pool) do
+      shown = shown + (t:IsShown() and 1 or 0)
+      visible = visible + (t:IsVisible() and 1 or 0)
+    end
+    add("  %s: pool %d, shown %d, visible %d", kind, #pool, shown, visible)
+    local t = pool[1]
+    if t and t:IsShown() then
+      local tx, ty = t:GetCenter()
+      local lx, ly = layer:GetCenter()
+      local r, g, b, a = t:GetVertexColor()
+      add("    first: %.0fx%.0f at %s, %s from centre; alpha %.2f, colour %.2f %.2f %.2f %.2f; layer %s; masks %d",
+        t:GetWidth(), t:GetHeight(), tx and ("%.0f, %.0f"):format(tx, ty) or "nil",
+        tx and lx and ("%.0f, %.0f"):format(tx - lx, ty - ly) or "-", t:GetAlpha(), r or 0, g or 0, b or 0,
+        a or 0, tostring(t:GetDrawLayer()), t:GetNumMaskTextures())
+    end
+  end
   local north, west, instanceMap = ns.Navigation:PlayerPosition()
   add("Player: %s, %s on map %s", tostring(north), tostring(west), tostring(instanceMap))
   add("Minimap: width %.1f, view radius %s yd, square=%s, rotation %.2f", Minimap:GetWidth(),

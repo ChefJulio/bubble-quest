@@ -557,6 +557,9 @@ end
 ---@param ppy number
 ---@param turn number?
 function View:Draw(north, west, map, ppy, turn)
+  -- For the diagnostics (/bq minimap): how often it's drawn, and with what.
+  self.drawCount = (self.drawCount or 0) + 1
+  self.lastDraw = { north = north, west = west, map = map, ppy = ppy, turn = turn }
   local opts = self.options
   local mapSettings = settings()
   local showAreas = mapSettings and mapSettings[opts.areasSetting or "areas"]
