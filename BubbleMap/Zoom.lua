@@ -23,8 +23,21 @@ local ADDON_NAME, ns = ...
 -- (even at alpha 0, mouse off: the wheel is separate) and zooms its own level: in gather mode that's the
 -- zoom; in our map a post-hook puts Blizzard's level back and steps ours (the blank-map bug, review).
 
-local STEPS = { 0.35, 0.5, 0.7, 1, 1.4, 2, 3, 4.5, 6 }  -- our map: times Blizzard's farthest view
-local DEFAULT_STEP = 4                                -- 1: Blizzard's farthest view
+-- Our map: times Blizzard's farthest view, x1.5 a step, as many in as out, so Blizzard's farthest view
+-- sits in the middle of the zoom slider (user's call). Six each way (user: further and closer): out to a
+-- zone or so, in until the tiles go soft (256 px per 533 yd; quest markers stay sharp).
+local STEP_RATIO, STEPS_EACH_WAY = 1.5, 6
+local STEPS = {}
+for i = -STEPS_EACH_WAY, STEPS_EACH_WAY do
+  STEPS[#STEPS + 1] = STEP_RATIO ^ i
+end
+local DEFAULT_STEP = STEPS_EACH_WAY + 1  -- 1: Blizzard's farthest view
+-- Blizzard's outdoor levels as shares of its farthest view [Inferred: classic's radii, 233.3 down to
+-- 66.7 yd; they matched the user's measurements at levels 0 and 1]: where gather mode sits on the slider.
+local LEVEL_SHARES = { 1, 6 / 7, 5 / 7, 4 / 7, 3 / 7, 2 / 7 }
+
+local SLIDER_HOLD, SLIDER_FADE = 1.2, 0.4  -- seconds shown after the last zoom, then fading out
+local showSlider  -- set when the slider is created (below)
 local ARROW = "Interface\\Minimap\\MinimapArrow"
 local ARROW_SIZE = 32
 
@@ -184,6 +197,7 @@ function Zoom:Step(delta)
     if step ~= self.step then
       self.step = step
       apply()
+      showSlider()
     end
     return
   end
@@ -197,6 +211,7 @@ function Zoom:Step(delta)
   local level = Minimap:GetZoom() + (delta > 0 and 1 or -1)
   if level >= 0 and level < Minimap:GetZoomLevels() then
     Minimap:SetZoom(level)
+    showSlider()
   end
 end
 
@@ -223,7 +238,97 @@ function Zoom:Describe()
     Minimap:GetZoomLevels() - 1, ns.DB.gatherMode, terrainHere() and "" or ", no terrain here")
 end
 
+-- The zoom slider (user's design): vertical, at the map's right edge while zooming, closer at the top.
+-- A tick per step (in gather mode: per Blizzard level), the middle tick wider and gold: Blizzard's
+-- farthest view. Placed on a log scale, so equal steps are equal gaps.
+local SLIDER_HEIGHT, SLIDER_INSET = 120, 8
+local slider, sliderTicks, sliderMarker, sliderShown = nil, {}, nil, 0
+local LOG_MIN, LOG_MAX = math.log(STEPS[1]), math.log(STEPS[#STEPS])
+
+local function sliderY(k)
+  -- 0 at the bottom (farthest out), SLIDER_HEIGHT at the top (closest in).
+  return (LOG_MAX - math.log(k)) / (LOG_MAX - LOG_MIN) * SLIDER_HEIGHT
+end
+
+local function sliderTick(frame, i)
+  local tick = sliderTicks[i]
+  if not tick then
+    tick = frame:CreateTexture(nil, "ARTWORK")
+    sliderTicks[i] = tick
+  end
+  return tick
+end
+
+local function layoutSlider(frame, marker)
+  local shares = Zoom.own and STEPS or LEVEL_SHARES
+  local count = 0
+  for _, k in ipairs(shares) do
+    if k >= STEPS[1] then
+      count = count + 1
+      local tick = sliderTick(frame, count)
+      local middle = math.abs(k - 1) < 0.001
+      tick:SetSize(middle and 14 or 7, middle and 2 or 1)
+      if middle then
+        tick:SetColorTexture(1, 0.82, 0, 1)
+      else
+        tick:SetColorTexture(1, 1, 1, 0.6)
+      end
+      tick:ClearAllPoints()
+      tick:SetPoint("CENTER", frame, "BOTTOM", 0, sliderY(k))
+      tick:Show()
+    end
+  end
+  for i = count + 1, #sliderTicks do
+    sliderTicks[i]:Hide()
+  end
+  local k = Zoom.own and STEPS[Zoom.step] or (LEVEL_SHARES[Minimap:GetZoom() + 1] or 1)
+  marker:ClearAllPoints()
+  marker:SetPoint("CENTER", frame, "BOTTOM", 0, sliderY(k))
+end
+
+local function createSlider(outer)
+  slider = CreateFrame("Frame", nil, outer)
+  ns.Around.OverMap(slider)
+  slider:SetSize(16, SLIDER_HEIGHT)
+  slider:SetPoint("RIGHT", outer, "RIGHT", -SLIDER_INSET, 0)
+  slider:SetAlpha(0)
+  local back = slider:CreateTexture(nil, "BACKGROUND")
+  back:SetPoint("TOPLEFT", -2, 6)
+  back:SetPoint("BOTTOMRIGHT", 2, -6)
+  back:SetColorTexture(0, 0, 0, 0.45)
+  local track = slider:CreateTexture(nil, "BORDER")
+  track:SetPoint("TOP")
+  track:SetPoint("BOTTOM")
+  track:SetWidth(1)
+  track:SetColorTexture(1, 1, 1, 0.35)
+  sliderMarker = slider:CreateTexture(nil, "OVERLAY")
+  sliderMarker:SetSize(8, 8)
+  sliderMarker:SetColorTexture(1, 1, 1, 1)
+  slider:SetScript("OnUpdate", function(self, delta)
+    sliderShown = sliderShown + delta
+    if sliderShown >= SLIDER_HOLD + SLIDER_FADE then
+      self:SetAlpha(0)
+      self:Hide()
+    elseif sliderShown > SLIDER_HOLD then
+      self:SetAlpha(1 - (sliderShown - SLIDER_HOLD) / SLIDER_FADE)
+    end
+  end)
+  slider:Hide()
+end
+
+showSlider = function()
+  local frame, marker = slider, sliderMarker
+  if not frame or not marker then
+    return
+  end
+  layoutSlider(frame, marker)
+  sliderShown = 0
+  frame:SetAlpha(1)
+  frame:Show()
+end
+
 table.insert(ns.Minimap.onActivate, function(outer)
+  createSlider(outer)
   -- Our player arrow, over the map at its centre (the player).
   arrow = CreateFrame("Frame", nil, outer)
   ns.Around.OverMap(arrow)
