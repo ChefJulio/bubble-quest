@@ -29,14 +29,6 @@ local ENTRIES = {
     get = function() return ns.DB.heightPercent end,
     set = function(v) ns.DB.heightPercent = v; ns.Minimap:Refresh() end },
 
-  { kind = "checkbox", id = "BUBBLEMAP_HIDE_GAME_QUEST_MARKERS", label = "Only BubbleQuest's quest markers",
-    default = true,
-    tooltip = "With BubbleQuest loaded: the game's own quest markers on the minimap are turned off, so they "
-      .. "don't double BubbleQuest's. Your own setting for them is put back when you untick this, and at "
-      .. "logout.",
-    get = function() return ns.DB.hideGameQuestMarkers end,
-    set = function(v) ns.DB.hideGameQuestMarkers = v; ns.QuestMarkers:Apply() end },
-
   { kind = "section", label = "Around the map" },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_BAR", label = "Top bar", default = true,
     tooltip = "The bar along the map's top: zone name, buttons and clock. Untick to hide all of it." },

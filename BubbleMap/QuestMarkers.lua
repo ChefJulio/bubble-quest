@@ -1,21 +1,15 @@
 local ADDON_NAME, ns = ...
 
--- The game's own quest markers on the minimap off, while BubbleQuest draws its own (decided with the
--- user, 2026-11-17): the game's "?" (and, to be confirmed in game, its "!") are drawn by the engine at
--- ranges that change with Blizzard's zoom, so they came and went beside BubbleQuest's and doubled them.
+-- Cleanup only. BubbleMap briefly turned the game's QuestPOIs tracking filter off (2026-11-17), to stop
+-- the game's minimap "?" and "!" doubling BubbleQuest's. It didn't: in game the filter was off and
+-- filtered out, and the game still drew both (they're quest giver blips with no switch an addon can
+-- reach). Worse, the player's state it recorded read "off" (tracking values aren't valid until the game
+-- sends them; Blizzard waits for MINIMAP_UPDATE_TRACKING, Mainline/Minimap.lua:891-913), so its restore
+-- would have left the filter off for good.
 --
--- The only switch is the tracking filter QuestPOIs (Enum.MinimapTrackingFilter; Blizzard keeps it always
--- on and out of its tracking menu, Camelot/MinimapConstants.lua:3-6). It's a saved game setting, so the
--- player's own state is recorded first and put back:
---   - before turning it off, its state goes into BubbleMapDB.questPOIs (written first, so a crash
---     between the two leaves the record, not a lost setting);
---   - put back when the setting is turned off, and at logout (the record is cleared then);
---   - a record still there at login (a crash, a disconnect) is the player's original state: kept, and
---     the filter turned off again.
--- Only with BubbleQuest loaded: without it nothing would draw quest markers.
-
-local QuestMarkers = {}
-ns.QuestMarkers = QuestMarkers
+-- So this puts QuestPOIs back on (Blizzard keeps it always on: Camelot/MinimapConstants.lua:3-6) once
+-- tracking is known, wherever BubbleMap's record of having changed it remains, and forgets the record.
+-- Remove once no install has the record (BubbleMap was never released with the feature).
 
 local function filterIndex()
   local wanted = Enum.MinimapTrackingFilter.QuestPOIs
@@ -28,91 +22,23 @@ local function filterIndex()
   return nil
 end
 
-local function active(index)
-  local info = C_Minimap.GetTrackingInfo(index)
-  return info ~= nil and info.active == true
-end
-
----Turn the game's quest markers off (recording the player's state first). False when the filter
----isn't there.
----@return boolean
-function QuestMarkers:Hide()
-  local index = filterIndex()
-  if not index then
-    return false
-  end
-  if ns.DB.questPOIs == nil then
-    ns.DB.questPOIs = { active = active(index) }
-  end
-  if active(index) then
-    C_Minimap.SetTracking(index, false)
-  end
-  return true
-end
-
----Put the player's own state back and forget the record.
-function QuestMarkers:Restore()
-  local record = ns.DB.questPOIs
-  if record == nil then
+local done = false
+local function cleanUp()
+  if done or not ns.DB or ns.DB.questPOIs == nil then
     return
   end
   local index = filterIndex()
-  if index and active(index) ~= record.active then
-    C_Minimap.SetTracking(index, record.active)
+  if not index then
+    return  -- tracking not known yet: the next MINIMAP_UPDATE_TRACKING
+  end
+  done = true
+  local info = C_Minimap.GetTrackingInfo(index)
+  if info and not info.active then
+    C_Minimap.SetTracking(index, true)
   end
   ns.DB.questPOIs = nil
+  ns.DB.hideGameQuestMarkers = nil
 end
 
----Apply the setting (BubbleMapDB.hideGameQuestMarkers) and whether BubbleQuest is there.
-function QuestMarkers:Apply()
-  if ns.Quest and ns.DB.hideGameQuestMarkers then
-    self:Hide()
-  else
-    self:Restore()
-  end
-end
-
----Lines for /bmap tracking: every tracking type the game reports, with its filter and state (to see
----which one draws the quest markers).
----@return string[]
-function QuestMarkers:Report()
-  local names = {}
-  for name, value in pairs(Enum.MinimapTrackingFilter) do
-    names[value] = name
-  end
-  local lines = {}
-  for index = 1, C_Minimap.GetNumTrackingTypes() do
-    local filter = C_Minimap.GetTrackingFilter(index)
-    local info = C_Minimap.GetTrackingInfo(index)
-    lines[#lines + 1] = ("%d. %s: filter %s (%s), %s"):format(index, info and info.name or "?",
-      filter and tostring(filter.filterID) or "-", filter and names[filter.filterID] or "-",
-      info and (info.active and "ON" or "off") or "?")
-  end
-  lines[#lines + 1] = ("QuestPOIs filtered out: %s"):format(
-    tostring(C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.QuestPOIs)))
-  return lines
-end
-
----One line for /bmap.
----@return string
-function QuestMarkers:Describe()
-  local index = filterIndex()
-  return ("game quest markers %s%s"):format(index and (active(index) and "on" or "off") or "unknown",
-    ns.DB.questPOIs and (" (yours: %s)"):format(ns.DB.questPOIs.active and "on" or "off") or "")
-end
-
--- The tracking types are known only once the game has sent them (Blizzard's own tracking button waits
--- for these events too, Mainline/Minimap.lua:891-913).
-local applied = false
-local function tryApply()
-  if not applied and ns.Minimap.active and filterIndex() then
-    applied = true
-    QuestMarkers:Apply()
-  end
-end
-
-table.insert(ns.Minimap.onActivate, tryApply)
-ns.On("MINIMAP_UPDATE_TRACKING", tryApply)
-ns.On("PLAYER_LOGOUT", function()
-  QuestMarkers:Restore()
-end)
+ns.On("MINIMAP_UPDATE_TRACKING", cleanUp)
+ns.On("PLAYER_ENTERING_WORLD", cleanUp)
