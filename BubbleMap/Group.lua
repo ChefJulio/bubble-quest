@@ -90,14 +90,16 @@ function Layer:HideFrom(from)
 end
 
 ---Draw the members on instance map `map`, each where `project(north, west)` puts it: pixels right and
----up of the frame's centre. Then the hover. Nothing when `project` is nil.
+---up of the frame's centre. Nothing when `project` is nil. Then the hover, unless `noHover` (another
+---layer's tooltip is up).
 ---@param map number?
 ---@param project? fun(north: number, west: number): number, number
-function Layer:Draw(map, project)
+---@param noHover boolean?
+function Layer:Draw(map, project, noHover)
   wipe(self.shown)
   if not (map and project) then
     self:HideFrom(1)
-    self:Hover()
+    self:Hover(true)
     return
   end
   local frame = self.frame
@@ -125,15 +127,15 @@ function Layer:Draw(map, project)
     end
   end
   self:HideFrom(count + 1)
-  self:Hover()
+  self:Hover(noHover)
 end
 
 -- Hover: the names of the members under the cursor (the dots take no mouse; worked out from the cursor,
 -- as BubbleQuest's areas are).
-function Layer:Hover()
+function Layer:Hover(noHover)
   local frame = self.frame
   local over = {}
-  if #self.shown > 0 and frame:IsVisible() and frame:IsMouseOver() then
+  if not noHover and #self.shown > 0 and frame:IsVisible() and frame:IsMouseOver() then
     local cx, cy = GetCursorPosition()
     local scale = frame:GetEffectiveScale()
     local mx, my = frame:GetCenter()
