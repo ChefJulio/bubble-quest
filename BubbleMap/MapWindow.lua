@@ -49,6 +49,7 @@ local slots = {}    -- [instance map] = { e (World entry), tiles, art, quests, p
 local centre = { x = 0, y = 0 }
 local ppy = DEFAULT_PPY
 local drag  -- { x, y, cx, cy, moved } while the left button is down
+local drawPulse  -- the quest drawer's pulse (below, with the drawer)
 
 local function playerPosition()
   local north, west, _, map = UnitPosition("player")
@@ -343,6 +344,7 @@ local function redraw()
   if ns.Waypoints then
     ns.Waypoints:DrawWindow(layers.waypoints, MapWindow.Project)
   end
+  drawPulse()
 
   -- The player's arrow, where they are (hidden off our continents or out of view).
   local ax, ay = nil, nil
@@ -397,6 +399,130 @@ local function saveFrame()
   if left and top then
     ns.DB.window = { left = left, top = top, width = window:GetWidth(), height = window:GetHeight() }
   end
+end
+
+-- The quest log drawer ----------------------------------------------------------------------------------
+-- BubbleQuest's quest list (BubbleQuestAPI.CreateQuestLogPanel, agreed with that addon 2026-11-18; built
+-- there) in a drawer on the window's right: the map narrows to make room. Its width is dragged at its
+-- left edge and saved (drawerWidth). A quest clicked in it centres the map on its next objective or
+-- turn-in, which pulses briefly. Without the API (an older BubbleQuest, or none) there's no drawer.
+
+local DRAWER_MIN, DRAWER_MAX = 300, 600
+local PULSE_SECONDS = 2.5
+
+local drawer, questPanel, questButton
+local pulse  -- { map, north, west, at } while a clicked quest's spot pulses
+
+local function questLogAvailable()
+  local quest = ns.Quest
+  return quest ~= nil and type(quest.CreateQuestLogPanel) == "function"
+end
+
+-- The map's right edge: the drawer's left while it's open, else the window's.
+local function layoutContent(footer, bar)
+  content:ClearAllPoints()
+  content:SetPoint("TOPLEFT", bar, "BOTTOMLEFT", 0, 0)
+  if drawer and drawer:IsShown() then
+    content:SetPoint("BOTTOMRIGHT", drawer, "BOTTOMLEFT", 0, 0)
+  else
+    content:SetPoint("BOTTOMRIGHT", footer, "TOPRIGHT", 0, 0)
+  end
+end
+
+local function centreOn(target)
+  local x, y = ns.World.ToPlane(target.map, target.north, target.west)
+  if not x then
+    return
+  end
+  centre.x, centre.y = x, y
+  MapWindow.following = false
+  pulse = { map = target.map, north = target.north, west = target.west, at = GetTime() }
+end
+
+local function createDrawer(footer, bar)
+  drawer = CreateFrame("Frame", nil, window)
+  drawer:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, 0)
+  drawer:SetPoint("BOTTOMRIGHT", footer, "TOPRIGHT", 0, 0)
+  drawer:SetWidth(math.max(DRAWER_MIN, math.min(DRAWER_MAX, ns.DB.drawerWidth or DRAWER_MIN)))
+  drawer:Hide()
+  local back = drawer:CreateTexture(nil, "BACKGROUND")
+  back:SetAllPoints()
+  back:SetColorTexture(0.05, 0.05, 0.06, 0.96)
+  local panelFrame = CreateFrame("Frame", nil, drawer)
+  panelFrame:SetPoint("TOPLEFT", 6, 0)
+  panelFrame:SetPoint("BOTTOMRIGHT")
+
+  -- Its left edge drags its width.
+  local edge = CreateFrame("Frame", nil, drawer)
+  edge:SetPoint("TOPLEFT")
+  edge:SetPoint("BOTTOMLEFT")
+  edge:SetWidth(6)
+  edge:EnableMouse(true)
+  local line = edge:CreateTexture(nil, "ARTWORK")
+  line:SetPoint("TOPLEFT", 2, 0)
+  line:SetPoint("BOTTOMLEFT", 2, 0)
+  line:SetWidth(1)
+  line:SetColorTexture(1, 0.82, 0, 0.35)
+  edge:SetScript("OnEnter", function() line:SetColorTexture(1, 0.82, 0, 0.9) end)
+  edge:SetScript("OnLeave", function() line:SetColorTexture(1, 0.82, 0, 0.35) end)
+  edge:SetScript("OnMouseDown", function()
+    edge:SetScript("OnUpdate", function()
+      local x = GetCursorPosition() / drawer:GetEffectiveScale()
+      local width = math.max(DRAWER_MIN, math.min(DRAWER_MAX, drawer:GetRight() - x))
+      -- Not wider than leaves the map its minimum.
+      width = math.min(width, window:GetWidth() - 320)
+      drawer:SetWidth(math.max(DRAWER_MIN, width))
+      ns.DB.drawerWidth = drawer:GetWidth()
+    end)
+  end)
+  edge:SetScript("OnMouseUp", function() edge:SetScript("OnUpdate", nil) end)
+
+  drawer:SetScript("OnShow", function()
+    window:SetResizeBounds(320 + drawer:GetWidth(), 240)
+    if window:GetWidth() < 320 + drawer:GetWidth() then
+      window:SetWidth(320 + drawer:GetWidth())
+    end
+    if not questPanel then
+      questPanel = ns.Quest.CreateQuestLogPanel(panelFrame, {
+        onQuestClick = function(_, target)
+          if target and target.map and target.north and target.west then
+            centreOn(target)
+          end
+        end,
+      })
+    end
+    questPanel:Show()
+    layoutContent(footer, bar)
+  end)
+  drawer:SetScript("OnHide", function()
+    window:SetResizeBounds(320, 240)
+    if questPanel then
+      questPanel:Hide()
+    end
+    layoutContent(footer, bar)
+  end)
+end
+
+-- The pulse on a clicked quest's spot: a highlight ring growing and fading.
+local pulseTexture
+function drawPulse()
+  if not pulse then
+    pulseTexture:Hide()
+    return
+  end
+  local t = (GetTime() - pulse.at) / PULSE_SECONDS
+  local x, y = MapWindow.Project(pulse.map, pulse.north, pulse.west)
+  if t >= 1 or not (x and y) then
+    pulse = nil
+    pulseTexture:Hide()
+    return
+  end
+  local wave = (t * 3) % 1  -- three rings
+  pulseTexture:SetSize(20 + 50 * wave, 20 + 50 * wave)
+  pulseTexture:SetAlpha((1 - wave) * (1 - t * 0.5))
+  pulseTexture:ClearAllPoints()
+  pulseTexture:SetPoint("CENTER", content, "CENTER", x, y)
+  pulseTexture:Show()
 end
 
 -- A click on the map (no drag): waypoints (Waypoints.lua).
@@ -493,6 +619,19 @@ local function create()
     GameTooltip:Show()
   end)
   styleButton:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  -- The quest log drawer's button (BubbleQuest's panel; none without it).
+  if questLogAvailable() then
+    createDrawer(footer, bar)
+    questButton = CreateFrame("Button", nil, footer, "UIPanelButtonTemplate")
+    questButton:SetHeight(16)
+    questButton:SetText("Quests")
+    questButton:SetWidth(questButton:GetFontString():GetStringWidth() + 20)
+    questButton:SetPoint("RIGHT", styleButton, "LEFT", -4, 0)
+    questButton:SetScript("OnClick", function()
+      drawer:SetShown(not drawer:IsShown())
+      ns.DB.drawerOpen = drawer:IsShown()
+    end)
+  end
   updateStyleButton()
 
   -- The map: clipped; drag to pan, wheel to zoom, click for waypoints.
@@ -519,6 +658,10 @@ local function create()
   layers.points = layer(7)
   layers.group = layer(8)
   layers.waypoints = layer(9)
+  pulseTexture = layers.waypoints:CreateTexture(nil, "OVERLAY")
+  pulseTexture:SetAtlas("Waypoint-MapPin-Highlight")  -- the world map's waypoint glow
+  pulseTexture:SetBlendMode("ADD")
+  pulseTexture:Hide()
   layers.labels = layer(10)
   -- The area label, at the top as the world map's (its template: scale 0.695, 10 px down).
   local labelFrame = layer(12)
@@ -578,6 +721,9 @@ local function create()
   window:SetScript("OnShow", function()
     MapWindow.following = true
     ns.MapPoints.Refresh()  -- flight points learned, events begun since it was last open
+    if drawer and ns.DB.drawerOpen and not drawer:IsShown() then
+      drawer:Show()  -- open as it was left
+    end
     redraw()
   end)
   window:SetScript("OnHide", function()

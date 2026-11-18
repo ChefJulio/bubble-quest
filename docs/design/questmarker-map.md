@@ -201,6 +201,14 @@ buttons are put away.
   otherwise); a continent without a UI map keeps its tiles. Zone names show when zoomed out.
 - **Footer:** your coordinates and the cursor's (zone %), and the window's own Terrain / Map art switch
   (setting windowStyle).
+- **Area label:** hovering, the big name at the top as on the world map (AreaLabelDataProvider.lua): the
+  explored area under the cursor, else the zone with its level range. **Zone exits** (map links) are
+  among the map points.
+- **Quest log drawer:** BubbleQuest's quest list (`BubbleQuestAPI.CreateQuestLogPanel(parent, options)`
+  -> { GetFrame, Show, Hide, Refresh }, `options.onQuestClick(questID, target)` with target
+  { map, north, west } or nil; agreed 2026-11-18, built in BubbleQuest) in a drawer on the window's
+  right, toggled by the footer's "Quests" button (only when the API has it), width dragged at its left
+  edge (300-600, saved), open state saved. A quest clicked centres the map on its target, which pulses.
 - **Waypoints** (Waypoints.lua): one of yours plus one per group member with BubbleMap. Click drops
   yours (private), Shift+click shares it, right-click a waypoint clears it (someone else's: hidden for
   you). Yours clears within 12 yd. Shown in the window and on the minimap (out of view: at its edge).
