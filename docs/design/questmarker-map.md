@@ -70,8 +70,10 @@ Mode's apply path (`SetEditModeScale`), where BubbleQuest's tracker taint once c
   a percentage of the width (setting). Blizzard's minimap is anchored to `outer`'s centre inside its
   own container (Blizzard positions only the container, never `Minimap`) and sized to the largest
   square that fits.
-- **Position:** until dragged, `outer` hangs from the top corner of Edit Mode's minimap box nearest the
-  screen edge, so it grows inward (centred on the box it ran off the screen: Edit Mode clamps only its
+- **Tracker attached** is a setting (on by default): off, BubbleQuest's tracker goes back to its own
+  place and the map takes BubbleMap's own width.
+- **Position:** whatever moved last wins. Until dragged, `outer` hangs from the top corner of Edit
+  Mode's minimap box nearest the screen edge, so it grows inward (centred on the box it ran off the screen: Edit Mode clamps only its
   own box; seen in game). Dragged, by BubbleQuest's tracker header or BubbleMap's own bar (when "Lock
   the map" is off), `outer` keeps its own saved position; `/bmap reset` goes back to Edit Mode's.
   Never in combat (the tracker's secure quest item buttons hang under it).
@@ -83,26 +85,38 @@ Mode's apply path (`SetEditModeScale`), where BubbleQuest's tracker taint once c
 - **Rotation:** with "Rotate Minimap" on, Blizzard's square ground clips at diagonal headings; with
   terrain, our rotated ground fills it ([terrain-map.md](terrain-map.md)).
 
-### Our map, gather mode, and zoom (step 6)
+### Our map, gather mode, and zoom (step 6, built)
 
 Blizzard's blips (herbs, ore, tracking, party, the game's own quest "?" and "!") are only right at
 Blizzard's own zoom levels and size, and addons can't read or redraw them. Tried and rejected,
-2026-11-17: scaling Blizzard's minimap frame, behind a mask (*mask magnify*) or inside a clipping
-parent: the blips spilled outside the map and the player arrow sat off-centre. And the QuestPOIs
-tracking filter doesn't hide the game's quest "?"/"!": with it off they still drew. So never a mix:
+2026-11-17: scaling Blizzard's minimap frame behind a mask (*mask magnify*) or inside a clipping parent
+(blips spilled outside the map, the arrow sat off-centre); its alpha at 0 (the engine still drew the
+blips); the QuestPOIs tracking filter (the game's "?"/"!" still drew). So the map is either ours or
+Blizzard's, never a mix:
 
-- **Our map (the usual):** Blizzard's minimap hidden (alpha 0, mouse off), its zoom fixed at its
-  farthest level; BubbleMap draws everything: terrain, our player arrow, BubbleQuest's quest layer
-  (`SetMinimapZoom(k, true)`: the game draws no markers, ours draw everywhere). Our own zoom, in and
-  out: 0.35x to 6x Blizzard's farthest view. Nothing of Blizzard's can be in a wrong place or double.
-- **Gather mode** (user's idea): Blizzard's minimap shown for its live blips, zoom limited to Blizzard's
-  own levels so the blips are always right; our terrain as the ground under it. Setting: automatic
-  (while a tracking spell such as Find Herbs is on), always, never.
-- **Indoors / no terrain** (instances, maps not in the table): Blizzard's minimap, which has the
-  interior maps.
+- **Our map (the default):** Blizzard's minimap hidden (`Hide`), its zoom fixed at its farthest level;
+  BubbleMap draws everything: terrain, our player arrow, BubbleQuest's quest layer
+  (`SetMinimapZoom(k, true)`: the game draws no markers, ours draw everywhere).
+- **One zoom scale everywhere:** 13 steps, x1.5 each, six in and six out of Blizzard's farthest view
+  (the slider's gold middle notch). A vertical notched slider shows at the map's right edge while
+  zooming, then fades.
+- **Gather mode** (setting: off by default, automatic while a tracking spell is on, or on; the bar's
+  gather button toggles it): at the steps where a Blizzard level matches ours within 10% (the middle and
+  three in: 1, 0.67, 0.44, 0.30 against Blizzard's 1, 0.71, 0.43, 0.29), Blizzard's minimap shows at
+  that level for its live blips, our terrain under it at its exact scale (green dots on the slider).
+  Every other step is our map.
+- **Ctrl peek** (in our map): Blizzard's minimap at its farthest level while Ctrl is held; no zooming
+  while held; released, our map at exactly the zoom it had.
+- **Indoors / no terrain** (instances, maps not in the table): Blizzard's minimap with its own zoom.
+- **Quest markers in gather mode:** the game draws its "?" and "!" within 0.8 of its view radius
+  (measured: 186.5 of 233.3 yd and 159.5 of 200 yd); BubbleQuest skips its own "?" where the game's
+  marker is inside that circle, and all its "!" inside it (the game draws a giver's "!" when the client
+  has loaded that NPC, which no addon API can tell).
+- **One ground:** our terrain in both modes outdoors (Blizzard's ground off), so the colour never
+  changes with the mode.
 - **Later:** what Blizzard's minimap showed that we can draw ourselves in our map (group members,
   corpse and graveyards, rares and treasures, flight masters, town services, pings), and a gathering
-  database (GatherMate2 and the like) for possible node spots in our map.
+  database (GatherMate2 and the like) for possible node spots.
 
 ## Around the minimap (built, step 3)
 
