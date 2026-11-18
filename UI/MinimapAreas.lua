@@ -29,8 +29,9 @@ local ROUND_MASK = "Interface/CharacterFrame/TempPortraitAlphaMask"
 local SQUARE_MASK = "Interface/BUTTONS/WHITE8X8"
 
 local MinimapAreas = {
-  zoom = 1,         -- how many times further than Blizzard's minimap the view reaches (SetZoom); above 1,
-                    -- BubbleMap's overview: Blizzard's minimap is faded out, its own "?" and "!" with it
+  zoom = 1,         -- how many times further than Blizzard's minimap the view reaches (SetZoom); any value
+                    -- in BubbleMap's own map
+  gameHidden = false, -- BubbleMap has Blizzard's minimap hidden (its own map): the game draws no markers
   version = -1,     -- MapAreas.version the point list was built for
   points = {},      -- { x, y (world yards), map, color, questID, objective (nil: turn-in) }
   hits = {},        -- circles drawn this frame: { x, y (pixels from the centre), questID, objective }
@@ -168,18 +169,18 @@ end
 -- within its view radius (C_Minimap.GetViewRadius) of the centre, a circle, even when the minimap is
 -- masked square (review, two BubbleMap zoom levels: a "?" in the square's corner went missing, as the
 -- game no longer drew it and a square test still skipped ours). Ours is skipped only there: drawn in
--- the corners and in BubbleMap's padding, and everywhere while BubbleMap's overview has Blizzard's
--- minimap faded out (zoom above 1, gameDraws).
+-- the corners and in BubbleMap's padding, and everywhere while BubbleMap draws its own map with
+-- Blizzard's minimap hidden (gameDraws).
 local function inGameView(x, y)
   local half = Minimap:GetWidth() / 2
   return x * x + y * y <= half * half
 end
 
--- Whether the game draws its quest markers on the minimap at all: not while BubbleMap's overview has
--- Blizzard's minimap faded out (zoom above 1). There's no switch for them otherwise: with the QuestPOIs
+-- Whether the game draws its quest markers on the minimap at all: not while BubbleMap draws its own map
+-- with Blizzard's minimap hidden (SetZoom's gameHidden). There's no switch for them otherwise: with the QuestPOIs
 -- tracking filter off, the game still drew its "?" and "!" (seen in game), so that filter isn't read.
 local function gameDraws()
-  return MinimapAreas.zoom == 1
+  return not MinimapAreas.gameHidden
 end
 
 -- The game's quest-giver "!" (review: two "!" a few pixels apart): drawn by the client, not readable
@@ -215,8 +216,8 @@ function MinimapAreas:NearestGivers(count)
   table.sort(nearest, function(a, b) return a.yards < b.yards end)
   local lines = { gameDraws()
     and ("Leaving the \"!\" to the game within %d yd (GAME_GIVER_YARDS)."):format(GAME_GIVER_YARDS)
-    or "BubbleMap's overview hides the game's own minimap markers: every \"!\" is ours. "
-      .. "To measure the game's range, zoom back in to Blizzard's levels." }
+    or "BubbleMap is drawing its own map: the game's minimap markers are hidden and every \"!\" is "
+      .. "ours. To measure the game's range, use BubbleMap's gather mode (Blizzard's minimap shown)." }
   for i = 1, math.min(count, #nearest) do
     local g = nearest[i]
     lines[#lines + 1] = ("%s: %d yd%s"):format(g.name, g.yards + 0.5,
@@ -521,7 +522,7 @@ local function create()
   layer:SetAllPoints(MinimapAreas.view or Minimap)
   layer:EnableMouse(false)
   layer:SetFrameLevel(Minimap:GetFrameLevel() + 2)
-  -- BubbleMap's overview fades Blizzard's minimap out; our areas stay (SetZoom).
+  -- BubbleMap's own map hides Blizzard's minimap (alpha 0); our areas stay (SetZoom).
   layer:SetIgnoreParentAlpha(true)
   mask = layer:CreateMaskTexture()
   mask:SetAllPoints(layer)
@@ -533,11 +534,17 @@ end
 
 ns.Events:On("PLAYER_LOGIN", create)
 
----The view reaches `factor` times further than Blizzard's minimap shows (BubbleMap's overview zoom,
+---The view reaches `factor` times further than Blizzard's minimap shows (BubbleMap's own zoom,
 ---Blizzard's minimap faded out); 1 is Blizzard's own view.
 ---@param factor number
-function MinimapAreas:SetZoom(factor)
+---@param gameHidden boolean? Blizzard's minimap is hidden (default: factor ~= 1, as it can't draw at
+---another scale)
+function MinimapAreas:SetZoom(factor, gameHidden)
   self.zoom = factor
+  if gameHidden == nil then
+    gameHidden = factor ~= 1
+  end
+  self.gameHidden = gameHidden
 end
 
 ---Draw over `frame` instead of the minimap alone (nil: back to the minimap). BubbleMap's map frame:

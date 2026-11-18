@@ -83,22 +83,26 @@ Mode's apply path (`SetEditModeScale`), where BubbleQuest's tracker taint once c
 - **Rotation:** with "Rotate Minimap" on, Blizzard's square ground clips at diagonal headings; with
   terrain, our rotated ground fills it ([terrain-map.md](terrain-map.md)).
 
-### Zoom: Blizzard's levels, then our overview (step 6)
+### Our map, gather mode, and zoom (step 6)
 
-- **Blizzard's own levels stay** (`Minimap:SetZoom`): its blips (herbs, ore, party, tracking, the game's
-  own quest "?" and "!") are only right at its own zoom.
-- **Out past level 0: overview** (built, `Zoom.lua`). The wheel carries on past Blizzard's farthest
-  level into steps reaching 1.6x to 6x as far: Blizzard's minimap fades out (alpha 0), our terrain is
-  the whole map with our own player arrow, BubbleQuest's areas scale with it
-  (`BubbleQuestAPI.SetMinimapZoom`; its "?" then draws everywhere, the game's being hidden). Outdoors
-  on our continents only; indoors or in an instance it ends. The wheel over the padding zooms too.
-- **In past Blizzard's closest level: not built.** Tried and rejected, 2026-11-17: *mask magnify*
-  (the Minimap frame k times its size behind a mask showing its centre). Blips are not masked (they
-  drew outside the map, over the game world) and the player arrow sat off-centre. Our terrain and
-  BubbleQuest's areas magnified fine, so a terrain-only close-up (no blips) is possible if it's ever
-  wanted; Blizzard's closest level is already close.
-- **Pinning Blizzard's zoom** (all zoom ours) was considered for the game's "!"/"?" changing with
-  zoom; rejected with mask magnify, as it would lose the blips at every level but one.
+Blizzard's blips (herbs, ore, tracking, party, the game's own quest "?" and "!") are only right at
+Blizzard's own zoom levels and size, and addons can't read or redraw them. Tried and rejected,
+2026-11-17: scaling Blizzard's minimap frame, behind a mask (*mask magnify*) or inside a clipping
+parent: the blips spilled outside the map and the player arrow sat off-centre. And the QuestPOIs
+tracking filter doesn't hide the game's quest "?"/"!": with it off they still drew. So never a mix:
+
+- **Our map (the usual):** Blizzard's minimap hidden (alpha 0, mouse off), its zoom fixed at its
+  farthest level; BubbleMap draws everything: terrain, our player arrow, BubbleQuest's quest layer
+  (`SetMinimapZoom(k, true)`: the game draws no markers, ours draw everywhere). Our own zoom, in and
+  out: 0.35x to 6x Blizzard's farthest view. Nothing of Blizzard's can be in a wrong place or double.
+- **Gather mode** (user's idea): Blizzard's minimap shown for its live blips, zoom limited to Blizzard's
+  own levels so the blips are always right; our terrain as the ground under it. Setting: automatic
+  (while a tracking spell such as Find Herbs is on), always, never.
+- **Indoors / no terrain** (instances, maps not in the table): Blizzard's minimap, which has the
+  interior maps.
+- **Later:** what Blizzard's minimap showed that we can draw ourselves in our map (group members,
+  corpse and graveyards, rares and treasures, flight masters, town services, pings), and a gathering
+  database (GatherMate2 and the like) for possible node spots in our map.
 
 ## Around the minimap (built, step 3)
 
@@ -175,7 +179,7 @@ again"). Two addons setting the mask and defining the shape would fight.
 4. ~~Addon list~~ (built).
 5. ~~Terrain core and padding~~ (built): pipeline and continent tiles, `SetMinimapView`, padding at the
    minimap's scale, rotated ground, one ground outdoors.
-6. ~~Zoom~~ (built): overview past level 0. Zoom-in past Blizzard's closest: rejected (see Zoom).
+6. ~~Our map, gather mode, zoom~~ (built; see the section).
 7. **World map terrain toggle** with cities (`BubbleMap_Terrain`).
 8. **Our map window:** deep zoom, then dungeons.
 

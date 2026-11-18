@@ -11,7 +11,8 @@ local function show(key)
   end
 end
 
--- kind, id, label, tooltip, default, get, set (+ min, max, step, format for sliders)
+-- kind, id, label, tooltip, default, get, set (+ min, max, step, format for sliders; options() ->
+-- { { value, label }, ... } for dropdowns)
 local ENTRIES = {
   { kind = "section", label = "Map" },
   { kind = "checkbox", id = "BUBBLEMAP_LOCKED", label = "Lock the map", default = true,
@@ -28,6 +29,16 @@ local ENTRIES = {
     format = function(v) return ("%d%%"):format(v) end,
     get = function() return ns.DB.heightPercent end,
     set = function(v) ns.DB.heightPercent = v; ns.Minimap:Refresh() end },
+
+  { kind = "dropdown", id = "BUBBLEMAP_GATHER_MODE", label = "Gather mode", default = "auto",
+    tooltip = "BubbleMap draws its own map, zooming in and out freely. Gather mode shows the game's own "
+      .. "minimap instead, for its live herb, ore and tracking blips, which are only right at the game's "
+      .. "zoom levels: zoom is limited to those. Automatic: while a tracking spell such as Find Herbs is on.",
+    options = function()
+      return { { "auto", "Automatic (while tracking)" }, { "always", "Always" }, { "never", "Never" } }
+    end,
+    get = function() return ns.DB.gatherMode end,
+    set = function(v) ns.DB.gatherMode = v; ns.Zoom:Update() end },
 
   { kind = "section", label = "Around the map" },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_BAR", label = "Top bar", default = true,
@@ -59,7 +70,7 @@ local SHOW_KEYS = {
   BUBBLEMAP_LAUNCHERS = "launchers",
 }
 
-local VAR_TYPE = { checkbox = "Boolean", slider = "Number" }
+local VAR_TYPE = { checkbox = "Boolean", slider = "Number", dropdown = "String" }
 
 local function register()
   local category = Settings.RegisterVerticalLayoutCategory("BubbleMap")
@@ -76,6 +87,14 @@ local function register()
         entry.label, entry.default, get, set)
       if entry.kind == "checkbox" then
         Settings.CreateCheckbox(category, setting, entry.tooltip)
+      elseif entry.kind == "dropdown" then
+        Settings.CreateDropdown(category, setting, function()
+          local container = Settings.CreateControlTextContainer()
+          for _, option in ipairs(entry.options()) do
+            container:Add(option[1], option[2])
+          end
+          return container:GetData()
+        end, entry.tooltip)
       else
         local options = Settings.CreateSliderOptions(entry.min, entry.max, entry.step)
         options:SetLabelFormatter(MinimalSliderWithSteppersMixin.Label.Right, entry.format)

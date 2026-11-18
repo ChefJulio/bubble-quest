@@ -76,9 +76,12 @@ end
 ---The minimap view reaches `factor` times further than Blizzard's minimap (an overview zoom past its
 ---farthest level, Blizzard's minimap faded out): the quest areas scale to match, and turn-ins get our
 ---"?" everywhere, as the game's own are hidden. 1: Blizzard's own view.
+---`gameHidden`: Blizzard's minimap is hidden (BubbleMap drawing its own map), so the game draws none of
+---its own "?" and "!" and ours draw everywhere. Defaults to factor ~= 1.
 ---@param factor number
-function api.SetMinimapZoom(factor)
-  ns.MinimapAreas:SetZoom(factor)
+---@param gameHidden boolean?
+function api.SetMinimapZoom(factor, gameHidden)
+  ns.MinimapAreas:SetZoom(factor, gameHidden)
 end
 
 ---How the tracker looks, for matching it. A fresh table each call; changes come with ThemeChanged.

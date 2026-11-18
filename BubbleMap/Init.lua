@@ -73,6 +73,7 @@ local DEFAULTS = {
   locked = true,      -- the bar can't drag the map
   width = 220,        -- the map's width without the quest addon (with it: the tracker's width)
   heightPercent = 100,  -- the map's height, percent of its width
+  gatherMode = "auto", -- Blizzard's minimap for its blips: "auto" (a tracking spell on), "always", "never"
   show = {            -- what's around the map (Around.lua); Blizzard's own versions are always hidden
     bar = true,       -- the bar along the map's top (zone, buttons, clock)
     zone = true,
