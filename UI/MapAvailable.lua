@@ -182,13 +182,18 @@ local function droppersText(itemID)
   return text
 end
 
-local function questLine(tooltip, q)
+---One available quest as a tooltip line: "[12] Title", coloured by difficulty, tagged trivial or
+---repeatable. `q`: { record, trivial }. Also the NPC tooltips' (UI/WorldTooltips.lua).
+---@param tooltip GameTooltip
+---@param q table
+function MapAvailable.QuestLine(tooltip, q)
   local r = q.record
   local level = (r.level and r.level > 0) and r.level or UnitLevel("player")
   local color = GetQuestDifficultyColor(level)
   local tag = q.trivial and "(Trivial)" or ns.Available.Repeatable(r) and "(Repeatable)" or ""
   tooltip:AddDoubleLine(("[%d] %s"):format(level, r.name or "?"), tag, color.r, color.g, color.b, 0.6, 0.6, 0.6)
 end
+local questLine = MapAvailable.QuestLine
 
 ---Fills `tooltip` (owned and anchored by the caller) for the entries under the cursor.
 function MapAvailable.FillTooltip(tooltip, entries)

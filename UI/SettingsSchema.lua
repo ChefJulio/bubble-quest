@@ -199,6 +199,25 @@ function Schema:Entries()
       set = function(p, v) p.cards.opacity = v; ns.Stack:ApplyBackground() end,
     },
 
+    -- Lines added to the game's own tooltips (UI/WorldTooltips.lua).
+    { kind = "section", label = "Tooltips", column = 1 },
+    {
+      kind = "checkbox", id = "BUBBLEQUEST_TOOLTIP_NPCS", column = 1, default = true,
+      label = "Quests on NPC tooltips",
+      tooltip = "Hovering a quest giver lists the quests it offers you; hovering the NPC a ready quest is "
+        .. "turned in to lists those quests. Not in combat (the game hides that data then).",
+      get = function(p) return p.tooltips.npcs end,
+      set = function(p, v) p.tooltips.npcs = v end,
+    },
+    {
+      kind = "checkbox", id = "BUBBLEQUEST_TOOLTIP_ITEMS", column = 1, default = true,
+      label = "Quests on item tooltips",
+      tooltip = "An item that starts a quest says which, and whether you've done it; an item a quest in "
+        .. "your log needs says which quest and how many you have.",
+      get = function(p) return p.tooltips.items end,
+      set = function(p, v) p.tooltips.items = v end,
+    },
+
     -- Only with Questie installed: its tracker's state, and Questie's own switch to turn it off.
     -- Questie's tracker state (with Questie), and QuestieDB's data (with QuestieDB, Questie or not).
     { kind = "section", label = "Questie", column = 1, windowOnly = true, onlyIf = function()

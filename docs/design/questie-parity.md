@@ -24,12 +24,12 @@ agreed), **skip** (not worth it, or the client already does it).
 | Questie | Status | Questmarker / notes |
 | --- | --- | --- |
 | World tooltips: quest progress on mobs and objects | planned | The client adds quest lines to unit tooltips itself (TooltipDataLineType QuestObjective/QuestTitle/QuestPlayer): add only what's missing |
-| Quests in NPC tooltips (what a quest giver offers) | planned | With part 2's data |
-| Quest level in tooltips | planned | |
+| Quests in NPC tooltips (what a quest giver offers) | have | UI/WorldTooltips.lua: offers and ready turn-ins, by NPC name (IDs are secret outside your group); not in combat |
+| Quest level in tooltips | have | "[level]" on every quest line BubbleQuest adds |
 | Next quests in chain | planned | QuestieDB nextQuestInChain |
 | Breadcrumb quests | planned | |
 | Item drop rates | planned | LibForeverData has drop chances |
-| "This item starts a quest" | planned | Roadmap 5 |
+| "This item starts a quest" | have | UI/WorldTooltips.lua, plus "Needed for" on items a quest in your log needs |
 | Quest XP at max level | skip | |
 
 ## Sounds

@@ -64,6 +64,10 @@ local PROFILE_DEFAULTS = {
     -- default can't come back). Profession trainers are per character (char.professionTrainers).
     services = { flight = true, inn = true, auction = true, mailbox = true },
   },
+  tooltips = {  -- lines BubbleQuest adds to the game's tooltips (UI/WorldTooltips.lua)
+    npcs = true,   -- quest givers: the quests they offer you; turn-in NPCs: your ready quests
+    items = true,  -- items: the quest they start, the quests they're needed for
+  },
   categories = {},  -- [category] = "show" | "separate" | "hide"; unset = Categories.DEFAULT_MODES
   font = {
     face = "default",  -- a LibSharedMedia font name, or "default" (the game's)
