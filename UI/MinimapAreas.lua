@@ -174,8 +174,12 @@ local function inGameView(x, y)
   return x * x + y * y <= half * half
 end
 
+-- Whether the game draws its quest markers on the minimap at all: not while BubbleMap's overview has
+-- Blizzard's minimap faded out (zoom above 1), and not while its quest markers are switched off (the
+-- QuestPOIs tracking filter: BubbleMap's "Only BubbleQuest's quest markers" turns it off). Errs to
+-- "draws" when unsure, as for the "!" range: a doubled marker is better than a missing one.
 local function gameDraws()
-  return MinimapAreas.zoom == 1
+  return MinimapAreas.zoom == 1 and not C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.QuestPOIs)
 end
 
 -- The game's quest-giver "!" (review: two "!" a few pixels apart): drawn by the client, not readable
@@ -209,11 +213,14 @@ function MinimapAreas:NearestGivers(count)
     end
   end
   table.sort(nearest, function(a, b) return a.yards < b.yards end)
-  local lines = { ("Leaving the \"!\" to the game within %d yd (GAME_GIVER_YARDS)."):format(GAME_GIVER_YARDS) }
+  local lines = { gameDraws()
+    and ("Leaving the \"!\" to the game within %d yd (GAME_GIVER_YARDS)."):format(GAME_GIVER_YARDS)
+    or "The game's own minimap quest markers are off (BubbleMap, or zoomed out): every \"!\" is ours. "
+      .. "To measure the game's range, turn them back on (BubbleMap's \"Only BubbleQuest's quest markers\")." }
   for i = 1, math.min(count, #nearest) do
     local g = nearest[i]
     lines[#lines + 1] = ("%s: %d yd%s"):format(g.name, g.yards + 0.5,
-      g.yards <= GAME_GIVER_YARDS and " (game's \"!\")" or "")
+      gameDraws() and g.yards <= GAME_GIVER_YARDS and " (game's \"!\")" or "")
   end
   if #nearest == 0 then
     lines[#lines + 1] = "No quest givers known on this map (minimap layer off, or none)."
@@ -317,6 +324,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
   markerSize = ns.MapAreas.turninSize(GIVER_SIZE) * ns.MapAreas.iconScale()  -- matches the givers' "!"
   -- The whole circle: on the minimap they're small (the world map's 70% core was too fiddly in review).
   MinimapAreas.radius = math.max(size / 2, HOVER_MIN)
+  local skipMarked = gameDraws()  -- once per frame, not per point
   for _, p in ipairs(MinimapAreas.points) do
     if p.map == instanceMap then
       local x, y = project(p.x - north, p.y - west, cos, sin, scale)
@@ -331,7 +339,7 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
-      elseif inside and not (gameDraws() and inGameView(x, y) and ns.MapAreas.GameMarksTurnIn(p.questID))
+      elseif inside and not (skipMarked and inGameView(x, y) and ns.MapAreas.GameMarksTurnIn(p.questID))
           and not markerNear(x, y) then
         -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
         place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
