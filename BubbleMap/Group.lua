@@ -17,6 +17,9 @@ local RING = { 0, 0, 0, 0.9 }      -- a dark ring, so the dot reads on any groun
 local DISC = "Interface\\CharacterFrame\\TempPortraitAlphaMask"  -- a white disc (its alpha is the circle)
 local HOVER_RADIUS = 7             -- pixels
 local UPDATE_SECONDS = 0.05
+-- A valid anchor on this client (Blizzard's own list of them: Blizzard_AuraButton.lua:49), missing from
+-- the API annotations lint reads, which list only ANCHOR_CURSOR_RIGHT; typed loosely for that alone.
+local ANCHOR_LEFT_OF_CURSOR = "ANCHOR_CURSOR_LEFT" ---@type any
 
 local Group = {}
 ns.Group = Group
@@ -154,7 +157,7 @@ function Layer:Hover(noHover)
   self.hovering = true
   -- Left of the cursor: BubbleQuest's quest tooltip takes its right (ANCHOR_CURSOR or _RIGHT), so a member
   -- standing at a quest giver shows both side by side (review: they overlapped).
-  GameTooltip:SetOwner(frame, "ANCHOR_CURSOR_LEFT")
+  GameTooltip:SetOwner(frame, ANCHOR_LEFT_OF_CURSOR)
   for _, unit in ipairs(over) do
     -- apiguard: allow the name is checked with issecretvalue (readable) before it's shown
     local name = UnitName(unit)
