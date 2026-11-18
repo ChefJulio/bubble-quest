@@ -106,7 +106,7 @@ local function gather(map, continent)
           and (node.faction ~= Enum.FlightPathFaction.Alliance or faction == "Alliance")
         if mine then
           add("t" .. node.nodeID, uiMap, node.position, {
-            atlas = kitAtlas(node.atlasName, node.textureKit), name = node.name,
+            kind = "flight", atlas = kitAtlas(node.atlasName, node.textureKit), name = node.name,
             note = node.isUndiscovered and "Undiscovered flight point" or "Flight point",
             dim = node.isUndiscovered,
           })
@@ -116,19 +116,19 @@ local function gather(map, continent)
     -- Zone exits: the green arrows at a zone's edge to the next (MapLinkDataProvider.lua).
     for _, link in ipairs(C_Map.GetMapLinksForMap(uiMap) or {}) do
       add("l" .. link.areaPoiID, uiMap, link.position, {
-        atlas = link.atlasName, name = link.name, note = "Way to " .. (link.name or "the next zone"),
+        kind = "link", atlas = link.atlasName, name = link.name, note = "Way to " .. (link.name or "the next zone"),
       })
     end
     for _, entrance in ipairs(C_EncounterJournal.GetDungeonEntrancesForMap(uiMap)) do
       add("d" .. entrance.areaPoiID, uiMap, entrance.position, {
-        atlas = entrance.atlasName, name = entrance.name, note = entrance.description,
+        kind = "dungeon", atlas = entrance.atlasName, name = entrance.name, note = entrance.description,
       })
     end
     for _, id in ipairs(C_AreaPoiInfo.GetAreaPOIForMap(uiMap)) do
       local poi = C_AreaPoiInfo.GetAreaPOIInfo(uiMap, id)
       if poi then
         add("a" .. id, uiMap, poi.position, {
-          atlas = poi.atlasName, index = poi.textureIndex, name = poi.name, note = poi.description,
+          kind = "area", atlas = poi.atlasName, index = poi.textureIndex, name = poi.name, note = poi.description,
         })
       end
     end
@@ -227,7 +227,7 @@ function Layer:Draw(map, north, west, project, noHover)
   for _, point in ipairs(list) do
     local x, y = project(point.north, point.west)
     local t = self:Icon(point)
-    if not t.empty and math.abs(x) <= halfW and math.abs(y) <= halfH then
+    if not t.empty and math.abs(x) <= halfW and math.abs(y) <= halfH and ns.MapWindow.Shows(point.kind) then
       t:ClearAllPoints()
       t:SetPoint("CENTER", frame, "CENTER", x, y)
       t:Show()

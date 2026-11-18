@@ -204,6 +204,15 @@ buttons are put away.
 - **Area label:** hovering, the big name at the top as on the world map (AreaLabelDataProvider.lua): the
   explored area under the cursor, else the zone with its level range. **Zone exits** (map links) are
   among the map points.
+- **Title bar** (as the world map's): a breadcrumb, continent | zone at the centre, each a menu that
+  frames the chosen map (its world rectangle fitted to the window; "The whole world" too); a "Show" menu
+  for what's drawn (flight masters, zone exits, dungeon entrances, events, zone names, waypoints, party
+  names, reveal) and BubbleQuest's own map options (`BubbleQuestAPI.AddMapMenu(description)`, asked of
+  it 2026-11-18; the submenu shows once it exists).
+- **Map art in the window** draws the continent's art as the base and the zones as their land pieces
+  only (overlays): their painted base art has faded borders that overlapped (review: "this looks bad").
+  Revealed by default (setting revealMap): every overlay from Data/Overlays.lua (tools/overlays.py, the
+  game's WorldMapOverlay data), as Leatrix Maps reveals; unticked, only the explored ones.
 - **Quest log drawer:** BubbleQuest's quest list (`BubbleQuestAPI.CreateQuestLogPanel(parent, options)`
   -> { GetFrame, Show, Hide, Refresh }, `options.onQuestClick(questID, target)` with target
   { map, north, west } or nil; agreed 2026-11-18, built in BubbleQuest) in a drawer on the window's

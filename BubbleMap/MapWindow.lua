@@ -15,7 +15,8 @@ local ADDON_NAME, ns = ...
 --
 -- Drawn, bottom up: the sea's colour where nothing is (ns.SEA: the coast's tile grid doesn't show),
 -- terrain or art, the hovered zone's highlight, the quest layer, map points, group members, waypoints
--- (Waypoints.lua), zone names when zoomed out, the player's arrow. The title names the zone under the
+-- (Waypoints.lua), zone names when zoomed out, the player's arrow. The title is a breadcrumb (continent,
+-- zone at the centre; each a menu framing a map), a "Show" menu chooses what's drawn. The area label names the zone under the
 -- cursor; the bottom bar gives your coordinates and the cursor's (zone %, as the world map) and the
 -- style switch (Terrain / Map art, the window's own setting: windowStyle).
 --
@@ -43,13 +44,14 @@ local MapWindow = {
 }
 ns.MapWindow = MapWindow
 
-local window, content, arrow, title, highlight, footerLeft, footerRight, styleButton
+local window, content, arrow, highlight, footerLeft, footerRight, styleButton
 local layers = {}   -- frames shared by every slot, by kind: tiles, art, highlight, points, group, labels
 local slots = {}    -- [instance map] = { e (World entry), tiles, art, quests, points, group, labels }
 local centre = { x = 0, y = 0 }
 local ppy = DEFAULT_PPY
 local drag  -- { x, y, cx, cy, moved } while the left button is down
 local drawPulse  -- the quest drawer's pulse (below, with the drawer)
+local continentButton, zoneButton, mapName  -- the breadcrumb (below, Navigation)
 
 local function playerPosition()
   local north, west, _, map = UnitPosition("player")
@@ -319,7 +321,8 @@ local function redraw()
 
   local halfW, halfH = content:GetWidth() / 2 / ppy, content:GetHeight() / 2 / ppy
   local style = ns.DB.windowStyle
-  local labelAlpha = math.max(0, math.min(1, (LABELS_UNTIL_PPY - ppy) / LABELS_FADE))
+  local labelAlpha = MapWindow.Shows("zoneNames") and math.max(0, math.min(1, (LABELS_UNTIL_PPY - ppy) / LABELS_FADE))
+    or 0
   local hoverProject
   -- Tooltips, one continent's at a time (the one under the cursor): BubbleQuest's right of the cursor,
   -- a member's name left of it (both show); a point's only when neither is up.
@@ -358,7 +361,7 @@ local function redraw()
   end
   drawHighlight(hoverEntry, hoverNorth, hoverWest, hoverProject)
   if ns.Waypoints then
-    ns.Waypoints:DrawWindow(layers.waypoints, MapWindow.Project)
+    ns.Waypoints:DrawWindow(layers.waypoints, MapWindow.Shows("waypoints") and MapWindow.Project or nil)
   end
   drawPulse()
 
@@ -380,7 +383,16 @@ local function redraw()
   local hoverZone = hoverEntry and zoneAt(hoverEntry, hoverNorth, hoverWest)
   local centreEntry, centreNorth, centreWest = ns.World.FromPlane(centre.x, centre.y)
   local centreZone = centreEntry and zoneAt(centreEntry, centreNorth, centreWest)
-  title:SetText((hoverZone or centreZone or {}).name or "BubbleMap")
+  -- The breadcrumb: the continent and zone at the centre.
+  continentButton:SetLabel(centreEntry and mapName(centreEntry.ui) or "BubbleMap")
+  local zoneHere = centreZone and centreEntry and centreZone.mapID ~= centreEntry.ui and centreZone or nil
+  zoneButton.zoneID = zoneHere and zoneHere.mapID
+  zoneButton:SetLabel(zoneHere and zoneHere.name or "")
+  zoneButton:SetShown(zoneHere ~= nil or (centreEntry ~= nil and centreEntry.ui ~= nil))
+  zoneButton.separator:SetShown(zoneButton:IsShown())
+  if not zoneHere then
+    zoneButton:SetLabel("Zones")
+  end
   areaLabel:SetText(hoverEntry and hoverNorth and hoverWest and areaText(hoverEntry, hoverZone, hoverNorth, hoverWest)
     or "")
   local here = C_Map.GetBestMapForUnit("player")
@@ -403,6 +415,135 @@ local function zoomAt(delta)
   centre.x, centre.y = x - dx / ppy, y + dy / ppy
   MapWindow.following = false
   redraw()
+end
+
+-- Navigation ------------------------------------------------------------------------------------------
+-- The title is a breadcrumb as the world map's: the continent and the zone at the map's centre, each a
+-- menu (the continents and the whole world; the continent's zones, in two columns) that frames the
+-- chosen map: its rectangle fitted to the window.
+
+-- Frame the plane rectangle x0..x1, y0..y1 (a margin round it).
+local function frameRect(x0, y0, x1, y1)
+  local w, h = content:GetWidth(), content:GetHeight()
+  ppy = math.max(MIN_PPY, math.min(MAX_PPY, 0.92 * math.min(w / math.max(x1 - x0, 1), h / math.max(y1 - y0, 1))))
+  centre.x, centre.y = (x0 + x1) / 2, (y0 + y1) / 2
+  MapWindow.following = false
+end
+
+-- Frame a UI map (a zone or a continent): its corners in the world, on the plane.
+local function frameMap(uiMap)
+  local mapA, a = C_Map.GetWorldPosFromMapPos(uiMap, CreateVector2D(0, 0))
+  local mapB, b = C_Map.GetWorldPosFromMapPos(uiMap, CreateVector2D(1, 1))
+  if not (a and b) then
+    return
+  end
+  local x0, y0 = ns.World.ToPlane(mapA, a.x, a.y)
+  local x1, y1 = ns.World.ToPlane(mapB, b.x, b.y)
+  if x0 and x1 then
+    frameRect(math.min(x0, x1), math.min(y0, y1), math.max(x0, x1), math.max(y0, y1))
+  end
+end
+
+function mapName(uiMap)
+  local info = uiMap and C_Map.GetMapInfo(uiMap)
+  return info and info.name
+end
+
+local function continentMenu(owner)
+  MenuUtil.CreateContextMenu(owner, function(_, root)
+    local here = ns.World.FromPlane(centre.x, centre.y)
+    for _, e in ipairs(ns.World.Continents()) do
+      local name = mapName(e.ui)
+      if name then
+        root:CreateRadio(name, function() return here == e end, function() frameMap(e.ui) end)
+      end
+    end
+    root:CreateRadio("The whole world", function() return false end, function()
+      frameRect(ns.World.Bounds())
+    end)
+  end)
+end
+
+local function zoneMenu(owner)
+  local e = ns.World.FromPlane(centre.x, centre.y)
+  if not (e and e.ui) then
+    return
+  end
+  MenuUtil.CreateContextMenu(owner, function(_, root)
+    local zones = {}
+    for _, zone in ipairs(ns.Art.Zones(e.ui)) do
+      local name = mapName(zone)
+      if name then
+        zones[#zones + 1] = { id = zone, name = name }
+      end
+    end
+    table.sort(zones, function(a, b) return a.name < b.name end)
+    local current = zoneButton.zoneID
+    for _, zone in ipairs(zones) do
+      root:CreateRadio(zone.name, function() return current == zone.id end, function() frameMap(zone.id) end)
+    end
+    if #zones > 16 then
+      root:SetGridMode(MenuConstants.VerticalGridDirection, 2)  -- two columns, as the world map's
+    end
+  end)
+end
+
+-- The "Show" menu: what the window draws (setting windowShow), and BubbleQuest's own map options when it
+-- offers them (BubbleQuestAPI.AddMapMenu: its map button's menu, the same items).
+local SHOW = {
+  { "flight", "Flight masters" },
+  { "link", "Zone exits" },
+  { "dungeon", "Dungeon entrances" },
+  { "area", "Events and landmarks" },
+  { "zoneNames", "Zone names" },
+  { "waypoints", "Waypoints" },
+}
+
+---Whether the window draws `key` (SHOW's keys; on unless switched off).
+---@param key string
+---@return boolean
+function MapWindow.Shows(key)
+  return ns.DB.windowShow[key] ~= false
+end
+
+local function showMenu(owner)
+  MenuUtil.CreateContextMenu(owner, function(_, root)
+    root:CreateTitle("BubbleMap")
+    for _, item in ipairs(SHOW) do
+      root:CreateCheckbox(item[2], function() return MapWindow.Shows(item[1]) end,
+        function() ns.DB.windowShow[item[1]] = not MapWindow.Shows(item[1]) end)
+    end
+    root:CreateCheckbox("Party members' names", function() return ns.DB.groupNames end,
+      function() ns.DB.groupNames = not ns.DB.groupNames end)
+    root:CreateCheckbox("Reveal the whole map (map art)", function() return ns.DB.revealMap end,
+      function()
+        ns.DB.revealMap = not ns.DB.revealMap
+        ns.Art.Rebuild()
+      end)
+    local quest = ns.Quest
+    if quest and type(quest.AddMapMenu) == "function" then
+      root:CreateDivider()
+      quest.AddMapMenu(root:CreateButton("BubbleQuest"))
+    end
+  end)
+end
+
+local function textButton(parent, onClick)
+  local b = CreateFrame("Button", nil, parent)
+  b:SetHeight(18)
+  b.text = b:CreateFontString(nil, "OVERLAY", "GameFontNormal")
+  b.text:SetPoint("LEFT")
+  b:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
+  b:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.08)
+  b:SetScript("OnClick", onClick)
+  function b:SetLabel(text)
+    if self.label ~= text then
+      self.label = text
+      self.text:SetText(text or "")
+      self:SetWidth(self.text:GetStringWidth() + 6)
+    end
+  end
+  return b
 end
 
 local function updateStyleButton()
@@ -593,8 +734,15 @@ local function create()
   local band = bar:CreateTexture(nil, "BACKGROUND")
   band:SetAllPoints()
   band:SetColorTexture(0, 0, 0, 0.6)
-  title = bar:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-  title:SetPoint("LEFT", 8, 0)
+  -- The breadcrumb: continent | zone, each a menu (Navigation, above).
+  continentButton = textButton(bar, function(self) continentMenu(self) end)
+  continentButton:SetPoint("LEFT", 8, 0)
+  local separator = bar:CreateFontString(nil, "OVERLAY", "GameFontDisable")
+  separator:SetPoint("LEFT", continentButton, "RIGHT", 4, 0)
+  separator:SetText("|")
+  zoneButton = textButton(bar, function(self) zoneMenu(self) end)
+  zoneButton:SetPoint("LEFT", separator, "RIGHT", 4, 0)
+  zoneButton.separator = separator
   local close = CreateFrame("Button", nil, bar, "UIPanelCloseButtonNoScripts")
   close:SetPoint("RIGHT", 2, 0)
   close:SetSize(24, 24)
@@ -607,6 +755,11 @@ local function create()
     MapWindow.following = true
     redraw()
   end)
+  local show = CreateFrame("Button", nil, bar, "UIPanelButtonTemplate")
+  show:SetText("Show")
+  show:SetSize(show:GetFontString():GetStringWidth() + 20, 18)
+  show:SetPoint("RIGHT", me, "LEFT", -4, 0)
+  show:SetScript("OnClick", function(self) showMenu(self) end)
 
   -- Footer: coordinates, the style switch.
   local footer = CreateFrame("Frame", nil, window)
