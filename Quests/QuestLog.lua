@@ -49,13 +49,20 @@ local function readObjectives(questID)
     local base = (info.type or "?") .. ":" .. stripProgress(text)
     local count = (seen[base] or 0) + 1
     seen[base] = count
+    -- A count that says done while the objective isn't is no count at all (review: "Raise your
+    -- leatherworking skill to 20" at skill 14 came as 1/1, unfinished, and showed a full bar): such an
+    -- objective counts as one without a counter (done or not, by `finished`).
+    local fulfilled, required = info.numFulfilled, info.numRequired ---@type number?, number?
+    if not info.finished and required and required > 0 and fulfilled and fulfilled >= required then
+      fulfilled, required = nil, nil
+    end
     objectives[i] = {
       key = count > 1 and (base .. "#" .. count) or base,
       text = text,
       type = info.type,
       finished = info.finished,
-      fulfilled = info.numFulfilled,
-      required = info.numRequired,
+      fulfilled = fulfilled,
+      required = required,
     }
   end
   return objectives
