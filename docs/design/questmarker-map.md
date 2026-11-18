@@ -1,219 +1,188 @@
-# Questmarker_Map: a minimap made for the tracker
+# BubbleMap: a minimap made for the suite
 
-Proposed 2026-11-17. Not started. A companion addon that replaces SexyMap for Questmarker players: a
-clean square minimap resting on top of the tracker as one designed column, everything around the
-minimap redone and toggleable, one deduplicated launcher list instead of minimap buttons, and terrain
-(design: [terrain-map.md](terrain-map.md)) for padding, overview zoom and the world map.
+Proposed 2026-11-17 as Questmarker_Map; renamed and made standalone the same day (suite rules:
+[bubble-suite.md](bubble-suite.md)). Steps 1-4 of the build order are built (in game review); 5-8
+are not started. (This file keeps its old name so links to it keep working.)
 
-Players who want standalone minimap styling have SexyMap; this addon exists to integrate with
-Questmarker and requires it.
+A SexyMap replacement that fits the Bubble suite: a clean square minimap, everything around it redone
+and toggleable, one condensed list instead of addon minimap buttons, and terrain (design:
+[terrain-map.md](terrain-map.md)) for padding, extended zoom and the world map. Standalone: with
+BubbleQuest loaded too, the map rests on BubbleQuest's tracker as one designed column.
 
 ## Packaging
 
-- **Same repo, same release, two addons side by side** (the BigWigs/DBM model). `Questmarker_Map/`
-  is a folder in the repo with its own TOC: `## Dependencies: Questmarker`, version
-  `@project-version@`. One tag releases both, so versions can't drift; no second CurseForge project.
-- **The big data is a third, load-on-demand addon,** `Questmarker_Terrain/` (`## LoadOnDemand: 1`,
-  `## Dependencies: Questmarker_Map`): the city and dungeon WMO tables (~2.6 MB). Loaded by
+- **Its own addon, its own release.** `BubbleMap/` (TOC `BubbleMap.toc`, `## OptionalDeps:
+  BubbleQuest`, SavedVariables `BubbleMapDB`, `/bmap`). For now it lives in BubbleQuest's repo and is
+  left out of BubbleQuest's zip (`.pkgmeta` ignore); it moves to its own repo and CurseForge project
+  per the suite doc.
+- **The big data is a second, load-on-demand addon,** `BubbleMap_Terrain/` (`## LoadOnDemand: 1`,
+  `## Dependencies: BubbleMap`): the city and dungeon WMO tables (~2.6 MB), loaded by
   `C_AddOns.LoadAddOn` the first time a city or dungeon is drawn. The continent tile table (~92 KB) is
-  needed whenever the minimap draws padding, so it lives in `Questmarker_Map` itself.
-- **Changes:**
-  - `.pkgmeta`: `move-folders` for both subfolders; the ignore list stays.
-  - `tools/package.py`: from one `ADDON` to a list of addon folders, each with its TOC, listed files and
-    version substitution. `--check` keeps working on the union.
-  - `tools/lint.py` / `apiguard.py` scan by directory; confirm they cover the subfolders and that each
-    addon's globals are declared in `.luarc.json`.
-  - Local testing: a second junction, `_forever_\Interface\AddOns\Questmarker_Map` to the repo subfolder
-    (same for `Questmarker_Terrain`).
-- **Switching it off** is the AddOns list. Players who already run a minimap addon leave it unticked.
+  needed whenever the minimap draws padding, so it lives in BubbleMap itself.
+- **Local testing:** a junction `_forever_\Interface\AddOns\BubbleMap` to the repo folder.
+- **Settings:** its own page in Options > AddOns (`Settings.lua`). STOPGAP until the suite's shared
+  library (LibBubble) brings the one settings window every Bubble addon uses.
 
-## Interface between the two addons
+## BubbleQuest, when it's there
 
-`Questmarker_Map` can't see Questmarker's private namespace and must not copy its code. Questmarker
-gets one read-only global, `QuestmarkerAPI` (added to `.luarc.json` `diagnostics.globals`):
+BubbleMap never reaches into BubbleQuest's private namespace. BubbleQuest has one read-only, versioned
+global, `BubbleQuestAPI` (`Core/API.lua`). BubbleMap finds it with `rawget` at load and checks `API`;
+every quest feature is gated on it.
 
-| Member | What |
-|---|---|
-| `API` | Version number, starting at 1. The map addon checks it at load and stays off (with one chat line) if it's older than it needs |
-| `RegisterCallback(event, fn)` | `"AreasChanged"` (from `MapAreas:MarkDirty`/`version`), `"ProfileChanged"`, `"TrackerResized"` |
-| `GetTracker()` | The tracker's root frame, for docking and width |
-| `SetTrackerDock(frame)` / `nil` | Dock the tracker's top edge under `frame` (and take its width from the tracker setting); `nil` restores normal positioning |
-| `SetMinimapView(view)` / `nil` | Point the minimap quest renderer at a larger frame (below) |
-| `Theme()` | Fonts, colours, border and spacing, so both addons look like one |
-| `FrameLevels()` | The world map canvas levels Questmarker uses (quest areas 2004, town services 2006, "!" 2007, "?" 2008, fan row 2010+) so the terrain layer can sit under them |
+| Member | What | Built |
+|---|---|---|
+| `API` | Version number (1) | yes |
+| `RegisterCallback(event, fn)` | `ProfileChanged`, `TrackerResized` (width), `ThemeChanged`, `AreasChanged`, `TrackerAttachMoved` | yes |
+| `GetTracker()` | The tracker's root frame (nil before PLAYER_LOGIN) | yes |
+| `SetTrackerAttach(frame)` / `nil` | Hang the tracker's top under `frame`; while attached its header drags `frame` (if movable) and fires `TrackerAttachMoved`. Queued after combat | yes |
+| `Theme()` | Font object names, panel colours, padding | yes |
+| `SetMinimapView(view)` / `nil` | Point the minimap quest renderer at a larger frame (below) | step 5 |
+| `FrameLevels()` | World map canvas levels BubbleQuest uses (quest areas 2004, town services 2006, "!" 2007, "?" 2008, fan row 2010+), so the terrain layer sits under them | step 7 |
 
-**Reuse, not reimplementation.** `UI/MinimapAreas.lua` already draws quest areas, the guide line,
-the "!" givers and the "?" turn-ins from a centre (the player) and a pixels-per-yard scale
-(`Minimap:GetWidth() / 2 / C_Minimap.GetViewRadius()`), clipped by a mask. The padding around the
-square is the same picture over a bigger frame, so it stays one renderer:
-
-- `SetMinimapView({ frame = outer, scale = fn })`: the renderer draws into `outer` instead of on
-  `Minimap`, with its mask fitted to `outer`'s shape, and asks `scale()` for pixels per yard (the map
-  addon owns zoom). Hover tests `outer:IsMouseOver()`.
-- With no view set (map addon off), it draws on `Minimap` exactly as today.
-- Its tooltip stays `QuestmarkerMinimapTooltip`. We keep Blizzard's `Minimap` frame, so
-  `Minimap_OnUpdate` still takes over `GameTooltip` every frame.
-
-The world map terrain layer needs nothing from the API except `FrameLevels()`.
+**Reuse, not reimplementation.** BubbleQuest's `UI/MinimapAreas.lua` draws quest areas, the guide
+line, the "!" givers and the "?" turn-ins from a centre (the player) and a pixels-per-yard scale,
+clipped by a mask. The padding around the square is the same picture over a bigger frame, so it stays
+one renderer: `SetMinimapView({ frame = outer, scale = fn })` makes it draw into `outer`, mask fitted
+to it, asking `scale()` for pixels per yard (BubbleMap owns zoom). Without a view, it draws on
+`Minimap` as today. Its hover requires the minimap itself under the cursor (`GetMouseFoci`), so
+nothing flashes through frames on top of it, BubbleMap's bar included.
 
 ## The minimap: Blizzard's frame, restyled in place
 
-We keep Blizzard's `Minimap` inside its Edit Mode container. Edit Mode places it, and everything we
-add is our own frames. SexyMap reparents the minimap to `UIParent`, which leaves Edit Mode moving an
-empty box. It also uses `SetScript` on Blizzard frames and overwrites their methods. We do none of
-that, and we don't hook Edit Mode's apply path (`SetEditModeScale`), which is where our tracker taint
-came from.
+Blizzard's `Minimap` stays in its Edit Mode container: Edit Mode scales it, we never move or reparent
+the container. SexyMap reparents the minimap to `UIParent` (Edit Mode then moves an empty box), uses
+`SetScript` on Blizzard frames and overwrites their methods; we do none of that, and we don't hook Edit
+Mode's apply path (`SetEditModeScale`), where BubbleQuest's tracker taint once came from.
 
-- **Square:** `Minimap:SetMaskTexture("Interface\\BUTTONS\\WHITE8X8")`, and our own border frame in
-  the tracker's style. Re-applied from a post-hook on `MinimapCluster:UpdateMinimapConfig`, because
-  Forever resets the mask on every rotate toggle (`Blizzard_Minimap/Camelot/Minimap.lua:42, 96-98`). The
-  hook sets widget state; it calls no Blizzard update function.
-- **Blizzard's round art:** `MinimapBackdrop` (ring, compass, expansion and event buttons) and
-  `MinimapCompassTexture` hidden.
-- **Blob rings:** `SetArchBlobRingScalar/Alpha`, `SetQuestBlobRingScalar/Alpha`,
-  `SetTaskBlobRingScalar/Alpha` to 0 (SexyMap misses the task blob).
-- **`GetMinimapShape`:** defined, returning `"SQUARE"`: LibDBIcon and `MinimapAreas.isSquare()` read it.
-- **Mouse wheel zoom:** Blizzard's own `OnMouseWheel` (`Minimap.xml:280`) is kept, extended through our
-  zoom (below) via `HookScript`.
+- **Square:** `Minimap:SetMaskTexture("Interface\\BUTTONS\\WHITE8X8")` and our own 1 px border.
+  Re-applied from a post-hook on `MinimapCluster:UpdateMinimapConfig`: Forever resets the mask on every
+  rotate toggle (`Blizzard_Minimap/Camelot/Minimap.lua:42, 96-98`). The hook sets widget state only.
+- **Blizzard's round ring:** `MinimapCompassTexture` and its underlay at alpha 0.
+- **Blob rings:** arch, quest and task blob ring scalar and alpha to 0.
+- **`GetMinimapShape`:** defined, returning `"SQUARE"` (LibDBIcon and MinimapAreas read it).
+- **After resizing, a redraw:** the engine kept drawing the ground at the old size until the player
+  moved (seen in game); a zoom step and back the next frame redraws it.
 
-### The column: map on the tracker
+### The column
 
-- **Width comes from the tracker.** The tracker's width setting (and its resize grip) sets the map's
-  width; the map's height is its own setting. The map's outer frame is anchored on `Minimap`, and the
-  tracker docks under it (`SetTrackerDock`), so moving the minimap in Edit Mode moves the whole column.
-- **The outer frame is as big as the column** and hangs from the top corner of Edit Mode's minimap box
-  nearest the screen edge, so it grows inward (centred on the box, as Blizzard anchors the minimap, it
-  ran off the screen: Edit Mode clamps only its own box; seen in game). Blizzard's minimap is
-  re-anchored to the outer frame's centre inside its own container (Blizzard positions only the
-  container, never the `Minimap` frame) and sized with `Minimap:SetSize` to the largest square that
-  fits.
-  - If the engine renders a rectangular minimap (`SetSize(w, h)` with `w ~= h`), it fills the whole
-    frame.
-  - If not, it's the largest square, centred, and the rest is **terrain padding** at exactly the
-    minimap's scale. The cleaner form: `C_Minimap.SetDrawGroundTextures(false)` and draw all ground
-    ourselves (no seam), Blizzard's blips still drawn in the square. Blizzard's HybridMinimap does the
-    same (`Blizzard_HybridMinimap.lua:44`).
-- **The limit:** Blizzard's blips (herbs, ore, party, tracking) and other addons' minimap pins draw
-  only inside Blizzard's minimap. Our quest content covers the whole frame.
+- **`outer`** (ours, `BubbleMapFrame`): the column's top, holding the border. Width: BubbleQuest's
+  tracker width when it's loaded (the tracker attaches under it), else the "Width" setting. Height:
+  a percentage of the width (setting). Blizzard's minimap is anchored to `outer`'s centre inside its
+  own container (Blizzard positions only the container, never `Minimap`) and sized to the largest
+  square that fits.
+- **Position:** until dragged, `outer` hangs from the top corner of Edit Mode's minimap box nearest the
+  screen edge, so it grows inward (centred on the box it ran off the screen: Edit Mode clamps only its
+  own box; seen in game). Dragged, by BubbleQuest's tracker header or BubbleMap's own bar (when "Lock
+  the map" is off), `outer` keeps its own saved position; `/bmap reset` goes back to Edit Mode's.
+  Never in combat (the tracker's secure quest item buttons hang under it).
+- **Watched cheaply:** a throttled check on `outer` notices Edit Mode scale and box changes.
+- **Rectangular map:** if the engine renders a rectangular minimap (`SetSize(w, h)`, `w ~= h`), it
+  fills the frame; else the rest is **terrain padding** at the minimap's scale (step 5), ideally with
+  Blizzard's ground off (`C_Minimap.SetDrawGroundTextures(false)`) and all ground ours, no seam.
+  Blizzard's blips (herbs, ore, party) draw only inside its square; our quest content covers all.
+- **Rotation:** with "Rotate Minimap" on, Blizzard's square ground clips at diagonal headings; with
+  terrain, our rotated ground fills it ([terrain-map.md](terrain-map.md)).
 
-### Zoom: one range, Blizzard's in the middle
+### Zoom: one range, Blizzard's in the middle (step 6)
 
-Pixels per yard is the one zoom value. Blizzard's levels (`Minimap:GetZoomLevels()`, discrete) are
-the middle of the range.
+Pixels per yard is the one zoom value; Blizzard's discrete levels (`Minimap:GetZoomLevels()`) are the
+middle of the range.
 
-- **Zoom out past level 0: overview.** The minimap fades out (alpha), ground drawing is off, and our
-  terrain plus quest content fill the frame, zooming smoothly. Blips vanish at this zoom: the honest
-  limit.
-- **Zoom in past the last level:** the minimap can't be clipped by a parent without reparenting it out
-  of Edit Mode, so two options, tested in that order:
-  1. *Mask magnify:* `Minimap:SetSize(k * side)` with a generated mask whose opaque centre is `1/k`
-     of the texture (`tools/make_*.py` style), so the visible part stays the same size and shows `k`
-     times the detail, blips included. Unknown whether the engine masks blips and the ground the same
-     way; in-game test.
-  2. *Fallback:* our terrain, as in overview. Upscaled tiles go soft past about Blizzard's closest
-     level (256 px per 533 yd); our quest content stays sharp.
+- **Out past level 0: overview.** The minimap fades out, ground drawing off, our terrain and quest
+  content fill the frame, zooming smoothly. Blips vanish at this zoom.
+- **In past the last level:** the minimap can't be clipped by a parent without leaving Edit Mode, so:
+  1. *Mask magnify:* `Minimap:SetSize(k * side)` with a mask whose opaque centre is `1/k` of the
+     texture, showing `k` times the detail, blips included. Unknown whether blips are masked like the
+     ground; in-game test.
+  2. *Fallback:* our terrain. Tiles go soft past about Blizzard's closest level; quest content stays
+     sharp.
 
-### Hiding Blizzard's elements
+## Around the minimap (built, step 3)
 
-Alpha 0 with the mouse disabled first. If that leaves visible problems, parent to a hidden frame of
-ours. None of these is an Edit Mode system, so the tracker's taint doesn't apply [Inferred; in-game
-check]. Blizzard re-shows the zoom buttons on `Minimap` `OnEnter` (`Minimap.lua:257`), so their
-hiding is re-applied from a post-hook. The addon compartment button re-shows on every registration
-(`AddonCompartment.lua:172`): `HookScript("OnShow")` re-hide.
+Our own frames (`Around.lua`), each a setting. Blizzard's versions are always faded out while
+BubbleMap styles the map, since they're laid out for the round map: alpha 0 and mouse off, never
+`Hide()`. `Show()` doesn't reset alpha, so Blizzard re-showing one (zoom buttons on every mouse-over,
+the clock's alarm) changes nothing and needs no hook; and `MinimapCluster` is a `ResizeLayoutFrame`
+measuring its shown children, so `Hide()` would shrink Edit Mode's box.
 
-## Around the minimap: all ours, each a setting
+Our frames over the map sit one **strata** above the minimap's: `MinimapCluster` is toplevel, so a
+click on the map raised it over anything at its strata and the bar vanished (seen in game).
 
-Our own frames, never restyled Blizzard ones. Each has its own on/off setting; Blizzard's original is
-hidden only while ours is on.
-
-| Element | Ours | Source |
+| Element | Ours | Default |
 |---|---|---|
-| Zone text | name, coloured by PvP status; click opens the world map | `GetMinimapZoneText`, `GetZonePVPInfo` |
-| Clock | local or realm time, 12/24 h; click opens the stopwatch/time manager | `GameTime_GetTime`-style; verify |
-| Coordinates | x, y to one decimal | `C_Map.GetPlayerMapPosition`; Blizzard's off via `SetCVar("minimapShowPlayerCoords", 0)` (`Minimap.lua:486-488`) |
-| Zoom +/- | small buttons, or none (wheel only) | our zoom |
-| Tracking | button opening our menu of tracking types | `C_Minimap` tracking functions; verify which are restricted |
-| Mail | icon when there's mail; tooltip lists senders | `HasNewMail`, `GetLatestThreeSenders` |
-| Calendar | date button; pending invites shown | opens the calendar |
-| Queue status | Blizzard's eye is a protected, menu-bearing button outside the minimap: we don't rebuild it. Setting chooses where ours shows a status line; the eye stays Blizzard's | research |
-| Difficulty | instance difficulty tag | `GetInstanceInfo` |
-| Expansion / landing page | button, if the client has one | research |
-| Crafting orders and other indicators | each found on Forever's minimap gets a row here | research |
+| Top bar | along the map's top, the tracker header's band; drags the column when unlocked | on |
+| Zone name | coloured by PvP status; tooltip zone/subzone; click: world map | on |
+| Tracking | our `MenuUtil` menu, Blizzard's listing rule (optional filters or a spell); predicted state until `MINIMAP_UPDATE_TRACKING`, as Blizzard's menu does | on |
+| Calendar | invite count; click: calendar (out of combat: a UI panel) | on |
+| Mail | envelope when there's mail; tooltip lists senders | on |
+| Clock | `GameTime_GetTime` (the game's local/realm and 24 h settings); click: clock settings, or stops a ringing alarm | on |
+| Coordinates | bottom left; Blizzard's frame faded, not its CVar (that's the player's own setting) | off |
+| Zoom +/- | bottom right; the wheel zooms either way | off |
 
-The research rows are settled before building them: what Forever actually puts around its minimap.
+Not on Forever, so not replaced: crafting orders, instance difficulty, the landing page button.
+Left alone: the queue eye (`QueueStatusButton`, its own Edit Mode system; move it in Edit Mode if it
+lands on the map). Also faded: the day/night frame, `MinimapBackdrop` (its event-URL button too).
 
-## The launcher list (replaces every minimap button)
+## The addon list (built, step 4)
 
-One condensed, deduplicated list (a drawer button on the map's border opens it). No addon keeps a
-minimap button.
+One condensed list (`Launchers.lua`) from the bar's Addons button (a drawn 2x2 grid); addons' minimap
+buttons are put away.
 
-- **Sources:**
-  - LibDataBroker launchers via LibDBIcon (`GetButtonList`, `GetMinimapButton`, callback
-    `LibDBIcon_IconCreated`), plus LDB's `DataObjectIterator` for launchers without an icon button.
-  - Blizzard's addon compartment: `AddonCompartmentFrame.registeredAddons` (read only, never sorted or
-    changed), and TOC `AddonCompartmentFunc` entries rebuilt from `C_AddOns` metadata so we know the
-    folder name (Blizzard keeps it only in a closure, `AddonCompartment.lua:127-129`).
-  - Stray buttons: unprotected `Button`s parented to `Minimap` that are neither Blizzard's nor
-    LibDBIcon's.
-- **Dedup:** key LDB launchers by LDB name, compartment entries by folder name. Drop a compartment row
-  whose data is LibDBIcon's own (`lib.objects[name].compartmentData`, the same table). Otherwise match
-  an LDB name to a folder name case-insensitively, colour codes stripped. With both, show the LDB
-  launcher (richer tooltip).
-- **Each row:** icon, name; left/right click run exactly what the button ran (`obj.OnClick(row, button)`;
-  compartment: `_G[funcName](addonName, button)`); tooltip from `OnTooltipShow` or `OnEnter`/`OnLeave`.
-- **Hiding their buttons:** `LibDBIcon:Hide(name)` after `PLAYER_LOGIN` (it doesn't write the owner's
-  saved `db.hide`) plus an `OnShow` re-hide, since the library re-shows on `Refresh`/`Show`. Never
-  `Lock`/`Unlock`/`AddButtonToCompartment`, which write the owner's settings. Stray buttons: alpha 0,
-  mouse off.
-- **List options:** sort by name, a search box once it's long, hide individual entries.
+- **Sources:** LibDataBroker launchers (and LibDBIcon's buttons' data objects); Blizzard's addon
+  compartment (`AddonCompartmentFrame.registeredAddons`, read only); stray `Button`s on `Minimap` that
+  are named, unprotected and neither Blizzard's nor LibDBIcon's.
+- **Each row** runs exactly what the original ran: `obj.OnClick(row, button)`;
+  `data.func(data, { buttonName = button }, row)` as Blizzard's menu calls it; `button:Click()` for
+  strays. Tooltips from `OnTooltipShow`, `OnEnter` or the compartment's `funcOnEnter`.
+- **One row per addon, both actions kept.** LibDBIcon's own compartment entries are dropped (same
+  `OnClick`). Any other compartment entry matching a launcher (name, shown name or the addon's folder,
+  compared on letters only; or the same icon) becomes that row's **gear**: an addon's button and
+  compartment entry often differ (Bagnon: bags and bank on the button, options on the entry; dropping
+  one lost it, seen in game).
+- **Putting buttons away** never touches another addon's saved settings: LibDBIcon buttons `Hide()`
+  plus an `OnShow` re-hide (the library re-shows on `Refresh`/`Show`), and the
+  `LibDBIcon_IconCreated` callback for late ones; the compartment button and strays faded.
+- **Another button collector** (MinimapButtonButton, MBB, MinimapButtonBag) and the list stays off,
+  with a prompt offering to turn that one off. ForeverCleanButtons is not one (it skins action
+  buttons); a wrong guess here once switched the list off silently.
+- **Later:** hide individual entries, a search box.
 
-## The world map
+## The world map (steps 7-8)
 
-- **Terrain toggle** on Blizzard's world map, as in [terrain-map.md](terrain-map.md). The layer sits
-  above explored-area art (2002) and below our quest areas (2004): level 2003, read from
-  `GetFrameLevelStart` each time, with no room to spare. If Blizzard or the peer layers change, this
-  is the first thing to re-check.
-- **Deep zoom: not on Blizzard's world map.** Its zoom levels are rebuilt from map art data on every
-  canvas resize (`MapCanvas_ScrollContainerMixin.lua:485-516`). There's no supported knob; appending a
-  level from a hook puts our table in front of many Blizzard readers, and pin acquisition reaches a
-  protected call (`SetPassThroughButtons`), so it would break in combat. Leatrix_Maps doesn't do it
-  either (its zoom is its own dungeon-map frame).
-- **So deep zoom lives in our own map window:** a `MapCanvasFrameTemplate` instance we own, where we can
-  override `CreateZoomLevels` freely. Terrain, our quest layers, the turn-in and giver icons, any
-  Blizzard data providers we choose. Our pins override `CheckMouseButtonPassthrough` (protected in
-  combat). This is the "quest map". Phase 11's quest log window may want to share it (log on the left,
-  map on the right); decide when phase 11 starts.
+- **Terrain toggle** on Blizzard's world map, as in [terrain-map.md](terrain-map.md): the layer at
+  level 2003, above explored-area art (2002) and below BubbleQuest's quest areas (2004), read from
+  `GetFrameLevelStart` each time. No room to spare: re-check if either side moves.
+- **Deep zoom isn't possible on Blizzard's world map** without tainting it: its zoom levels are rebuilt
+  from map art data on every canvas resize (`MapCanvas_ScrollContainerMixin.lua:485-516`); appending a
+  level puts our table before many Blizzard readers, and pin acquisition reaches a protected call. So
+  deep zoom lives in **our own map window**, a `MapCanvasFrameTemplate` instance we own (our pins
+  override `CheckMouseButtonPassthrough`). BubbleQuest's phase 11 quest log window may share it.
 
-## Coexisting with SexyMap and other minimap addons
+## Other minimap addons
 
-If SexyMap (or another known minimap addon) is loaded, `Questmarker_Map` tells the player once (the
-Questie prompt's pattern, with "don't ask again") and leaves the minimap untouched. The world map
-terrain toggle and our own map window still work. Two addons both setting the mask and defining
-`GetMinimapShape` would fight.
+SexyMap (or another known minimap addon, or anyone defining `GetMinimapShape` first) loaded:
+BubbleMap leaves the minimap alone and prompts once per login ("Turn SexyMap off" reloads; "Don't ask
+again"). Two addons setting the mask and defining the shape would fight.
 
 ## Build order
 
-Each step usable on its own.
-
-1. **Packaging and API:** the folders, `.pkgmeta`, `package.py`, lint coverage, junctions;
-   `QuestmarkerAPI` with `API`, callbacks, `GetTracker`, `SetTrackerDock`, `Theme`.
-2. **Square map and the column:** mask, border, hidden art and blob rings, `GetMinimapShape`,
-   `SetSize` to the column, tracker docked under it, SexyMap stand-down.
-3. **Around the minimap:** the table above, each with its setting.
-4. **Launcher list.**
+1. ~~Packaging and API~~ (built).
+2. ~~Square map and the column~~ (built).
+3. ~~Around the minimap~~ (built).
+4. ~~Addon list~~ (built).
 5. **Terrain core and padding:** pipeline and continent tiles ([terrain-map.md](terrain-map.md)),
-   `SetMinimapView`, padding at the minimap's scale.
+   `SetMinimapView`, padding at the minimap's scale; rotated ground.
 6. **Zoom:** overview past level 0; the mask-magnify test, else terrain past the last level.
-7. **World map terrain toggle** with cities (`Questmarker_Terrain`).
+7. **World map terrain toggle** with cities (`BubbleMap_Terrain`).
 8. **Our map window:** deep zoom, then dungeons.
 
 ## Settle in game
 
+Settled: `Minimap:SetSize` square works and survives Edit Mode with no taint seen; alpha plus mouse
+off keeps Blizzard's elements away; `LibDBIcon:Hide` plus the re-hide holds (the list in review).
+
+Open:
 1. Does `Minimap:SetSize(w, h)` with `w ~= h` render a rectangle, or stretch?
-2. Does `Minimap:SetSize` survive Edit Mode (enter, change scale, leave), and does it taint Edit Mode?
-3. Does the mask-magnify trick mask the blips and ground alike?
-4. Does alpha 0 plus mouse off keep each hidden Blizzard element out of the way, and do the zoom buttons
-   stay hidden through `OnEnter`?
-5. Seam: does our padding line up with Blizzard's ground at every Blizzard zoom level and indoors?
-6. Does `LibDBIcon:Hide` plus the `OnShow` re-hide hold through other addons' `Refresh` calls?
-7. Everything in [terrain-map.md](terrain-map.md)'s list.
+2. Does the mask-magnify trick mask the blips and ground alike?
+3. Seam: does our padding line up with Blizzard's ground at every zoom level and indoors?
+4. Everything in [terrain-map.md](terrain-map.md)'s list.

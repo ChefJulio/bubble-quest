@@ -3,7 +3,7 @@
 Proposed 2026-11-16, revised 2026-11-17. Not started. Shows the real terrain the minimap draws (its
 ground tiles) where Blizzard doesn't: on the world map instead of the painted art, around and beyond
 the minimap, and in our own map window. One shared terrain layer, part of the companion addon
-[Questmarker_Map](questmarker-map.md), which owns the views, zoom and build order. The standalone
+[BubbleMap](questmarker-map.md), which owns the views, zoom and build order. The standalone
 "radar" frame first proposed here became that addon's padded, zoomable minimap.
 
 ## What the client allows
@@ -47,12 +47,12 @@ days; vendoring is half a day but adds Node and .NET to a Python repo. Known dat
 over: WMO placements with pitch/roll are skipped; some `WMOMinimapTexture` rows are stale (Forever's
 rebuilt Orgrimmar).
 
-**Shipping:** the continent tile table (~92 KB) is in `Questmarker_Map`, since the minimap padding
+**Shipping:** the continent tile table (~92 KB) is in `BubbleMap`, since the minimap padding
 needs it whenever the addon runs. The WMO tables (2.6 MB) live in a load-on-demand addon,
-`Questmarker_Terrain` (`LoadOnDemand: 1`), loaded by `C_AddOns.LoadAddOn` the first time a city or
+`BubbleMap_Terrain` (`LoadOnDemand: 1`), loaded by `C_AddOns.LoadAddOn` the first time a city or
 dungeon is drawn. Packaging: [questmarker-map.md](questmarker-map.md#packaging).
 
-## Terrain core (`Questmarker_Map/Terrain.lua`)
+## Terrain core (`BubbleMap/Terrain.lua`)
 
 Shared by both views; knows nothing about frames it draws into.
 
@@ -71,7 +71,7 @@ Shared by both views; knows nothing about frames it draws into.
 - **Missing tiles** (open sea) draw over an opaque backdrop. A `SetTexture` that returns false is
   counted and reported by `/qm terrain`.
 
-## World map toggle (`Questmarker_Map/WorldMap.lua`)
+## World map toggle (`BubbleMap/WorldMap.lua`)
 
 **Layering, touching nothing of Blizzard's.** Our own frame on `WorldMapFrame:GetCanvas()`
 (`Blizzard_MapCanvas.lua:758`), mouse-disabled, `SetAllPoints`, with an opaque backdrop and the tiles.
@@ -79,8 +79,8 @@ Blizzard's base art draws at the canvas's own level (`Blizzard_MapCanvas.xml:7`)
 each from 2000 upward (`MapCanvas_PinFrameLevelsManager.lua:3, 65-74`), and explored-area art is a pin
 type (`PIN_FRAME_LEVEL_MAP_EXPLORATION`, `Blizzard_WorldMap.lua:261`). So the frame's level is read, not
 claimed: `pinFrameLevelsManager:GetFrameLevelStart("PIN_FRAME_LEVEL_MAP_EXPLORATION") + 1` (2003), which
-puts it above the art and the explored overlays and below every other pin, and below Questmarker's
-quest areas at 2004 (`QuestmarkerAPI.FrameLevels()`). No room to spare: re-check if either side moves. Reading the manager's table is safe;
+puts it above the art and the explored overlays and below every other pin, and below BubbleQuest's
+quest areas at 2004 (`BubbleQuestAPI.FrameLevels()`). No room to spare: re-check if either side moves. Reading the manager's table is safe;
 inserting a level into it would write Blizzard data, so we don't. TerrainWorldMap instead hides
 Blizzard's detail layers and exploration pins and replaces the map's `OnMouseWheel` with `SetScript`;
 none of that is needed here.
