@@ -29,6 +29,7 @@ local SHOWN_EVENTS = {
 local QUIET_BUS_EVENTS = {
   LearnedChanged = true,
   AreasChanged = true,  -- follows LearnedChanged and most quest events
+  ShareStateChanged = true,  -- Share next's waiting state, twice per share
 }
 
 local Events = {

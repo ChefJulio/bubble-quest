@@ -206,13 +206,47 @@ local function nextCandidate(tried)
   return best
 end
 
-local function finishPending()
+-- Share next's state (review: "not sure how long to wait between pressing it"; clicks while it waited
+-- were dropped without a sign): busy from a share until its replies are in, and through the short gap
+-- before it moves on to the next. The header button dims while busy (UI/Cards/Stack.lua), on the Bus
+-- event "ShareStateChanged".
+local function setState(pending, queued)
   local chain = Party.chain
-  local pending = chain.pending
-  chain.pending = nil
+  chain.pending, chain.queued = pending, queued
+  ns.Bus:Fire("ShareStateChanged")
+end
+
+---What Share next is doing: the quest it's waiting on replies for, true between a failed share and the
+---next one, or nil when a click would share.
+---@return number|boolean|nil
+function Party:ShareState()
+  local chain = self.chain
+  return chain.pending and chain.pending.questID or chain.queued or nil
+end
+
+-- "Shima: already completed, Bob: quest log full", from a failed share's replies.
+local function refusalText(refusals)
+  local parts = {}
+  for name, key in pairs(refusals) do
+    parts[#parts + 1] = name .. ": " .. (REASONS[key] or "not eligible")
+  end
+  table.sort(parts)
+  return table.concat(parts, ", ")
+end
+
+local function finishPending()
+  local pending = Party.chain.pending
   if pending and not pending.reached and not InCombatLockdown() then
-    -- Nobody could take it: straight on to the next one (review).
+    -- Nobody could take it: say why, then straight on to the next one (review). The game prints the
+    -- successful shares itself ("Sharing quest with ..."), so only failures get a line of ours.
+    local title = C_QuestLog.GetTitleForQuestID(pending.questID) or "That quest"
+    local why = refusalText(pending.refusals)
+    ns.Debug:Print(("%s: nobody could take it%s. Trying the next."):format(title,
+      why ~= "" and " (" .. why .. ")" or ""))
+    setState(nil, true)
     C_Timer.After(NEXT_DELAY, function() Party:ShareNext(true) end)
+  else
+    setState(nil, nil)
   end
 end
 
@@ -220,13 +254,14 @@ end
 ---share (not a new click), so an empty list ends quietly-ish.
 ---@param continuing boolean?
 function Party:ShareNext(continuing)
+  local chain = self.chain
+  if chain.pending or (chain.queued and not continuing) then
+    return  -- still busy with the last one (the button shows it)
+  end
   if InCombatLockdown() then
     ns.Debug:Print("Sharing isn't possible in combat.")
+    setState(nil, nil)
     return
-  end
-  local chain = self.chain
-  if chain.pending then
-    return  -- still waiting for replies to the last one
   end
   local quest = nextCandidate(chain.tried)
   if not quest then
@@ -234,6 +269,7 @@ function Party:ShareNext(continuing)
       ns.Debug:Print("No more quests in this zone to share with your party.")
     end
     wipe(chain.tried)  -- the next click starts a new round
+    setState(nil, nil)
     return
   end
   chain.tried[quest.questID] = true
@@ -241,12 +277,12 @@ function Party:ShareNext(continuing)
   for _, name in ipairs(self:Missing(quest.questID)) do
     expected[name] = true
   end
-  chain.pending = { questID = quest.questID, expected = expected, reached = false }
+  local pending = { questID = quest.questID, expected = expected, reached = false, refusals = {} }
+  setState(pending, nil)
   if not pushNow(quest.questID) then
-    chain.pending = nil
+    setState(nil, nil)
     return
   end
-  local pending = chain.pending
   C_Timer.After(REPLY_WINDOW, function()
     if chain.pending == pending then
       finishPending()
@@ -289,6 +325,8 @@ ns.Events:On("CHAT_MSG_SYSTEM", function(message)
       if pending then
         if p.outcome == "sharing" or p.outcome == "accepted" then
           pending.reached = true
+        elseif name then
+          pending.refusals[name] = p.key
         end
         if name then
           pending.expected[name] = nil

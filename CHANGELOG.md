@@ -53,7 +53,8 @@ in your AddOns list for a few releases to hand them over; leave it enabled. The 
   who, click to share). It leaves out who can't: too low level, wrong class or race, and, when they run
   BubbleQuest too, already completed, an earlier quest missing, or a full quest log
 - "Share next" in the tracker's header: shares the next quest in this zone someone lacks, and skips
-  straight on when nobody can take it (already done, not eligible, ...)
+  straight on when nobody can take it, saying why in chat ("Shima: already completed"). The button
+  dims while it waits for your party's replies, so you can see when it's ready for the next click
 
 - Timed quests show a countdown under the title ("Time left 2:12": orange under a minute, red under
   20 seconds) and in the tooltip, and go to the top of the tracker while the timer runs

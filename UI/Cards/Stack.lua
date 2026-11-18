@@ -749,18 +749,37 @@ local function createHeader(container)
   share:SetPoint("RIGHT", header.count, "LEFT", -8, 0)
   share:SetHighlightTexture("Interface\\QuestFrame\\UI-QuestTitleHighlight", "ADD")
   share:SetScript("OnClick", function() ns.Party:ShareNext() end)
+  -- While a share waits for replies (a few seconds) the button is dimmed and its tooltip says so
+  -- (review: unclear how long to wait between clicks).
+  share:SetMotionScriptsWhileDisabled(true)
   local function shareTooltip()
     if not ns.Tooltips:Take(share, "ANCHOR_LEFT", shareTooltip) then
       return
     end
     GameTooltip:SetText("Share next", 1, 1, 1)
-    GameTooltip:AddLine("Shares the next quest in this zone that someone in your party doesn't have. If "
-      .. "nobody can take it (already done, not eligible, log full ...), it moves straight on to the next. "
-      .. "Click again for the one after.", nil, nil, nil, true)
+    local state = ns.Party:ShareState()
+    if type(state) == "number" then
+      GameTooltip:AddLine(("Sharing %s, waiting for replies ..."):format(
+        C_QuestLog.GetTitleForQuestID(state) or "a quest"), 1, 0.82, 0, true)
+    elseif state then
+      GameTooltip:AddLine("Nobody could take that one: moving on to the next ...", 1, 0.82, 0, true)
+    else
+      GameTooltip:AddLine("Shares the next quest in this zone that someone in your party doesn't have. If "
+        .. "nobody can take it (already done, not eligible, log full ...), it says why and moves straight on "
+        .. "to the next. Click again for the one after.", nil, nil, nil, true)
+    end
     GameTooltip:Show()
   end
   share:SetScript("OnEnter", shareTooltip)
   share:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  ns.Bus:On("ShareStateChanged", function()
+    local busy = ns.Party:ShareState() ~= nil
+    share:SetEnabled(not busy)
+    share.label:SetAlpha(busy and 0.4 or 1)
+    if GameTooltip:GetOwner() == share then
+      shareTooltip()  -- the open tooltip follows the state
+    end
+  end)
   share:Hide()
   header.share = share
 
