@@ -6,6 +6,11 @@
   your count. Each has a toggle under Tooltips in the settings. Not in combat: the game hides that
   data then
 
+- Quest colours on the maps are picked against the quests around them: a new quest takes the colour
+  most unlike its neighbours' (quests far apart can share one), keeps it, and keeps it across logins.
+  Each objective's shade stays closer to its quest's colour, so it no longer drifts towards another
+  quest's
+
 ## Fixes
 
 - Quest givers showed two "!" on the minimap, the game's and BubbleQuest's, a few pixels apart.

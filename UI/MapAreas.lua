@@ -100,7 +100,7 @@ local PALETTE = {
 }
 
 local MapAreas = {
-  colors = {},   -- [questID] = palette index, for the session (stays when cards re-sort)
+  colors = {},   -- [questID] = palette index (char.questColors from login: kept across sessions)
   groups = {},   -- [n] = per-quest frame with its textures
   hits = {},     -- every drawn circle: { x, y (canvas pixels), questID, objective (index or nil) }
   fanItems = {}, -- the turn-in "?" for fanning out (UI/MapFan.lua)
@@ -122,42 +122,120 @@ function MapAreas:Enabled()
   return ns.DB.profile and ns.DB.profile.map and ns.DB.profile.map.areas
 end
 
----A quest's colour: assigned once per session, the palette colour least used by the other quests
----on the cards right now (so neighbours rarely match).
+-- Colours by neighbourhood (review: quests side by side sometimes had similar hues). A quest's colour is
+-- picked when it first needs one, as the palette colour most unlike the colours (and objective shades)
+-- of the quests whose areas are near its own; far-off quests can share a colour freely, so eight go a
+-- long way. Once picked it stays (the card's strip never jumps; newcomers adapt to their neighbours),
+-- remembered per character across sessions (char.questColors), forgotten when the quest leaves the log.
+-- Near: areas within NEAR_YARDS, found on a grid of cells that size (sharing or touching a cell), one
+-- pass over each quest's points instead of every pair.
+local NEAR_YARDS = 400
+local shadeColors  -- defined below: a palette colour and its objective shades
+
+-- How different two colours look: the "redmean" weighted RGB distance, close to perceptual for a
+-- palette check and cheap.
+local function colorDistance(a, b)
+  local rm = (a[1] + b[1]) / 2
+  local dr, dg, db = a[1] - b[1], a[2] - b[2], a[3] - b[3]
+  return math.sqrt((2 + rm) * dr * dr + 4 * dg * dg + (3 - rm) * db * db)
+end
+
+-- A quest's grid cells, and how many objectives it shades (its colours to compare).
+local function footprint(quest)
+  local cells, objectives = {}, 1
+  for _, entry in ipairs(MapAreas:QuestPoints(quest)) do
+    local p = entry.point
+    cells[p.map .. ":" .. math.floor(p.x / NEAR_YARDS) .. ":" .. math.floor(p.y / NEAR_YARDS)] = true
+    objectives = math.max(objectives, entry.objective or 1)
+  end
+  return cells, objectives
+end
+
+local function touches(cellsA, cellsB)
+  for cell in pairs(cellsA) do
+    local map, cx, cy = cell:match("^(.-):(%-?%d+):(%-?%d+)$")
+    cx, cy = tonumber(cx), tonumber(cy)
+    for dx = -1, 1 do
+      for dy = -1, 1 do
+        if cellsB[map .. ":" .. (cx + dx) .. ":" .. (cy + dy)] then
+          return true
+        end
+      end
+    end
+  end
+  return false
+end
+
+local function pickColor(questID)
+  local quest = ns.QuestLog:Get(questID)
+  local cells, objectives = {}, 1
+  if quest then
+    cells, objectives = footprint(quest)
+  end
+  -- The neighbours' colours: every shade they show, and how often each palette colour is in use.
+  local near, used = {}, {}
+  for otherID, index in pairs(MapAreas.colors) do
+    local other = otherID ~= questID and ns.QuestLog:Get(otherID)
+    if other then
+      used[index] = (used[index] or 0) + 1
+      local otherCells, otherObjectives = footprint(other)
+      if next(cells) and touches(cells, otherCells) then
+        for _, color in ipairs(shadeColors(index, otherObjectives)) do
+          near[#near + 1] = color
+        end
+      end
+    end
+  end
+  -- Most unlike the neighbours (the closest pair decides); ties: the least used, then palette order.
+  local best, bestScore
+  for i = 1, #PALETTE do
+    local score = math.huge
+    for _, mine in ipairs(shadeColors(i, objectives)) do
+      for _, theirs in ipairs(near) do
+        score = math.min(score, colorDistance(mine, theirs))
+      end
+    end
+    if not best or score > bestScore + 1e-6
+        or (math.abs(score - bestScore) <= 1e-6 and (used[i] or 0) < (used[best] or 0)) then
+      best, bestScore = i, score
+    end
+  end
+  return best
+end
+
+---A quest's colour (see above): its palette colour, picked once against its neighbours.
 ---@param questID number
 ---@return table { r, g, b }
 function MapAreas:ColorFor(questID)
   local index = self.colors[questID]
-  if not index then
-    local used = {}
-    for visibleID in pairs(ns.Stack.visible) do
-      local i = self.colors[visibleID]
-      if i then
-        used[i] = (used[i] or 0) + 1
-      end
-    end
-    index = 1
-    for i = 2, #PALETTE do
-      if (used[i] or 0) < (used[index] or 0) then
-        index = i
-      end
-    end
+  if not index or not PALETTE[index] then
+    index = pickColor(questID)
     self.colors[questID] = index
   end
   return PALETTE[index]
 end
 
+-- Kept per character (saved variables load before login); a quest leaving the log (turned in,
+-- abandoned) frees its colour. Not pruned against the log at login: it may not be read in yet.
+ns.Events:On("PLAYER_LOGIN", function()
+  MapAreas.colors = ns.DB.char.questColors
+end)
+ns.Bus:On("QuestRemoved", function(questID)
+  MapAreas.colors[questID] = nil
+end)
+
 -- Shades per objective (review: a quest's two kill objectives overlapped in one colour and couldn't be
--- told apart). The quest's colour stays the family; each objective after the first moves its
--- lightness and, a little, its hue, so overlaps separate on the parchment and still read as one quest.
+-- told apart). The quest's colour stays the family; each objective after the first changes its
+-- lightness and saturation, with only a small hue nudge, so overlaps separate on the parchment and
+-- still read as one quest. (Hue turns of up to 50 degrees brought a shade next to another quest's
+-- colour, review: "different quests have similar hues"; a first, gentler set was too alike.)
 -- { hue turn (fraction of the wheel), saturation change, value change }, by objective index.
--- (A first, gentler set was "pretty similar" on the map in review: the steps are bolder now.)
 local SHADES = {
-  { 0, 0, 0 },              -- 1: the quest's colour
-  { 0.08, -0.45, 0.25 },    -- 2: clearly lighter, a step along the hue (teal -> sky blue)
-  { -0.07, 0.15, -0.35 },   -- 3: deeper, a step the other way (teal -> deep green)
-  { 0.14, -0.20, -0.12 },   -- 4
-  { -0.13, -0.40, 0.15 },   -- 5
+  { 0, 0, 0 },               -- 1: the quest's colour
+  { 0.025, -0.45, 0.25 },    -- 2: clearly lighter
+  { -0.025, 0.15, -0.35 },   -- 3: deeper
+  { 0.04, -0.20, -0.15 },    -- 4
+  { -0.04, -0.40, 0.15 },    -- 5
 }
 
 local function toHSV(r, g, b)
@@ -192,17 +270,14 @@ end
 
 local shadeCache = {}  -- [palette index .. ":" .. objective] = { r, g, b }
 
----An objective's shade of its quest's colour (the turn-in, or nil: the quest's colour itself).
----@param questID number
----@param objective number?
----@return table { r, g, b }
-function MapAreas:ShadeFor(questID, objective)
-  local base = self:ColorFor(questID)
-  local shade = objective and SHADES[(objective - 1) % #SHADES + 1]
-  if not shade or objective == 1 then
+-- Palette colour `index`, shaded for `objective` (1: the colour itself).
+local function shadeOf(index, objective)
+  local base = PALETTE[index]
+  local shade = SHADES[(objective - 1) % #SHADES + 1]
+  if objective == 1 then
     return base
   end
-  local key = self.colors[questID] .. ":" .. objective
+  local key = index .. ":" .. objective
   local color = shadeCache[key]
   if not color then
     local h, s, v = toHSV(base[1], base[2], base[3])
@@ -212,6 +287,27 @@ function MapAreas:ShadeFor(questID, objective)
     shadeCache[key] = color
   end
   return color
+end
+
+-- Every colour a quest with `objectives` objectives shows in palette colour `index` (pickColor).
+shadeColors = function(index, objectives)
+  local colors = {}
+  for objective = 1, math.min(objectives, #SHADES) do
+    colors[#colors + 1] = shadeOf(index, objective)
+  end
+  return colors
+end
+
+---An objective's shade of its quest's colour (the turn-in, or nil: the quest's colour itself).
+---@param questID number
+---@param objective number?
+---@return table { r, g, b }
+function MapAreas:ShadeFor(questID, objective)
+  local base = self:ColorFor(questID)
+  if not objective or objective == 1 then
+    return base
+  end
+  return shadeOf(self.colors[questID], objective)
 end
 
 ---Does this map show quest givers' and town icons? Not on continent, world and cosmic maps unless the

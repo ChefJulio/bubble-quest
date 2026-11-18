@@ -100,6 +100,7 @@ local CHAR_DEFAULTS = {
   professionTrainers = {},  -- [profession] = true / false: its trainers on the world map; nil until first seen
   classTrainers = {},       -- [class name] = true / false: the same for class trainers (yours on when first seen)
   notOffered = {},  -- ["npc"|"object" .. id] = { [questID] = expiry time }: a giver left it out (Quests/Offers.lua)
+  questColors = {},  -- [questID] = palette index: each quest's map colour, kept until it leaves the log (UI/MapAreas.lua)
 }
 
 local MIGRATIONS = {
