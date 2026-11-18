@@ -78,6 +78,11 @@ Shared by both views; knows nothing about frames it draws into.
 - **Missing tiles** (open sea) draw over an opaque backdrop. A `SetTexture` that returns false is
   counted and reported by `/qm terrain`.
 
+**Two tile drawers today (remaining work):** `Terrain.lua` (the minimap: slot grid, rotation, written
+first and tested in game) and `TileView.lua` (the map window: any centre and scale, parked textures
+reused least-recently-seen). The minimap should move onto `TileView` (with rotation added there), so
+there is one tile drawer.
+
 ## World map toggle (`BubbleMap/WorldMap.lua`)
 
 **Layering, touching nothing of Blizzard's.** Our own frame on `WorldMapFrame:GetCanvas()`
