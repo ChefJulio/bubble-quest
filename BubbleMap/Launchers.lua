@@ -20,7 +20,8 @@ local ADDON_NAME, ns = ...
 -- Putting buttons away never touches another addon's saved settings: LibDBIcon buttons are hidden with
 -- Hide() (lib:Hide writes nothing, LibDBIcon-1.0.lua:391-396) plus an OnShow post-hook, as the library
 -- shows them again on Refresh/Show; the compartment button and strays are faded (alpha 0, mouse off).
--- Another button collector loaded (ForeverCleanButtons, ...) and BubbleMap leaves the buttons to it.
+-- Another button collector loaded (ForeverCleanButtons, ...): BubbleMap leaves the buttons to it and
+-- offers to turn it off (Compat.lua, job "buttons").
 
 local ROW_HEIGHT = 20
 local ICON = 16
@@ -28,11 +29,9 @@ local COLUMN_WIDTH = 190
 local PAD = 6
 local CLOSE_DELAY = 1.0  -- seconds after the mouse leaves the list and its button
 
--- Addons that collect minimap buttons themselves: two collectors would fight over them.
-local COLLECTORS = { "ForeverCleanButtons", "MinimapButtonButton", "MBB", "MinimapButtonBag" }
-
 local Launchers = {
   collecting = false,
+  why = "not started",  -- why not collecting, for /bmap
 }
 ns.Launchers = Launchers
 
@@ -47,15 +46,6 @@ end
 
 local function key(text)
   return plain(text):lower():gsub("%s+", "")
-end
-
-local function otherCollector()
-  for _, name in ipairs(COLLECTORS) do
-    if C_AddOns.IsAddOnLoaded(name) then
-      return name
-    end
-  end
-  return nil
 end
 
 -- Gathering -------------------------------------------------------------------------------------------
@@ -341,8 +331,24 @@ function Launchers:Active()
   return self.collecting
 end
 
+---One line for /bmap.
+---@return string
+function Launchers:Describe()
+  if self.collecting then
+    return ("addon list on (%d entries)"):format(#self:Entries())
+  end
+  return "addon list off: " .. self.why
+end
+
 table.insert(ns.Minimap.onActivate, function()
-  if not ns.DB.show.launchers or otherCollector() then
+  if not ns.DB.show.launchers then
+    Launchers.why = "its setting is off"
+    return
+  end
+  local other = ns.Compat:Other("buttons")
+  if other then
+    Launchers.why = other .. " is collecting the buttons"
+    ns.Compat:PromptSoon("buttons", other)
     return
   end
   Launchers.collecting = true

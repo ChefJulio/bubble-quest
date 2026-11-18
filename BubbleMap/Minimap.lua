@@ -240,9 +240,9 @@ function Minimap_:Describe()
   if not self.active then
     return "inactive"
   end
-  return ("column %dx%d, minimap %.0f (scale %.2f), shape %s, %s"):format(outer:GetWidth(),
+  return ("column %dx%d, minimap %.0f (scale %.2f), shape %s, %s; %s"):format(outer:GetWidth(),
     outer:GetHeight(), Minimap:GetWidth(), Minimap:GetEffectiveScale(), GetMinimapShape(),
-    ns.Quest and "with the quest tracker" or "standalone")
+    ns.Quest and "with the quest tracker" or "standalone", ns.Launchers:Describe())
 end
 
 -- /bmap: status; /bmap reset: back to Edit Mode's position. (Settings come with step 3.)
@@ -260,9 +260,9 @@ SlashCmdList.BUBBLEMAP = function(input)
 end
 
 ns.On("PLAYER_LOGIN", function()
-  local other = ns.Compat:Other()
+  local other = ns.Compat:Other("minimap")
   if other then
-    ns.Compat:PromptSoon(other)
+    ns.Compat:PromptSoon("minimap", other)
     return
   end
   -- The quest addon creates its tracker on PLAYER_LOGIN too; which handler runs first isn't ours to pick.

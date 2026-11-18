@@ -1,37 +1,53 @@
 local ADDON_NAME, ns = ...
 
--- Another minimap addon (SexyMap, ...) and ours would both set the mask, size the map and define
--- GetMinimapShape, and fight. So if one is loaded, BubbleMap leaves the minimap alone and says so once
--- per login (our own small window, as Blizzard's StaticPopup system taints when addons define
--- dialogs). The fix is one of them off in the AddOns list; the prompt's button does that for the other
--- addon and reloads (a secure "/reload" macro button: addon code can't call ReloadUI on Forever).
+-- Other addons doing BubbleMap's jobs. Two of them on the same job fight, so BubbleMap leaves that job
+-- to the other one and says so once per login, with a button that turns the other addon off and
+-- reloads (our own small window, as Blizzard's StaticPopup system taints when addons define dialogs; a
+-- secure "/reload" macro button, as addon code can't call ReloadUI on Forever). "Don't ask again"
+-- per job.
+--
+--   minimap: another minimap addon (SexyMap, ...) would also set the mask, size the map and define
+--            GetMinimapShape. BubbleMap then leaves the minimap alone entirely.
+--   buttons: another minimap button collector (ForeverCleanButtons, ...) would also hide and move
+--            the buttons. BubbleMap's launcher list then stays off (Launchers.lua).
 
-local NEVER = "other-minimap-never"
 local PROMPT_DELAY = 5  -- seconds after login
 
--- Addons known to restyle the minimap. A minimap shape defined by anyone before we run counts too
--- (the GetMinimapShape convention): that's someone shaping it, whatever its name.
-local KNOWN = { "SexyMap", "BasicMinimap", "ElvUI", "Mappy", "SquareMinimap" }
+local JOBS = {
+  minimap = {
+    -- Addons known to restyle the minimap. A minimap shape defined by anyone before we run counts too
+    -- (the GetMinimapShape convention): that's someone shaping it, whatever its name.
+    known = { "SexyMap", "BasicMinimap", "ElvUI", "Mappy", "SquareMinimap" },
+    never = "other-minimap-never",
+    title = "%s is styling the minimap too",
+    text = "BubbleMap is leaving the minimap alone until one of them is off.",
+  },
+  buttons = {
+    known = { "ForeverCleanButtons", "MinimapButtonButton", "MBB", "MinimapButtonBag" },
+    never = "other-buttons-never",
+    title = "%s is collecting minimap buttons too",
+    text = "BubbleMap's addon list (the bar's Addons button) is off until one of them is off.",
+  },
+}
 
 local Compat = {}
 ns.Compat = Compat
 
----The first loaded minimap addon's folder name, "another addon" when only the shape global gives one
----away, or nil when the minimap is ours to style.
+---The first loaded addon doing `job`'s work (its folder name), "another addon" when only the minimap
+---shape global gives one away, or nil when the job is ours.
+---@param job string "minimap" | "buttons"
 ---@return string?
-function Compat:Other()
-  for _, name in ipairs(KNOWN) do
+function Compat:Other(job)
+  for _, name in ipairs(JOBS[job].known) do
     if C_AddOns.IsAddOnLoaded(name) then
       return name
     end
   end
-  if rawget(_G, "GetMinimapShape") and not ns.Minimap.shapeIsOurs then
+  if job == "minimap" and rawget(_G, "GetMinimapShape") and not ns.Minimap.shapeIsOurs then
     return "another addon"
   end
   return nil
 end
-
-local prompt
 
 local function plainButton(parent, text, onClick)
   local b = CreateFrame("Button", nil, parent, "UIPanelButtonTemplate")
@@ -41,14 +57,16 @@ local function plainButton(parent, text, onClick)
   return b
 end
 
-local function createPrompt(other)
-  local frame = CreateFrame("Frame", "BubbleMapOtherPrompt", UIParent)
+local function createPrompt(job, other)
+  local spec = JOBS[job]
+  local frameName = "BubbleMapOtherPrompt_" .. job
+  local frame = CreateFrame("Frame", frameName, UIParent)
   frame:SetFrameStrata("DIALOG")
   frame:SetPoint("TOP", 0, -140)
-  frame:SetSize(420, 104)
+  frame:SetSize(440, 104)
   frame:EnableMouse(true)
   frame:Hide()
-  tinsert(UISpecialFrames, "BubbleMapOtherPrompt")  -- Escape closes it (= Not now)
+  tinsert(UISpecialFrames, frameName)  -- Escape closes it (= Not now)
 
   local background = frame:CreateTexture(nil, "BACKGROUND")
   background:SetAllPoints()
@@ -61,12 +79,12 @@ local function createPrompt(other)
 
   local title = frame:CreateFontString(nil, "ARTWORK", "GameFontNormal")
   title:SetPoint("TOPLEFT", 14, -12)
-  title:SetText(("%s is styling the minimap too"):format(other))
+  title:SetText(spec.title:format(other))
   local text = frame:CreateFontString(nil, "ARTWORK", "GameFontHighlight")
   text:SetPoint("TOPLEFT", title, "BOTTOMLEFT", 0, -6)
   text:SetPoint("RIGHT", -14, 0)
   text:SetJustifyH("LEFT")
-  text:SetText("BubbleMap is leaving the minimap alone until one of them is off.")
+  text:SetText(spec.text)
 
   local last
   if other ~= "another addon" then
@@ -90,21 +108,24 @@ local function createPrompt(other)
     later:SetPoint("BOTTOMLEFT", 14, 12)
   end
   local never = plainButton(frame, "Don't ask again", function()
-    ns.DB.notices[NEVER] = true
+    ns.DB.notices[spec.never] = true
     frame:Hide()
   end)
   never:SetPoint("LEFT", later, "RIGHT", 8, 0)
   return frame
 end
 
----Prompt about `other` a few seconds after login, unless the player said "Don't ask again".
+local prompts = {}
+
+---Prompt about `other` doing `job` a few seconds after login, unless the player said "Don't ask again".
+---@param job string "minimap" | "buttons"
 ---@param other string
-function Compat:PromptSoon(other)
+function Compat:PromptSoon(job, other)
   C_Timer.After(PROMPT_DELAY, function()
-    if ns.DB.notices[NEVER] or InCombatLockdown() then
+    if ns.DB.notices[JOBS[job].never] or InCombatLockdown() then
       return
     end
-    prompt = prompt or createPrompt(other)
-    prompt:Show()
+    prompts[job] = prompts[job] or createPrompt(job, other)
+    prompts[job]:Show()
   end)
 end
