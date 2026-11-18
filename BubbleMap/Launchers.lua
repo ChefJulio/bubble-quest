@@ -162,11 +162,15 @@ function Launchers:Entries()
   -- entry with a button's icon is that button's addon.
   local function add(entry, compartment, also)
     local icon = iconKey(entry.icon)
-    if entry.key == "" or seen[entry.key] or (also and seen[also])
+    -- The name shown counts too: Bagnon's launcher is "BagnonLauncher" labelled "Bagnon", its
+    -- compartment entry "Bagnon" with another icon (BagBrother/core; seen in review).
+    local label = key(entry.label)
+    if entry.key == "" or seen[entry.key] or seen[label] or (also and seen[also])
         or (compartment and icon and seenIcons[icon]) then
       return
     end
     seen[entry.key] = true
+    seen[label] = true
     if also then
       seen[also] = true
     end
