@@ -155,6 +155,46 @@ local function drawHighlight(e, north, west, project)
   highlight:Show()
 end
 
+-- The area label: the big name at the map's top while hovering, as the world map's
+-- (AreaLabelDataProvider.lua): the explored area under the cursor (MapUtil.FindBestAreaNameAtMouse: its
+-- explored area IDs on the zone's map, C_Map.GetAreaInfo), else the zone with its level range coloured
+-- for you (C_Map.GetMapLevels, GetQuestDifficultyColor).
+local areaLabel
+
+local function areaText(e, zone, north, west)
+  if not (zone and e.ui) then
+    return nil
+  end
+  if zone.mapID ~= e.ui then
+    local _, pos = C_Map.GetMapPosFromWorldPos(e.map, CreateVector2D(north, west), zone.mapID)
+    local areas = pos and C_MapExplorationInfo.GetExploredAreaIDsAtPosition(zone.mapID, pos)
+    for _, areaID in ipairs(areas or {}) do
+      local name = C_Map.GetAreaInfo(areaID)
+      if name and name ~= "" then
+        return name
+      end
+    end
+  else
+    return nil  -- between zones: nothing, as the world map
+  end
+  local name = zone.name
+  local low, high = C_Map.GetMapLevels(zone.mapID)
+  if name and low and high and low > 0 and high > 0 then
+    local level = UnitLevel("player")
+    local color
+    if level < low then
+      color = GetQuestDifficultyColor(low)
+    elseif level > high then
+      color = GetQuestDifficultyColor(high - 2)  -- zones wholly below you aren't yellow (as Blizzard)
+    else
+      color = QuestDifficultyColors["difficult"]
+    end
+    local range = low ~= high and (low .. "-" .. high) or tostring(high)
+    name = ("%s%s (%s)|r"):format(name, RGBTableToColorCode(color), range)
+  end
+  return name
+end
+
 -- Zone names ------------------------------------------------------------------------------------------
 
 -- A continent's zones with their names and middles (their map's centre, in the continent's yards), once.
@@ -323,6 +363,8 @@ local function redraw()
   local centreEntry, centreNorth, centreWest = ns.World.FromPlane(centre.x, centre.y)
   local centreZone = centreEntry and zoneAt(centreEntry, centreNorth, centreWest)
   title:SetText((hoverZone or centreZone or {}).name or "BubbleMap")
+  areaLabel:SetText(hoverEntry and hoverNorth and hoverWest and areaText(hoverEntry, hoverZone, hoverNorth, hoverWest)
+    or "")
   local here = C_Map.GetBestMapForUnit("player")
   local mine = pn and pw and pmap and here and coords(pmap, here, pn, pw)
   footerLeft:SetText(mine and ("Player: " .. mine) or "")
@@ -478,6 +520,12 @@ local function create()
   layers.group = layer(8)
   layers.waypoints = layer(9)
   layers.labels = layer(10)
+  -- The area label, at the top as the world map's (its template: scale 0.695, 10 px down).
+  local labelFrame = layer(12)
+  labelFrame:SetScale(0.695)
+  areaLabel = labelFrame:CreateFontString(nil, "OVERLAY", "WorldMapTextFont")
+  areaLabel:SetPoint("TOP", labelFrame, "TOP", 0, -10 / 0.695)
+  areaLabel:SetTextColor(1.0, 0.9294, 0.7607)  -- AREA_NAME_FONT_COLOR (defined only in some clients' constants)
   local arrowFrame = layer(11)
   arrow = arrowFrame:CreateTexture(nil, "OVERLAY")
   arrow:SetSize(28, 28)

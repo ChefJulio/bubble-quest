@@ -1,9 +1,9 @@
 local ADDON_NAME, ns = ...
 
--- Blizzard's map points on our map window (MapWindow.lua): flight masters, dungeon entrances and area
--- points (events, landmarks), from the same calls Blizzard's world map uses for them
--- (Blizzard_SharedMapDataProviders: FlightPointDataProvider, DungeonEntranceDataProvider,
--- AreaPOIDataProvider), with their icons and a tooltip.
+-- Blizzard's map points on our map window (MapWindow.lua): flight masters, zone exits, dungeon
+-- entrances and area points (events, landmarks), from the same calls Blizzard's world map uses for them
+-- (Blizzard_SharedMapDataProviders: FlightPointDataProvider, MapLinkDataProvider,
+-- DungeonEntranceDataProvider, AreaPOIDataProvider), with their icons and a tooltip.
 --
 -- Those calls take a UI map and give positions on it (0..1). Our window is one continent in world
 -- yards, so a continent's points are gathered from its UI map and every zone under it (some only show
@@ -112,6 +112,12 @@ local function gather(map, continent)
           })
         end
       end
+    end
+    -- Zone exits: the green arrows at a zone's edge to the next (MapLinkDataProvider.lua).
+    for _, link in ipairs(C_Map.GetMapLinksForMap(uiMap) or {}) do
+      add("l" .. link.areaPoiID, uiMap, link.position, {
+        atlas = link.atlasName, name = link.name, note = "Way to " .. (link.name or "the next zone"),
+      })
     end
     for _, entrance in ipairs(C_EncounterJournal.GetDungeonEntrancesForMap(uiMap)) do
       add("d" .. entrance.areaPoiID, uiMap, entrance.position, {
