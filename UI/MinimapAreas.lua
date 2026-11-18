@@ -124,6 +124,7 @@ end
 -- cluster centre (no areas here: the minimap is small). Rebuilt when the entries are.
 
 local GIVER_SIZE, DROP_ICON_SIZE = 12, 9  -- pixels at 100% (setting map.iconSize)
+local MERGE_SHARE = 0.8  -- icons closer than this share of their size merge into one (givers' "!")
 local giverPoints, giversBuiltFor = {}, nil
 MinimapAreas.giverHits = {}
 
@@ -247,8 +248,26 @@ local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, half
       end
       if inside and not (dedupe and gameMarksGiver(p, dNorth, dWest, x, y, trivialHidden)) then
         local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
-        place(acquireGiver(p.entry), x, y, size)
-        hits[#hits + 1] = { x = x, y = y, radius = math.max(size / 2, HOVER_MIN), entries = { p.entry } }
+        -- One "!" per spot (review: doubled "!" zoomed out): a giver's spawns, or givers side by side,
+        -- that would overlap on screen share the first one drawn; its tooltip lists all their quests.
+        local merged
+        for _, hit in ipairs(hits) do
+          if hit.drop == p.drop and math.abs(hit.x - x) < size * MERGE_SHARE
+              and math.abs(hit.y - y) < size * MERGE_SHARE then
+            merged = hit
+            break
+          end
+        end
+        if merged then
+          if not tContains(merged.entries, p.entry) then
+            merged.entries[#merged.entries + 1] = p.entry
+          end
+        else
+          place(acquireGiver(p.entry), x, y, size)
+          hits[#hits + 1] = {
+            x = x, y = y, radius = math.max(size / 2, HOVER_MIN), entries = { p.entry }, drop = p.drop,
+          }
+        end
       end
     end
   end
@@ -325,8 +344,20 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
   -- The whole circle: on the minimap they're small (the world map's 70% core was too fiddly in review).
   MinimapAreas.radius = math.max(size / 2, HOVER_MIN)
   local skipMarked = gameDraws()  -- once per frame, not per point
+  -- One "?" per quest (review: two for one turn-in): where the sources know several spots (two
+  -- databases a little apart, an NPC with more than one spawn), the one nearest you, as the arrow
+  -- and its distance take.
+  local nearestTurnin, nearestYards = {}, {}
   for _, p in ipairs(MinimapAreas.points) do
-    if p.map == instanceMap then
+    if p.map == instanceMap and not p.objective then
+      local yards = (p.x - north) ^ 2 + (p.y - west) ^ 2
+      if not nearestYards[p.questID] or yards < nearestYards[p.questID] then
+        nearestTurnin[p.questID], nearestYards[p.questID] = p, yards
+      end
+    end
+  end
+  for _, p in ipairs(MinimapAreas.points) do
+    if p.map == instanceMap and (p.objective or nearestTurnin[p.questID] == p) then
       local x, y = project(p.x - north, p.y - west, cos, sin, scale)
       local inside
       if square then
