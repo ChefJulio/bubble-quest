@@ -48,7 +48,7 @@ local ENTRIES = {
     tooltip = "+ and - at the map's bottom right. The mouse wheel zooms either way." },
   { kind = "checkbox", id = "BUBBLEMAP_LAUNCHERS", label = "Collect addon buttons", default = true,
     tooltip = "Every addon's minimap button and addon-menu entry in one list, opened from the bar; their "
-      .. "buttons are put away. With another button collector on (ForeverCleanButtons, ...) this waits, "
+      .. "buttons are put away. With another button collector on (MinimapButtonButton, ...) this waits, "
       .. "and BubbleMap offers to turn that one off. Takes effect after /reload." },
 }
 

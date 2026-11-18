@@ -20,7 +20,7 @@ local ADDON_NAME, ns = ...
 -- Putting buttons away never touches another addon's saved settings: LibDBIcon buttons are hidden with
 -- Hide() (lib:Hide writes nothing, LibDBIcon-1.0.lua:391-396) plus an OnShow post-hook, as the library
 -- shows them again on Refresh/Show; the compartment button and strays are faded (alpha 0, mouse off).
--- Another button collector loaded (ForeverCleanButtons, ...): BubbleMap leaves the buttons to it and
+-- Another button collector loaded (MinimapButtonButton, ...): BubbleMap leaves the buttons to it and
 -- offers to turn it off (Compat.lua, job "buttons").
 
 local ROW_HEIGHT = 20

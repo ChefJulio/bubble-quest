@@ -8,8 +8,10 @@ local ADDON_NAME, ns = ...
 --
 --   minimap: another minimap addon (SexyMap, ...) would also set the mask, size the map and define
 --            GetMinimapShape. BubbleMap then leaves the minimap alone entirely.
---   buttons: another minimap button collector (ForeverCleanButtons, ...) would also hide and move
---            the buttons. BubbleMap's launcher list then stays off (Launchers.lua).
+--   buttons: another minimap button collector (MinimapButtonButton, ...) would also hide and move
+--            the buttons. BubbleMap's launcher list then stays off (Launchers.lua). Only real
+--            collectors belong here: ForeverCleanButtons, despite its name, skins action buttons and
+--            has an ordinary minimap button of its own (its Minimap.lua), which our list takes in.
 
 local PROMPT_DELAY = 5  -- seconds after login
 
@@ -23,7 +25,7 @@ local JOBS = {
     text = "BubbleMap is leaving the minimap alone until one of them is off.",
   },
   buttons = {
-    known = { "ForeverCleanButtons", "MinimapButtonButton", "MBB", "MinimapButtonBag" },
+    known = { "MinimapButtonButton", "MBB", "MinimapButtonBag" },
     never = "other-buttons-never",
     title = "%s is collecting minimap buttons too",
     text = "BubbleMap's addon list (the bar's Addons button) is off until one of them is off.",
