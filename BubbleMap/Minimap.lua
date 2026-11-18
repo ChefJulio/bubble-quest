@@ -43,8 +43,23 @@ local outer
 
 -- Shape ------------------------------------------------------------------------------------------
 
+-- EXPERIMENT (/bmap magnify N, build step 6): "mask magnify". The Minimap frame N times its size behind a
+-- mask whose opaque centre is 1/N of it (tools/make_masks.py): the same square shows, N times closer,
+-- at Blizzard's zoom level unchanged. Settles whether Blizzard's blips (herbs, ore, party, the game's
+-- "?" and "!") draw right magnified: if they do, Blizzard's zoom can be pinned and all zooming done
+-- here (docs/design/questmarker-map.md, "Zoom"). Not saved: off after /reload.
+local MAGNIFY_MASKS = { [2] = true, [3] = true, [4] = true }
+
+local function mask()
+  local k = Minimap_.magnify or 1
+  if k > 1 then
+    return ("Interface\\AddOns\\%s\\Media\\mask_%dx"):format(ADDON_NAME, k)
+  end
+  return SQUARE_MASK
+end
+
 local function applyShape()
-  Minimap:SetMaskTexture(SQUARE_MASK)
+  Minimap:SetMaskTexture(mask())
   for _, ring in ipairs({ "ArchBlobRing", "QuestBlobRing", "TaskBlobRing" }) do
     Minimap["Set" .. ring .. "Scalar"](Minimap, 0)
     Minimap["Set" .. ring .. "Alpha"](Minimap, 0)
@@ -66,8 +81,12 @@ local function applySize()
   outer:SetSize(width, height)
   -- Minimap's units differ from ours by Edit Mode's scale on its container.
   local side = math.min(width, height) * outer:GetEffectiveScale() / Minimap:GetEffectiveScale()
-  local resized = math.abs(Minimap:GetWidth() - side) > 0.5
-  Minimap:SetSize(side, side)
+  local k = Minimap_.magnify or 1
+  local resized = math.abs(Minimap:GetWidth() - side * k) > 0.5
+  Minimap:SetSize(side * k, side * k)
+  -- Magnified, only the middle shows: clicks (pings) and hover only there too.
+  local inset = side * (k - 1) / 2
+  Minimap:SetHitRectInsets(inset, inset, inset, inset)
   Minimap_.appliedScale = Minimap:GetEffectiveScale()
   Minimap_.appliedWidth = width
   if resized then
@@ -133,6 +152,21 @@ local function refresh()
     applyAnchor()
     applySize()
   end)
+end
+
+---The magnify experiment: 1 (off), 2, 3 or 4. Returns false for anything else.
+---@param k number
+---@return boolean
+function Minimap_:SetMagnify(k)
+  if k ~= 1 and not MAGNIFY_MASKS[k] then
+    return false
+  end
+  self.magnify = k
+  if self.active then
+    applyShape()
+    refresh()
+  end
+  return true
 end
 
 ---Size or position settings changed.
@@ -260,6 +294,13 @@ SlashCmdList.BUBBLEMAP = function(input)
   if command == "reset" then
     Minimap_:ResetPosition()
     print("|cffffd100BubbleMap|r: back at the minimap's Edit Mode position.")
+  elseif command == "magnify" then
+    local k = tonumber((input or ""):match("magnify%s+(%d+)") or "")
+    if k and Minimap_:SetMagnify(k) then
+      print(("|cffffd100BubbleMap|r: magnify x%d (experiment; /bmap magnify 1 to end)."):format(k))
+    else
+      print("|cffffd100BubbleMap|r: /bmap magnify 1, 2, 3 or 4.")
+    end
   elseif command == "tiles" then
     for _, line in ipairs(ns.Terrain:Report()) do
       print("|cffffd100BubbleMap|r " .. line)
