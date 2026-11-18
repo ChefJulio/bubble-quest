@@ -4,8 +4,9 @@ package-as: BubbleQuest
 # Interface\AddOns (the BigWigs/DBM model). tools/package.py's COMPANIONS must list the same.
 # Questmarker: the stub that hands the old Questmarker settings to BubbleQuest; it also replaces the
 # old Questmarker folder on update, so the old addon can't load beside the new one.
+# BubbleMap lives here until the repo split but doesn't ship with BubbleQuest: it gets its own
+# release and CurseForge project (docs/design/bubble-suite.md), so it's ignored below.
 move-folders:
-  BubbleQuest/BubbleMap: BubbleMap
   BubbleQuest/Questmarker: Questmarker
 
 # Release notes for CurseForge and GitHub: CHANGELOG.md holds only the coming release's notes;
@@ -23,6 +24,7 @@ ignore:
   - .gitattributes
   - .gitignore
   - .pkgmeta
+  - BubbleMap
   - CLAUDE.md
   - docs
   - tools
