@@ -13,9 +13,10 @@ local ADDON_NAME, ns = ...
 --   - Stray minimap buttons (Buttons on Minimap that are neither LibDBIcon's nor Blizzard's, and not
 --     protected): button:Click(mouseButton).
 -- Duplicates: a compartment entry that LibDBIcon made for one of its own buttons
--- (lib.objects[name].compartmentData, LibDBIcon-1.0.lua:648) is dropped; otherwise an entry is dropped
--- when its name, or its addon's folder name, matches a launcher's on letters only, or when it has the
--- same icon. The launcher is kept (richer tooltip).
+-- (lib.objects[name].compartmentData, LibDBIcon-1.0.lua:648) is dropped, as it runs the same OnClick.
+-- Otherwise a compartment entry whose name, shown name or addon folder matches a launcher's on
+-- letters only, or with the same icon, joins that launcher's row as a gear button: one row per addon,
+-- both actions kept.
 --
 -- Putting buttons away never touches another addon's saved settings: LibDBIcon buttons are hidden with
 -- Hide() (lib:Hide writes nothing, LibDBIcon-1.0.lua:391-396) plus an OnShow post-hook, as the library
@@ -160,22 +161,35 @@ function Launchers:Entries()
   -- `compartment`: a compartment entry, `also` another name it goes by (its addon's folder). Only these
   -- are matched on icons too: two different addons' buttons may share an icon, but a compartment
   -- entry with a button's icon is that button's addon.
+  --
+  -- A compartment entry matching a launcher isn't dropped but merged into that launcher's row as its
+  -- `extra` (the row's gear): the two often do different things. Bagnon's launcher opens the bags
+  -- (left), the bank (right), options only on Shift-click; its compartment entry opens the options
+  -- (review: merging by dropping lost that).
   local function add(entry, compartment, also)
+    if entry.key == "" then
+      return
+    end
     local icon = iconKey(entry.icon)
     -- The name shown counts too: Bagnon's launcher is "BagnonLauncher" labelled "Bagnon", its
     -- compartment entry "Bagnon" with another icon (BagBrother/core; seen in review).
     local label = key(entry.label)
-    if entry.key == "" or seen[entry.key] or seen[label] or (also and seen[also])
-        or (compartment and icon and seenIcons[icon]) then
+    local existing = seen[entry.key] or seen[label] or (also and seen[also])
+      or (compartment and icon and seenIcons[icon])
+    if existing then
+      if compartment and not existing.compartment and not existing.extra then
+        existing.extra = entry
+      end
       return
     end
-    seen[entry.key] = true
-    seen[label] = true
+    entry.compartment = compartment
+    seen[entry.key] = entry
+    seen[label] = entry
     if also then
-      seen[also] = true
+      seen[also] = entry
     end
     if icon then
-      seenIcons[icon] = true
+      seenIcons[icon] = entry
     end
     list[#list + 1] = entry
   end
@@ -304,6 +318,32 @@ local function row(i)
   end)
   r:SetScript("OnEnter", function(self) self.entry.enter(self) end)
   r:SetScript("OnLeave", function(self) self.entry.leave(self) end)
+
+  -- The gear: the addon's compartment entry, when it has one beside its launcher (see Duplicates).
+  -- The same art as BubbleQuest's settings button (exists on Forever: UI/Cards/Stack.lua).
+  r.gear = CreateFrame("Button", nil, r)
+  r.gear:SetSize(ICON, ICON)
+  r.gear:SetPoint("RIGHT", -4, 0)
+  r.gear:SetNormalAtlas("ui-questtrackerbutton-filter")
+  r.gear:SetHighlightAtlas("ui-questtrackerbutton-yellow-highlight", "ADD")
+  r.gear:RegisterForClicks("AnyUp")
+  r.gear:SetScript("OnClick", function(self, button)
+    local extra = self:GetParent().entry.extra
+    r:GetParent():Hide()
+    extra.click(self, button)
+  end)
+  r.gear:SetScript("OnEnter", function(self)
+    local extra = self:GetParent().entry.extra
+    GameTooltip:SetOwner(self, "ANCHOR_LEFT")
+    GameTooltip:AddLine(extra.label, 1, 1, 1)
+    GameTooltip:AddLine("Its entry in the game's addon menu (often its settings).", 0.8, 0.8, 0.8, true)
+    GameTooltip:Show()
+    extra.enter(self)
+  end)
+  r.gear:SetScript("OnLeave", function(self)
+    self:GetParent().entry.extra.leave(self)
+    GameTooltip:Hide()
+  end)
   rows[i] = r
   return r
 end
@@ -351,6 +391,8 @@ function Launchers:Toggle(button)
     local r = row(i)
     r.entry = entry
     setIcon(r.icon, entry.icon)
+    r.gear:SetShown(entry.extra ~= nil)
+    r.text:SetPoint("RIGHT", entry.extra and r.gear or r, entry.extra and "LEFT" or "RIGHT", -4, 0)
     r.text:SetText(entry.label)
     local column, line = math.floor((i - 1) / perColumn), (i - 1) % perColumn
     r:ClearAllPoints()

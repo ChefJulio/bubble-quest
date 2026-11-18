@@ -215,7 +215,19 @@ local function createButtons()
   end)
   buttons.calendar = calendar
 
-  local launchers = iconButton("ui-hud-minimap-addon-indicator")
+  -- Drawn, not an atlas: a 2x2 grid ("all the apps"). Blizzard's compartment art is a plain square
+  -- (its "13" sits on it), which read as an empty button (review).
+  local launchers = CreateFrame("Button", nil, bar)
+  launchers:SetSize(ICON, ICON)
+  local cell = math.floor((ICON - 3) / 2)
+  for i = 0, 3 do
+    local square = launchers:CreateTexture(nil, "ARTWORK")
+    square:SetSize(cell, cell)
+    square:SetPoint("TOPLEFT", 1 + (i % 2) * (cell + 1), -1 - math.floor(i / 2) * (cell + 1))
+    square:SetColorTexture(0.85, 0.75, 0.45, 1)
+  end
+  launchers:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
+  launchers:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.2)
   launchers:SetScript("OnClick", function(self) ns.Launchers:Toggle(self) end)
   tooltip(launchers, function()
     GameTooltip:AddLine("Addons", 1, 1, 1)
