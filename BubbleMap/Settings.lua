@@ -57,6 +57,11 @@ local ENTRIES = {
     get = function() return ns.DB.mapStyle end,
     set = function(v) ns.DB.mapStyle = v; ns.Around:Apply() end },  -- the bar button's icon follows
 
+  { kind = "checkbox", id = "BUBBLEMAP_GROUP_NAMES", label = "Party members' names", default = true,
+    tooltip = "Each party or raid member's name beside their dot, in their class colour, on the map and "
+      .. "in the map window. Untick for dots only (hover one for its name).",
+    get = function() return ns.DB.groupNames end, set = function(v) ns.DB.groupNames = v end },
+
   { kind = "checkbox", id = "BUBBLEMAP_WORLD_TERRAIN", label = "Terrain on the world map", default = false,
     tooltip = "Zone maps on the world map show the real terrain (the minimap's own ground) instead of the "
       .. "painted art. Also the button at the world map's top right.",

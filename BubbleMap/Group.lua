@@ -78,6 +78,9 @@ function Layer:Dot(i)
     d.fill:SetSize(DOT_SIZE, DOT_SIZE)
     d.fill:SetPoint("CENTER", d.ring)
     d.fill:SetTexture(DISC)
+    -- The member's name beside the dot (setting groupNames).
+    d.name = frame:CreateFontString(nil, "OVERLAY", "GameFontHighlightSmallOutline")
+    d.name:SetPoint("LEFT", d.ring, "RIGHT", 2, 0)
     self.dots[i] = d
   end
   return d
@@ -87,6 +90,7 @@ function Layer:HideFrom(from)
   for i = from, #self.dots do
     self.dots[i].ring:Hide()
     self.dots[i].fill:Hide()
+    self.dots[i].name:Hide()
   end
 end
 
@@ -123,6 +127,15 @@ function Layer:Draw(map, project, noHover)
         d.ring:SetPoint("CENTER", frame, "CENTER", x, y)
         d.ring:Show()
         d.fill:Show()
+        -- apiguard: allow the name is checked with issecretvalue (readable) before it's shown
+        local name = ns.DB.groupNames and UnitName(unit)
+        if name and readable(name) then
+          d.name:SetText(name)
+          d.name:SetTextColor(color and color.r or 1, color and color.g or 1, color and color.b or 1)
+          d.name:Show()
+        else
+          d.name:Hide()
+        end
         self.shown[#self.shown + 1] = { x = x, y = y, unit = unit }
       end
     end
