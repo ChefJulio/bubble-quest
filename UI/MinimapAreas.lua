@@ -163,21 +163,82 @@ local function acquireGiver(entry)
   return t
 end
 
+-- Where the game draws its own minimap markers (the "?" of many ready quests, quest givers' "!"):
+-- within its view radius (C_Minimap.GetViewRadius) of the centre, a circle, even when the minimap is
+-- masked square (review, two BubbleMap zoom levels: a "?" in the square's corner went missing, as the
+-- game no longer drew it and a square test still skipped ours). Ours is skipped only there: drawn in
+-- the corners and in BubbleMap's padding, and everywhere while BubbleMap's overview has Blizzard's
+-- minimap faded out (zoom above 1, gameDraws).
+local function inGameView(x, y)
+  local half = Minimap:GetWidth() / 2
+  return x * x + y * y <= half * half
+end
+
+local function gameDraws()
+  return MinimapAreas.zoom == 1
+end
+
+-- The game's quest-giver "!" (review: two "!" a few pixels apart): drawn by the client, not readable
+-- by addons (no API lists them, and the minimap blips aren't frames), for the givers it knows about:
+-- those the server has sent, within its visibility range of the player. That range isn't documented
+-- (players report 40-70 yd in the open world on classic-era clients), so this errs short: too short
+-- leaves a few doubled "!" near its edge, too long would hide givers the game doesn't mark at all.
+-- Tune with /bq givers. Low-level givers only while the game's "Low-level quests" tracking is on.
+-- Drop-started quests have no giver for the game to mark.
+local GAME_GIVER_YARDS = 50
+
+local function gameMarksGiver(p, dNorth, dWest, x, y, trivialHidden)
+  return not p.drop and inGameView(x, y) and dNorth * dNorth + dWest * dWest <= GAME_GIVER_YARDS ^ 2
+    and not (p.entry.trivial and trivialHidden)
+end
+
+---For /bq givers: the `count` nearest quest givers on this map, nearest first, as lines "name: N yd",
+---marked when within GAME_GIVER_YARDS (ours hidden there, inside the game's view). Measuring: walk
+---away from a giver and note the distance at which the game's own "!" vanishes.
+---@param count number
+---@return string[]
+function MinimapAreas:NearestGivers(count)
+  local north, west, instanceMap = ns.Navigation:PlayerPosition()
+  local nearest = {}
+  if north then
+    for _, p in ipairs(giverPoints) do
+      if p.map == instanceMap and not p.drop then
+        local yards = math.sqrt((p.x - north) ^ 2 + (p.y - west) ^ 2)
+        nearest[#nearest + 1] = { yards = yards, name = p.entry.giver.name or "?" }
+      end
+    end
+  end
+  table.sort(nearest, function(a, b) return a.yards < b.yards end)
+  local lines = { ("Leaving the \"!\" to the game within %d yd (GAME_GIVER_YARDS)."):format(GAME_GIVER_YARDS) }
+  for i = 1, math.min(count, #nearest) do
+    local g = nearest[i]
+    lines[#lines + 1] = ("%s: %d yd%s"):format(g.name, g.yards + 0.5,
+      g.yards <= GAME_GIVER_YARDS and " (game's \"!\")" or "")
+  end
+  if #nearest == 0 then
+    lines[#lines + 1] = "No quest givers known on this map (minimap layer off, or none)."
+  end
+  return lines
+end
+
 local function drawGivers(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
   local hits = MinimapAreas.giverHits
   local iconScale = ns.MapAreas.iconScale()
   local pad = GIVER_SIZE * iconScale / 2
   local reachW, reachH = halfW + pad, halfH + pad
+  local dedupe = gameDraws()
+  local trivialHidden = dedupe and C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.TrivialQuests)
   for _, p in ipairs(giverPoints) do
     if p.map == instanceMap then
-      local x, y = project(p.x - north, p.y - west, cos, sin, scale)
+      local dNorth, dWest = p.x - north, p.y - west
+      local x, y = project(dNorth, dWest, cos, sin, scale)
       local inside
       if square then
         inside = math.abs(x) <= reachW and math.abs(y) <= reachH
       else
         inside = x * x + y * y <= reachW * reachW
       end
-      if inside then
+      if inside and not (dedupe and gameMarksGiver(p, dNorth, dWest, x, y, trivialHidden)) then
         local size = (p.drop and DROP_ICON_SIZE or GIVER_SIZE) * iconScale
         place(acquireGiver(p.entry), x, y, size)
         hits[#hits + 1] = { x = x, y = y, radius = math.max(size / 2, HOVER_MIN), entries = { p.entry } }
@@ -245,17 +306,6 @@ local function markerNear(x, y)
   return false
 end
 
--- Inside Blizzard's own minimap (not BubbleMap's padding around it): the game draws its "?" for many
--- ready quests there, and only there, so ours is skipped there and drawn in the padding. Not while
--- BubbleMap's overview has Blizzard's minimap faded out (zoom above 1): ours then draws everywhere.
-local function inMinimap(x, y, square)
-  local half = Minimap:GetWidth() / 2
-  if square then
-    return math.abs(x) <= half and math.abs(y) <= half
-  end
-  return x * x + y * y <= half * half
-end
-
 local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH, square)
   local size = 2 * ns.MapAreas.blobYards() * scale
   local alpha = ns.MapAreas.blobAlpha()
@@ -281,8 +331,8 @@ local function drawAreas(north, west, instanceMap, cos, sin, scale, halfW, halfH
         blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
         place(blob, x, y, size)
         hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
-      elseif inside and not (MinimapAreas.zoom == 1 and inMinimap(x, y, square)
-          and ns.MapAreas.GameMarksTurnIn(p.questID)) and not markerNear(x, y) then
+      elseif inside and not (gameDraws() and inGameView(x, y) and ns.MapAreas.GameMarksTurnIn(p.questID))
+          and not markerNear(x, y) then
         -- A turn-in: just the "?" (review: the circle under it added nothing), still hoverable.
         place(acquire(markers, "markers", ns.MapAreas.setTurninArt, "OVERLAY"), x, y, markerSize)
         placedMarkers[#placedMarkers + 1] = x

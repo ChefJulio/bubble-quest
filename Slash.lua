@@ -241,6 +241,17 @@ commands.available = {
 
 -- Minimap areas and guide line (UI/MinimapAreas.lua): what the layer sees, for when nothing shows.
 -- Type it, rest the cursor on a minimap circle, then press Enter: the hover is checked too.
+-- Measuring the game's own quest-giver "!" range (UI/MinimapAreas.lua GAME_GIVER_YARDS): re-run while
+-- walking away from a giver (up arrow, Enter) and note where the game's "!" disappears.
+commands.givers = {
+  help = "the nearest quest givers and their distance in yards",
+  run = function()
+    for _, line in ipairs(ns.MinimapAreas:NearestGivers(5)) do
+      print(line)
+    end
+  end,
+}
+
 commands.minimap = {
   help = "minimap areas, guide line and hover state (copy window)",
   run = function()
