@@ -176,11 +176,10 @@ local function inGameView(x, y)
 end
 
 -- Whether the game draws its quest markers on the minimap at all: not while BubbleMap's overview has
--- Blizzard's minimap faded out (zoom above 1), and not while its quest markers are switched off (the
--- QuestPOIs tracking filter: BubbleMap's "Only BubbleQuest's quest markers" turns it off). Errs to
--- "draws" when unsure, as for the "!" range: a doubled marker is better than a missing one.
+-- Blizzard's minimap faded out (zoom above 1). There's no switch for them otherwise: with the QuestPOIs
+-- tracking filter off, the game still drew its "?" and "!" (seen in game), so that filter isn't read.
 local function gameDraws()
-  return MinimapAreas.zoom == 1 and not C_Minimap.IsFilteredOut(Enum.MinimapTrackingFilter.QuestPOIs)
+  return MinimapAreas.zoom == 1
 end
 
 -- The game's quest-giver "!" (review: two "!" a few pixels apart): drawn by the client, not readable
@@ -216,8 +215,8 @@ function MinimapAreas:NearestGivers(count)
   table.sort(nearest, function(a, b) return a.yards < b.yards end)
   local lines = { gameDraws()
     and ("Leaving the \"!\" to the game within %d yd (GAME_GIVER_YARDS)."):format(GAME_GIVER_YARDS)
-    or "The game's own minimap quest markers are off (BubbleMap, or zoomed out): every \"!\" is ours. "
-      .. "To measure the game's range, turn them back on (BubbleMap's \"Only BubbleQuest's quest markers\")." }
+    or "BubbleMap's overview hides the game's own minimap markers: every \"!\" is ours. "
+      .. "To measure the game's range, zoom back in to Blizzard's levels." }
   for i = 1, math.min(count, #nearest) do
     local g = nearest[i]
     lines[#lines + 1] = ("%s: %d yd%s"):format(g.name, g.yards + 0.5,
