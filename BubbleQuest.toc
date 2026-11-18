@@ -52,6 +52,7 @@ Quests\Tracking.lua
 Quests\Automation.lua
 Quests\Party.lua
 Blizzard\Tracker.lua
+Blizzard\QuestPins.lua
 Compat\Questie.lua
 UI\Pool.lua
 UI\Tooltips.lua

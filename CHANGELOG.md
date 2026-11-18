@@ -7,6 +7,9 @@
   "Ready to turn in" section is gone: the zone sections do its job). They keep their green "Turn in
   to ..." line
 - "Unhide all" at the end of the Hidden list (click twice)
+- The game's own round quest pins are switched off on the world map for every character (the map's
+  "Show Quest Objectives" filter is saved per character, so alts still had them): BubbleQuest's
+  areas and "?" show instead. A Map setting turns this off and gives each character its filter back
 
 - Quests on the game's tooltips. Hover a quest giver to see the quests it offers you (the same ones
   as the map's "!"), or the NPC a ready quest goes to for "? [10] Downstream  Ready". Items say which

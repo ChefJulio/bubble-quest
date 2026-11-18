@@ -410,6 +410,15 @@ function Schema:Entries()
       get = function(p) return p.map.continentIcons end,
       set = function(p, v) p.map.continentIcons = v; ns.MapAvailable:MarkDirty(); ns.MapServices:MarkDirty() end,
     },
+    {
+      kind = "checkbox", id = "BUBBLEQUEST_MAP_HIDE_BLIZZARD_PINS", column = 2, default = true,
+      label = "Hide the game's quest pins on the world map",
+      tooltip = "The game's own round quest pins (the world map's \"Show Quest Objectives\" filter, saved per "
+        .. "character) are switched off, so every character's map shows BubbleQuest's areas and \"?\" alike. "
+        .. "Untick to give each character its own filter back.",
+      get = function(p) return p.map.hideBlizzardPins end,
+      set = function(p, v) p.map.hideBlizzardPins = v; ns.QuestPins:Apply() end,
+    },
 
     { kind = "section", label = "Arrows", column = 2 },
     {

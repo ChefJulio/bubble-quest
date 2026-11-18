@@ -60,6 +60,7 @@ local PROFILE_DEFAULTS = {
     availableTrivial = false,  -- also grey (trivial) ones
     availableDrops = true,     -- also quests started by a dropped item (their droppers' area)
     continentIcons = false,    -- quest givers and town services on continent maps too (zone maps always)
+    hideBlizzardPins = true,   -- the game's own quest pins off on the world map (Blizzard/QuestPins.lua)
     -- Town services on the world map (UI/MapServices.lua): [key] = true / false (off is kept, so a
     -- default can't come back). Profession trainers are per character (char.professionTrainers).
     services = { flight = true, inn = true, auction = true, mailbox = true },
@@ -96,6 +97,8 @@ local CHAR_DEFAULTS = {
   professionTrainers = {},  -- [profession] = true / false: its trainers on the world map; nil until first seen
   classTrainers = {},       -- [class name] = true / false: the same for class trainers (yours on when first seen)
   notOffered = {},  -- ["npc"|"object" .. id] = { [questID] = expiry time }: a giver left it out (Quests/Offers.lua)
+  -- questPOIBefore: this character's own "Show Quest Objectives" (questPOI CVar) while BubbleQuest has
+  -- it off (Blizzard/QuestPins.lua); put back when the setting goes off
   questColors = {},  -- [questID] = palette index: each quest's map colour, kept until it leaves the log (UI/MapAreas.lua)
 }
 
