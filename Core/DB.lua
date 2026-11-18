@@ -82,15 +82,11 @@ local CHAR_DEFAULTS = {
   ignored = {},     -- [questID] = true: hidden until unhidden
   collapsed = {},   -- [questID] = true: card shows only its title line
   minimized = false,  -- whole tracker collapsed to its header row
-  elsewhere = {
-    expanded = false,
-  },
   overflow = {
     expanded = false,  -- "+ N more here" opened
   },
-  turnins = {
-    expanded = true,   -- the "Ready to turn in" section is open
-  },
+  zoneOpen = {},    -- [zone name] = true / false: a zone section opened or closed by hand (UI/Cards/Stack.lua)
+  -- zoneSeen: the zone the sections were last reset for (Smart sorting resets them on a zone change)
   hidden = {
     expanded = false,
   },

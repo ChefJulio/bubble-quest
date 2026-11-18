@@ -1,9 +1,9 @@
 local ADDON_NAME, ns = ...
 
 -- The card stack: a header row, then what ns.Tracking:View() says to show:
---   pinned cards, "Ready to turn in" (here at a hub), this zone's cards (capped, or filling the height
---   set), "N more here", "Ready to turn in" (here when out questing), one section per separated
---   category ("Camping (2)"), "Elsewhere (N)", "Hidden (N)".
+--   pinned cards; this zone's section (its cards, ready ones among them, capped or filling the height
+--   set, then "N more here"); one section per separated category ("Camping (2)"); one section per
+--   other zone, nearest first ("Westfall (3)"); "Hidden (N)" with "Unhide all".
 -- Tracking decides order and membership; this file only draws.
 --
 -- When things change (spec: nothing jumps around):
@@ -28,6 +28,7 @@ local BOTTOM_MARGIN = 12     -- the panel stops this far above the screen's bott
 local DEFAULT_WIDTH, MIN_WIDTH, MAX_WIDTH = 250, 200, 450  -- card width (resize grip)
 local MIN_SCROLL_HEIGHT = 48 -- the resize grip can't make the scroll area smaller than this
 local SCROLL_STEP = 40       -- pixels per mouse wheel notch
+local UNHIDE_SECONDS = 4     -- "Unhide all" stays armed this long after its first click
 
 -- The first atlas the client has, from candidates seen in Forever's UI source. Atlases referenced
 -- only by retail-only files might not exist on Forever, so ask the client rather than assume.
@@ -49,12 +50,13 @@ local Stack = {
   resortPending = false,
   attachedTo = nil, ---@type Frame? -- the frame the tracker hangs under (BubbleQuestAPI.SetTrackerAttach)
   draggingAttached = false,  -- our header is dragging attachedTo
+  unhideArmedUntil = 0,      -- "Unhide all" was clicked once: a second click before this time unhides
   PAD = PAD,
   HEADER_HEIGHT = HEADER_HEIGHT,
 }
 ns.Stack = Stack
 
-local cardPool, headingPool, linePool, sectionPool, dividerPool
+local cardPool, linePool, sectionPool, dividerPool
 
 -- Drawing ----------------------------------------------------------------------------------------
 
@@ -92,15 +94,6 @@ local function placeCard(quest, options, limit)
   cursor.any = true
   ns.ItemButtons:Attach(card, quest, Stack.container)  -- refused in combat; the queued layout adds it
   return true
-end
-
-local function placeHeading(text)
-  separate("card")
-  local heading = headingPool:Acquire()
-  heading:SetPoint("TOPLEFT", Stack.body, "TOPLEFT", 0, -cursor.y)
-  heading:SetText(text)
-  cursor.y = cursor.y + LINE_HEIGHT
-  cursor.any = false  -- no divider between a heading and its first card
 end
 
 ---A clickable text line: group toggles, and quests in the Hidden group.
@@ -199,7 +192,6 @@ function Stack:Layout()
   ns.ItemButtons:ReleaseAll()
   self:ApplyWidth()
   cardPool:ReleaseAll()
-  headingPool:ReleaseAll()
   linePool:ReleaseAll()
   sectionPool:ReleaseAll()
   dividerPool:ReleaseAll()
@@ -226,56 +218,95 @@ function Stack:Layout()
     placeCard(quest, { pinned = true, zone = elsewhere })
   end
 
-  -- Ready to turn in (Tracking rule 3): above this zone's cards at a hub, below them when out
-  -- questing. Open unless the player closed it.
-  local function placeTurnins()
-    if #view.turnins == 0 then
-      return
-    end
-    local expanded = char.turnins.expanded
-    placeSection("Ready to turn in", #view.turnins, expanded, toggleGroup(char.turnins))
-    if expanded then
-      for _, quest in ipairs(view.turnins) do
-        placeCard(quest)
-      end
-    end
+  -- Zone sections (review: "section the cards by zone, auto-hide the zones I'm not in and auto-expand
+  -- the zone I'm in"): this zone's section on top, then one per other zone, nearest first. Open or
+  -- closed by hand (char.zoneOpen[name] = true/false); unset means open for the zone you're in, closed
+  -- for the others. With Smart sorting every zone change resets them all: the new zone opens, the rest
+  -- close.
+  local zoneName = ns.Zone.name or "This zone"
+  if ns.DB.profile.cards.sortMode == "smart" and char.zoneSeen ~= zoneName then
+    char.zoneSeen = zoneName
+    wipe(char.zoneOpen)
   end
-  if view.turninsFirst then
-    placeTurnins()
+  local function zoneOpen(name)
+    local open = char.zoneOpen[name]
+    if open == nil then
+      return name == zoneName
+    end
+    return open
+  end
+  local function toggleZone(name)
+    return function()
+      char.zoneOpen[name] = not zoneOpen(name)
+      Stack:Request(false, true)
+    end
   end
 
-  -- This zone's cards (Tracking rule 5): by count, or with a height set (resize grip) as many as fit
+  -- Other zones' quests by zone (after Fill: nearestAnywhere's candidates that found no room join
+  -- them), nearest zone first (its nearest quest; zones without a distance after, by name).
+  local function otherZones()
+    local byZone, zones, nearest = {}, {}, {}
+    for _, quest in ipairs(view.elsewhere) do
+      local zone = ns.Zone:NameFor(quest)
+      if not byZone[zone] then
+        byZone[zone] = {}
+        zones[#zones + 1] = zone
+      end
+      table.insert(byZone[zone], quest)
+      local d = ns.Navigation:Distance(quest)
+      if d and (not nearest[zone] or d < nearest[zone]) then
+        nearest[zone] = d
+      end
+    end
+    table.sort(zones, function(a, b)
+      local da, db = nearest[a], nearest[b]
+      if da and db then return da < db end
+      if da or db then return da ~= nil end
+      return a < b
+    end)
+    return zones, byZone
+  end
+
+  -- This zone (Tracking rule 5): by count, or with a height set (resize grip) as many cards as fit
   -- above the section headers that follow, so those stay in view (an opened section below scrolls).
-  local cards = ns.DB.profile.cards
-  local place
-  if (cards.maxHeight or 0) > 0 then
-    local below = #view.groups + (#view.elsewhere > 0 and 1 or 0) + (#view.hidden > 0 and 1 or 0)
-      + (#view.here > 0 and 1 or 0)  -- room for "N more here", in case
-      + ((not view.turninsFirst and #view.turnins > 0) and 1 or 0)
-    local limit = self:MaxScrollHeight() - below * (SECTION_HEIGHT + 2 * HALF_GAP)
-    place = function(quest)
-      return placeCard(quest, nil, limit)
+  local hereOpen = zoneOpen(zoneName)
+  if #view.here > 0 or #view.near > 0 then
+    placeSection(zoneName, #view.here, hereOpen, toggleZone(zoneName))
+  end
+  if hereOpen then
+    local cards = ns.DB.profile.cards
+    local place
+    if (cards.maxHeight or 0) > 0 then
+      local zoneCount = {}
+      for _, quest in ipairs(view.elsewhere) do zoneCount[ns.Zone:NameFor(quest)] = true end
+      for _, quest in ipairs(view.near) do zoneCount[ns.Zone:NameFor(quest)] = true end
+      local below = #view.groups + (#view.hidden > 0 and 1 or 0) + (#view.here > 0 and 1 or 0)  -- "N more here"
+      for _ in pairs(zoneCount) do below = below + 1 end
+      local limit = self:MaxScrollHeight() - below * (SECTION_HEIGHT + 2 * HALF_GAP)
+      place = function(quest)
+        return placeCard(quest, nil, limit)
+      end
+    else
+      place = function(quest, index)
+        return index <= cards.cap and placeCard(quest)
+      end
+    end
+    local overflow = ns.Tracking:Fill(view, place)
+    if #overflow > 0 then
+      if char.overflow.expanded then
+        for _, quest in ipairs(overflow) do
+          placeCard(quest)
+        end
+        placeSection("Show fewer", nil, true, toggleGroup(char.overflow), true)
+      else
+        placeSection(("%d more here"):format(#overflow), nil, false, toggleGroup(char.overflow), true)
+      end
     end
   else
-    place = function(quest, index)
-      return index <= cards.cap and placeCard(quest)
+    -- Closed: the nearest outside quests it would have borrowed stay in their own zones.
+    for _, quest in ipairs(view.near) do
+      table.insert(view.elsewhere, quest)
     end
-  end
-  local overflow = ns.Tracking:Fill(view, place)
-
-  if #overflow > 0 then
-    if char.overflow.expanded then
-      for _, quest in ipairs(overflow) do
-        placeCard(quest)
-      end
-      placeSection("Show fewer", nil, true, toggleGroup(char.overflow), true)
-    else
-      placeSection(("%d more here"):format(#overflow), nil, false, toggleGroup(char.overflow), true)
-    end
-  end
-
-  if not view.turninsFirst then
-    placeTurnins()
   end
 
   for _, group in ipairs(view.groups) do
@@ -292,26 +323,21 @@ function Stack:Layout()
     end
   end
 
-  if #view.elsewhere > 0 then
-    local expanded = char.elsewhere.expanded
-    placeSection("Elsewhere", #view.elsewhere, expanded, toggleGroup(char.elsewhere))
-    if expanded then
-      local byZone, zones = {}, {}
-      for _, quest in ipairs(view.elsewhere) do
-        local zone = ns.Zone:NameFor(quest)
-        if not byZone[zone] then
-          byZone[zone] = {}
-          zones[#zones + 1] = zone
-        end
-        table.insert(byZone[zone], quest)
-      end
-      table.sort(zones)
-      for _, zone in ipairs(zones) do
-        placeHeading(zone)
-        table.sort(byZone[zone], function(a, b) return (a.order or 0) < (b.order or 0) end)
-        for _, quest in ipairs(byZone[zone]) do
-          placeCard(quest)
-        end
+  -- Other zones, nearest first, each its own section; inside one, nearest quest first.
+  local zones, byZone = otherZones()
+  for _, zone in ipairs(zones) do
+    local open = zoneOpen(zone)
+    local quests = byZone[zone]
+    placeSection(zone, #quests, open, toggleZone(zone))
+    if open then
+      table.sort(quests, function(a, b)
+        local da, db = ns.Navigation:Distance(a), ns.Navigation:Distance(b)
+        if da and db then return da < db end
+        if da or db then return da ~= nil end
+        return (a.order or 0) < (b.order or 0)
+      end)
+      for _, quest in ipairs(quests) do
+        placeCard(quest)
       end
     end
   end
@@ -325,6 +351,22 @@ function Stack:Layout()
           ns.Menu:OpenForHidden(line, quest)
         end, nil, 14)
       end
+      -- Unhide all (review): two clicks, as Delete profile, so one stray click can't undo a list built
+      -- up quest by quest. The first arms it for UNHIDE_SECONDS.
+      local armed = GetTime() < Stack.unhideArmedUntil
+      local text = armed and ("|cffff8040Click again to unhide %d|r"):format(#view.hidden)
+        or "|cff66ccffUnhide all|r"
+      placeLine(text, function()
+        if GetTime() < Stack.unhideArmedUntil then
+          Stack.unhideArmedUntil = 0
+          wipe(char.ignored)
+          ns.Bus:Fire("TrackingChanged")
+        else
+          Stack.unhideArmedUntil = GetTime() + UNHIDE_SECONDS
+          Stack:Request(false, true)
+          C_Timer.After(UNHIDE_SECONDS + 0.1, function() Stack:Request(false, true) end)
+        end
+      end, nil, 14)
     end
   end
 
@@ -874,11 +916,6 @@ function Stack:Create()
     card.questID = nil
   end)
 
-  headingPool = ns.CreatePool(function()
-    local heading = body:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
-    heading:SetTextColor(0.7, 0.7, 0.7)
-    return heading
-  end)
 
   linePool = ns.CreatePool(function()
     local line = CreateFrame("Button", nil, body)

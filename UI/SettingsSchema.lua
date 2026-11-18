@@ -89,10 +89,10 @@ function Schema:Entries()
     {
       kind = "dropdown", id = "BUBBLEQUEST_SORT_MODE", column = 1, default = "smart",
       label = "Sort quests by",
-      tooltip = "Smart: quests whose area you're in (or with a timer running) first, then by distance. "
-        .. "Distance: nearest first. Level and Quest log: a fixed order that doesn't change as you move. "
-        .. "Ready quests always have their own section, on top when you're nearer a turn-in than an "
-        .. "objective.",
+      tooltip = "Smart: quests whose area you're in (or with a timer running) first, then by distance, "
+        .. "ready quests among them by the distance to their turn-in; entering a zone opens its section "
+        .. "and closes the other zones'. Distance: nearest first. Level and Quest log: a fixed order that "
+        .. "doesn't change as you move; zone sections open and close only by hand.",
       options = function()
         local list = {}
         for _, mode in ipairs(ns.Tracking.SORT_MODES) do

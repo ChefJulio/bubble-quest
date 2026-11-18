@@ -1,5 +1,13 @@
 ## What's new
 
+- Cards are sectioned by zone: your zone's section on top, then one per other zone, nearest first
+  (this replaces "Elsewhere"). With Smart sorting, entering a zone opens its section and closes the
+  others; you can still open or close any by hand
+- Ready quests are back among the others, sorted by the distance to their turn-in (the separate
+  "Ready to turn in" section is gone: the zone sections do its job). They keep their green "Turn in
+  to ..." line
+- "Unhide all" at the end of the Hidden list (click twice)
+
 - Quests on the game's tooltips. Hover a quest giver to see the quests it offers you (the same ones
   as the map's "!"), or the NPC a ready quest goes to for "? [10] Downstream  Ready". Items say which
   quest they start ("Starts a quest", greyed once done) and which quest in your log needs them, with
