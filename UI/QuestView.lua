@@ -28,7 +28,7 @@ local ADDON_NAME, ns = ...
 --   servicesExclude   { [MapServices key] = true }: services left out (the owner draws its own)
 --   focus         function(focus) -> true when the mouse focus counts as being on the view
 --   minCircle, minIcon   smallest on-screen sizes, pixels (a far-out window keeps its marks visible)
---   tooltipName   a global name for the view's tooltip
+--   tooltipName   a global name for the view's tooltip (default "BubbleQuestViewTooltip<n>")
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
 -- Pixels, not yards: a minimap is small (140 px across for 233 yd each way in review, 0.3 px a yard),
@@ -41,6 +41,7 @@ local PLAYER_GAP = 7         -- no dots this close to the player (their arrow)
 local HOVER_MIN = 6          -- a circle's hover radius at least this, however far out the view
 local TARGET_SECONDS = 0.1   -- how often the guide's target is worked out again (the arrows' rate)
 local HOVER_SECONDS = 0.05   -- how often the hover is checked while the cursor is on the view
+local BLIP_OFFSET = 24       -- pixels right of the cursor for ours while GameTooltip is up (updateHover)
 local ROUND_MASK = "Interface/CharacterFrame/TempPortraitAlphaMask"
 local SQUARE_MASK = "Interface/BUTTONS/WHITE8X8"
 local MERGE_SHARE = 0.8      -- icons closer than this share of their size merge into one (givers' "!")
@@ -172,6 +173,7 @@ end
 
 local View = {}
 View.__index = View
+local viewCount = 0  -- for the views' tooltip names
 
 ---A view drawing into `parent` (its layer fills it).
 ---@param parent Frame
@@ -192,7 +194,11 @@ function QuestView.New(parent, options)
     view.mask = layer:CreateMaskTexture()
     view.mask:SetAllPoints(layer)
   end
-  local tooltip = CreateFrame("GameTooltip", view.options.tooltipName, UIParent, "GameTooltipTemplate")
+  -- Always named: GameTooltipTemplate names its lines "$parentTextLeft1"..., so an unnamed one made
+  -- globals off UIParent's name, shared by every unnamed view (review, BugSack: "UIParentTextLeft1").
+  viewCount = viewCount + 1
+  local name = view.options.tooltipName or ("BubbleQuestViewTooltip" .. viewCount)
+  local tooltip = CreateFrame("GameTooltip", name, UIParent, "GameTooltipTemplate")
   ---@cast tooltip GameTooltip
   view.tooltip = tooltip
   -- Hidden, it keeps no anchors: nothing of ours stays tied to another frame (see updateHover).
@@ -211,6 +217,12 @@ end
 
 function View:Hide()
   self.layer:Hide()
+end
+
+---The view's tooltip is up (the cursor is on one of its marks).
+---@return boolean
+function View:IsHovering()
+  return self.tooltip:IsShown() and self.tooltip:GetOwner() == self.layer
 end
 
 function View:Show()
@@ -514,17 +526,15 @@ function View:updateHover()
     tooltip:Hide()
     return
   end
-  -- When a blip's tooltip (GameTooltip) is up too, ours hangs under it instead of covering it: placed
-  -- at its screen position, never anchored to it (review, error: anchored to GameTooltip, ours joined
-  -- its anchor family, and Blizzard re-anchoring GameTooltip for the player frame then failed with
-  -- "SetPoint would result in anchor family connection").
-  local left, bottom = GameTooltip:GetLeft(), GameTooltip:GetBottom()
-  local blip = GameTooltip:IsShown() and left ~= nil and bottom ~= nil
-  ns.Tooltips:Take(self.layer, blip and "ANCHOR_NONE" or "ANCHOR_CURSOR", nil, tooltip)
-  if blip then
-    local ratio = GameTooltip:GetEffectiveScale() / tooltip:GetEffectiveScale()
-    tooltip:ClearAllPoints()
-    tooltip:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left * ratio, bottom * ratio - 2)
+  -- Anchored to the cursor only, never with SetPoint (review, error twice: "SetPoint would result in
+  -- anchor family connection". Hung under GameTooltip by anchoring to it, then by its screen position
+  -- on UIParent: both joined the family GameTooltip is in, and Blizzard re-anchoring it then failed).
+  -- With a blip's tooltip (GameTooltip, at the cursor: Minimap_OnUpdate) up too, ours goes to the
+  -- cursor's right, as Blizzard's flight map does (FM_ZoneSummaryDataProvider.lua:48), so both read.
+  if GameTooltip:IsShown() then
+    ns.Tooltips:Take(self.layer, "ANCHOR_CURSOR_RIGHT", nil, tooltip, BLIP_OFFSET, 0)
+  else
+    ns.Tooltips:Take(self.layer, "ANCHOR_CURSOR", nil, tooltip)
   end
   if offers then
     ns.MapAvailable.FillTooltip(tooltip, offers)

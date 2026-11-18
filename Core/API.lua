@@ -91,6 +91,8 @@ end
 ---  :Draw(north, west, instanceMap, pixelsPerYard, turn)  north/west: world yards (UnitPosition's), the
 ---      point at the frame's centre; turn: radians (0: north up). Call when what the frame shows changes.
 ---  :Hide(), :Show()
+---  :IsHovering()  the view's own tooltip is up (the cursor on one of its marks): the owner's other
+---      tooltips can yield to it. While GameTooltip is up, the view's goes to the cursor's right.
 ---  :GetFrame()  the view's own frame (a child of `frame`, mouse off): for its frame level over terrain
 ---What shows follows the Map settings: areas with "Show quest areas on the world map", quest givers with
 ---"Show quests you can pick up". Options (all optional): guide (bool), hover (bool, default true: tooltips from the cursor while the
@@ -117,6 +119,7 @@ function api.CreateQuestView(frame, options)
     Draw = function(_, north, west, instanceMap, ppy, turn) view:Draw(north, west, instanceMap, ppy, turn) end,
     Hide = function() view:Hide() end,
     Show = function() view:Show() end,
+    IsHovering = function() return view:IsHovering() end,
     GetFrame = function() return view.layer end,
   }
 end

@@ -22,14 +22,16 @@ end
 ---@param anchor string an ANCHOR_* point
 ---@param reshow fun()? shows it again (for tooltips shown on enter)
 ---@param tooltip table? a GameTooltip
+---@param x number? the anchor's offsets
+---@param y number?
 ---@return table?
-function Tooltips:Take(owner, anchor, reshow, tooltip)
+function Tooltips:Take(owner, anchor, reshow, tooltip, x, y)
   tooltip = tooltip or GameTooltip
   self.waiting = reshow and { owner = owner, reshow = reshow } or nil
   if self:Suppressed() then
     return nil
   end
-  tooltip:SetOwner(owner, anchor)
+  tooltip:SetOwner(owner, anchor, x, y)
   self.taken[tooltip] = owner
   return tooltip
 end
