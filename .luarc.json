@@ -21,6 +21,7 @@
     ".tools/lua-language-server-*",
     ".tools/research",
     ".tools/luals-log",
+    ".tools/terrain",
     ".tools/vscode-wow-api/luasrc",
     ".tools/vscode-wow-api/wowdoc",
     ".release",
