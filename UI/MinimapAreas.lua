@@ -424,8 +424,9 @@ local tooltip  -- created with the layer
 
 -- The cursor is on the minimap itself, not just inside its rectangle: a frame over it (BubbleMap's
 -- bar, an addon's minimap button) is what the mouse is on then, and the areas under it flashed their
--- tooltips through it (seen in review). Over BubbleMap's padding (outside Blizzard's square) nothing
--- takes the mouse, so the game world is under it: that counts too.
+-- tooltips through it (seen in review). The view frame counts as the map too (BubbleMap's, SetView:
+-- it takes the mouse wheel for its zoom, so it's the mouse focus over its map), and so does the game
+-- world, under the cursor where nothing takes the mouse.
 local function onMinimap()
   if not layer:IsMouseOver() then
     return false
@@ -433,7 +434,8 @@ local function onMinimap()
   local foci = GetMouseFoci()
   local focus = foci and foci[1]
   -- WorldFrame: the engine makes it (no XML), so lint has no declaration for it.
-  return focus == Minimap or focus == rawget(_G, "WorldFrame")
+  return focus == Minimap or (focus ~= nil and focus == MinimapAreas.view)
+    or focus == rawget(_G, "WorldFrame")
 end
 
 local hoverElapsed = 0
