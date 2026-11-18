@@ -123,8 +123,8 @@ end
 
 -- The guide's quest: the hovered card (that one only: it's what you're asking about), else the pinned
 -- quests in pin order, then the cards top to bottom: the first with somewhere to go on this continent
--- (a pinned "raise your skill" quest has nowhere, and shouldn't hide the line) that you aren't already
--- "here" for (pickGuide). Its target:
+-- (a pinned "raise your skill" quest has nowhere, and shouldn't hide the line); no line while you're
+-- "here" for that one (pickGuide). Its target:
 -- Navigation:GuidePoint, shared with the world map's line (UI/MapAreas.lua).
 local function guideTarget(questID)
   local quest = ns.QuestLog:Get(questID)
@@ -153,16 +153,18 @@ local function pickGuide()
   if hovered and ns.Stack.visible[hovered] then
     return hovered, guideTarget(hovered)
   end
-  -- Quests you're already "here" for are skipped (review: "this dotted line makes no sense": standing
-  -- in Red Leather Bandanas' Defias area, the top card, the line led to another Defias area): the line
-  -- shows where to go next, the first card that needs walking to.
+  -- The first candidate with somewhere to go is the quest; when you're already "here" for it, there's
+  -- no line at all (review: standing in Red Leather Bandanas' Defias area, the top card, the line led to
+  -- another Defias area; "if I'm here for the quest there should be no line": the line is for getting
+  -- there, not for the next card).
   for _, questID in ipairs(QuestView.Candidates()) do
-    local quest = ns.QuestLog:Get(questID)
-    if not (quest and not quest.readyForTurnIn and ns.Navigation:InArea(quest)) then
-      local point = guideTarget(questID)
-      if point then
-        return questID, point
+    local point = guideTarget(questID)
+    if point then
+      local quest = ns.QuestLog:Get(questID)
+      if quest and not quest.readyForTurnIn and ns.Navigation:InArea(quest) then
+        return nil, nil
       end
+      return questID, point
     end
   end
   return nil, nil
