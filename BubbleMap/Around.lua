@@ -192,6 +192,30 @@ end
 local function createButtons()
   buttons = {}
 
+  -- Gather: the player's tracking spell (Find Herbs, ...) on or off, which is what gather mode follows
+  -- (Zoom.lua). Its icon is that spell's; grey while off. Only for players with a tracking spell.
+  local gather = CreateFrame("Button", nil, bar)
+  gather:SetSize(ICON, ICON)
+  gather.icon = gather:CreateTexture(nil, "ARTWORK")
+  gather.icon:SetAllPoints()
+  gather.icon:SetTexCoord(0.08, 0.92, 0.08, 0.92)
+  gather:SetHighlightTexture("Interface\\BUTTONS\\WHITE8X8", "ADD")
+  gather:GetHighlightTexture():SetVertexColor(1, 1, 1, 0.2)
+  gather:SetScript("OnClick", function() ns.Zoom:ToggleGather() end)
+  tooltip(gather, function()
+    local spell = ns.Zoom:GatherSpell()
+    if not spell then
+      return
+    end
+    GameTooltip:AddLine(spell.name .. (spell.active and ": on" or ": off"), 1, 1, 1)
+    GameTooltip:AddLine(spell.active
+      and "Gather mode: the game's minimap, for its live blips; zoom is limited to its levels. Click: off, "
+        .. "for BubbleMap's map and all its zoom."
+      or "BubbleMap's map, all its zoom. Click: on, for the game's live blips (gather mode).",
+      0.8, 0.8, 0.8, true)
+  end)
+  buttons.gather = gather
+
   local tracking = iconButton("ui-hud-minimap-tracking-button")
   tracking:SetScript("OnClick", function(self) trackingMenu(self) end)
   tooltip(tracking, function() GameTooltip:AddLine("Tracking", 1, 1, 1) end)
@@ -350,6 +374,13 @@ local function layoutBar()
   place(buttons.mail, show.mail and buttons.mail.has)
   place(buttons.calendar, show.calendar)
   place(buttons.tracking, show.tracking)
+  local spell = ns.Zoom:GatherSpell()
+  if spell then
+    buttons.gather.icon:SetTexture(spell.texture)
+    buttons.gather.icon:SetDesaturated(not spell.active)
+    buttons.gather.icon:SetAlpha(spell.active and 1 or 0.6)
+  end
+  place(buttons.gather, show.gather and spell ~= nil)
   place(buttons.launchers, ns.Launchers:Active())
   zone:SetShown(show.zone)
   if anchor then
@@ -437,6 +468,11 @@ for _, event in ipairs({ "ZONE_CHANGED", "ZONE_CHANGED_INDOORS", "ZONE_CHANGED_N
     end
   end)
 end
+ns.On("MINIMAP_UPDATE_TRACKING", function()
+  if bar then
+    layoutBar()  -- the gather button's icon and state
+  end
+end)
 ns.On("UPDATE_PENDING_MAIL", function()
   if bar then
     updateMail()

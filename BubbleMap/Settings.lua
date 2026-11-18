@@ -51,6 +51,9 @@ local ENTRIES = {
     tooltip = "Shows how many invites are waiting." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_TRACKING", label = "Tracking button", default = true,
     tooltip = "What the minimap shows: flight masters, trainers, ..." },
+  { kind = "checkbox", id = "BUBBLEMAP_SHOW_GATHER", label = "Gather button", default = true,
+    tooltip = "Your tracking spell (Find Herbs, ...) on and off in one click: on is gather mode, the game's "
+      .. "minimap and its live blips; off is BubbleMap's map with all its zoom." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_MAIL", label = "New mail", default = true,
     tooltip = "An envelope when there's new mail; hover it for the senders." },
   { kind = "checkbox", id = "BUBBLEMAP_SHOW_COORDS", label = "Coordinates", default = false,
@@ -66,7 +69,7 @@ local ENTRIES = {
 local SHOW_KEYS = {
   BUBBLEMAP_SHOW_BAR = "bar", BUBBLEMAP_SHOW_ZONE = "zone", BUBBLEMAP_SHOW_CLOCK = "clock",
   BUBBLEMAP_SHOW_CALENDAR = "calendar", BUBBLEMAP_SHOW_TRACKING = "tracking",
-  BUBBLEMAP_SHOW_MAIL = "mail", BUBBLEMAP_SHOW_COORDS = "coords", BUBBLEMAP_SHOW_ZOOM = "zoom",
+  BUBBLEMAP_SHOW_MAIL = "mail", BUBBLEMAP_SHOW_GATHER = "gather", BUBBLEMAP_SHOW_COORDS = "coords", BUBBLEMAP_SHOW_ZOOM = "zoom",
   BUBBLEMAP_LAUNCHERS = "launchers",
 }
 

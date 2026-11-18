@@ -30,7 +30,10 @@ local ARROW_SIZE = 32
 local Zoom = {
   own = false,        -- our map is showing (else Blizzard's minimap)
   step = DEFAULT_STEP,
+  beyond = false,     -- gathering, but zoomed out past Blizzard's farthest level: our map until back in
 }
+
+local lastLevel  -- Blizzard's zoom level as of the last frame (to see its wheel hit its farthest)
 ns.Zoom = Zoom
 
 local arrow, arrowTexture
@@ -54,6 +57,53 @@ local function trackingSpellOn()
     end
   end
   return false
+end
+
+-- The player's tracking spells (Find Herbs, Find Minerals, Track Beasts, ...): { index, name, texture,
+-- active }. The game runs one at a time.
+local function trackingSpells()
+  local list = {}
+  for index = 1, C_Minimap.GetNumTrackingTypes() do
+    local info = C_Minimap.GetTrackingInfo(index)
+    if info and info.type == "spell" then
+      list[#list + 1] = { index = index, name = info.name, texture = info.texture, active = info.active }
+    end
+  end
+  return list
+end
+
+---The tracking spell the gather button shows: the active one, else the last one used (by name), else
+---the first. nil when the player has none.
+---@return table?
+function Zoom:GatherSpell()
+  local spells = trackingSpells()
+  local last
+  for _, s in ipairs(spells) do
+    if s.active then
+      return s
+    end
+    if s.name == ns.DB.lastGather then
+      last = s
+    end
+  end
+  return last or spells[1]
+end
+
+---The bar's gather button: a tracking spell on turns it off (our map, all its zoom); none on turns the
+---last used one on (gather mode, when its setting is automatic). Blizzard's own tracking menu sets
+---tracking the same way, from ordinary UI code.
+function Zoom:ToggleGather()
+  local spell = self:GatherSpell()
+  if not spell then
+    return
+  end
+  if spell.active then
+    C_Minimap.SetTracking(spell.index, false)
+  else
+    C_Minimap.SetTracking(spell.index, true)
+    ns.DB.lastGather = spell.name
+    self.beyond = false  -- on: straight to gather mode
+  end
 end
 
 local function gathering()
@@ -85,9 +135,16 @@ local function apply()
   end
 end
 
----Re-decide whose map shows (tracking changed, indoors, the setting).
+---Re-decide whose map shows (tracking changed, indoors, the setting, zoomed past Blizzard's levels).
+---Gathering, the map is Blizzard's at its zoom levels and ours beyond them (user's design): zooming out
+---past Blizzard's farthest level leaves gather mode for our map, zooming back in returns to it. The
+---tracking spell stays on throughout.
 function Zoom:Update()
-  local own = terrainHere() and not gathering()
+  local gather = gathering()
+  if not gather then
+    self.beyond = false
+  end
+  local own = terrainHere() and (not gather or self.beyond)
   if own ~= self.own then
     self.own = own
     apply()
@@ -98,11 +155,24 @@ end
 ---@param delta number
 function Zoom:Step(delta)
   if self.own then
+    -- Gathering and zooming back in to Blizzard's range: gather mode, at its farthest level.
+    if self.beyond and delta > 0 and STEPS[self.step - 1] and STEPS[self.step - 1] <= 1 then
+      self.beyond = false
+      self:Update()
+      return
+    end
     local step = math.max(1, math.min(#STEPS, self.step - (delta > 0 and 1 or -1)))
     if step ~= self.step then
       self.step = step
       apply()
     end
+    return
+  end
+  -- Blizzard's map: out past its farthest level is our map (blips hidden: they'd be wrong there).
+  if delta < 0 and Minimap:GetZoom() == 0 and terrainHere() then
+    self.beyond = true
+    self.step = DEFAULT_STEP + 1  -- the first step out past Blizzard's farthest
+    self:Update()
     return
   end
   local level = Minimap:GetZoom() + (delta > 0 and 1 or -1)
@@ -115,6 +185,7 @@ end
 local function update()
   Zoom:Update()
   if not Zoom.own then
+    lastLevel = Minimap:GetZoom()
     return
   end
   -- apiguard: allow the argument is a constant string, never a secret value
@@ -126,8 +197,8 @@ end
 ---@return string
 function Zoom:Describe()
   if self.own then
-    return ("our map, zoom x%.2f of Blizzard's farthest (gather mode %s)"):format(STEPS[self.step],
-      ns.DB.gatherMode)
+    return ("our map, zoom x%.2f of Blizzard's farthest (gather mode %s%s)"):format(STEPS[self.step],
+      ns.DB.gatherMode, self.beyond and ", zoomed out past it" or "")
   end
   return ("Blizzard's minimap, level %d of %d (gather mode %s%s)"):format(Minimap:GetZoom(),
     Minimap:GetZoomLevels() - 1, ns.DB.gatherMode, terrainHere() and "" or ", no terrain here")
@@ -151,11 +222,16 @@ table.insert(ns.Minimap.onActivate, function(outer)
   -- Over Blizzard's square its minimap takes the wheel even with its mouse off (the wheel is separate),
   -- and zooms its own level. In our map that's not the zoom: put its level back (fixed at its farthest)
   -- and step ours instead. A post-hook: Blizzard's handler runs untouched.
+  -- In gather mode Blizzard's handler zooms; at its farthest level already, the wheel out goes on into
+  -- our map.
   Minimap:HookScript("OnMouseWheel", function(_, delta)
     if Zoom.own then
       Minimap:SetZoom(0)
       Zoom:Step(delta)
+    elseif delta < 0 and lastLevel == 0 then
+      Zoom:Step(delta)
     end
+    lastLevel = Minimap:GetZoom()
   end)
 
   local driver = CreateFrame("Frame", nil, outer)
