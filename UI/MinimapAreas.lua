@@ -127,10 +127,10 @@ end
 -- Pixels in the minimap's own units at 100% (setting map.iconSize). Our icons are meant to look like
 -- the game's minimap blips (review: "exactly the same size as Blizzard's"), so they're sized as those
 -- are: in the minimap's units, times Edit Mode's minimap "Icon Scale" (iconScale, below). Matched to
--- a side-by-side in game (minimap scale 0.64): the game's "!" and "?" both ~16 px on screen, 1.3x and
--- 1.6x ours at the old 12 (in UIParent units). TURNIN_SHARE: the "?" art fills less of its square.
-local GIVER_SIZE, DROP_ICON_SIZE = 25, 19
-local TURNIN_SHARE = 1.2
+-- the game's in two side-by-sides: its "!" and "?" are both ~16 px tall on screen; ours at 25 units
+-- came out ~28 px (about 1.12 px per unit there), so 14. The "?" box matches the "!" (TURNIN_SHARE).
+local GIVER_SIZE, DROP_ICON_SIZE = 14, 11
+local TURNIN_SHARE = 1
 
 -- Our icons' size factor, as the game's blips get it: the minimap's scale (Edit Mode's minimap Size;
 -- the layer may live on BubbleMap's frame, at another scale) times Edit Mode's minimap "Icon Scale"
