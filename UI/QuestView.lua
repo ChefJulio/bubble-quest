@@ -148,10 +148,46 @@ function QuestView.Candidates()
   return list
 end
 
+-- The pins as a value: a quest pinned (the counter goes up) or unpinned (fewer) changes it.
+local function pinsState()
+  local count = 0
+  for _ in pairs(ns.DB.char.pins) do
+    count = count + 1
+  end
+  return ns.DB.char.pinCounter .. ":" .. count
+end
+
+---Make `questID` the guide's quest (a click in the quest log panel, UI/QuestLogPanel.lua: review, "centre
+---and guide"), until another is chosen, the pins change (pinning still sends the line to the pin) or it
+---leaves the log. A hovered card still wins while hovered.
+---@param questID number
+function QuestView.ChooseGuide(questID)
+  QuestView.chosen = questID
+  QuestView.chosenPins = pinsState()
+  QuestView.guide.at = 0  -- at once, not at the next TARGET_SECONDS
+end
+
+local function chosenQuest()
+  local questID = QuestView.chosen
+  if questID and (not ns.QuestLog:Get(questID) or QuestView.chosenPins ~= pinsState()) then
+    QuestView.chosen, QuestView.chosenPins = nil, nil
+    return nil
+  end
+  return questID
+end
+QuestView.Chosen = chosenQuest  -- the chosen quest, if it still stands (the quest log panel marks it)
+
 local function pickGuide()
   local hovered = ns.MapAreas.cardHover
   if hovered and ns.Stack.visible[hovered] then
     return hovered, guideTarget(hovered)
+  end
+  -- A quest picked in the quest log: its line even when you're "here" for it (unlike the candidates
+  -- below), as it was asked for by name; where it has nowhere to go here, the usual rules.
+  local chosen = chosenQuest()
+  local chosenPoint = chosen and guideTarget(chosen)
+  if chosenPoint then
+    return chosen, chosenPoint
   end
   -- The first candidate with somewhere to go is the quest; when you're already "here" for it, there's
   -- no line at all (review: standing in Red Leather Bandanas' Defias area, the top card, the line led to

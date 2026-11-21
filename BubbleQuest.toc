@@ -69,6 +69,7 @@ UI\MinimapAreas.lua
 UI\MapAvailable.lua
 UI\MapServices.lua
 UI\MapButton.lua
+UI\QuestLogPanel.lua
 UI\WorldTooltips.lua
 UI\SettingsSchema.lua
 UI\Settings.lua

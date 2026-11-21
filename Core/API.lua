@@ -126,6 +126,28 @@ function api.CreateQuestView(frame, options)
   }
 end
 
+---A quest log list in `frame` (UI/QuestLogPanel.lua): every quest in the log under its zone (as the
+---tracker's sections), with its objectives, a pin checkbox, a search box and the log's count ("12/40").
+---It fills `frame`, scrolls with the mouse wheel over it, and keeps itself up to date while shown; at
+---least 240 px wide (BubbleQuestAPI.QUEST_LOG_MIN_WIDTH). Options: onQuestClick(questID, target), a quest
+---clicked: it's now the guide line's quest (minimap and quest views), and target is where it leads,
+---{ map = instance map, north, west } in world yards (UnitPosition's), or nil when nothing is known.
+---Returns a handle: :GetFrame(), :Show(), :Hide(), :Refresh() (rebuild now; never needed for updates).
+---@param frame Frame
+---@param options table?
+---@return table
+function api.CreateQuestLogPanel(frame, options)
+  options = options or {}
+  local panel = ns.QuestLogPanel.New(frame, { onQuestClick = options.onQuestClick })
+  return {
+    GetFrame = function() return panel.frame end,
+    Show = function() panel:Show() end,
+    Hide = function() panel:Hide() end,
+    Refresh = function() panel:Refresh() end,
+  }
+end
+api.QUEST_LOG_MIN_WIDTH = 240
+
 ---Append BubbleQuest's map menu (the world map button's: quest areas, quests you can pick up, the
 ---minimap's areas and guide, the Town services submenu, Map settings...) to `description`: a MenuUtil
 ---menu description, the root or a submenu (BubbleMap's window's filter menu).

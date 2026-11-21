@@ -87,6 +87,7 @@ local CHAR_DEFAULTS = {
   },
   zoneOpen = {},    -- [zone name] = true / false: a zone section opened or closed by hand (UI/Cards/Stack.lua)
   -- zoneSeen: the zone the sections were last reset for (Smart sorting resets them on a zone change)
+  logCollapsed = {},  -- [zone name] = true: closed in the quest log panel (UI/QuestLogPanel.lua); open by default
   hidden = {
     expanded = false,
   },
