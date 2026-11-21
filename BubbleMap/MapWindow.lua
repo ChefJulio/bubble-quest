@@ -38,6 +38,7 @@ local TITLE_HEIGHT, FOOTER_HEIGHT = 22, 20
 local CLICK_SLOP = 4                -- pixels the mouse may move for a press to count as a click
 local ARROW = "Interface\\Minimap\\MinimapArrow"
 local HIGHLIGHT_ALPHA = 0.7
+local HIGHLIGHT_UNTIL_PPY = 0.07    -- the zone hover glow only zoomed out this far (zone names' range)
 
 local MapWindow = {
   following = true,  -- the view stays on the player until dragged
@@ -52,6 +53,7 @@ local ppy = DEFAULT_PPY
 local drag  -- { x, y, cx, cy, moved } while the left button is down
 local drawPulse  -- the quest drawer's pulse (below, with the drawer)
 local continentButton, zoneButton, mapName  -- the breadcrumb (below, Navigation)
+local drawer  -- the quest log drawer (below)
 
 local function playerPosition()
   local north, west, _, map = UnitPosition("player")
@@ -359,7 +361,12 @@ local function redraw()
       hideSlot(slot)
     end
   end
-  drawHighlight(hoverEntry, hoverNorth, hoverWest, hoverProject)
+  -- Only zoomed out, where it helps tell zones apart (review: zoomed in it "looks bad").
+  if ppy < HIGHLIGHT_UNTIL_PPY then
+    drawHighlight(hoverEntry, hoverNorth, hoverWest, hoverProject)
+  else
+    highlight:Hide()
+  end
   if ns.Waypoints then
     ns.Waypoints:DrawWindow(layers.waypoints, MapWindow.Shows("waypoints") and MapWindow.Project or nil)
   end
@@ -554,7 +561,9 @@ end
 local function saveFrame()
   local left, top = window:GetLeft(), window:GetTop()
   if left and top then
-    ns.DB.window = { left = left, top = top, width = window:GetWidth(), height = window:GetHeight() }
+    -- The map's own width: an open drawer adds itself again when it opens.
+    local width = window:GetWidth() - (drawer and drawer:IsShown() and drawer:GetWidth() or 0)
+    ns.DB.window = { left = left, top = top, width = width, height = window:GetHeight() }
   end
 end
 
@@ -567,7 +576,7 @@ end
 local DRAWER_MIN, DRAWER_MAX, DRAWER_DEFAULT = 240, 600, 300  -- BubbleQuest's list needs 240 (its word)
 local PULSE_SECONDS = 2.5
 
-local drawer, questPanel, questButton
+local questPanel, questButton
 local pulse  -- { map, north, west, at } while a clicked quest's spot pulses
 
 local function questLogAvailable()
@@ -586,14 +595,43 @@ local function layoutContent(footer, bar)
   end
 end
 
+-- A quest clicked: frame you and its target together, the guide line between (review: "zoom to an
+-- appropriate level to include both player and goal"), at least FIT_MIN_YARDS across; on another map
+-- than you, just centre on the target at the current zoom.
+local FIT_MIN_YARDS = 250
+local FIT_MARGIN = 0.15
 local function centreOn(target)
   local x, y = ns.World.ToPlane(target.map, target.north, target.west)
   if not x then
     return
   end
-  centre.x, centre.y = x, y
-  MapWindow.following = false
   pulse = { map = target.map, north = target.north, west = target.west, at = GetTime() }
+  local north, west, _, map = UnitPosition("player")
+  local px, py
+  if map == target.map and north and not issecretvalue(north) then
+    px, py = ns.World.ToPlane(map, north, west)
+  end
+  if not px then
+    centre.x, centre.y = x, y
+    MapWindow.following = false
+    return
+  end
+  local x0, x1, y0, y1 = math.min(x, px), math.max(x, px), math.min(y, py), math.max(y, py)
+  local w, h = math.max(x1 - x0, FIT_MIN_YARDS), math.max(y1 - y0, FIT_MIN_YARDS)
+  local mx, my = (x0 + x1) / 2, (y0 + y1) / 2
+  frameRect(mx - w / 2 * (1 + FIT_MARGIN), my - h / 2 * (1 + FIT_MARGIN), mx + w / 2 * (1 + FIT_MARGIN),
+    my + h / 2 * (1 + FIT_MARGIN))
+end
+
+-- The window grows to the right by the drawer and shrinks back (review: Blizzard's quest log "extends
+-- outwards"; the map keeps its size). Its top left stays put.
+local function growWindow(by)
+  local left, top = window:GetLeft(), window:GetTop()
+  if left and top then
+    window:ClearAllPoints()
+    window:SetPoint("TOPLEFT", UIParent, "BOTTOMLEFT", left, top)
+  end
+  window:SetWidth(window:GetWidth() + by)
 end
 
 local function createDrawer(footer, bar)
@@ -611,18 +649,18 @@ local function createDrawer(footer, bar)
   back:SetAllPoints()
   back:SetColorTexture(0.05, 0.05, 0.06, 0.96)
   local panelFrame = CreateFrame("Frame", nil, drawer)
-  panelFrame:SetPoint("TOPLEFT", 6, 0)
-  panelFrame:SetPoint("BOTTOMRIGHT")
+  panelFrame:SetPoint("TOPLEFT")
+  panelFrame:SetPoint("BOTTOMRIGHT", -6, 0)
 
-  -- Its left edge drags its width.
+  -- Its outer (right) edge drags its width, the window with it: the map keeps its size.
   local edge = CreateFrame("Frame", nil, drawer)
-  edge:SetPoint("TOPLEFT")
-  edge:SetPoint("BOTTOMLEFT")
+  edge:SetPoint("TOPRIGHT")
+  edge:SetPoint("BOTTOMRIGHT", 0, 18)  -- clear of the window's resize grip
   edge:SetWidth(6)
   edge:EnableMouse(true)
   local line = edge:CreateTexture(nil, "ARTWORK")
-  line:SetPoint("TOPLEFT", 2, 0)
-  line:SetPoint("BOTTOMLEFT", 2, 0)
+  line:SetPoint("TOPRIGHT", -2, 0)
+  line:SetPoint("BOTTOMRIGHT", -2, 0)
   line:SetWidth(1)
   line:SetColorTexture(1, 0.82, 0, 0.35)
   edge:SetScript("OnEnter", function() line:SetColorTexture(1, 0.82, 0, 0.9) end)
@@ -630,20 +668,21 @@ local function createDrawer(footer, bar)
   edge:SetScript("OnMouseDown", function()
     edge:SetScript("OnUpdate", function()
       local x = GetCursorPosition() / drawer:GetEffectiveScale()
-      local width = math.max(DRAWER_MIN, math.min(DRAWER_MAX, drawer:GetRight() - x))
-      -- Not wider than leaves the map its minimum.
-      width = math.min(width, window:GetWidth() - 320)
-      drawer:SetWidth(math.max(DRAWER_MIN, width))
-      ns.DB.drawerWidth = drawer:GetWidth()
+      local width = math.max(DRAWER_MIN, math.min(DRAWER_MAX, x - drawer:GetLeft()))
+      local by = width - drawer:GetWidth()
+      if by ~= 0 then
+        drawer:SetWidth(width)
+        growWindow(by)
+        window:SetResizeBounds(320 + width, 240)
+        ns.DB.drawerWidth = width
+      end
     end)
   end)
   edge:SetScript("OnMouseUp", function() edge:SetScript("OnUpdate", nil) end)
 
   drawer:SetScript("OnShow", function()
+    growWindow(drawer:GetWidth())
     window:SetResizeBounds(320 + drawer:GetWidth(), 240)
-    if window:GetWidth() < 320 + drawer:GetWidth() then
-      window:SetWidth(320 + drawer:GetWidth())
-    end
     if not questPanel then
       questPanel = ns.Quest.CreateQuestLogPanel(panelFrame, {
         onQuestClick = function(_, target)
@@ -658,6 +697,7 @@ local function createDrawer(footer, bar)
   end)
   drawer:SetScript("OnHide", function()
     window:SetResizeBounds(320, 240)
+    growWindow(-drawer:GetWidth())
     if questPanel then
       questPanel:Hide()
     end

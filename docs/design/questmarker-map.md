@@ -216,8 +216,11 @@ buttons are put away.
 - **Quest log drawer:** BubbleQuest's quest list (`BubbleQuestAPI.CreateQuestLogPanel(parent, options)`
   -> { GetFrame, Show, Hide, Refresh }, `options.onQuestClick(questID, target)` with target
   { map, north, west } or nil; agreed 2026-11-18, built in BubbleQuest) in a drawer on the window's
-  right, toggled by the footer's "Quests" button (only when the API has it), width dragged at its left
-  edge (300-600, saved), open state saved. A quest clicked centres the map on its target, which pulses.
+  right, toggled by the footer's "Quests" button (only when the API has it). It grows the window outward
+  (review: as Blizzard's quest log; the map keeps its size), width dragged at its outer edge (the list's
+  minimum, 240, to 600; saved), open state saved. A quest clicked frames you and its target together
+  (both in view, 15% margin, at least 250 yd; centred on the target when on another map), which pulses.
+- **Zone hover glow** only zoomed out (under 0.07 px/yd, the zone names' range): zoomed in it looked bad.
 - **Waypoints** (Waypoints.lua): one of yours plus one per group member with BubbleMap. Click drops
   yours (private), Shift+click shares it, right-click a waypoint clears it (someone else's: hidden for
   you). Yours clears within 12 yd. Shown in the window and on the minimap (out of view: at its edge).
