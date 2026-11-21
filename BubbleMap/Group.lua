@@ -96,11 +96,13 @@ end
 
 ---Draw the members on instance map `map`, each where `project(north, west)` puts it: pixels right and
 ---up of the frame's centre. Nothing when `project` is nil. Then the hover, unless `noHover` (another
----layer's tooltip is up).
+---layer's tooltip is up). `namesOnly`: the names alone, no dots and no hover (the game's minimap is
+---showing and draws the members' blips and their tooltips itself).
 ---@param map number?
 ---@param project? fun(north: number, west: number): number, number
 ---@param noHover boolean?
-function Layer:Draw(map, project, noHover)
+---@param namesOnly boolean?
+function Layer:Draw(map, project, noHover, namesOnly)
   wipe(self.shown)
   if not (map and project) then
     self:HideFrom(1)
@@ -125,8 +127,8 @@ function Layer:Draw(map, project, noHover)
         end
         d.ring:ClearAllPoints()
         d.ring:SetPoint("CENTER", frame, "CENTER", x, y)
-        d.ring:Show()
-        d.fill:Show()
+        d.ring:SetShown(not namesOnly)
+        d.fill:SetShown(not namesOnly)
         -- apiguard: allow the name is checked with issecretvalue (readable) before it's shown
         local name = ns.DB.groupNames and UnitName(unit)
         if name and readable(name) then
@@ -136,7 +138,9 @@ function Layer:Draw(map, project, noHover)
         else
           d.name:Hide()
         end
-        self.shown[#self.shown + 1] = { x = x, y = y, unit = unit }
+        if not namesOnly then
+          self.shown[#self.shown + 1] = { x = x, y = y, unit = unit }
+        end
       end
     end
   end
@@ -206,7 +210,11 @@ table.insert(ns.Minimap.onActivate, function(outer)
     if layer.frame:GetFrameLevel() ~= level then
       layer.frame:SetFrameLevel(level)
     end
-    if not ns.Zoom.own then
+    -- The game's minimap showing (gather mode at its levels, indoors): it draws the members' blips, so
+    -- only their names, beside its blips, at its scale (Terrain:Projection follows its radius then).
+    -- Review: names wanted "at any zoom level".
+    local namesOnly = not ns.Zoom.own
+    if namesOnly and not ns.DB.groupNames then
       layer:Draw(nil, nil)
       return
     end
@@ -221,6 +229,6 @@ table.insert(ns.Minimap.onActivate, function(outer)
       -- East right, north up; turned.
       local x, y = (pw - west) * s, (north - pn) * s
       return x * cos + y * sin, -x * sin + y * cos
-    end)
+    end, nil, namesOnly)
   end)
 end)
