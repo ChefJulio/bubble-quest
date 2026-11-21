@@ -597,6 +597,11 @@ local function centreOn(target)
 end
 
 local function createDrawer(footer, bar)
+  -- The list's own minimum, when it says (BubbleQuestAPI.QUEST_LOG_MIN_WIDTH).
+  local listMin = tonumber(ns.Quest.QUEST_LOG_MIN_WIDTH)
+  if listMin then
+    DRAWER_MIN = math.max(listMin, 120)
+  end
   drawer = CreateFrame("Frame", nil, window)
   drawer:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, 0)
   drawer:SetPoint("BOTTOMRIGHT", footer, "TOPRIGHT", 0, 0)
