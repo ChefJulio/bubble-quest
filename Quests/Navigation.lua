@@ -88,6 +88,12 @@ local function collect(questID, name)
         return math.min(p.n or 1, MAX_LEARNED_WEIGHT)
       end)
     end
+    -- Last: a dropper guessed from the item's or quest's name (Data/ForeverData.lua GuessedPoints),
+    -- below learned spots, which are real sightings (review: WANTED: Jai'vhanel's feather, no
+    -- dropper in any data).
+    if #points == 0 then
+      add(ns.ForeverData:GuessedPoints(questID, name), "guess")
+    end
   else
     add(ns.QuestieData:TurnInPoints(questID), "questie")
     add(ns.ForeverData:TurnInPoints(questID), "forever-db")

@@ -235,9 +235,56 @@ end
 
 local pointCache = {}  -- [questID .. ":" .. text] = points or false
 
----Spawn points (world yards: { map, x, y }) of whatever an objective needs: the creature to kill or
----talk to, the object to use, or the creatures/objects an item comes from. Matched by name: the
----objective's text contains the target's name ("Kobold Vermin slain" -> Kobold Vermin).
+-- The quest objective an objective's text is about: the first whose target's name it contains
+-- ("Kobold Vermin slain" -> Kobold Vermin). Returns the objective, its target's kind and name.
+local function objectiveFor(lib, record, text)
+  for _, objective in ipairs(record.objectives or {}) do
+    local kind = TARGET_KIND[objective.kind]
+    local name = kind and objective.target and lib.Name(kind, objective.target)
+    if name and text:find(name, 1, true) then
+      return objective, kind, name
+    end
+  end
+  return nil
+end
+
+-- Guide steps (lib.Steps: action, targetKind, target, place { map, x, y } in world yards, text) as a
+-- location source. A step is about the objective when it targets the objective's own target (then
+-- only its place adds anything), or, for an item objective, when it's a loot / kill / gather step on a
+-- creature or object and the quest has one item objective or the step names the item: that's where
+-- the item comes from, often the only record of it (review: a quarter of item objectives list no
+-- dropper; most of those have steps).
+local SOURCE_ACTIONS = { loot = true, kill = true, ["collect-object"] = true, ["use-item"] = true }
+
+local function addStepPoints(lib, questID, record, objective, kind, name, points, added)
+  local items = 0
+  for _, o in ipairs(record.objectives or {}) do
+    items = items + (o.kind == "item" and 1 or 0)
+  end
+  local lowerName = name:lower()
+  for _, step in ipairs(lib.Steps(questID)) do
+    local stepKind, target = step.targetKind, step.target
+    local about = stepKind == kind and target == objective.target
+    if not about and kind == "item" and SOURCE_ACTIONS[step.action] and target
+        and (stepKind == "npc" or stepKind == "object")
+        and (items == 1 or (step.text and step.text:lower():find(lowerName, 1, true))) then
+      about = true
+      if not added[stepKind .. target] then
+        added[stepKind .. target] = true
+        addSpawns(lib, stepKind, target, points)
+      end
+    end
+    local place = about and step.place
+    if place and place.map and place.x and place.y then
+      points[#points + 1] = { map = place.map, x = place.x, y = place.y,
+        kind = (stepKind == "npc" or stepKind == "object") and stepKind or "explore" }
+    end
+  end
+end
+
+---Points (world yards: { map, x, y, kind }) of whatever an objective needs, from forever-db: the
+---creature to kill or talk to, the object to use, or the creatures/objects an item comes from (its
+---listed droppers, and guide steps that say where it's got), plus the places guide steps name for it.
 ---@param questID number
 ---@param text string the objective's text
 ---@return table? points, nil when forever-db has none
@@ -249,26 +296,149 @@ function ForeverData:ObjectivePoints(questID, text)
   local lib, record = library(), self:Quest(questID)
   local points = {}
   if lib and record then
-    for _, objective in ipairs(record.objectives or {}) do
-      local kind = TARGET_KIND[objective.kind]
-      local name = kind and objective.target and lib.Name(kind, objective.target)
-      if name and text:find(name, 1, true) then
-        if kind == "item" then
-          local item = lib.Get("item", objective.target)
-          for _, source in ipairs(item and item.sources or {}) do
-            if source.kind == "npc" or source.kind == "object" then
-              addSpawns(lib, source.kind, source.id, points)
-            end
+    local objective, kind, name = objectiveFor(lib, record, text)
+    if objective and kind and name then
+      local added = {}  -- [kind .. id]: spawns already in
+      if kind == "item" then
+        local item = lib.Get("item", objective.target)
+        for _, source in ipairs(item and item.sources or {}) do
+          if (source.kind == "npc" or source.kind == "object") and not added[source.kind .. source.id] then
+            added[source.kind .. source.id] = true
+            addSpawns(lib, source.kind, source.id, points)
           end
-        else
-          addSpawns(lib, kind, objective.target, points)
         end
-        break
+      else
+        addSpawns(lib, kind, objective.target, points)
       end
+      addStepPoints(lib, questID, record, objective, kind, name, points, added)
     end
   end
   pointCache[key] = #points > 0 and points or false
   return pointCache[key] or nil
+end
+
+-- Guessed droppers -------------------------------------------------------------------------------
+
+-- For an item objective nothing else places (no dropper listed, no step: review, WANTED: Jai'vhanel's
+-- "Feather of Jai'vhanel", forever-db knowing her and the feather but not that she drops it): the
+-- creature the item or the quest is named after. Strict, as a wrong guess sends the player away:
+--   - names taken whole from set patterns, never any word: the item's "<thing> of <Name>" and
+--     "<Name>'s <thing>", its leading words ("Wolf Fang" -> Wolf; at least LEADING_MIN letters), the
+--     title's part after a colon ("WANTED: <Name>") and the whole title;
+--   - a creature's name must equal one of them exactly (case aside), longest first;
+--   - and it must spawn in the quest's zone (forever-db's zone for the quest).
+-- Kept apart from real data (source "guess" in Quests/Navigation.lua): used only when no database and
+-- no learned spot has anything.
+local LEADING_MIN = 4
+local guessCache = {}  -- [questID .. ":" .. text] = points or false
+
+local function candidateNames(itemName, title)
+  local list, seen = {}, {}
+  local function add(s)
+    s = s and s:match("^%s*(.-)%s*$")
+    if s and s ~= "" and not seen[s:lower()] then
+      seen[s:lower()] = true
+      list[#list + 1] = s
+    end
+  end
+  add(itemName:match("^.- of (.+)$"))
+  add(itemName:match("^(.-)'s "))
+  local words = {}
+  for word in itemName:gmatch("%S+") do
+    words[#words + 1] = word
+  end
+  for n = #words - 1, 1, -1 do
+    local prefix = table.concat(words, " ", 1, n)
+    if #prefix >= LEADING_MIN then
+      add(prefix)
+    end
+  end
+  if title then
+    add(title:match(":%s*(.+)$"))
+    add(title)
+  end
+  table.sort(list, function(a, b) return #a > #b end)
+  return list
+end
+
+-- The zone (uiMap name) a world point lies in: the first Zone-type map up from the smallest one.
+local zoneNames = {}
+local function zoneNameAt(lib, map, x, y)
+  local uiMap = lib.ToUiMap(map, x, y)
+  if not uiMap then
+    return nil
+  end
+  if zoneNames[uiMap] == nil then
+    zoneNames[uiMap] = false
+    local id = uiMap
+    while id and id > 0 do
+      local info = C_Map.GetMapInfo(id)
+      if not info then
+        break
+      end
+      if info.mapType == Enum.UIMapType.Zone then
+        zoneNames[uiMap] = info.name
+        break
+      end
+      id = info.parentMapID
+    end
+  end
+  return zoneNames[uiMap] or nil
+end
+
+-- The guess itself, into `points`.
+local function guess(lib, record, text, points)
+  local objective, kind, name = objectiveFor(lib, record, text)
+  local zone = objective and kind == "item" and name and C_Map.GetAreaInfo(record.zone)
+  if not zone or not name then
+    return
+  end
+  local wanted = {}
+  for rank, candidate in ipairs(candidateNames(name, record.name)) do
+    wanted[candidate:lower()] = rank
+  end
+  -- Every creature with one of those names (a scan: rare, and cached per objective), best rank first.
+  local found = {}
+  for _, id in ipairs(lib.Ids("npc")) do
+    local npcName = lib.Name("npc", id)
+    local rank = npcName and wanted[npcName:lower()]
+    if rank then
+      found[#found + 1] = { id = id, rank = rank }
+    end
+  end
+  table.sort(found, function(a, b) return a.rank < b.rank end)
+  -- The best-ranked name with spawns in the quest's zone: all its creatures' spawns there.
+  local bestRank
+  for _, f in ipairs(found) do
+    if bestRank and f.rank > bestRank then
+      break
+    end
+    for _, p in ipairs(lib.Spawns("npc", f.id)) do
+      if zoneNameAt(lib, p.map, p.x, p.y) == zone then
+        bestRank = f.rank
+        points[#points + 1] = { map = p.map, x = p.x, y = p.y, kind = "npc" }
+      end
+    end
+  end
+end
+
+---Points of the creature an unplaced item objective is likely got from, guessed by name (see above),
+---or nil. Only for Quests/Navigation.lua's last resort.
+---@param questID number
+---@param text string the objective's text
+---@return table?
+function ForeverData:GuessedPoints(questID, text)
+  local key = questID .. ":" .. text
+  if guessCache[key] ~= nil then
+    return guessCache[key] or nil
+  end
+  local lib, record = library(), self:Quest(questID)
+  local points = {}
+  if lib and record and record.zone then
+    guess(lib, record, text, points)
+  end
+  guessCache[key] = #points > 0 and points or false
+  return guessCache[key] or nil
 end
 
 ---Spawn points of whoever takes the quest in.
