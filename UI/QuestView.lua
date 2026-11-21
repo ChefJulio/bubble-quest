@@ -377,7 +377,8 @@ function View:GameShowsTurnIn(questID)
     return false
   end
   local x, y = project(marker.x - self.north, marker.y - self.west, self.cos, self.sin, self.scale)
-  return x * x + y * y <= reach * reach
+  local dx, dy = x - (self.gameX or 0), y - (self.gameY or 0)  -- from the player (see Draw)
+  return dx * dx + dy * dy <= reach * reach
 end
 
 -- The game's quest-giver "!" (review: two "!" a few pixels apart) is drawn by the client for the givers
@@ -386,7 +387,8 @@ end
 -- for quests the game never marks: started by a drop, or low-level while it hides those.
 function View:gameMarksGiver(p, x, y)
   local reach = self.gameReach
-  return reach ~= nil and not p.drop and x * x + y * y <= reach * reach
+  local dx, dy = x - (self.gameX or 0), y - (self.gameY or 0)  -- from the player (see Draw)
+  return reach ~= nil and not p.drop and dx * dx + dy * dy <= reach * reach
     and not (p.entry.trivial and self.trivialHidden)
 end
 
@@ -675,6 +677,13 @@ function View:Draw(north, west, map, ppy, turn)
       self.playerNorth, self.playerWest = playerNorth, playerWest
     else
       self.playerNorth, self.playerWest = nil, nil
+    end
+    -- The game draws its own markers around the player, not the view's centre: they differ once the
+    -- view is panned (BubbleMap's dragged minimap). The game's reach is measured from here.
+    if self.playerNorth then
+      self.gameX, self.gameY = project(self.playerNorth - north, self.playerWest - west, self.cos, self.sin, ppy)
+    else
+      self.gameX, self.gameY = 0, 0
     end
     if self.mask then
       local shape = opts.mask()

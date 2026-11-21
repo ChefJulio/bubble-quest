@@ -73,6 +73,15 @@ function api.SetMinimapView(frame)
   ns.MinimapAreas:SetView(frame)
 end
 
+---Where the minimap view centres, for a minimap dragged away from the player: fn() -> north, west
+---(world yards, UnitPosition's, on the player's instance map), or nil for the player. Called every
+---frame the minimap draws; nil fn: always the player. The player stays the player for the guide line's
+---start and "you're here".
+---@param fn function?
+function api.SetMinimapCentre(fn)
+  ns.MinimapAreas:SetCentre(fn)
+end
+
 ---The minimap view reaches `factor` times further than Blizzard's minimap (an overview zoom past its
 ---farthest level, Blizzard's minimap faded out): the quest areas scale to match, and turn-ins get our
 ---"?" everywhere, as the game's own are hidden. 1: Blizzard's own view.

@@ -152,6 +152,16 @@ end
 local function update()
   raiseLayer()
   local north, west, instanceMap = ns.Navigation:PlayerPosition()
+  -- BubbleMap's own map can be dragged away from the player (SetCentre): the view centres there; the
+  -- player stays the player (the guide's start, "here"). An error in its function falls back to the
+  -- player rather than stopping the minimap.
+  local centre = MinimapAreas.centre
+  if centre and north then
+    local ok, n, w = pcall(centre)
+    if ok and type(n) == "number" and type(w) == "number" then
+      north, west = n, w
+    end
+  end
   view:Draw(north, west, instanceMap, pixelsPerYard(), rotation())
 end
 
@@ -199,6 +209,17 @@ end
 ---centred on the minimap, wider or taller, filled with terrain at the minimap's scale.
 ---@param frame Frame?
 function MinimapAreas:SetView(frame)
+  self:applyView(frame)
+end
+
+---Where the view centres: fn() -> north, west (world yards on the player's instance map), or nil for
+---the player; nil fn: always the player.
+---@param fn function?
+function MinimapAreas:SetCentre(fn)
+  self.centre = fn
+end
+
+function MinimapAreas:applyView(frame)
   self.view = frame
   if view then
     -- The frame's child, not the minimap's: BubbleMap's own map hides Blizzard's minimap outright
