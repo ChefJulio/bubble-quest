@@ -205,6 +205,10 @@ function MinimapAreas:SetView(frame)
     -- (at alpha 0 the game's blips still drew), which would hide a child of it. Above the frame's own
     -- textures (its terrain), as above the minimap's.
     view:SetParent(frame or Minimap)
+    -- On Blizzard's minimap the marks ignore its alpha (BubbleMap fades it out: QuestView.New); on
+    -- BubbleMap's frame they follow it, so its minimap opacity setting fades them too (review). Ctrl's
+    -- see-through is the layer's own alpha, on top of either.
+    view.layer:SetIgnoreParentAlpha(frame == nil)
     raiseLayer()
   end
 end
