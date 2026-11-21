@@ -383,8 +383,68 @@ end
 function Panel:makeAction()
   local button = CreateFrame("Button", nil, self.body, "UIPanelButtonTemplate")
   button:SetHeight(ACTION_HEIGHT)
-  button:SetScript("OnClick", function(self) self.action(self.questID) end)
+  button:SetScript("OnClick", function(self) self.action(self.questID, self) end)
   return button
+end
+
+-- Link: a menu of where to (review: "link opens a menu that the player chooses the channel, and it
+-- prints there by itself"). The groups and guild you're in, your numbered channels (GetChannelList:
+-- id, name, disabled, ...), and "Into chat box..." (the chat box being typed in, else a new one: as
+-- ChatFrameUtil.LinkItem does) to add your own words. Sending is a click, which say and channels need;
+-- in chat lockdown (restricted content) the game refuses it, so those wait greyed out.
+-- Party categories (Blizzard globals, not in the annotations lint reads): home group, instance group.
+local HOME = rawget(_G, "LE_PARTY_CATEGORY_HOME") or 1
+local INSTANCE = rawget(_G, "LE_PARTY_CATEGORY_INSTANCE") or 2
+local GROUP_CHATS = {
+  { "Say", "SAY", function() return true end },
+  { "Party", "PARTY", function() return IsInGroup(HOME) end },
+  { "Raid", "RAID", function() return IsInRaid(HOME) end },
+  { "Instance", "INSTANCE_CHAT", function() return IsInGroup(INSTANCE) end },
+  { "Guild", "GUILD", function() return IsInGuild() end },
+}
+
+local function sendLink(link, chatType, target)
+  if C_ChatInfo.InChatMessagingLockdown() then
+    return
+  end
+  -- apiguard: allow a quest link and constant chat types from a click, never secret; not sent in lockdown
+  C_ChatInfo.SendChatMessage(link, chatType, nil, target)
+end
+
+---@param owner table the Link button
+---@param questID number
+function QuestLogPanel.OpenLinkMenu(owner, questID)
+  local link = GetQuestLink(questID)
+  if not link then
+    return
+  end
+  local locked = C_ChatInfo.InChatMessagingLockdown()
+  MenuUtil.CreateContextMenu(owner, function(_, root)
+    root:CreateTitle(locked and "Link (chat is locked here)" or "Link to")
+    for _, chat in ipairs(GROUP_CHATS) do
+      if chat[3]() then
+        local item = root:CreateButton(chat[1], function() sendLink(link, chat[2]) end)
+        item:SetEnabled(not locked)
+      end
+    end
+    local channels = { GetChannelList() }
+    if #channels > 0 then
+      root:CreateDivider()
+      for i = 1, #channels, 3 do
+        local id, name, disabled = channels[i], channels[i + 1], channels[i + 2]
+        local item = root:CreateButton(("%d. %s"):format(id, name), function() sendLink(link, "CHANNEL", id) end)
+        item:SetEnabled(not (locked or disabled))
+      end
+    end
+    root:CreateDivider()
+    root:CreateButton("Into chat box...", function()
+      if ChatFrameUtil.GetActiveWindow() then
+        ChatFrameUtil.InsertLink(link)
+      else
+        ChatFrameUtil.OpenChat(link)
+      end
+    end)
+  end)
 end
 
 local ACTIONS = {
@@ -395,19 +455,7 @@ local ACTIONS = {
   },
   {
     label = "Link",
-    -- Into the chat box being typed in, else a new one opened with it (ChatFrameUtil.LinkItem's way;
-    -- TryInsertQuestLinkForQuestID needs a Shift-click, so a plain click did nothing: review).
-    action = function(questID)
-      local link = GetQuestLink(questID)
-      if not link then
-        return
-      end
-      if ChatFrameUtil.GetActiveWindow() then
-        ChatFrameUtil.InsertLink(link)
-      else
-        ChatFrameUtil.OpenChat(link)
-      end
-    end,
+    action = function(questID, button) QuestLogPanel.OpenLinkMenu(button, questID) end,
   },
   {
     label = "Abandon",
