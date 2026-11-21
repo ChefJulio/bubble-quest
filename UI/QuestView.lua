@@ -31,6 +31,7 @@ local ADDON_NAME, ns = ...
 --   circleYards  function() -> an area circle's radius, yards (default: the map.size setting)
 --   tooltipName   a global name for the view's tooltip (default "BubbleQuestViewTooltip<n>")
 --   ctrlHides     false: holding Ctrl leaves the view showing (default: see-through while held)
+--   highlight     light up a hovered quest (card or quest log row), dim the rest, as the world map does
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
 -- Pixels, not yards: a minimap is small (140 px across for 233 yd each way in review, 0.3 px a yard),
@@ -179,7 +180,8 @@ QuestView.Chosen = chosenQuest  -- the chosen quest, if it still stands (the que
 
 local function pickGuide()
   local hovered = ns.MapAreas.cardHover
-  if hovered and ns.Stack.visible[hovered] then
+  -- Any quest in the log: a quest log panel row hovers quests without a card too.
+  if hovered and ns.QuestLog:Get(hovered) then
     return hovered, guideTarget(hovered)
   end
   -- A quest picked in the quest log: its line even when you're "here" for it (unlike the candidates
@@ -412,14 +414,33 @@ function View:drawAreas()
       end
     end
   end
+  -- A hovered quest (a tracker card, a row of the quest log panel) lights up as on the world map: its
+  -- circles glow and grow, the rest dim (UI/MapAreas.lua's highlight). Only where the owner asks
+  -- (options.highlight): the minimap stays steady while the cursor passes over the tracker under it.
+  local lit = self.options.highlight and ns.MapAreas.cardHover or nil
+  local litObjective = lit and ns.MapAreas.cardHoverObjective
+  local look = ns.MapAreas.HIGHLIGHT
+  local glow
+  if lit then
+    local wave = (math.sin(GetTime() * 2 * math.pi / look.seconds) + 1) / 2
+    glow = look.low + (look.high - look.low) * wave
+  end
   for _, p in ipairs(QuestView.points) do
     if p.map == self.map and (p.objective or nearestTurnin[p.questID] == p) then
       local x, y = project(p.x - north, p.y - west, self.cos, self.sin, scale)
       if p.objective then
-        if self:inside(x, y, size / 2) then  -- a circle partly inside still shows its inside part
+        local blobAlpha, blobSize = alpha, size
+        if lit then
+          if p.questID == lit and (not litObjective or litObjective == p.objective) then
+            blobAlpha, blobSize = glow, size * look.grow
+          else
+            blobAlpha = alpha * look.dimmed
+          end
+        end
+        if self:inside(x, y, blobSize / 2) then  -- a circle partly inside still shows its inside part
           local blob = self:acquire("blobs", ns.MapAreas.BLOB_TEXTURE, "ARTWORK")
-          blob:SetVertexColor(p.color[1], p.color[2], p.color[3], alpha)
-          self:place(blob, x, y, size)
+          blob:SetVertexColor(p.color[1], p.color[2], p.color[3], blobAlpha)
+          self:place(blob, x, y, blobSize)
           hits[#hits + 1] = { x = x, y = y, questID = p.questID, objective = p.objective }
         end
       elseif self:inside(x, y, self.markerSize / 2) and not self:GameShowsTurnIn(p.questID)

@@ -281,6 +281,19 @@ function Panel:makeQuest()
   row.title:SetPoint("RIGHT", row.check, "LEFT", -2, 0)
   row.title:SetJustifyH("LEFT")
   row:SetScript("OnClick", function(self) QuestLogPanel.Choose(self.questID, self.panel) end)
+  -- Hovered, the quest previews as a hovered card does: its guide line, its areas lit (MapAreas'
+  -- card hover, which the world map and quest views read). The map doesn't move.
+  local function hover() ns.MapAreas:SetCardHover(row.questID) end
+  local function leave()
+    if ns.MapAreas.cardHover == row.questID then
+      ns.MapAreas:SetCardHover(nil)
+    end
+  end
+  row:SetScript("OnEnter", hover)
+  row:SetScript("OnLeave", leave)
+  row.check:HookScript("OnEnter", hover)
+  row.check:HookScript("OnLeave", leave)
+  row:SetScript("OnHide", leave)
   return row
 end
 

@@ -101,7 +101,8 @@ end
 ---the town services switched on in the map button's menu, minus the excluded; keys "flight", "inn",
 ---"bank", "auction", "repair", "mailbox", "weapon", "stable", "battle", "trainer:<profession>",
 ---"class:<class>"), ctrlHides (default true: the view is see-through while Ctrl is held, as the minimap's;
----false keeps it showing). The game's own minimap markers are never assumed here: every "?" and "!" is ours.
+---false keeps it showing), highlight (default true: a quest hovered in the tracker or a quest log panel
+---lights up, the others dim, as on the world map). The game's own minimap markers are never assumed here: every "?" and "!" is ours.
 ---@param frame Frame
 ---@param options table?
 ---@return table
@@ -113,6 +114,7 @@ function api.CreateQuestView(frame, options)
     services = services and function() return true end or nil,
     servicesExclude = type(services) == "table" and services.exclude or nil,
     ctrlHides = options.ctrlHides,
+    highlight = options.highlight ~= false,
     focus = options.hover ~= false and function(focus) return focus == frame end or function() return false end,
     minCircle = options.minCircle or 4,
     minIcon = options.minIcon or 8,

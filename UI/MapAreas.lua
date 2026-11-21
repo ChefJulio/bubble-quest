@@ -703,6 +703,9 @@ end
 
 local GLOW_LOW, GLOW_HIGH, GLOW_SECONDS = 0.45, 0.9, 1.4
 local GLOW_GROW = 1.3  -- lit circles grow by this, so the highlighted area reads bolder (review)
+-- The same look in quest views (UI/QuestView.lua: the minimap, BubbleMap's window).
+MapAreas.HIGHLIGHT = { dimmed = DIMMED_SHARE, low = GLOW_LOW, high = GLOW_HIGH, seconds = GLOW_SECONDS,
+  grow = GLOW_GROW }
 
 local highlightKey
 local lit = {}  -- the circles currently glowing
