@@ -34,10 +34,33 @@ local OPEN = { 0.85, 0.85, 0.85 }
 local READY = { 0.3, 0.85, 0.3 }
 local FAILED = { 0.9, 0.25, 0.25 }
 
+local DESCRIPTION_LINES = 4  -- the description's lines before "more"
+local REWARD_SIZE = 24
+local ACTION_HEIGHT = 20
+
 local QuestLogPanel = {
   MIN_WIDTH = MIN_WIDTH,
+  expanded = nil,   -- the quest whose entry is open (one at a time, in every panel)
+  fullText = {},    -- [questID] = true: its whole description shown ("more")
 }
 ns.QuestLogPanel = QuestLogPanel
+
+-- Abandoning, confirmed in our own dialog (not Blizzard's ABANDON_QUEST: ours runs our code only). The
+-- game abandons the selected quest, as Blizzard's own (GameDialogDefs.lua:837).
+-- Blizzard's own strings (GlobalStrings; not in the annotations lint reads), English if missing.
+StaticPopupDialogs["BUBBLEQUEST_ABANDON"] = {
+  text = rawget(_G, "ABANDON_QUEST_CONFIRM") or "Abandon \"%s\"?",
+  button1 = rawget(_G, "YES") or "Yes",
+  button2 = rawget(_G, "NO") or "No",
+  OnAccept = function(_, questID)
+    C_QuestLog.SetSelectedQuest(questID)
+    C_QuestLog.SetAbandonQuest()
+    C_QuestLog.AbandonQuest()
+  end,
+  timeout = 0,
+  whileDead = 1,
+  hideOnEscape = 1,
+}
 
 local panels = {}
 
@@ -140,8 +163,9 @@ end
 ---@param options table? { onQuestClick = function(questID, target) } (target: { map, north, west } or nil)
 ---@return table
 function QuestLogPanel.New(parent, options)
-  local panel = setmetatable({ options = options or {}, used = { headers = 0, quests = 0, lines = 0 },
-    pools = { headers = {}, quests = {}, lines = {} }, dirty = true }, Panel)
+  local panel = setmetatable({ options = options or {},
+    used = { headers = 0, quests = 0, lines = 0, links = 0, rewards = 0, actions = 0 },
+    pools = { headers = {}, quests = {}, lines = {}, links = {}, rewards = {}, actions = {} }, dirty = true }, Panel)
   local frame = CreateFrame("Frame", nil, parent)
   frame:SetAllPoints(parent)
   panel.frame = frame
@@ -280,7 +304,17 @@ function Panel:makeQuest()
   row.title:SetPoint("TOPLEFT", INDENT, 0)
   row.title:SetPoint("RIGHT", row.check, "LEFT", -2, 0)
   row.title:SetJustifyH("LEFT")
-  row:SetScript("OnClick", function(self) QuestLogPanel.Choose(self.questID, self.panel) end)
+  -- A click opens the quest's entry under it (and closes the one open), centres and guides; on the open
+  -- one it closes it.
+  row:SetScript("OnClick", function(self)
+    if QuestLogPanel.expanded == self.questID then
+      QuestLogPanel.expanded = nil
+      QuestLogPanel.RefreshAll()
+    else
+      QuestLogPanel.expanded = self.questID
+      QuestLogPanel.Choose(self.questID, self.panel)
+    end
+  end)
   -- Hovered, the quest previews as a hovered card does: its guide line, its areas lit (MapAreas'
   -- card hover, which the world map and quest views read). The map doesn't move.
   local function hover() ns.MapAreas:SetCardHover(row.questID) end
@@ -301,6 +335,168 @@ function Panel:makeLine()
   local line = self.body:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
   line:SetJustifyH("LEFT")
   return line
+end
+
+-- "more" / "less" under a description.
+function Panel:makeLink()
+  local link = CreateFrame("Button", nil, self.body)
+  link.text = link:CreateFontString(nil, "ARTWORK", "BubbleQuestSmallFont")
+  link.text:SetPoint("LEFT")
+  link.text:SetTextColor(0.4, 0.7, 1)
+  link:SetScript("OnClick", function(self)
+    QuestLogPanel.fullText[self.questID] = not QuestLogPanel.fullText[self.questID] or nil
+    QuestLogPanel.RefreshAll()
+  end)
+  return link
+end
+
+-- GameTooltip:SetQuestLogItem(type, index, questID): Forever's takes the quest (GameTooltip.lua:845,
+-- AM_QuestDialog.lua:281); the annotations lint reads still list the older two-argument form.
+local setQuestLogItem = GameTooltip.SetQuestLogItem --[[@as fun(tooltip, kind: string, index: number, questID: number)]]
+
+-- A reward item: its icon and count; its tooltip on hover, Shift-click links it.
+function Panel:makeReward()
+  local button = CreateFrame("Button", nil, self.body)
+  button:SetSize(REWARD_SIZE, REWARD_SIZE)
+  button.icon = button:CreateTexture(nil, "ARTWORK")
+  button.icon:SetAllPoints()
+  button.count = button:CreateFontString(nil, "OVERLAY", "NumberFontNormalSmall")
+  button.count:SetPoint("BOTTOMRIGHT", -1, 1)
+  button:SetHighlightTexture("Interface\\Buttons\\ButtonHilight-Square", "ADD")
+  button:SetScript("OnEnter", function(reward)
+    if ns.Tooltips:Take(reward, "ANCHOR_RIGHT") then
+      setQuestLogItem(GameTooltip, reward.kind, reward.index, reward.questID)
+      GameTooltip:Show()
+    end
+  end)
+  button:SetScript("OnLeave", function() GameTooltip:Hide() end)
+  -- Shift-click: the item's link into chat (not HandleModifiedItemClick: it reaches restricted calls).
+  button:SetScript("OnClick", function(reward)
+    local link = IsModifiedClick("CHATLINK") and GetQuestLogItemLink(reward.kind, reward.index, reward.questID)
+    if link then
+      ChatFrameUtil.InsertLink(link)
+    end
+  end)
+  return button
+end
+
+function Panel:makeAction()
+  local button = CreateFrame("Button", nil, self.body, "UIPanelButtonTemplate")
+  button:SetHeight(ACTION_HEIGHT)
+  button:SetScript("OnClick", function(self) self.action(self.questID) end)
+  return button
+end
+
+local ACTIONS = {
+  {
+    label = "Share",
+    enabled = function(questID) return IsInGroup() and C_QuestLog.IsPushableQuest(questID) end,
+    action = function(questID) ns.Party:Push(questID) end,  -- queued in combat (Quests/Party.lua)
+  },
+  {
+    label = "Link",
+    action = function(questID) ChatFrameUtil.TryInsertQuestLinkForQuestID(questID) end,
+  },
+  {
+    label = "Abandon",
+    action = function(questID)
+      local quest = ns.QuestLog:Get(questID)
+      StaticPopup_Show("BUBBLEQUEST_ABANDON", quest and quest.title or "?", nil, questID)
+    end,
+  },
+}
+
+-- The open quest's entry, under its objectives: the game's summary and description (the description
+-- cut at DESCRIPTION_LINES with "more"), its rewards, and Share / Link / Abandon. Returns the new y.
+function Panel:placeEntry(quest, y, width)
+  local questID = quest.questID
+  local left = 2 * INDENT
+  local inner = width - left - PAD
+  local function text(value, color, maxLines)
+    local fs = self:acquire("lines", function() return self:makeLine() end)
+    fs:ClearAllPoints()
+    fs:SetPoint("TOPLEFT", left, -y)
+    fs:SetWidth(inner)
+    fs:SetMaxLines(maxLines or 0)
+    fs:SetText(value)
+    fs:SetTextColor(color[1], color[2], color[3])
+    y = y + fs:GetStringHeight() + 3
+    return fs
+  end
+  y = y + 3
+  -- By its log index: no selection needed (as GameTooltip.lua:709 reads it).
+  local logIndex = C_QuestLog.GetLogIndexForQuestID(questID)
+  local description, summary
+  if logIndex then
+    description, summary = GetQuestLogQuestText(logIndex)
+  end
+  if summary and summary ~= "" then
+    text(summary, OPEN)
+  end
+  if description and description ~= "" then
+    local full = QuestLogPanel.fullText[questID]
+    local fs = text(description, DONE, not full and DESCRIPTION_LINES or nil)
+    if full or fs:IsTruncated() then
+      local link = self:acquire("links", function() return self:makeLink() end)
+      link.questID = questID
+      link.text:SetText(full and "less" or "more")
+      link:SetSize(link.text:GetStringWidth() + 4, link.text:GetStringHeight() + 2)
+      link:ClearAllPoints()
+      link:SetPoint("TOPLEFT", left, -y)
+      y = y + link:GetHeight() + 3
+    end
+  end
+  -- Rewards: experience and money on one line, then the items (all of them, then the choices).
+  local parts = {}
+  local xp = GetQuestLogRewardXP(questID)
+  if xp and xp > 0 then
+    parts[#parts + 1] = BreakUpLargeNumbers(xp) .. " XP"
+  end
+  local money = GetQuestLogRewardMoney(questID)
+  if money and money > 0 then
+    parts[#parts + 1] = GetMoneyString(money)
+  end
+  if #parts > 0 then
+    text("Rewards: " .. table.concat(parts, "   "), OPEN)
+  end
+  local function items(kind, count, info, label)
+    if count == 0 then
+      return
+    end
+    if label then
+      text(label, DONE)
+    end
+    local x = left
+    for index = 1, count do
+      local _, texture, number = info(index, questID)
+      if x + REWARD_SIZE > left + inner then
+        x, y = left, y + REWARD_SIZE + 3
+      end
+      local button = self:acquire("rewards", function() return self:makeReward() end)
+      button.kind, button.index, button.questID = kind, index, questID
+      button.icon:SetTexture(texture)
+      button.count:SetText(number and number > 1 and number or "")
+      button:ClearAllPoints()
+      button:SetPoint("TOPLEFT", x, -y)
+      x = x + REWARD_SIZE + 3
+    end
+    y = y + REWARD_SIZE + 4
+  end
+  items("reward", GetNumQuestLogRewards(questID) or 0, GetQuestLogRewardInfo, nil)
+  items("choice", GetNumQuestLogChoices(questID) or 0, GetQuestLogChoiceInfo, "Choose one:")
+  -- The actions, side by side.
+  local gap = 4
+  local buttonWidth = (inner - gap * (#ACTIONS - 1)) / #ACTIONS
+  for i, def in ipairs(ACTIONS) do
+    local button = self:acquire("actions", function() return self:makeAction() end)
+    button.questID, button.action = questID, def.action
+    button:SetText(def.label)
+    button:SetWidth(buttonWidth)
+    button:SetEnabled(not def.enabled or def.enabled(questID) == true)
+    button:ClearAllPoints()
+    button:SetPoint("TOPLEFT", left + (i - 1) * (buttonWidth + gap), -y)
+  end
+  return y + ACTION_HEIGHT + 4
 end
 
 function Panel:hideUnused()
@@ -383,6 +579,7 @@ function Panel:placeQuest(quest, y, width, pins, chosen)
     fs:ClearAllPoints()
     fs:SetPoint("TOPLEFT", 2 * INDENT, -y)
     fs:SetWidth(width - 2 * INDENT - CHECK_SIZE)
+    fs:SetMaxLines(0)  -- pooled: may have been a cut description
     fs:SetText(text)
     fs:SetTextColor(color[1], color[2], color[3])
     y = y + fs:GetStringHeight() + 1
@@ -401,6 +598,10 @@ function Panel:placeQuest(quest, y, width, pins, chosen)
   row:SetPoint("TOPLEFT", 0, -top)
   row:SetPoint("RIGHT", self.body, "RIGHT")
   row:SetHeight(y - top)
+  -- Its entry, when open: under the row, not part of it (its own buttons take the clicks).
+  if QuestLogPanel.expanded == quest.questID then
+    y = self:placeEntry(quest, y, width)
+  end
   return y
 end
 
