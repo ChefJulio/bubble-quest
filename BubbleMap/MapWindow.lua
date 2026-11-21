@@ -564,7 +564,7 @@ end
 -- left edge and saved (drawerWidth). A quest clicked in it centres the map on its next objective or
 -- turn-in, which pulses briefly. Without the API (an older BubbleQuest, or none) there's no drawer.
 
-local DRAWER_MIN, DRAWER_MAX = 300, 600
+local DRAWER_MIN, DRAWER_MAX, DRAWER_DEFAULT = 240, 600, 300  -- BubbleQuest's list needs 240 (its word)
 local PULSE_SECONDS = 2.5
 
 local drawer, questPanel, questButton
@@ -600,7 +600,7 @@ local function createDrawer(footer, bar)
   drawer = CreateFrame("Frame", nil, window)
   drawer:SetPoint("TOPRIGHT", bar, "BOTTOMRIGHT", 0, 0)
   drawer:SetPoint("BOTTOMRIGHT", footer, "TOPRIGHT", 0, 0)
-  drawer:SetWidth(math.max(DRAWER_MIN, math.min(DRAWER_MAX, ns.DB.drawerWidth or DRAWER_MIN)))
+  drawer:SetWidth(math.max(DRAWER_MIN, math.min(DRAWER_MAX, ns.DB.drawerWidth or DRAWER_DEFAULT)))
   drawer:Hide()
   local back = drawer:CreateTexture(nil, "BACKGROUND")
   back:SetAllPoints()
