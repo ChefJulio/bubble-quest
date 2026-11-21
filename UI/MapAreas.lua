@@ -896,6 +896,11 @@ end
 -- through the map's own canvas click handlers (MapCanvasMixin:AddCanvasClickHandler, run by Blizzard
 -- in securecallfunction), and anything else (a modifier held, a pin or one of our icons under the
 -- cursor, an open fan-out row, combat) leaves the click to the map.
+-- The quest a click on these hits means: the top card's (quest views' clicks too, UI/QuestView.lua).
+function MapAreas.ClickedQuest(found)
+  return found and inCardOrder(found)[1]
+end
+
 local function onCanvasClick(map, button, nx, ny)
   if button ~= "LeftButton" or IsModifierKeyDown() or InCombatLockdown() or #MapAreas.hits == 0
       or ns.MapFan.fanned or ns.MapAvailable.hovering or ns.MapServices.hovering

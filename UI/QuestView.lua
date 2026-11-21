@@ -590,6 +590,41 @@ function View:onView()
   return focus ~= nil and self.options.focus ~= nil and self.options.focus(focus) == true
 end
 
+-- The cursor in the layer's units, from its centre (the marks' coordinates).
+function View:cursor()
+  local cx, cy = GetCursorPosition()
+  local scale = self.layer:GetEffectiveScale()
+  local mx, my = self.layer:GetCenter()
+  return cx / scale - mx, cy / scale - my
+end
+
+---A click on the view (its owner passes it on: BubbleMap's frames, Blizzard's minimap): a quest
+---giver's "!" opens its preview card (UI/QuestPreview.lua); a quest's area or turn-in "?" opens its
+---entry in the quest log panel when one is shown, else the quest on Blizzard's map (as a card click
+---does). Left button, no modifier. True when it took the click.
+---@param button string
+---@return boolean
+function View:Click(button)
+  if button ~= "LeftButton" or IsModifierKeyDown() or not self.layer:IsVisible()
+      or not self.layer:IsMouseOver() or (#self.hits == 0 and #self.giverHits == 0) then
+    return false
+  end
+  local x, y = self:cursor()
+  local offers = ns.MapAvailable.Under(self.giverHits, x, y)
+  if offers then
+    ns.QuestPreview.ShowAvailable(offers)
+    return true
+  end
+  local questID = ns.MapAreas.ClickedQuest(ns.MapAreas.Under(self.hits, self.radius, x, y))
+  if not questID then
+    return false
+  end
+  if not ns.QuestLogPanel.Open(questID) then
+    ns.Navigation:ShowOnMap(questID)
+  end
+  return true
+end
+
 function View:updateHover()
   local now = GetTime()
   if now - self.hoverAt < HOVER_SECONDS then
@@ -601,10 +636,7 @@ function View:updateHover()
   -- areas (the world map's order).
   local found, offers, services
   if (#self.hits > 0 or #self.giverHits > 0 or #self.serviceHits > 0) and self:onView() then
-    local cx, cy = GetCursorPosition()
-    local scale = self.layer:GetEffectiveScale()
-    local mx, my = self.layer:GetCenter()
-    local x, y = cx / scale - mx, cy / scale - my
+    local x, y = self:cursor()
     offers = ns.MapAvailable.Under(self.giverHits, x, y)
     if not offers then
       for _, hit in ipairs(self.serviceHits) do

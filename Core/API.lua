@@ -73,6 +73,14 @@ function api.SetMinimapView(frame)
   ns.MinimapAreas:SetView(frame)
 end
 
+---A click on the minimap view, from the frame given to SetMinimapView (it takes the mouse): as a quest
+---view handle's :Click. True when taken. (On Blizzard's own minimap BubbleQuest hears clicks itself.)
+---@param button string
+---@return boolean
+function api.MinimapClick(button)
+  return ns.MinimapAreas:Click(button)
+end
+
 ---Where the minimap view centres, for a minimap dragged away from the player: fn() -> north, west
 ---(world yards, UnitPosition's, on the player's instance map), or nil for the player. Called every
 ---frame the minimap draws; nil fn: always the player. The player stays the player for the guide line's
@@ -100,6 +108,9 @@ end
 ---  :Draw(north, west, instanceMap, pixelsPerYard, turn)  north/west: world yards (UnitPosition's), the
 ---      point at the frame's centre; turn: radians (0: north up). Call when what the frame shows changes.
 ---  :Hide(), :Show()
+---  :Click(button) -> true when the view took a click (call on mouse-up when it wasn't a drag, before
+---      your own handling): a quest giver's "!" opens a preview card at the cursor; a quest's area or
+---      "?" opens its entry in a shown quest log panel, else the quest on Blizzard's map. Left button only.
 ---  :IsHovering()  the view's own tooltip is up (the cursor on one of its marks): the owner's other
 ---      tooltips can yield to it. While GameTooltip is up, the view's goes to the cursor's right.
 ---  :GetFrame()  the view's own frame (a child of `frame`, mouse off): for its frame level over terrain
@@ -133,6 +144,7 @@ function api.CreateQuestView(frame, options)
     Hide = function() view:Hide() end,
     Show = function() view:Show() end,
     IsHovering = function() return view:IsHovering() end,
+    Click = function(_, button) return view:Click(button) end,
     GetFrame = function() return view.layer end,
   }
 end

@@ -192,6 +192,32 @@ end
 
 ns.Events:On("PLAYER_LOGIN", create)
 
+---A click on the minimap view (BubbleQuestAPI.MinimapClick: BubbleMap's frames take the mouse first):
+---see QuestView's View:Click. True when it took the click.
+---@param button string
+---@return boolean
+function MinimapAreas:Click(button)
+  return view ~= nil and view:Click(button)
+end
+
+-- Blizzard's own minimap (no BubbleMap view): its clicks, after Blizzard's handler (a post-hook: the
+-- ping still happens, nothing replaced). Only a click, not the end of a drag (minimap addons drag it):
+-- the cursor must be where it was pressed.
+local pressedAt
+ns.Events:On("PLAYER_LOGIN", function()
+  Minimap:HookScript("OnMouseDown", function()
+    pressedAt = { GetCursorPosition() }
+  end)
+  Minimap:HookScript("OnMouseUp", function(_, button)
+    local x, y = GetCursorPosition()
+    local still = pressedAt and math.abs(x - pressedAt[1]) < 4 and math.abs(y - pressedAt[2]) < 4
+    pressedAt = nil
+    if still and not MinimapAreas.view then
+      MinimapAreas:Click(button)
+    end
+  end)
+end)
+
 ---The view reaches `factor` times further than Blizzard's minimap shows (BubbleMap's own zoom,
 ---Blizzard's minimap faded out); 1 is Blizzard's own view.
 ---@param factor number

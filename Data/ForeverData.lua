@@ -465,6 +465,28 @@ function ForeverData:UiMapOf(map, x, y)
   return lib and (lib.ToUiMap(map, x, y))
 end
 
+---Tips for a quest from forever-db's guide: its "gotcha" steps and its notes (confirmed ones), as text.
+---@param questID number
+---@return string[]
+function ForeverData:Tips(questID)
+  local lib = library()
+  local tips = {}
+  if not lib then
+    return tips
+  end
+  for _, step in ipairs(lib.Steps(questID)) do
+    if step.action == "gotcha" and step.text and step.text ~= "" and step.confidence == nil then
+      tips[#tips + 1] = step.text
+    end
+  end
+  for _, note in ipairs(lib.Notes(questID)) do
+    if note.text and note.text ~= "" and note.confidence == nil then
+      tips[#tips + 1] = note.text
+    end
+  end
+  return tips
+end
+
 ---The quest's area (zone or subzone) name, from its AreaTable id.
 ---@param questID number
 ---@return string?

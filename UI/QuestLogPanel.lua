@@ -618,7 +618,11 @@ function Panel:Refresh()
   self.body:SetHeight(math.max(1, y))
   -- A shorter list (a zone closed) can leave the scroll past its end.
   local range = self.scroll:GetVerticalScrollRange()
-  if self.scroll:GetVerticalScroll() > range then
+  if self.scrollTop then
+    -- Opened from a map: the quest near the top, with its header's height of context above.
+    self.scroll:SetVerticalScroll(math.max(0, math.min(range, self.scrollTop - HEADER_HEIGHT)))
+    self.scrollTo, self.scrollTop = nil, nil
+  elseif self.scroll:GetVerticalScroll() > range then
     self.scroll:SetVerticalScroll(range)
   end
   self:placeThumb()
@@ -628,6 +632,9 @@ end
 function Panel:placeQuest(quest, y, width, pins, chosen)
   local row = self:acquire("quests", function() return self:makeQuest() end)
   row.panel, row.questID = self, quest.questID
+  if self.scrollTo == quest.questID then
+    self.scrollTop = y  -- Refresh scrolls here once laid out (QuestLogPanel.Open)
+  end
   row.title:SetText(titleText(quest))
   row.check:SetChecked(pins[quest.questID] ~= nil)
   row.selected:SetShown(chosen == quest.questID)
@@ -679,6 +686,30 @@ function QuestLogPanel.RefreshAll()
   for _, panel in ipairs(panels) do
     panel:MarkDirty()
   end
+end
+
+---Open `questID`'s entry in a shown panel, as a click on it there (centre and guide), its zone opened
+---and the list scrolled to it: a click on its area or turn-in "?" on a map (UI/QuestView.lua View:Click).
+---False when no panel is shown or it isn't in the log.
+---@param questID number
+---@return boolean
+function QuestLogPanel.Open(questID)
+  local quest = ns.QuestLog:Get(questID)
+  local panel
+  for _, p in ipairs(panels) do
+    if p.frame:IsVisible() then
+      panel = p
+      break
+    end
+  end
+  if not quest or not panel then
+    return false
+  end
+  ns.DB.char.logCollapsed[zoneOf(quest)] = nil
+  QuestLogPanel.expanded = questID
+  panel.scrollTo = questID
+  QuestLogPanel.Choose(questID, panel)
+  return true
 end
 
 ---A click on a quest: it becomes the guide's quest, and the panel's owner hears where it leads.

@@ -271,6 +271,7 @@ local function placeIcon(canvas, x, y, entry, base)
   MapAvailable.fanItems[#MapAvailable.fanItems + 1] = {
     texture = icon, x = x, y = y, base = base,
     fill = function(tooltip) MapAvailable.FillTooltip(tooltip, hit.entries) end,  -- merged drops too
+    click = function() ns.QuestPreview.ShowAvailable(hit.entries) end,  -- in a fanned-out row too
   }
   return hit
 end
@@ -426,11 +427,30 @@ local function updateHover(map, delta)
   end
 end
 
+-- Click (review: "clicking on available quests on the map/minimap should open a preview"): a left-click
+-- on a "!" opens the preview card (UI/QuestPreview.lua). Through the map's canvas click handlers, as
+-- UI/MapAreas.lua's; an open fan-out row has its own (its items' click), and modified clicks (Ctrl:
+-- Blizzard's waypoint) and other buttons stay the map's.
+local function onCanvasClick(map, button, nx, ny)
+  if button ~= "LeftButton" or IsModifierKeyDown() or ns.MapFan.fanned or #MapAvailable.hits == 0
+      or not nx or not ny or issecretvalue(nx) or issecretvalue(ny) then
+    return false
+  end
+  local width, height = map:GetCanvas():GetSize()
+  local found = MapAvailable.Under(MapAvailable.hits, nx * width, ny * height)
+  if not found then
+    return false
+  end
+  ns.QuestPreview.ShowAvailable(found)
+  return true
+end
+
 local function createLayer()
   local map = rawget(_G, "WorldMapFrame")
   if layer or not map then
     return
   end
+  map:AddCanvasClickHandler(onCanvasClick)
   local canvas = map:GetCanvas()
   layer = CreateFrame("Frame", nil, canvas)
   layer:SetAllPoints(canvas)
