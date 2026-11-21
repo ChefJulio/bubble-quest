@@ -1,5 +1,0 @@
-<Bindings>
-  <Binding name="BUBBLEMAP_TOGGLE_MAP" header="BUBBLEMAP">
-    BubbleMap_ToggleMap()
-  </Binding>
-</Bindings>

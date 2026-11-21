@@ -12,7 +12,7 @@ its own, and lights up extra features when its siblings are loaded too.
 | Addon | Was | State |
 |---|---|---|
 | BubbleQuest | Questmarker (CurseForge 1806606, released up to v0.5.0) | live; renamed in this repo, unreleased |
-| BubbleMap | Questmarker_Map (companion in this repo) | in progress |
+| BubbleMap | Questmarker_Map (companion in this repo) | own repo (bubble-map), first release pending |
 | BubbleFonts | - | exists, separate repo |
 | BubbleBags | - | planned |
 | BubbleBuffs | - | planned |
@@ -25,8 +25,10 @@ ChefJulio/bubble-quest (the old URL redirects). CurseForge project renamed to Bu
 `bubblequest`, same ID 1806606, new logo (2026-11-17).
 
 BubbleMap status (2026-11-17): renamed to BubbleMap in this repo (folder, TOC, `BubbleMapDB`, `/bmap`),
-standalone with `## OptionalDeps: BubbleQuest, Questmarker`; quest features gated on the API. Repo
-split pending.
+standalone with `## OptionalDeps: BubbleQuest, Questmarker`; quest features gated on the API.
+Repo split done 2026-11-21 (`git subtree split`, history kept): `C:\Dev\BosDev\bubble-map`, its own
+packaging, lint and map data tools; the dev junction `AddOns\BubbleMap` points there. GitHub remote and
+CurseForge project pending.
 
 ## Rules
 

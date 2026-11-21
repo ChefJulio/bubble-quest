@@ -1,5 +1,5 @@
 """Build a release zip locally: .release/BubbleQuest-<version>.zip, holding a BubbleQuest/ folder and one
-folder per companion addon beside it (BubbleMap/, and Questmarker/: the stub that hands the old
+folder per companion addon beside it (Questmarker/: the stub that hands the old
 Questmarker settings over to BubbleQuest, docs/design/bubble-suite.md).
 
 Releases are built by the BigWigs packager on GitHub (.github/workflows/release.yml, on a version tag);
@@ -27,8 +27,7 @@ from pathlib import Path
 
 ADDON = "BubbleQuest"
 # Repo subfolders shipped as their own addon folders: Questmarker (the settings hand-off stub) for a few
-# releases after the rename. BubbleMap also lives in this repo until the split but ships on its own
-# (.pkgmeta ignores it).
+# releases after the rename. (BubbleMap lived here until 2026-11-21; now its own repo, bubble-map.)
 COMPANIONS = ["Questmarker"]
 ROOT = Path(__file__).resolve().parent.parent
 TOC = f"{ADDON}.toc"

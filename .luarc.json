@@ -21,7 +21,6 @@
     ".tools/lua-language-server-*",
     ".tools/research",
     ".tools/luals-log",
-    ".tools/terrain",
     ".tools/vscode-wow-api/luasrc",
     ".tools/vscode-wow-api/wowdoc",
     ".release",
@@ -44,14 +43,7 @@
     "BubbleQuest_OnAddonCompartmentEnter",
     "BubbleQuest_OnAddonCompartmentLeave",
     "BubbleQuestMinimapTooltip",
-    "BubbleQuestAPI",
-    "BubbleMapDB",
-    "GetMinimapShape",
-    "SLASH_BUBBLEMAP1",
-    "SLASH_BUBBLEMAP2",
-    "BubbleMap_ToggleMap",
-    "BINDING_HEADER_BUBBLEMAP",
-    "BINDING_NAME_BUBBLEMAP_TOGGLE_MAP"
+    "BubbleQuestAPI"
   ],
   "diagnostics.disable": [],
   "diagnostics.severity": {
