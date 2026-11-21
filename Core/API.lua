@@ -111,6 +111,7 @@ end
 ---  :Click(button) -> true when the view took a click (call on mouse-up when it wasn't a drag, before
 ---      your own handling): a quest giver's "!" opens a preview card at the cursor; a quest's area or
 ---      "?" opens its entry in a shown quest log panel, else the quest on Blizzard's map. Left button only.
+---      Option clickAreas = false: areas don't take clicks (the "?" and "!" still do).
 ---  :IsHovering()  the view's own tooltip is up (the cursor on one of its marks): the owner's other
 ---      tooltips can yield to it. While GameTooltip is up, the view's goes to the cursor's right.
 ---  :GetFrame()  the view's own frame (a child of `frame`, mouse off): for its frame level over terrain
@@ -135,6 +136,7 @@ function api.CreateQuestView(frame, options)
     servicesExclude = type(services) == "table" and services.exclude or nil,
     ctrlHides = options.ctrlHides,
     highlight = options.highlight ~= false,
+    clickAreas = options.clickAreas,
     focus = options.hover ~= false and function(focus) return focus == frame end or function() return false end,
     minCircle = options.minCircle or 4,
     minIcon = options.minIcon or 8,

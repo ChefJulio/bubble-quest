@@ -31,6 +31,7 @@ local ADDON_NAME, ns = ...
 --   circleYards  function() -> an area circle's radius, yards (default: the map.size setting)
 --   tooltipName   a global name for the view's tooltip (default "BubbleQuestViewTooltip<n>")
 --   ctrlHides     false: holding Ctrl leaves the view showing (default: see-through while held)
+--   clickAreas    false: a click on a quest's area does nothing (its "?" and quest givers' "!" still do)
 --   highlight     light up a hovered quest (card or quest log row), dim the rest, as the world map does
 
 local DOT_TEXTURE = "Interface\\AddOns\\" .. ADDON_NAME .. "\\Media\\Map\\dot"  -- tools/make_blob.py
@@ -615,7 +616,18 @@ function View:Click(button)
     ns.QuestPreview.ShowAvailable(offers)
     return true
   end
-  local questID = ns.MapAreas.ClickedQuest(ns.MapAreas.Under(self.hits, self.radius, x, y))
+  -- Areas take clicks unless the owner says not (options.clickAreas false: BubbleMap's window, where they
+  -- cover most of the map and a click drops a waypoint); a turn-in "?" always does.
+  local hits = self.hits
+  if self.options.clickAreas == false then
+    hits = {}
+    for _, hit in ipairs(self.hits) do
+      if not hit.objective then
+        hits[#hits + 1] = hit
+      end
+    end
+  end
+  local questID = ns.MapAreas.ClickedQuest(ns.MapAreas.Under(hits, self.radius, x, y))
   if not questID then
     return false
   end
