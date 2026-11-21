@@ -395,7 +395,19 @@ local ACTIONS = {
   },
   {
     label = "Link",
-    action = function(questID) ChatFrameUtil.TryInsertQuestLinkForQuestID(questID) end,
+    -- Into the chat box being typed in, else a new one opened with it (ChatFrameUtil.LinkItem's way;
+    -- TryInsertQuestLinkForQuestID needs a Shift-click, so a plain click did nothing: review).
+    action = function(questID)
+      local link = GetQuestLink(questID)
+      if not link then
+        return
+      end
+      if ChatFrameUtil.GetActiveWindow() then
+        ChatFrameUtil.InsertLink(link)
+      else
+        ChatFrameUtil.OpenChat(link)
+      end
+    end,
   },
   {
     label = "Abandon",
