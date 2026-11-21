@@ -126,6 +126,14 @@ function api.CreateQuestView(frame, options)
   }
 end
 
+---Append BubbleQuest's map menu (the world map button's: quest areas, quests you can pick up, the
+---minimap's areas and guide, the Town services submenu, Map settings...) to `description`: a MenuUtil
+---menu description, the root or a submenu (BubbleMap's window's filter menu).
+---@param description table
+function api.AddMapMenu(description)
+  ns.MapButton.FillMenu(description)
+end
+
 ---How the tracker looks, for matching it. A fresh table each call; changes come with ThemeChanged.
 ---@return table
 function api.Theme()

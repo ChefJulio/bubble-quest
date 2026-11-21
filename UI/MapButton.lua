@@ -35,44 +35,51 @@ local function value(id)
   return entry ~= nil and entry.get(ns.DB.profile) == true
 end
 
+---The menu's items, appended to a menu description (MenuUtil's `root`, or a submenu of it): the world
+---map button's menu, and BubbleMap's window's (BubbleQuestAPI.AddMapMenu), one list so they never drift.
+---@param root table
+function MapButton.FillMenu(root)
+  for _, item in ipairs(ITEMS) do
+    if item == "-" then
+      root:CreateDivider()
+    else
+      local id, label = item[1], item[2]
+      local checkbox = root:CreateCheckbox((item.indent and "   " or "") .. label,
+        function() return value(id) end,
+        function() ns.Settings:SetValue(id, not value(id)) end)
+      -- The sub-options only matter while "Quests you can pick up" is on.
+      if item.indent and not value("BUBBLEQUEST_MAP_AVAILABLE") then
+        checkbox:SetEnabled(false)
+      end
+    end
+  end
+  -- Town services (UI/MapServices.lua): each its own toggle.
+  root:CreateDivider()
+  local services = root:CreateButton("Town services")
+  for _, s in ipairs(ns.MapServices.SERVICES) do
+    services:CreateCheckbox(s.label, function() return ns.MapServices:IsOn(s.key) end,
+      function() ns.MapServices:Toggle(s.key) end)
+  end
+  local classTrainers = services:CreateButton("Class trainers")
+  for _, class in ipairs(ns.MapServices:Classes()) do
+    local key = "class:" .. class
+    classTrainers:CreateCheckbox(class, function() return ns.MapServices:IsOn(key) end,
+      function() ns.MapServices:Toggle(key) end)
+  end
+  local trainers = services:CreateButton("Profession trainers")
+  for _, p in ipairs(ns.MapServices.PROFESSIONS) do
+    local key = "trainer:" .. p[1]
+    trainers:CreateCheckbox(p[1], function() return ns.MapServices:IsOn(key) end,
+      function() ns.MapServices:Toggle(key) end)
+  end
+  root:CreateDivider()
+  root:CreateButton("Map settings...", function() ns.Settings:Open() end)
+end
+
 local function openMenu(owner)
   MenuUtil.CreateContextMenu(owner, function(_, root)
     root:CreateTitle("BubbleQuest")
-    for _, item in ipairs(ITEMS) do
-      if item == "-" then
-        root:CreateDivider()
-      else
-        local id, label = item[1], item[2]
-        local checkbox = root:CreateCheckbox((item.indent and "   " or "") .. label,
-          function() return value(id) end,
-          function() ns.Settings:SetValue(id, not value(id)) end)
-        -- The sub-options only matter while "Quests you can pick up" is on.
-        if item.indent and not value("BUBBLEQUEST_MAP_AVAILABLE") then
-          checkbox:SetEnabled(false)
-        end
-      end
-    end
-    -- Town services (UI/MapServices.lua): on the world map, each its own toggle.
-    root:CreateDivider()
-    local services = root:CreateButton("Town services")
-    for _, s in ipairs(ns.MapServices.SERVICES) do
-      services:CreateCheckbox(s.label, function() return ns.MapServices:IsOn(s.key) end,
-        function() ns.MapServices:Toggle(s.key) end)
-    end
-    local classTrainers = services:CreateButton("Class trainers")
-    for _, class in ipairs(ns.MapServices:Classes()) do
-      local key = "class:" .. class
-      classTrainers:CreateCheckbox(class, function() return ns.MapServices:IsOn(key) end,
-        function() ns.MapServices:Toggle(key) end)
-    end
-    local trainers = services:CreateButton("Profession trainers")
-    for _, p in ipairs(ns.MapServices.PROFESSIONS) do
-      local key = "trainer:" .. p[1]
-      trainers:CreateCheckbox(p[1], function() return ns.MapServices:IsOn(key) end,
-        function() ns.MapServices:Toggle(key) end)
-    end
-    root:CreateDivider()
-    root:CreateButton("Map settings...", function() ns.Settings:Open() end)
+    MapButton.FillMenu(root)
   end)
 end
 
